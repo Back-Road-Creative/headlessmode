@@ -113,7 +113,7 @@ base map, on either page, requests map tiles or map data directly from that
 layer's own service, for the area on screen. Today those services are U.S.
 federal agencies (USGS, whose elevation service also draws contour lines and whose
 water service reports stream gauges, the Forest Service, FEMA, BLM and NOAA), NASA satellite
-imagery, the Bureau of Transportation Statistics (noise-map tiles), and the
+imagery, the Bureau of Transportation Statistics (noise-map tiles, rail lines and airports), and the
 biodiversity data aggregator GBIF; several of those agencies'
 public services are hosted on Esri's commercial ArcGIS Online platform rather
 than the agency's own domain, and one imagery layer is served from Amazon S3.

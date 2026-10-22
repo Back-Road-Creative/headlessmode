@@ -98,6 +98,17 @@ const BLM_REC_SERVICE = 'https://gis.blm.gov/arcgis/rest/services/recreation/BLM
 // credential check is a substring match, and `taxonKey=`/`datasetKey=` contain `key=`.
 const GBIF_SEARCH_SERVICE = 'https://api.gbif.org/v1/occurrence/search';
 const GBIF_DATASET_SERVICE = 'https://api.gbif.org/v1/dataset';
+const NTAD_RAIL_SERVICE = 'https://geo.dot.gov/server/rest/services/Hosted/North_American_Class_1_Rail/FeatureServer/0';
+const NTAD_AIRPORTS_SERVICE = 'https://geo.dot.gov/server/rest/services/Hosted/Airports_/FeatureServer/0';
+// The rail layer's WHOLE field list, as measured; the airport list is the SELECTION this map asks
+// for (the service carries about a hundred more, among them airport, locid, ownership and elevation).
+const NTAD_RAIL_FIELDS = ['objectid', 'fraarcid', 'frfranode', 'tofranode', 'stfips', 'cntyfips', 'stcntyfips',
+  'stateab', 'country', 'fraregion', 'rrowner1', 'rrowner2', 'rrowner3', 'trkrghts1', 'trkrghts2', 'trkrghts3',
+  'trkrghts4', 'trkrghts5', 'trkrghts6', 'trkrghts7', 'trkrghts8', 'trkrghts9', 'subdiv', 'yardname', 'passngr',
+  'stracnet', 'tracks', 'direction', 'carddirect', 'net', 'miles', 'km', 'timezone', 'im_rt_type', 'ds',
+  'area_length_miles', 'SHAPE__Length'];
+const NTAD_AIRPORT_FIELDS = ['loc_id', 'fac_name', 'fac_type', 'fac_use', 'city', 'state_name', 'owner_type',
+  'status_code', 'atc_tower', 'icao_identifier', 'role', 'category', 'hub'];
 const AIRNOW_AQI_SERVICE = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursCombined/FeatureServer/0';
 // gridcode -> the label the service's own renderer gives that value, word for word.
 const AIRNOW_AQI_CATEGORIES = { 1: 'Good', 2: 'Moderate', 3: 'Unhealthy for Sensitive Groups', 4: 'Unhealthy', 5: 'Very Unhealthy', 6: 'Hazardous' };
@@ -1028,6 +1039,67 @@ export const SOURCES = deepFreeze({
     coverageSemantics: 'A modelled 2020 annual-average day of aircraft, road and rail noise over the lower 48 '
       + 'states (24-hour A-weighted equivalent level). BTS says it should not be used to evaluate noise at '
       + 'individual locations or specific times. Not a measurement, not a forecast, and silent about Alaska and Hawaii here.',
+    measuredOn: '2026-10-20',
+  },
+  // BTS NTAD Class I rail lines and the FAA airport facility list, the two things the noise tiles
+  // above are made OF. Both are ArcGIS FeatureServers on the SAME host as the tiles, so neither
+  // adds an origin. Measured 2026-10-20 (GET only). CORS: a real /query echoed the request Origin
+  // (https://headlessmode.com, https://example.org and http://localhost:1313 each came back with
+  // allow-credentials true) and an OPTIONS preflight answered 200. Rail: layer 0 of
+  // North_American_Class_1_Rail, polylines, 82,892 segments nationally, maxRecordCount 2000; the
+  // 10 sq deg box -85,34.5,-81,37 returned 1,987 of that 2,000, so a box is held to 9 sq deg (the
+  // 3 x 3 degree box -84.5,34.5,-81.5,37.5 returned 1,948, uncapped), and maxAllowableOffset 0.001
+  // took that answer from 3,408,197 bytes to 383,482 for the same 1,948 segments.
+  btsRailClass1: {
+    id: 'btsRailClass1',
+    name: 'BTS NTAD North American Class I rail lines',
+    kind: 'feature-query',
+    origin: 'https://geo.dot.gov',
+    serviceUrl: NTAD_RAIL_SERVICE,
+    metadataUrl: `${NTAD_RAIL_SERVICE}?f=json`,
+    layers: [{ id: 0, name: 'North American Class 1 Rail', queryUrl: `${NTAD_RAIL_SERVICE}/query`,
+      geometryType: 'esriGeometryPolyline', fields: NTAD_RAIL_FIELDS }],
+    spatialReference: { wkid: 102100, latestWkid: 3857 },
+    limits: { requiresKey: false, maxRecordCount: 2000, partialPageFlag: 'exceededTransferLimit',
+      maxBboxSquareDegrees: 9, simplifyDegrees: 0.001 },
+    pagination: true,
+    cors: 'reflects-origin',
+    attribution: 'U.S. DOT Bureau of Transportation Statistics, National Transportation Atlas Database (North American Class I rail lines)',
+    termsUrl: 'https://geodata.bts.gov/',
+    dateBasis: 'unknown',   // the service states no date and copyright text is empty
+    claim: 'inventory',
+    coverageSemantics: 'Where Class I railroads run, as BTS publishes the line. Class I only: a short line, '
+      + 'a branch another operator runs or a spur is simply not in this layer, so absence here is not '
+      + 'absence of a railway. It says nothing about how many trains pass, at what hour, or how loud.',
+    measuredOn: '2026-10-20',
+  },
+  // The FAA facility list as BTS republishes it (Airports_, layer 0): 13,235 points, all fac_type
+  // AIRPORT, fac_use PU 4,931 and PR 8,304, status_code O 13,171. OZ_Airports_All was measured and
+  // refused: 511 opportunity-zone airports whose fields are obscure (the Knoxville box held 1).
+  // The plan guessed JSON-only; the service lists JSON, geoJSON and PBF. Public-use only is asked
+  // (fac_use='PU'): the -85,34.5,-81,37 box holds 190 facilities and 63 public-use, a private strip
+  // being a place nobody may land. role and category are FAA codes carried as published.
+  btsAirports: {
+    id: 'btsAirports',
+    name: 'BTS NTAD airports (FAA facility data, public-use)',
+    kind: 'feature-query',
+    origin: 'https://geo.dot.gov',
+    serviceUrl: NTAD_AIRPORTS_SERVICE,
+    metadataUrl: `${NTAD_AIRPORTS_SERVICE}?f=json`,
+    layers: [{ id: 0, name: 'Airports', queryUrl: `${NTAD_AIRPORTS_SERVICE}/query`,
+      geometryType: 'esriGeometryPoint', fields: NTAD_AIRPORT_FIELDS }],
+    spatialReference: null,   // the native wkid was not read; outSR 4326 is asked and answered
+    limits: { requiresKey: false, maxRecordCount: 2000, partialPageFlag: 'exceededTransferLimit',
+      maxBboxSquareDegrees: 50 },
+    pagination: true,
+    cors: 'reflects-origin',
+    attribution: 'U.S. DOT Bureau of Transportation Statistics, National Transportation Atlas Database (airports, FAA facility data)',
+    termsUrl: 'https://geodata.bts.gov/',
+    dateBasis: 'unknown',
+    claim: 'inventory',
+    coverageSemantics: 'Airports the FAA lists as open to the public, as BTS republishes them. It lists the '
+      + 'facility, not its traffic: a grass strip and a hub are both one point, and it says nothing about '
+      + 'how often aircraft use it. Private-use fields, heliports and military-only fields are not asked.',
     measuredOn: '2026-10-20',
   },
   // GBIF occurrence records, read as AGGREGATES and never as records. Four measured facts

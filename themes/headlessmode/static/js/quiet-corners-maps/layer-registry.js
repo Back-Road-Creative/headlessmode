@@ -24,6 +24,9 @@ import { CONTEXT_ROW as HILLSHADE_ROW } from './source-hillshade.js';
 import { CONTEXT_ROW as CONTOURS_ROW } from './source-contours.js';
 import { CONTEXT_ROW as GAUGES_ROW } from './source-stream-gauges.js';
 import { CONTEXT_ROW as STATIONS_ROW } from './source-nws-observations.js';
+// Screen-only CHECKBOXES in the federal group, not context rows: the context group is a radio of
+// one, so a preset holding the noise surface beside rail and airports could not be built there.
+import { RAIL_ROW, AIRPORT_ROW } from './source-ntad-rail-airports.js';
 import { LAYER_LABEL as AURORA_LABEL, LAYER_CAVEAT as AURORA_CAVEAT } from './source-aurora.js';
 import { LAYER_LABEL as FLOOD_LABEL, LAYER_CAVEAT as FLOOD_CAVEAT } from './source-flood-zones.js';
 import { LAYER_LABEL as AQI_LABEL, LAYER_CAVEAT as AQI_CAVEAT } from './source-aqi.js';
@@ -323,6 +326,10 @@ export const LAYERS = Object.freeze([
     coverageCaveat: `Road names from USGS The National Map transportation data, screen only: they are not drawn on printed sheets. Highways start at zoom ${ROAD_FIRST_ZOOM}, and local roads appear from zoom ${ROAD_LOCAL_ZOOM}. ${SOURCES.usgsRoadNames.coverageCaveat}`,
     render: render('none'),
   }),
+  // BTS rail lines and public-use airports: where the sources of the noise surface below are.
+  // Their rows live with their words in source-ntad-rail-airports.js (screen-only, off by default).
+  RAIL_ROW,
+  AIRPORT_ROW,
   // A CONTINUOUS-COLOUR SURFACE: a third kind, neither ink on the map nor a page in the PDF
   // but a raster under the vectors on screen. main.js hands Leaflet the URL, so there is no
   // fetch of its own; `screenOnly` keeps it out of the overlay fetch as `extraPage` does a sheet.
@@ -891,6 +898,10 @@ export function drapeKindFor(layer) {
   if (layer.group === 'cameras') return 'point';
   if (layer.group === 'context' || layer.group === 'base' || layer.group === 'reading'
     || layer.extraPage) return false;
+  // Rail lines and airports are live screen-only reads (source-ntad-rail-airports.js): nothing in
+  // 3D drapes them, and a point row must not be given the 'line' drape. `notIn3d` is what makes
+  // terrain-overlays tell the reader so ("Available in 2D") rather than drop them silently.
+  if (layer.notIn3d) return false;
   return 'line';
 }
 export const LAYER_DRAPE = Object.freeze(Object.fromEntries(LAYERS.map((l) => [l.id, drapeKindFor(l)])));

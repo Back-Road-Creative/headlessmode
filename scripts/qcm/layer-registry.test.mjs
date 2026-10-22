@@ -6,6 +6,8 @@ import { readFileSync } from 'node:fs';
 import { LAYERS, groupHint, shortLabel, LAYER_BY_ID, LAYER_IDS, DEFAULT_LAYERS, GROUPS, GROUP_IDS, enabledLayers, layerControlSpecs,
   baseControlSpecs, contextControlSpecs, CONTEXT_LAYERS, DEFAULT_CONTEXT, surfaceCaption, LAYER_DRAPE, drapeKindFor }
   from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
+import { LAYERS_WITH_DRAPE } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
+import { capabilityNotices } from '../../themes/headlessmode/static/js/quiet-corners-maps/terrain-overlays.js';
 import { layerAboutText } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-panel.js';
 import { SYMBOL_BY_KEY, SYMBOLS } from '../../themes/headlessmode/static/js/quiet-corners-maps/legend.js';
 import { LAYER_IDS as CATALOGUE_FAMILIES } from '../../themes/headlessmode/static/js/quiet-corners-maps/state-sources.js';
@@ -398,9 +400,15 @@ test('every layer names a drape kind for the 3D terrain panel', () => {
   }
   // A layer that draws ink on the 2D map (symbolKeys, not 'reading'/'base'/extraPage/cameras)
   // is drapeable, never silently false -- that would be a layer the panel forgets.
+  // The one exception is a row that SAYS it is not drawn in 3D (`notIn3d`): terrain-overlays turns
+  // it into an "Available in 2D" notice, so the panel does not drop it silently.
   for (const l of LAYERS.filter((x) => x.group !== 'context' && x.group !== 'base'
-    && x.group !== 'reading' && x.group !== 'cameras' && !x.extraPage)) {
+    && x.group !== 'reading' && x.group !== 'cameras' && !x.extraPage && !x.notIn3d)) {
     assert.notEqual(LAYER_DRAPE[l.id], false, `${l.id} draws on the 2D map but the panel drops it`);
+  }
+  for (const l of LAYERS.filter((x) => x.notIn3d)) {
+    assert.equal(LAYER_DRAPE[l.id], false, `${l.id} says it is not drawn in 3D`);
+    assert.deepEqual(capabilityNotices(LAYERS_WITH_DRAPE, { [l.id]: true }, {}).map((n) => [n.id, n.status]), [[l.id, 'available-2d']]);
   }
 });
 

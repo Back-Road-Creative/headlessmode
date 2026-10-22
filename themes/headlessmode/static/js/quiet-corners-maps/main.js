@@ -19,6 +19,7 @@ import {
 } from './source-hillshade.js';
 import { contoursRequestFor, createContoursFetcher } from './source-contours.js';
 import { gaugeLayer, gaugeReader, areaReport as gaugeAreaReport } from './source-stream-gauges.js';
+import { railLayer, airportLayer, ntadReader, fetchRail, fetchAirports, railReport, airportReport } from './source-ntad-rail-airports.js';
 import { observationLayer, observationReader, loadCatalogue as loadStationCatalogue, areaReport as stationAreaReport } from './source-nws-observations.js';
 import { fetchRecSites } from './source-rec-sites.js';
 import { fetchBlmRecSites } from './source-blm-rec-sites.js';
@@ -206,6 +207,7 @@ let aqi, aqiReads = null;
 /** Stream gauges (E3): a bounded JSON question like the air quality above, drawn as one marker
  *  per station. `gaugesNewestMs` is the newest reading's own time, for the caption. */
 let gauges, gaugeReads = null, gaugesNewestMs = null;
+let railLines, railReads = null, airportPoints, airportReads = null;   // BTS rail lines and airports (screen only)
 /** Weather stations (E4): the same shape as the gauges, over a catalogue file read once (cached
  *  only on success, so turning the layer off and on retries a failed read). */
 let stations, stationReads = null, stationsNewestMs = null, stationCatalogue = null;
@@ -420,6 +422,14 @@ function attach(hostedMap) {
   gaugeReads = gaugeReader({});
   map.on('moveend zoomend', renderGauges);
   renderGauges();
+  railLines = railLayer(L);
+  railReads = ntadReader({ fetchFn: fetchRail });
+  airportPoints = airportLayer(L);
+  airportReads = ntadReader({ fetchFn: fetchAirports });
+  map.on('moveend zoomend', renderRail);
+  map.on('moveend zoomend', renderAirports);
+  renderRail();
+  renderAirports();
   stations = observationLayer(L);
   stationReads = observationReader({});
   map.on('moveend zoomend', renderStations);
@@ -1062,7 +1072,7 @@ function renderLayerPanelExtras() {
     // reader chose, so it stays out of the "layers on" count: a fresh load reads "No layers
     // on", and the count moves only when the reader moves a switch.
     const badgeWord = l.screenOnly
-      ? (layersFromControls()[l.id] ? roadsBadge || 'on' : 'off')
+      ? (layersFromControls()[l.id] ? (l.id === 'roads' ? roadsBadge || 'on' : 'on') : 'off')
       : layerBadge({
         checked, required: !!l.required, zoomBlocked,
         state: state.states[l.id] ?? null, featureCount: state.counts[l.id] ?? null,
@@ -2186,6 +2196,39 @@ async function renderGauges() {
   });
 }
 
+/** One BTS rail/airport row, on or off. A bounded question like renderGauges: a pan asks again, a
+ *  drag does not, the answer about a view the reader left is dropped, a view over the area cap asks
+ *  nothing, and the markers are cleared either way so the last view's lines never sit on ground
+ *  this answer says nothing about. The row's own report line is where the answer is worded. */
+async function renderNtad(on, group, reads, draw, reportOf, reportId) {
+  if (!group || !map) return;
+  const el = $(reportId);
+  if (!on) {
+    reads.cancel();
+    if (map.hasLayer(group)) map.removeLayer(group);
+    draw([]);
+    if (el) { el.textContent = ''; el.hidden = true; }
+    return;
+  }
+  const b = map.getBounds();
+  const bbox = { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() };
+  await reads.ask(bbox, (got) => {
+    draw(got);
+    if (!map.hasLayer(group)) group.addTo(map);
+    if (el) { el.textContent = reportOf(got).text; el.hidden = false; }
+  });
+}
+function renderRail() {
+  const layers = layersFromControls();
+  return renderNtad(!!layers.railClass1, railLines, railReads,
+    (got) => railLines.draw(Array.isArray(got) ? got : (got && got.lines) || []), railReport, 'qcm-layer-railClass1-report');
+}
+function renderAirports() {
+  const layers = layersFromControls();
+  return renderNtad(!!layers.airports, airportPoints, airportReads,
+    (got) => airportPoints.draw(Array.isArray(got) ? got : (got && got.airports) || []), airportReport, 'qcm-layer-airports-report');
+}
+
 /** Weather stations, on or off. Like renderGauges, with the station list read once from this
  *  site first. A list that will not load is a stated line and is retried on the next turn-on. */
 async function renderStations() {
@@ -2500,7 +2543,7 @@ const CAMERA_RENDER = Object.fromEntries(CAMERA_LAYER_IDS.map((id) => [id,
 /** QQA-05r-2: a screen-only row in the federal group (Road names) draws labels on the map and
  *  puts nothing on a printed sheet, so toggling it neither invalidates the recipe nor re-plans:
  *  it only asks the map to draw (or clear) its labels. */
-const SCREEN_RENDER = { roads: () => { renderRoads(); renderLegend(); } };
+const SCREEN_RENDER = { roads: () => { renderRoads(); renderLegend(); }, railClass1: () => { renderRail(); renderLegend(); }, airports: () => { renderAirports(); renderLegend(); } };
 /** The names row is a printable layer AND a per-view pass: the default invalidate + replan, then
  *  ask for the view (or clear, when it went off). */
 const NAMES_RENDER = { names: (event) => { invalidate({ layers: { names: event.target.checked } }); replan(); renderNamesPass(); } };
