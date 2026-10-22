@@ -130,7 +130,12 @@
    holds the six presets plus Undo and Reset (items 7-8) in the same 2 rows the six presets
    alone needed at three columns: a separate row for Undo/Reset measured 656px at 390px
    against the 600px map-key-reach budget below, 56px over; sharing the grid's own spare
-   cells in row 2 costs nothing further. Four narrower columns wrap the longest labels onto
+   cells in row 2 costs nothing further. Loud or quiet made seven presets: nine buttons need a
+   third row, measured 607px at 390px (7 over) and 50px past layer-panel-compact-browser's
+   budget, and an 8-track grid that packed Undo/Reset into one cell failed axe and the 200%
+   text check (CI 39783695477). So Undo and Reset left the grid for the layer count line
+   (.qcm-preset-actions below), and the last preset takes the spare eighth cell, which at
+   1280px keeps "Loud or quiet" on one line instead of three. Four narrower columns wrap the longest labels onto
    a second line at 390px, so the preset/action font, line-height and padding below are
    trimmed from the shared button chrome's defaults (0.8rem/1.3/0.35rem 0.6rem) until a
    wrapped row still clears the 44px phone touch target without pushing the panel past the
@@ -140,6 +145,7 @@
 .qcm-presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3rem; margin: 0 0 0.2rem; }
 .qcm-controls .qcm-preset { font-size: 0.875rem; line-height: 1.15;
     text-align: left; cursor: pointer; padding: 0.35rem 0.4rem; }
+.qcm-presets > .qcm-preset:last-of-type { grid-column: span 2; }
 .qcm-controls .qcm-preset-action { text-align: center; }
 .qcm-controls .qcm-preset-action:disabled { opacity: 0.5; cursor: default; }
 /* U1: what a preset button's aria-describedby names -- which switches it would move,
@@ -192,7 +198,16 @@
     position: sticky; top: 0; z-index: 1; padding-bottom: 0.3rem; background: #18181b; }
 .qcm-layer-toolbar label { font-size: 0.78rem; color: #d4d4d8; }
 .qcm-layer-toolbar input[type="search"] { margin-left: 0.35rem; }
-#qcm-layer-count { margin: 0; flex-basis: 100%; }
+.qcm-layer-count-row { display: flex; flex-basis: 100%; align-items: center; gap: 0.3rem; }
+#qcm-layer-count { margin: 0; flex: 1 1 auto; }
+/* Undo and Reset share the count line rather than a preset row (see the U1 note above).
+   At 1024px and up they are trimmed to the count line's own height, so the line does not
+   grow and the collapsed panel stays at its budget; under 1024px the shared 44px touch
+   minimum and the 0.875rem starting-set label floor (phone-controls.test.mjs) still apply. */
+.qcm-preset-actions { display: flex; gap: 0.3rem; }
+@media (min-width: 1024px) {
+    .qcm-controls .qcm-preset-actions .qcm-preset-action { font-size: 0.78rem; padding: 0 0.6rem; }
+}
 
 /* One badge word per row: off / loading / ready / empty / partial / unavailable / zoom in. */
 .qcm-layer-state {

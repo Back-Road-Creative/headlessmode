@@ -1448,17 +1448,17 @@ function refreshPresetPreviews() {
   }
 }
 
-/** The preset buttons, plus Undo and Reset in the same grid. Buttons, not a select or
+/** The preset buttons, plus Undo and Reset. Buttons, not a select or
  *  radios, because none of them is a state the page stays in: pressing one moves the
  *  switches below and is then over. Each preset carries a `.qcm-preset-preview` paragraph
  *  naming what it would move, before it is pressed -- `aria-describedby` so a screen
  *  reader hears it as part of the button.
  *
- *  U1: Undo and Reset share this same host and grid, as items 7 and 8, rather than a
- *  second container below it -- the grid is 4 columns exactly so 8 buttons fill 2 rows,
- *  the same row count 6 presets alone needed at 3 columns; a separate row for two more
- *  buttons measured 656px at 390px against layout.test.mjs's 600px map-key-reach budget,
- *  56px over. Both start disabled -- there is nothing yet to undo or reset. */
+ *  Undo and Reset go on the layer count line (`#qcm-preset-actions`), not into the
+ *  4-column grid: with seven presets, nine buttons there needed a third row, past
+ *  layout.test.mjs's 600px map-key-reach budget at 390px (a separate row for two more
+ *  buttons had already measured 656px under U1). The grid falls back to holding them
+ *  if the line is missing. Both start disabled -- there is nothing yet to undo or reset. */
 function renderPresets() {
   const host = $('qcm-presets'); if (!host) return;
   const undoBtn = document.createElement('button');
@@ -1479,7 +1479,8 @@ function renderPresets() {
     const preview = document.createElement('p');
     preview.className = 'qcm-preset-preview'; preview.id = previewId;
     return [button, preview];
-  }), undoBtn, resetBtn);
+  }));
+  ($('qcm-preset-actions') || host).replaceChildren(undoBtn, resetBtn);
   presetUndoBtn = undoBtn; presetResetBtn = resetBtn;
   refreshPresetPreviews();
 }
