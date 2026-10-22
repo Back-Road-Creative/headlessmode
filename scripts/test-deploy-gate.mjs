@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { decide, gather, counts } from './ci/deploy-gate.mjs';
+import { decide, gather, counts, makeApi } from './ci/deploy-gate.mjs';
 
 const T = 'a'.repeat(40);
 const OTHER = 'b'.repeat(40);
@@ -108,6 +108,57 @@ test('gather falls back to the subject (#N) when GitHub has no commit-to-PR asso
   // A subject naming a PR whose merge commit is another SHA proves nothing.
   const no = await gather({ repo: 'o/r', sha: D, api: api('docs: something (#744)') });
   assert.deepEqual(no.prs, []);
+});
+
+// 2026-10-22, during a GitHub Actions incident: two deploys of 11a905fc failed on the API, not
+// on the code. Run 39800781901 got HTTP 500 from /commits/{sha}/pulls; run 39801814567 refused
+// no-pr-ci because the pr-ci.yml runs list for a green head read empty, then not (0/1/0/1).
+const response = (status, body = {}) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
+const recorder = () => { const waits = []; return { waits, sleep: async (ms) => { waits.push(ms); } }; };
+
+test('api retries a 5xx, a 429 and a network error, then returns the body', async () => {
+  const seq = [response(500), response(429), new Error('socket hang up'), response(200, { ok: 1 })];
+  const { waits, sleep } = recorder();
+  const fetchImpl = async () => { const r = seq.shift(); if (r instanceof Error) throw r; return r; };
+  const api = makeApi({ token: 't', fetchImpl, sleep, delays: [1, 2, 3] });
+  assert.deepEqual(await api('/repos/o/r/commits/x/pulls'), { ok: 1 });
+  assert.deepEqual(waits, [1, 2, 3]);
+});
+
+test('api does not retry a 4xx: a missing or forbidden resource is an answer', async () => {
+  const { waits, sleep } = recorder();
+  const api = makeApi({ token: 't', fetchImpl: async () => response(404), sleep, delays: [1, 2] });
+  await assert.rejects(api('/repos/o/r/pulls/9'), /HTTP 404/);
+  assert.deepEqual(waits, []);
+});
+
+test('api gives up after the last delay and says how many attempts it made', async () => {
+  const { waits, sleep } = recorder();
+  const api = makeApi({ token: 't', fetchImpl: async () => response(502), sleep, delays: [1, 2] });
+  await assert.rejects(api('/repos/o/r/commits/x'), /HTTP 502 after 3 attempts/);
+  assert.deepEqual(waits, [1, 2]);
+});
+
+const gatherApi = (runReads) => async (path) => {
+  if (path === `/repos/o/r/commits/${'d'.repeat(40)}`) return { commit: { message: 'x', tree: { sha: T } } };
+  if (path.endsWith('/pulls')) return [{ number: 9, merged_at: '2026-10-22T14:22:00Z', base: { ref: 'master' }, head: { sha: 'c'.repeat(40) } }];
+  if (path.includes('/git/commits/')) return { tree: { sha: T } };
+  if (path.includes('/actions/workflows/pr-ci.yml/runs')) return { workflow_runs: runReads.shift() ?? [] };
+  throw new Error(`unexpected ${path}`);
+};
+
+test('gather re-reads a runs list with no decisive run until one appears', async () => {
+  const { waits, sleep } = recorder();
+  const input = await gather({ repo: 'o/r', sha: 'd'.repeat(40), api: gatherApi([[], [], [run('success')]]), sleep, delays: [1, 2, 3] });
+  assert.deepEqual(waits, [1, 2]);
+  assert.equal(decide(input).code, 'pr-ci-green');
+});
+
+test('gather still refuses no-pr-ci once every re-read came back with no decisive run', async () => {
+  const { waits, sleep } = recorder();
+  const input = await gather({ repo: 'o/r', sha: 'd'.repeat(40), api: gatherApi([[], [], []]), sleep, delays: [1, 2] });
+  assert.deepEqual(waits, [1, 2]);
+  assert.equal(decide(input).code, 'no-pr-ci');
 });
 
 test('counts: a skipped or todo test fails the suite; a missing summary fails too', () => {
