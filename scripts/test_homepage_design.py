@@ -17,10 +17,10 @@ HOME = ROOT / "public" / "index.html"
 CSS = ROOT / "themes" / "headlessmode" / "static" / "css" / "style.css"
 SYSTEMS = ROOT / "data" / "systems.json"
 
-HERO_TITLE = "The name means focus. So does the software."
-HERO_LEDE = "Straightforward to use, and honest about what it can't do."
+HERO_TITLE = "For the things we’re working on."
+HERO_LEDE = "A collection of projects."
 # The homepage's primary buttons. Every row also carries "Details →".
-ACTION_LABELS = {"Download", "Open the map", "Try the demo", "Request a demo", "Install"}
+ACTION_LABELS = {"Download", "Open the map", "View demo", "Ask about Framegrade", "Installation"}
 # Free = public (used directly, nothing to arrange) or a free tool; Preview = everything else.
 CHIP_WORDING = {
     "Band Coach": "Free",
@@ -176,9 +176,10 @@ def test_the_planned_buttons():
           for s in page().stanzas if s["actions"]}
     assert by["Band Coach"][0] == "Download"
     assert by["Quiet Corners"] == ("Open the map", "/quiet-corners/#dashboard")
-    assert by["rigscore"] == ("Install", "/rigscore/")
-    assert by["Waypost"] == ("Try the demo", "/demo/waypost/")
-    assert by["Framegrade"] == ("Request a demo", "/contact/")
+    assert by["rigscore"] == ("Installation", "/rigscore/#install")
+    assert by["Waypost"] == ("View demo", "/demo/waypost/")
+    assert by["Framegrade"] == ("Ask about Framegrade", "/contact/")
+    assert by["bot-battle-station"] == ("Installation", "/bot-battle-station/")
 
 
 def test_stanza_tags_say_free_or_preview():

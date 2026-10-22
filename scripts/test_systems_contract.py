@@ -537,7 +537,7 @@ def test_the_homepage_has_no_free_tools_inventory_or_crosslinks():
 
 def test_the_hero_states_the_headline_and_keeps_the_roster_anchors():
     homepage = built(HOMEPAGE).read_text()
-    assert "The name means focus. So does the software." in homepage
+    assert "For the things we’re working on." in homepage
     assert "one-person studio" not in homepage
     ids = _Ids()
     ids.feed(homepage)
@@ -590,8 +590,8 @@ def test_homepage_blurbs_are_the_canonical_plain_language_copy():
         "rigscore": "Checks an AI development setup's configuration for security, consistency and governance problems",
         "push-guard": "A client-side hook that blocks direct pushes to protected branches so changes go through pull requests",
         "Band Coach": "A practice coach for 26 instruments that listens through your microphone or MIDI keyboard, checks pitch and timing, and picks what to practice next",
-        "Waypost": "A console on your own computer that runs a creator's video, photo and SEO work and schedules posts to YouTube, TikTok, Instagram and Facebook, one tab per brand",
-        "Framegrade": "The media engine under Waypost: it grades video and photos, checks every finished file before delivery, and builds route films from GPS tracks",
+        "Waypost": "A console on your own computer that runs a creator's video, photo and SEO work and queues posts for YouTube, Instagram and Facebook, one tab per brand",
+        "Framegrade": "The media engine under Waypost: it grades video and photos, checks each finished file before delivery, and builds route films from GPS tracks",
     }
     assert {s["name"]: s["blurb"] for s in systems()} == expected
 
