@@ -152,6 +152,18 @@ const ADDRESS_ALTERNATIVES = 'Search a town or named place, type coordinates (la
  *  household, a rooftop or a doorway. */
 export const ADDRESS_ESTIMATE_NOTE = 'estimated along the street, not a doorstep';
 
+/** The Census Bureau's requested notice (QQA-04c), shown whenever an answer came from its
+ *  geocoder. GEOCODER.md records that it is not verified the Data API terms govern the
+ *  geocoder; one legible line is the safe course. */
+export const CENSUS_NOTICE = 'This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau.';
+
+/** The lookup outcomes whose text is the geocoder's own answer (or its absence): results, no
+ *  match, outage. Searching and a too-short query are ours, not Census's. */
+export function addressAnswerShown(status) {
+  return status === 'ready' || status === 'none' || status === 'unavailable'
+    || status === 'timeout' || status === 'rate-limited';
+}
+
 /** What typing an address says: nothing was sent, and where Search will send it. */
 export const ADDRESS_PROMPT_MESSAGE = 'Press Search to look up this street address. Search sends what you '
   + 'typed, through this site, to the U.S. Census Bureau\u2019s address geocoder.';

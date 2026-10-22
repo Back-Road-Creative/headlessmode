@@ -1391,6 +1391,12 @@ dialog::backdrop {
        scroll box, and so the one child that can give up height -- and the box
        and "Search" stay inside the frame on a short screen. */
     display: flex; flex-direction: column;
+    /* The list gives up height first, but only down to its min-height (below); the
+       field, "Search" and the notes cannot shrink, and with no list showing (no
+       match, outage) nothing can. The stage clips at its bottom edge, so what the
+       cap leaves over scrolls inside the box rather than being cut off, Census
+       notice (QQA-04c) included. A tall screen never reaches the cap. */
+    overflow-y: auto;
 }
 /* `display: flex` above would otherwise beat the UA's [hidden] rule. Tailwind's
    preflight, which this page loads, already hides [hidden] with !important; this
@@ -1416,6 +1422,11 @@ dialog::backdrop {
 .qc-finder-results {
     margin-top: 0.4rem; max-height: 13rem; overflow-y: auto;
     background: #12121e; border: 1px solid #2a2a42;
+}
+/* Two rows' worth at least once there are two: on a short stage the box scrolls before
+   the list is squeezed to nothing. One row keeps its own height. */
+.qc-finder-results:has(.qc-finder-hit ~ .qc-finder-hit, [role="group"] ~ [role="group"]) {
+    min-height: 5rem;
 }
 .qc-finder-hit {
     display: block; width: 100%; padding: 0.4rem 0.5rem;
@@ -1510,6 +1521,9 @@ dialog::backdrop {
     font-family: var(--font-mono, ui-monospace, monospace); font-size: 0.875rem;
     line-height: 1.4;
 }
+/* QQA-04c: the Census notice is a .qc-finder-empty line (same type, same ground, 0.875rem),
+   set a little apart from the answer above it. */
+.qc-finder-credit { padding-top: 0.35rem; }
 
 /* B2: the explicit trigger for the remote GNIS name search -- a full-width row
    under the local match's own note/status, never fired by a keystroke. */
