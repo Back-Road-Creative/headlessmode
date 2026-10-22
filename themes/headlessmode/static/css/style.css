@@ -219,7 +219,9 @@ a:focus-visible, button:focus-visible {
 
 /* ---- Homepage hero ----
    The forest band continues the masthead: kelly rule, serif headline, one
-   line. No button: the products start right below it. */
+   line. No button: the products start right below it. The headline is 814px on one
+   line at its 3.25rem cap, so .hero-copy is 52rem (832px), not 46rem: at 46rem it broke
+   into two balanced lines at every desktop width. Under ~860px it wraps, by design. */
 .hero-band { background: var(--forest); color: #fff; }
 .hero {
     /* padding-block, never the padding shorthand: .hero sits on the same
@@ -228,7 +230,7 @@ a:focus-visible, button:focus-visible {
        rule for .window-row, .sheet-head and the chrome rows above. */
     padding-block: 2rem 3.1rem;
 }
-.hero-copy { max-width: 46rem; display: grid; gap: 0.9rem; }
+.hero-copy { max-width: 52rem; display: grid; gap: 0.9rem; }
 .hero-rule { display: block; width: 56px; height: 4px; border-radius: 2px; background: var(--kelly); }
 .hero-title {
     font-family: var(--font-serif);

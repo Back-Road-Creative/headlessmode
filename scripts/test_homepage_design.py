@@ -148,6 +148,13 @@ def test_hero_states_the_headline_and_line_and_no_inventory_link():
     assert "one-person studio" not in HOME.read_text()
 
 
+def test_hero_headline_fits_one_line_on_a_desktop():
+    # The headline at its 3.25rem cap is 814px wide on one line (measured 2026-10-22 in
+    # Chromium at 1280px). A .hero-copy cap under that wraps it to two balanced lines.
+    cap = re.search(r"max-width:\s*([\d.]+)rem", rule(".hero-copy"))
+    assert cap and float(cap.group(1)) * 16 >= 814 + 16, rule(".hero-copy")
+
+
 def test_hero_is_a_forest_band_with_a_kelly_rule():
     assert "var(--forest)" in rule(".hero-band")
     assert "var(--kelly)" in rule(".hero-rule")
