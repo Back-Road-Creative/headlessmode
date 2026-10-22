@@ -49,8 +49,14 @@ test('every source carries the required keys and its kind-specific block', () =>
     // A camera catalogue has a serviceUrl and a coverageSemantics naming its real
     // footprint (QUX-08D: District 5 only), and is never a tile cache.
     else if (src.kind === 'observation-feed') {
-      assert.ok(src.endpoints && src.endpoints.byBox && src.endpoints.byBox.includes('{bbox}'), `${key} lacks endpoints.byBox`);
-      assert.ok(Array.isArray(src.parameterCodes) && src.parameterCodes.length > 0, `${key} lacks parameterCodes`);
+      // Asked by box (USGS: byBox + parameterCodes) or by station from a build-time catalogue
+      // (NWS: latest with {id} + catalogue).
+      if (src.endpoints && src.endpoints.byBox) {
+        assert.ok(src.endpoints.byBox.includes('{bbox}'), `${key} lacks endpoints.byBox`);
+        assert.ok(Array.isArray(src.parameterCodes) && src.parameterCodes.length > 0, `${key} lacks parameterCodes`);
+      } else {
+        assert.ok(src.endpoints && src.endpoints.latest && src.endpoints.latest.includes('{id}') && src.endpoints.catalogue, `${key} lacks endpoints.latest/catalogue`);
+      }
       assert.ok(!('tile' in src) && !('layers' in src), `${key} is a point feed, not tiles or an ArcGIS layer`);
     }
     else if (src.kind === 'camera-feed') {

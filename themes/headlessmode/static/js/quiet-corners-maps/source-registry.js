@@ -1236,6 +1236,49 @@ export const SOURCES = deepFreeze({
       + 'decommission on 2027-02-22 and is not used.',
     measuredOn: '2026-10-20',
   },
+  // NWS weather stations: the newest temperature, wind and humidity observation a station has
+  // published. Measured 2026-10-20 with a User-Agent naming headlessmode.com: GET
+  // /stations?limit=500 answered 200 `application/geo+json`, `access-control-allow-origin: *`,
+  // 500 stations / 541,480 bytes with a `pagination.next` cursor ({"s":500}); the list ends
+  // between offset 48,000 and 49,000 (about 48,500 stations nationally, 98 pages). It has NO
+  // bounding-box filter -- `state=TN` is accepted, nothing spatial -- so the station list is a
+  // build-time catalogue (scripts/qcm/build-nws-stations.mjs, a reviewable diff, two stations to a line under
+  // static/data/quiet-corners-maps/nws-stations/) and only `/stations/{id}/observations/latest`
+  // is read live, for at most 12 stations per view. KTYS answered 200, CORS `*`, 1,800 bytes
+  // trimmed: `temperature` (wmoUnit:degC), `windSpeed`/`windGust` (wmoUnit:km_h-1),
+  // `windDirection` (degree_(angle)) and `relativeHumidity` (percent), each `{unitCode, value,
+  // qualityControl}`, with the observation's own `timestamp`. A value can be null (qualityControl
+  // `Z`) and `X` marks a reading that failed quality control. The origin is the one the forecast
+  // and alerts rows already approved, so connect-src is unchanged.
+  nwsObservations: {
+    id: 'nwsObservations',
+    name: 'NWS weather stations (temperature, wind and humidity, latest observation)',
+    kind: 'observation-feed',
+    origin: 'https://api.weather.gov',
+    serviceUrl: 'https://api.weather.gov',
+    metadataUrl: 'https://api.weather.gov/openapi.json',
+    endpoints: {
+      latest: 'https://api.weather.gov/stations/{id}/observations/latest',
+      catalogue: '/data/quiet-corners-maps/nws-stations/stations.json',
+    },
+    spatialReference: { wkid: 4326 },
+    limits: { requiresKey: false, maxStationsPerView: 12, maxBboxSquareDegrees: 25,
+      stationsPageLimit: 500, nationalStationsObserved: 48500 },
+    pagination: false,
+    cors: 'star',
+    attribution: 'NOAA National Weather Service, station observations',
+    termsUrl: 'https://www.weather.gov/disclaimer',
+    dateBasis: 'feature-field',   // each observation carries its own `timestamp`
+    claim: 'observation',
+    coverageSemantics: 'The newest observation each listed station has published, with its own '
+      + 'observation time. The list holds airport-style reporting stations from five states only '
+      + '(Tennessee, North Carolina, Georgia, South Carolina and Colorado: 332 stations), not every '
+      + 'instrument and not every state, and at most 12 stations '
+      + 'nearest the centre of the view are read. A station is a point: a valley a few miles '
+      + 'away can differ a lot. It is a reading from a past moment, not a forecast. A missing '
+      + 'value or one that failed quality control is left out and counted.',
+    measuredOn: '2026-10-20',
+  },
   // NOAA's Hazard Mapping System smoke analysis. `Start` and `End_` are STRINGS in the HMS
   // wire format `YYYYDDD HHMM`, UTC day-of-year (`2026257 1200` is 2026-09-14 12:00Z): the
   // satellite image sequence the analyst outlined the plume from. The service's own

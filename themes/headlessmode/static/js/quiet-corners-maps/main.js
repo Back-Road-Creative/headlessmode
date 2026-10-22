@@ -19,6 +19,7 @@ import {
 } from './source-hillshade.js';
 import { contoursRequestFor, createContoursFetcher } from './source-contours.js';
 import { gaugeLayer, gaugeReader, areaReport as gaugeAreaReport } from './source-stream-gauges.js';
+import { observationLayer, observationReader, loadCatalogue as loadStationCatalogue, areaReport as stationAreaReport } from './source-nws-observations.js';
 import { fetchRecSites } from './source-rec-sites.js';
 import { fetchBlmRecSites } from './source-blm-rec-sites.js';
 import { fetchTrails } from './source-trails.js';
@@ -205,6 +206,9 @@ let aqi, aqiReads = null;
 /** Stream gauges (E3): a bounded JSON question like the air quality above, drawn as one marker
  *  per station. `gaugesNewestMs` is the newest reading's own time, for the caption. */
 let gauges, gaugeReads = null, gaugesNewestMs = null;
+/** Weather stations (E4): the same shape as the gauges, over a catalogue file read once (cached
+ *  only on success, so turning the layer off and on retries a failed read). */
+let stations, stationReads = null, stationsNewestMs = null, stationCatalogue = null;
 /** Wildlife records: the other bounded question, and the only surface that draws no picture
  *  at all -- three limit=0 counts per cell, shaded as one box, because 97% of GBIF records
  *  state no coordinate precision and a dot would claim one. */
@@ -416,6 +420,10 @@ function attach(hostedMap) {
   gaugeReads = gaugeReader({});
   map.on('moveend zoomend', renderGauges);
   renderGauges();
+  stations = observationLayer(L);
+  stationReads = observationReader({});
+  map.on('moveend zoomend', renderStations);
+  renderStations();
   wildlife = gbifLayer(L);
   wildlifeReads = gbifReader({});
   map.on('moveend zoomend', renderWildlife);
@@ -881,6 +889,7 @@ const SURFACE_TIME = {
   epaAirNowAqi: () => ({ timeMs: aqiObservedMs }),
   // The newest reading in view: each station states its own, and the row says so.
   streamGauges: () => ({ timeMs: gaugesNewestMs }),
+  nwsObservations: () => ({ timeMs: stationsNewestMs }),
   // Nothing goes here for the terrain surface on purpose. It is a CALCULATION over a
   // national compilation that states no date for a given piece of ground, so there is no
   // honest moment to show -- and the caption says the time is unknown rather than
@@ -1230,6 +1239,7 @@ const CONTEXT_RENDER = {
 
   epaAirNowAqi: renderAqi,
   streamGauges: renderGauges,
+  nwsObservations: renderStations,
   gbifOccurrence: renderWildlife,
 
   terrainSlope: renderTerrain,
@@ -2173,6 +2183,45 @@ async function renderGauges() {
     if (!el) return;
     el.textContent = gaugeAreaReport(got).text;
     el.hidden = false;
+  });
+}
+
+/** Weather stations, on or off. Like renderGauges, with the station list read once from this
+ *  site first. A list that will not load is a stated line and is retried on the next turn-on. */
+async function renderStations() {
+  if (!stations || !map) return;
+  const layers = layersFromControls();
+  const on = !!layers.nwsObservations;
+  const el = $('qcm-layer-nwsObservations-report');
+  const say = (text) => { if (el) { el.textContent = text; el.hidden = false; } };
+  if (!on) {
+    stationReads.cancel();
+    if (map.hasLayer(stations)) map.removeLayer(stations);
+    stations.draw([], null);
+    if (el) { el.textContent = ''; el.hidden = true; }
+    return;
+  }
+  if (!stationCatalogue) {
+    const got = await loadStationCatalogue();
+    if (!layersFromControls().nwsObservations) return;
+    if (got.status !== 'ready') {
+      stations.draw([], null);
+      stationsNewestMs = null;
+      renderSurfaceCaption();
+      say(stationAreaReport({ status: 'catalogue-unavailable' }).text);
+      return;
+    }
+    stationCatalogue = got.stations;
+  }
+  const b = map.getBounds();
+  const bbox = { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() };
+  await stationReads.ask(bbox, stationCatalogue, (got) => {
+    const sites = got && got.status === 'ready' ? got.sites : [];
+    stationsNewestMs = sites.length ? Math.max(...sites.map((s) => s.timeMs)) : null;
+    renderSurfaceCaption();
+    stations.draw(sites, got && got.fetchedMs);
+    if (!map.hasLayer(stations)) stations.addTo(map);
+    say(stationAreaReport(got).text);
   });
 }
 
