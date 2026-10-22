@@ -37,7 +37,7 @@ coverage once the page is non-draft (`test_quiet_corners_export_has_coverage_on_
 `test_sprawl_factor_coverage_has_no_dead_factors`).
 
 The same file's `TestPublishedCopyRules` holds two copy rules. The site never
-names its owner ("Joe", "Joseph", "Petrucelli", "JP") in anything Hugo builds
+names its owner (first name, surname or initials) in anything Hugo builds
 or copies, `static/data/` geodata excepted. Back Road Creative is linked from
 About, and Go Move Shift only from Waypost, as what Waypost makes. There are
 no clients, results or case studies, so none are claimed.

@@ -542,7 +542,7 @@ jobs:
         # wsl2-ci-1 runs its runner under NoNewPrivileges=yes, so the setuid
         # snap-confine cannot start /snap/bin/chromium there ("snap-confine is
         # packaged without necessary permissions", run 39684764854); the runners
-        # under joe start it fine. Launch-probe the browser CHROME_PATH names and,
+        # under the host's own user start it fine. Launch-probe the browser CHROME_PATH names and,
         # when it cannot start, install Chrome for Testing (every library it needs
         # is on the host) into the runner's tool cache, kept across runs, and
         # repoint CHROME_PATH for pa11y and Lighthouse. The runner itself is not

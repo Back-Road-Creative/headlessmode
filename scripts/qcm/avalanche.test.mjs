@@ -41,7 +41,7 @@ test('the measured record: a forecast, from a non-agency host, no key, CORS open
   assert.equal(MAP_LAYER_URL, 'https://api.avalanche.org/v2/public/products/map-layer');
   assert.equal(src.limits.requiresKey, false);
   assert.equal(src.cors, 'star');
-  // JP's permission is the reason the layer exists at all; the record says where it came from.
+  // The owner's permission is the reason the layer exists at all; the record says where it came from.
   assert.match(src.permission, /2026-10-20/);
   assert.ok(cspDirectivesFor()['connect-src'].includes('https://api.avalanche.org'));
   assert.ok(!cspDirectivesFor()['img-src'].includes('https://api.avalanche.org'), 'nothing is painted as <img>');

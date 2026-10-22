@@ -669,7 +669,7 @@ def test_the_products_are_ranked_in_the_storefront_order():
 
 
 def test_driftless_is_not_advertised_on_the_homepage():
-    """JP 2026-10-19: Driftless is not ready, so it is not advertised. Its page
+    """The owner, 2026-10-19: Driftless is not ready, so it is not advertised. Its page
     stays reachable by direct URL; the homepage neither lists nor links it."""
     driftless = next(s for s in systems() if s["name"] == "Driftless")
     assert driftless.get("homepage") is False
