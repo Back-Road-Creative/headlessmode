@@ -24,6 +24,13 @@
 // tests the exact deployed tree). Switch to 'refuse' once the merge path lands
 // heads that are up to date with master.
 //
+// Transient GitHub answers are retried, not decided on: a 5xx, a 429 or a network
+// error is re-asked after each of RETRY_DELAYS_MS, and a pr-ci.yml runs list with no
+// decisive run is re-read on the same delays before it can refuse no-pr-ci. A 4xx is
+// an answer and is never retried. Measured 2026-10-22, during a GitHub Actions incident:
+// run 39800781901 died on one HTTP 500 from /commits/{sha}/pulls, and run 39801814567
+// refused no-pr-ci for a green head whose runs list read empty, then not (0/1/0/1).
+//
 // CLI:
 //   node scripts/ci/deploy-gate.mjs check      (GITHUB_REPOSITORY, GITHUB_SHA, GITHUB_TOKEN, OVERRIDE_REASON)
 //   node scripts/ci/deploy-gate.mjs counts <node --test log>   (fails on skipped/todo/zero tests)
@@ -32,6 +39,8 @@ import { fileURLToPath } from 'node:url';
 
 const DECISIVE = new Set(['success', 'failure']);
 export const STALE_TREE = 'warn';
+export const RETRY_DELAYS_MS = [2000, 5000, 10000];
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function newestDecisive(runs) {
   return runs
@@ -68,7 +77,36 @@ export function decide({ deployTree, prs, override, staleTree = STALE_TREE }) {
   return { ok: false, ...refusals[0], refusals };
 }
 
-export async function gather({ repo, sha, api }) {
+export function makeApi({ token, fetchImpl = fetch, sleep = wait, delays = RETRY_DELAYS_MS }) {
+  return async (path) => {
+    for (let attempt = 0; ; attempt++) {
+      let res, why;
+      try {
+        res = await fetchImpl(`https://api.github.com${path}`, {
+          headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json' },
+        });
+        if (res.ok) return res.json();
+        if (res.status < 500 && res.status !== 429) throw new Error(`GitHub API ${path}: HTTP ${res.status}`);
+        why = `HTTP ${res.status}`;
+      } catch (e) {
+        if (res) throw e;
+        why = e.message;
+      }
+      if (attempt >= delays.length) throw new Error(`GitHub API ${path}: ${why} after ${attempt + 1} attempts`);
+      await sleep(delays[attempt]);
+    }
+  };
+}
+
+async function prCiRuns({ repo, headSha, api, sleep, delays }) {
+  for (let attempt = 0; ; attempt++) {
+    const runs = (await api(`/repos/${repo}/actions/workflows/pr-ci.yml/runs?head_sha=${headSha}&per_page=100`)).workflow_runs;
+    if (newestDecisive(runs) || attempt >= delays.length) return runs;
+    await sleep(delays[attempt]);
+  }
+}
+
+export async function gather({ repo, sha, api, sleep = wait, delays = RETRY_DELAYS_MS }) {
   const commit = await api(`/repos/${repo}/commits/${sha}`);
   let merged = (await api(`/repos/${repo}/commits/${sha}/pulls`)).filter((x) => x.merged_at && x.base.ref === 'master');
   if (!merged.length) {
@@ -84,8 +122,8 @@ export async function gather({ repo, sha, api }) {
   const prs = [];
   for (const p of merged) {
     const head = await api(`/repos/${repo}/git/commits/${p.head.sha}`);
-    const runs = await api(`/repos/${repo}/actions/workflows/pr-ci.yml/runs?head_sha=${p.head.sha}&per_page=100`);
-    prs.push({ number: p.number, headSha: p.head.sha, headTree: head.tree.sha, runs: runs.workflow_runs });
+    const runs = await prCiRuns({ repo, headSha: p.head.sha, api, sleep, delays });
+    prs.push({ number: p.number, headSha: p.head.sha, headTree: head.tree.sha, runs });
   }
   return { deployTree: commit.commit.tree.sha, prs };
 }
@@ -103,13 +141,7 @@ export function counts(log) {
 
 async function check() {
   const { GITHUB_REPOSITORY: repo, GITHUB_SHA: sha, GITHUB_TOKEN: token } = process.env;
-  const api = async (path) => {
-    const res = await fetch(`https://api.github.com${path}`, {
-      headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json' },
-    });
-    if (!res.ok) throw new Error(`GitHub API ${path}: HTTP ${res.status}`);
-    return res.json();
-  };
+  const api = makeApi({ token });
   const v = decide({ ...(await gather({ repo, sha, api })), override: process.env.OVERRIDE_REASON });
   const line = `deploy-gate ${v.ok ? 'PASS' : 'REFUSE'} [${v.code}] ${v.reason}`;
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${line}\n`);
