@@ -101,6 +101,7 @@ with open(sys.argv[2], "w", encoding="utf-8") as f:
 print(f"ok   {sys.argv[2]} demo = {man['source']}, {pages} pages")
 PY
 }
+# shellcheck disable=SC2317  # `return` works only when sourced; a direct run falls through to the exit
 if [ "${DRIFTLESS_BUNDLE_REGEN_SOURCE_ONLY:-}" = "1" ]; then return 0 2>/dev/null || exit 0; fi
 cd "$CHECKOUT"
 git fetch -q origin --tags
