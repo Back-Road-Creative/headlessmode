@@ -178,19 +178,6 @@ export const PRESETS = Object.freeze([
     base: 'usgsTopo',
     layers: ['countyLines', 'countyScore'],
   }),
-  // The noise question, asked of the three things a noise map is made of. ONE surface (the 2020
-  // modelled noise tiles) with rail lines and airports as checkboxes over it -- possible only
-  // because those two are not context rows, and the context group is a choice of one. Roads and
-  // names are the screen lettering that lets a reader place the picture; the topo base stays under.
-  // Road names open ON and a preset leaves such a row alone unless it lists it (layer-presets.test:
-  // no preset lists roads), so they are part of this set by staying on, not by being named here.
-  definePreset({
-    id: 'loudOrQuiet',
-    label: 'Loud or quiet',
-    question: 'Is this place near the rail lines and airports that make it loud, or away from them?',
-    base: 'usgsTopo',
-    layers: ['transportNoise', 'railClass1', 'airports', 'names'],
-  }),
 ]);
 export const PRESET_BY_ID = Object.freeze(Object.fromEntries(PRESETS.map((p) => [p.id, p])));
 

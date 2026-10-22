@@ -19,7 +19,7 @@ const build = (over) => definePreset({ id: 't', label: 'T', question: 'T?', base
 test('six presets, each naming real layers, a real base and the question it answers', () => {
   // U1 (F03): task presets plus Reset/Undo -- Map only, Trails & terrain, Land access,
   // Compare counties, retaining the two S10 presets unchanged.
-  assert.equal(PRESETS.length, 7, 'the two S10 presets, U1\'s four task presets and Loud or quiet (E5)');
+  assert.equal(PRESETS.length, 6, 'the two S10 presets plus U1\'s four task presets');
   for (const p of PRESETS) {
     assert.ok(BASE_BY_ID[p.base], `${p.id} names base ${p.base}`);
     for (const id of p.layers) assert.ok(LAYER_BY_ID[id], `${p.id} names layer ${id}`);

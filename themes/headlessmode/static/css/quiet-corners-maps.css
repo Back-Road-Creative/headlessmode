@@ -137,12 +137,7 @@
    budget — measured 631px at the shared-chrome size, 600px at the earlier 0.72rem size.
    QQA-05d raised the label to 0.875rem (14px) with the line-height and 44px phone
    minimum unchanged; layout.test.mjs still holds the budget. */
-/* Eight tracks, a preset spans two and Undo/Reset one each, so the two actions share one
-   preset's width: seven presets plus both actions still fill two rows (a seventh preset in a
-   flat four-column grid opened a third row and put the panel past its budget). */
-.qcm-presets { display: grid; grid-template-columns: repeat(8, 1fr); gap: 0.3rem; margin: 0 0 0.2rem; }
-.qcm-presets > .qcm-preset { grid-column: span 2; }
-.qcm-presets > .qcm-preset-action { grid-column: span 1; }
+.qcm-presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3rem; margin: 0 0 0.2rem; }
 .qcm-controls .qcm-preset { font-size: 0.875rem; line-height: 1.15;
     text-align: left; cursor: pointer; padding: 0.35rem 0.4rem; }
 .qcm-controls .qcm-preset-action { text-align: center; }
@@ -404,7 +399,7 @@
         #qc-sheet .qc-candidate-row { grid-template-columns: minmax(0, 1fr); }
         /* The Layers presets are four equal columns that floor at their content: in the
            287px dock that ran 10px past the edge and the panel scrolled sideways. */
-        #qc-sheet .qcm-presets { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        #qc-sheet .qcm-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     /* The filters sit in a two-column grid whose `sm:` switch keys on the VIEWPORT, so in
        a dock a third of that wide each half-width control was ~110px. One column, like the
