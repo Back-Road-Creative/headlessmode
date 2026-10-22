@@ -394,7 +394,9 @@ jobs:
             REASONS=""
             addr() { REASONS="${REASONS}- ${1}"$'\n'; }
 
-            REL_TAG=$(gh api "repos/${source_repo}/releases/latest" --jq .tag_name 2>/dev/null)
+            # gh api prints the error body on stdout for a 404, so its exit code
+            # decides, not whether the output is empty.
+            REL_TAG=$(gh api "repos/${source_repo}/releases/latest" --jq .tag_name 2>/dev/null) || REL_TAG=""
             if [ -z "$REL_TAG" ]; then
               addr "**Latest release unreadable**: could not read the latest release from \`${source_repo}\`."
             else
