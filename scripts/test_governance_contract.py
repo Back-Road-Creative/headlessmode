@@ -526,6 +526,18 @@ def _third_party_data_domains():
     return {".".join(host.split(".")[-2:]) for host in origins}
 
 
+def _third_party_data_hosts():
+    """Every host the source registry links to (origins, service, metadata and terms
+    pages), since the page cites all of them and htmltest probes each one."""
+    registry = os.path.join(
+        REPO_ROOT, "themes/headlessmode/static/js/quiet-corners-maps/source-registry.js"
+    )
+    with open(registry, encoding="utf-8") as fh:
+        hosts = set(re.findall(r"'https://([a-z0-9.-]+)[/']", fh.read()))
+    assert hosts, f"{registry} names no https hosts"
+    return hosts
+
+
 def test_third_party_data_hosts_are_not_probed_on_every_run():
     """The Field Maps page cites its sources' terms and service pages. On 2026-09-06 the
     whole fs.usda.gov estate reset connections (curl exit 56) and 502'd, turning two green
@@ -533,13 +545,16 @@ def test_third_party_data_hosts_are_not_probed_on_every_run():
     502'd and 504'd and did the same to three. Every host the app itself names is allow-
     listed for the same reason x.com and linkedin.com are: their liveness is a scheduled
     concern, not a per-PR one."""
-    domains = _third_party_data_domains()
-    # Each entry is a regex, where a dot is escaped `\.`; compare against the
-    # pattern with its escapes stripped.
-    plain = [u.replace("\\", "") for u in _htmltest_ignore_urls()]
-    for domain in sorted(domains):
-        assert any(domain in u for u in plain), (
-            f".htmltest.yml still probes {domain} on every run; a third-party outage "
+    assert _third_party_data_domains()
+    # Match each host the registry names against the IgnoreURLs regexes themselves. A
+    # substring check on the registrable domain passed `usda.gov` on the strength of the
+    # fs.usda.gov entry, so the SNOTEL rows' wcc.sc.egov.usda.gov and www.nrcs.usda.gov
+    # links went unlisted and turned PR #6 red on a 404 and a timeout (2026-10-22).
+    patterns = [re.compile(u) for u in _htmltest_ignore_urls()]
+    for host in sorted(_third_party_data_hosts()):
+        url = f"https://{host}/"
+        assert any(p.search(url) for p in patterns), (
+            f".htmltest.yml still probes {host} on every run; a third-party outage "
             "there turns unrelated PRs red"
         )
 

@@ -119,6 +119,12 @@ CacheExpires: "24h"
 #   - avalanche.org: the avalanche-danger layer (E-P6) cites avalanche.org's
 #     forecast pages and queries api.avalanche.org. Not an agency host, but its
 #     liveness is a scheduled concern like every source host above.
+#   - the rest of the source registry (USDA NRCS for SNOTEL, BTS, state 511
+#     and DOT camera hosts, city open-data portals, AVO, the AWS open-data
+#     registry). On 2026-10-22 PR #6 went red on wcc.sc.egov.usda.gov (a REST
+#     root that 404s a plain GET) and a www.nrcs.usda.gov timeout: the old
+#     coverage test matched `usda.gov` against the fs.usda.gov entry. It now
+#     matches every registry host against these regexes.
 IgnoreURLs:
   - "^#"
   - "^mailto:"
@@ -145,6 +151,20 @@ IgnoreURLs:
   - "^https?://([a-z0-9-]+\\.)*usgs\\.gov/"
   - "^https?://([a-z0-9-]+\\.)*fws\\.gov/"
   - "^https?://([a-z0-9-]+\\.)*avalanche\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*usda\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*bts\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*virginia\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*511mn\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*alaska\\.edu/"
+  - "^https?://([a-z0-9-]+\\.)*iteriscloud\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*austintexas\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*brla\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*kandrive\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*ky\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*opendata\\.aws/"
+  - "^https?://([a-z0-9-]+\\.)*wsdot\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*cotrip\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*sd511\\.org/"
   - "^https?://([a-z0-9-]+\\.)*amazonaws\\.com/"
   - "^https?://([a-z0-9-]+\\.)*arlingtontx\\.gov/"
   - "^https?://([a-z0-9-]+\\.)*cityofsalem\\.net/"
