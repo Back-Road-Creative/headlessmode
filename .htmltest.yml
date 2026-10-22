@@ -125,6 +125,11 @@ CacheExpires: "24h"
 #     root that 404s a plain GET) and a www.nrcs.usda.gov timeout: the old
 #     coverage test matched `usda.gov` against the fs.usda.gov entry. It now
 #     matches every registry host against these regexes.
+#   - every other host the Field Maps page cites: the state road-camera feeds
+#     (MD CHART, NJ Turnpike, DelDOT, MoDOT, NMRoads) and camera operators'
+#     pages. On 2026-10-22 the #18 deploy went red on 403s from
+#     chart.maryland.gov and www.njta.gov; the coverage test now also reads
+#     content/quiet-corners-maps.md.
 IgnoreURLs:
   - "^#"
   - "^mailto:"
@@ -182,6 +187,17 @@ IgnoreURLs:
   - "^https?://([a-z0-9-]+\\.)*nau\\.edu/"
   - "^https?://([a-z0-9-]+\\.)*kirklandwa\\.gov/"
   - "^https?://([a-z0-9-]+\\.)*wa\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*maryland\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*njta\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*deldot\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*modot\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*nmroads\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*sd\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*511sc\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*kingcounty\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*lexingtonky\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*hpwren\\.ucsd\\.edu/"
+  - "^https?://([a-z0-9-]+\\.)*alertwest\\.live/"
   - "^https?://localhost"
 IgnoreDirectoryMissingTrailingSlash: true
 # The driftless demo bundle links between its pages EXTENSIONLESS

@@ -535,6 +535,12 @@ def _third_party_data_hosts():
     with open(registry, encoding="utf-8") as fh:
         hosts = set(re.findall(r"'https://([a-z0-9.-]+)[/']", fh.read()))
     assert hosts, f"{registry} names no https hosts"
+    # The page copy cites hosts the registry never names: the state road-camera feeds
+    # (source-camera.js) and the camera operators' pages. On 2026-10-22 the #18 deploy
+    # went red on 403s from chart.maryland.gov and www.njta.gov, both cited only there.
+    page = os.path.join(REPO_ROOT, "content/quiet-corners-maps.md")
+    with open(page, encoding="utf-8") as fh:
+        hosts |= set(re.findall(r"\(https://([a-z0-9.-]+)[/)]", fh.read()))
     return hosts
 
 
