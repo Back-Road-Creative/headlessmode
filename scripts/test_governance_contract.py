@@ -244,7 +244,7 @@ def test_pr_ci_cancels_only_its_own_superseded_run():
 def test_pr_ci_can_be_dispatched_for_a_bot_opened_pr():
     """product-sync opens its release PRs with the workflow token, and a PR opened that
     way starts no pull_request run a human did not approve: #821 sat at
-    action_required until JP clicked through on GitHub (2026-10-19). product-sync
+    action_required until the owner clicked through on GitHub (2026-10-19). product-sync
     dispatches PR CI on the release branch instead, so the trigger must exist, and a
     dispatched run (no PR number) must group by its branch, not share one group that
     cancels every other dispatched run.
@@ -1527,7 +1527,7 @@ def test_site_audit_hosted_chrome_step_precedes_every_browser_step():
 def test_site_audit_probes_the_self_hosted_chromium_and_falls_back_to_chrome_for_testing():
     # wsl2-ci-1 runs its runner under NoNewPrivileges=yes, so the setuid snap-confine
     # cannot start /snap/bin/chromium there ("snap-confine is packaged without
-    # necessary permissions", run 39684764854); the runners under joe start it fine.
+    # necessary permissions", run 39684764854); the runners under the host's own user start it fine.
     # The step launch-probes the browser CHROME_PATH names and, when it cannot start,
     # installs Chrome for Testing into the runner's tool cache and repoints CHROME_PATH
     # for pa11y and Lighthouse. It never edits the runner.

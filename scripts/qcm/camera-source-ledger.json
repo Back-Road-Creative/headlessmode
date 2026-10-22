@@ -352,7 +352,7 @@
       "credentialsAndLimits": "keyed service; free tier limited and picture addresses expire; the key must never reach the browser",
       "rights": "\"you must not place the bandwidth of Webcams API under an inappropriate load with the Webcams API\" (Windy Webcams API terms, https://api.windy.com/webcams/terms, read 2026-10-08; the terms at https://account.windy.com/agreements/windy-api-webcams-terms-of-use also require the visible credit \"Webcams provided by windy.com\" and say nothing on storing images)",
       "stableIds": "no: not established",
-      "health": "candidate: not owner-published (Windy lists other people's cameras); needs QQA-15 embed and stream support and a paid-key decision for JP"
+      "health": "candidate: not owner-published (Windy lists other people's cameras); needs QQA-15 embed and stream support and a paid-key decision for the owner"
     },
     { "id": "official-open-data-catalogues", "status": "candidate", "purpose": "roads", "media": "still", "captureTime": "no", "lastQualified": null, "owner": "QQA-17b", "positionPrecision": "exact: the layer's coordinates", "duplicates": [],
       "operator": "State DOT and city open-data catalogues (ArcGIS Online, Socrata)",

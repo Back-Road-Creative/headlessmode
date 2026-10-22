@@ -67,7 +67,7 @@ test('the layer panel is grouped, and a group heading is derived rather than wri
 });
 
 // --- one map ---------------------------------------------------------------
-// JP, 2026-09-07: "there is only supposed to be one map, there should be no
+// The owner, 2026-09-07: "there is only supposed to be one map, there should be no
 // hidden map. one single map with all these layers / features."
 test('the dashboard map is the one map: it reaches field zooms and hands itself over', () => {
   const dash = readFileSync(new URL('../../themes/headlessmode/static/js/quiet-corners.js', import.meta.url), 'utf8');

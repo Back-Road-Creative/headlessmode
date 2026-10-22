@@ -7,7 +7,8 @@ workspace path on a developer's machine, an age public key or an encrypted
 instead of something noticed after publishing.
 
 Every pattern is assembled from fragments so this file does not match
-itself; nothing is exempted.
+itself; nothing is exempted, except that the owner-name check skips
+static/data/, third-party geodata whose place names are not about the owner.
 
 Run: pytest scripts/test_public_tree.py -v
 """
@@ -27,7 +28,7 @@ FORBIDDEN_CONTENT = {
     ),
     "private repo name (bare)": re.compile("driftless-" + "archive"),
     "local path (dev user)": re.compile("/home/" + "dev/"),
-    "local path (joe user)": re.compile("/home/" + "joe/"),
+    "local path (owner user)": re.compile("/home/" + "jo" + "e/"),
     "private service name": re.compile("svc-gomoveshift-" + "video"),
     "age public key": re.compile(_AGE + "[0-9a-z]{58}"),
 }
@@ -71,3 +72,22 @@ def test_no_tracked_venv_or_encrypted_file() -> None:
         if path.endswith(".enc"):
             bad.append(f"{path}: encrypted (.enc) file")
     assert not bad, "tracked files must not include a virtualenv or .enc file:\n" + "\n".join(bad)
+
+
+# The owner is never named in this public repo, docs and tests included
+# (owner's instruction, 2026-10-22): first name, full first name, surname or
+# initials. Word-bounded; the initials are case-sensitive so "jpg" never matches.
+OWNER_NAME = re.compile(r"\b(?:" + "jo" + "e|jo" + "seph|pet" + "rucelli" + r")\b", re.IGNORECASE)
+OWNER_INITIALS = re.compile(r"\b" + "J" + "P" + r"\b")
+OWNER_SKIP = ("static/data/",)
+
+
+def test_tracked_files_never_name_the_owner() -> None:
+    hits = []
+    for path in _tracked_files():
+        if path.startswith(OWNER_SKIP):
+            continue
+        for number, line in _text_lines(path):
+            if OWNER_NAME.search(line) or OWNER_INITIALS.search(line):
+                hits.append(f"{path}:{number}: {line.strip()[:120]}")
+    assert not hits, "tracked files must not name the owner:\n" + "\n".join(hits)

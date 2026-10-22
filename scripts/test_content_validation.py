@@ -264,11 +264,12 @@ class TestFieldMapsDoc:
 class TestPublishedCopyRules:
     """What the published site may say about who makes it.
 
-    The site never names its owner -- not "Joe", "Joseph", "Petrucelli" or
-    "JP" -- in any page, layout, data file, config or static asset Hugo copies
+    The site never names its owner -- first name, full first name, surname or
+    initials -- in any page, layout, data file, config or static asset Hugo copies
     into the site (owner's instruction, 2026-10-22). static/data/ is left out:
-    it is third-party geodata whose place names ("Joe Wheeler State Park")
-    are not about the owner. Go Move Shift is shown only as what Waypost
+    it is third-party geodata whose place names (a state park named for
+    someone who shares the first name) are not about the owner. The patterns are
+    assembled from fragments so this file never names the owner either. Go Move Shift is shown only as what Waypost
     makes; there are no clients, results or case studies to cite.
     """
 
@@ -276,9 +277,9 @@ class TestPublishedCopyRules:
     SOURCES = ["content", "layouts", "data", "i18n", "site-config", "themes", "static"]
     SKIP = ("static/data/",)
     SUFFIXES = {".md", ".html", ".toml", ".yaml", ".yml", ".json", ".txt", ".xml", ".js", ".mjs", ".css"}
-    # Word-bounded so "Joel" and "jpg" never match; "JP" is case-sensitive.
-    NAME = re.compile(r"\b(?:joe|joseph|petrucelli)\b", re.IGNORECASE)
-    INITIALS = re.compile(r"\bJP\b")
+    # Word-bounded so longer names and "jpg" never match; the initials are case-sensitive.
+    NAME = re.compile(r"\b(?:" + "jo" + "e|jo" + "seph|pet" + "rucelli" + r")\b", re.IGNORECASE)
+    INITIALS = re.compile(r"\b" + "J" + "P" + r"\b")
 
     def _published_files(self):
         for entry in self.SOURCES:

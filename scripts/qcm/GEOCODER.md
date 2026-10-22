@@ -1,6 +1,6 @@
 # Address search: provider decision record (QQA-04a)
 
-For JP. Nothing was purchased and no account or key exists. The evidence is
+For the owner. Nothing was purchased and no account or key exists. The evidence is
 `data/quiet-corners-maps/geocode-qualification.json`; `qualify-geocoder.test.mjs` fails if a number
 below stops matching it. Re-run with `node scripts/qcm/qualify-geocoder.mjs --select --run`.
 

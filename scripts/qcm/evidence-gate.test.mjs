@@ -233,7 +233,7 @@ test('a skipped test with no allowlist entry is rejected with its name and reaso
 
 test('an allowlist entry (file + test-name pattern) lets exactly the skips it names through', () => {
   const ev = readEvidence('bad');
-  const entry = { file: 'bad/skip.test.mjs', test: '^needs a browser$', reason: 'fixture', owner: 'JP' };
+  const entry = { file: 'bad/skip.test.mjs', test: '^needs a browser$', reason: 'fixture', owner: 'owner' };
   const reasons = checkEvidence({ evidence: ev, expectedSha: project.sha, onDisk: ['bad/skip.test.mjs'], allowlist: [entry] });
   const skips = reasons.filter((r) => /skipped/.test(r));
   assert.equal(skips.length, 2, reasons.join('\n'));

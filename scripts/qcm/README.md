@@ -381,7 +381,7 @@ Exit 0 when the bundle covers the candidate; exit 1 with one `evidence: ...` lin
 
 `/api/geocode` is a Cloudflare Pages Function (`static/functions/api/geocode.js`, routed by
 `static/_routes.json`) that relays one address to the US Census geocoder. `scripts/qcm/GEOCODER.md`
-is the decision record for JP: provider, terms, privacy, measured rural results and known gaps.
+is the decision record for the owner: provider, terms, privacy, measured rural results and known gaps.
 
 | File | What it does |
 | --- | --- |
