@@ -116,6 +116,9 @@ CacheExpires: "24h"
 #     operator's outage must not turn an unrelated PR red. The domains come
 #     from the source registry, so scripts/test_governance_contract.py fails
 #     until a new camera operator is listed here.
+#   - avalanche.org: the avalanche-danger layer (E-P6) cites avalanche.org's
+#     forecast pages and queries api.avalanche.org. Not an agency host, but its
+#     liveness is a scheduled concern like every source host above.
 IgnoreURLs:
   - "^#"
   - "^mailto:"
@@ -141,6 +144,7 @@ IgnoreURLs:
   - "^https?://([a-z0-9-]+\\.)*arcgis\\.com/"
   - "^https?://([a-z0-9-]+\\.)*usgs\\.gov/"
   - "^https?://([a-z0-9-]+\\.)*fws\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*avalanche\\.org/"
   - "^https?://([a-z0-9-]+\\.)*amazonaws\\.com/"
   - "^https?://([a-z0-9-]+\\.)*arlingtontx\\.gov/"
   - "^https?://([a-z0-9-]+\\.)*cityofsalem\\.net/"
