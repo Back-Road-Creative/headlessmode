@@ -37,12 +37,12 @@ while IFS= read -r name; do
   if [ "${name%.html}" != "$name" ]; then
     stem="${name%.html}"
     c=$(code /dev/null "$DEMO_BASE/$stem")
-    [ "$c" = 200 ] && row ok "$stem -> $c" || row FAIL "$stem -> $c (want 200)"
+    if [ "$c" = 200 ]; then row ok "$stem -> $c"; else row FAIL "$stem -> $c (want 200)"; fi
     c2=$(curl -s -o /dev/null -w '%{http_code}' "$DEMO_BASE/$name")
-    { [ "$c2" = 200 ] || [ "$c2" = 308 ]; } && row ok "$name -> $c2" || row FAIL "$name -> $c2 (want 200 or 308)"
+    if [ "$c2" = 200 ] || [ "$c2" = 308 ]; then row ok "$name -> $c2"; else row FAIL "$name -> $c2 (want 200 or 308)"; fi
   else
     c=$(code /dev/null "$DEMO_BASE/$name")
-    [ "$c" = 200 ] && row ok "$name -> $c" || row FAIL "$name -> $c (want 200)"
+    if [ "$c" = 200 ]; then row ok "$name -> $c"; else row FAIL "$name -> $c (want 200)"; fi
   fi
 done <<<"$files"
 curl -sSL -o "$TMP/manifest.json" "$DEMO_BASE/manifest.json"
@@ -52,7 +52,7 @@ live_source=$(python3 -c "
 import json
 try: print(json.load(open('$TMP/manifest.json')).get('source',''))
 except Exception: print('')")
-[ "$live_source" = "$TAG" ] && row ok "manifest source = $live_source" || row FAIL "manifest source = $live_source (want $TAG)"
+if [ "$live_source" = "$TAG" ]; then row ok "manifest source = $live_source"; else row FAIL "manifest source = $live_source (want $TAG)"; fi
 sha_sample=$(python3 -c "
 import json
 d=json.load(open('$MANIFEST')).get('sha256')
@@ -63,7 +63,7 @@ else
   while IFS=$'\t' read -r name want; do
     [ -n "$name" ] || continue
     got=$(curl -sSL "$DEMO_BASE/$name" | sha256sum | cut -d' ' -f1)
-    [ "$got" = "$want" ] && row ok "sha256 $name" || row FAIL "sha256 $name = $got (want $want)"
+    if [ "$got" = "$want" ]; then row ok "sha256 $name"; else row FAIL "sha256 $name = $got (want $want)"; fi
   done <<<"$sha_sample"
 fi
 echo
