@@ -1,0 +1,171 @@
+# htmltest config for the built site, read by every gate that checks links:
+# .github/workflows/pr-ci.yml (pre-merge) and deploy-production.yml (pre-deploy)
+# both run bare `htmltest`, which reads this file from the repo root. One tracked
+# file means the PR gate and the deploy gate cannot disagree, and adding a host
+# to the allow-list below is a content change rather than a workflow edit.
+# NOTE: deploy-production.yml does not persist tmp/.htmltest across runs
+# (no actions/cache step there), so CacheExpires only pays off in pr-ci.yml
+# today; it is still the correct default for both, and harmless without it.
+DirectoryPath: "public"
+CheckExternal: true
+CheckInternal: true
+CheckMailto: false
+CheckTel: false
+CheckFavicon: false
+ExternalTimeout: 45
+# Three self-hosted runners share ONE outbound IP, and htmltest opens
+# 16 external connections by default. A multi-PR sitting therefore
+# pointed ~48 concurrent requests at github.com, which answered 504
+# on our own org's repo pages: on 2026-09-07 four of five PRs opened
+# in the same minute went red on links that returned 200 to a direct
+# curl seconds later. The connections were capped rather than github.com
+# allow-listed, so a wrong repo link stayed caught. The cap still holds
+# for every other host; github.com links are now checked through the
+# GitHub API instead (the github.com entry under IgnoreURLs says why).
+#
+# ExternalTimeout was raised from 20s (htmltest's own default is 15s) on
+# 2026-09-19 after two more concurrent PRs (#544, #545) each failed on a
+# single github.com link exceeding a 20s ExternalTimeout by a few seconds
+# — different real, reachable URLs each time (one PR's release page, the
+# other's repo root), both runs 23:09-23:11 the same night. That is
+# github.com answering slow under two simultaneous full-site sweeps, not
+# a broken link: a direct curl to either URL succeeded seconds later.
+# 45s gives a throttled response room to land inside one connection
+# attempt without masking a link that is actually down (a truly dead
+# host still times out, just later).
+HTTPConcurrencyLimit: 4
+# htmltest's own external-link cache (refcache.json, keyed by URL) is on
+# by default but writes under tmp/.htmltest, which is untracked and gets
+# wiped by actions/checkout's `git clean` before every run — so on its
+# own this cache never survived past one job. pr-ci.yml's "Restore" and
+# "Save htmltest external-link cache" steps persist that directory across
+# runs, saving after a red link check too, so a link this build already
+# verified recently is not re-fetched at all — cutting the number of
+# concurrent requests this job sends to external hosts regardless of how
+# many other PRs are running.
+# CacheExpires is shortened from htmltest's 336h (two week) default so a
+# link that goes genuinely dead is still caught within a day rather than
+# staying green off a stale cache entry for two weeks.
+CacheExpires: "24h"
+# External checking is ON so a wrong upstream link (e.g. a blob/master
+# 404) is caught pre-merge and pre-deploy. Allow-listed:
+#   - self-domain: canonical/og self-links point at the LIVE site,
+#     which is stale-by-design until this deploy; the built pages are
+#     already covered by the internal check, so don't network-probe
+#     our own domain (a new page's canonical would 404 on live).
+#   - github.com: rate-limits page views per IP, and the runners share one,
+#     so on 2026-10-02 htmltest went red on 503 "Unicorn!" pages for links
+#     that were fine (#665-#668; a browser user agent got 429 "Rate
+#     limit"). Not unchecked: scripts/qcm/check-github-links.mjs checks
+#     every github.com link through the GitHub API right after htmltest,
+#     in pr-ci.yml, deploy-production.yml and `npm run test:html`.
+#   - x.com / linkedin: rate-limit / bot-block CI (transient 403/429).
+#   - fs.usda.gov: the Field Maps page cites the Forest Service terms
+#     page. On 2026-09-06 that whole estate reset connections (curl
+#     exit 56) and 502'd for hours, turning two unrelated green PRs
+#     red on a link this site does not control and the app never
+#     fetches — the app queries apps.fs.usda.gov, which stayed up.
+#     Third-party citation liveness is a scheduled concern
+#     (drift-sentinel.yml), not a per-PR one.
+#   - gbif.org: the occurrence endpoint and the data-user terms page the
+#     wildlife-records row cites. The terms page answers 403 to a non-browser
+#     client, so probing it is a guaranteed red on a link this site does not
+#     control and a reader opens by hand; the app queries api.gbif.org, whose
+#     liveness is a scheduled concern like every federal host above.
+#   - weather.gov: the NWS terms page the Field Maps sources table cites;
+#     the app fetches api.weather.gov, which this does not probe either.
+#   - geoplatform.gov: the ImageServer catalogue pages the land-cover and
+#     canopy rows cite for their vintage. The app queries the same host's
+#     REST endpoints, but a citation link is not a data fetch and its
+#     liveness is a scheduled concern like every federal host above.
+#   - nasa.gov: the GIBS/Black Marble pages the night-light row cites; the
+#     tiles come from gibs.earthdata.nasa.gov, likewise not probed here.
+#   - dot.gov: the geo.dot.gov ArcGIS REST page the transportation-noise row
+#     cites. It is the tile service itself (the app loads its tiles, not this
+#     page), a federal host whose liveness is a scheduled concern like the others.
+#   - fema.gov: the National Flood Hazard Layer terms page the flood-map
+#     row CITES. The app queries hazards.fema.gov and never fetches the
+#     terms page at all; that page also answered 403 to a datacenter IP
+#     when the source was measured, so probing it per PR would turn
+#     unrelated PRs red on bot protection we do not control.
+#   - blm.gov: the BLM terms page plus the per-record www.blm.gov/visit/ page
+#     every BLM recreation site links to; the app queries gis.blm.gov.
+#   - arcgis.com: the item pages the AQI, HMS smoke and NIFC fire rows
+#     cite for their terms; the app queries services, services2 and
+#     services3, none probed here. Esri's item pages' liveness is a
+#     scheduled concern, exactly as for the federal hosts above.
+#   - epa.gov: the ecoregion product page and the geospatial terms of use
+#     the Place facts rows CITE. Nothing fetches epa.gov at runtime at
+#     all — the ecoregion geometry is a committed copy this site serves,
+#     so gispub.epa.gov is not in the source registry and not in the CSP.
+#     A cited page's liveness is a scheduled concern like every host
+#     above it. (The PAD-US access row cites usgs.gov and queries
+#     services.arcgis.com, both already covered.)
+#   - noaa.gov: the radar and space-weather product pages the two new
+#     condition rows cite; the app queries mapservices.weather.noaa.gov
+#     and services.swpc.noaa.gov, neither of which this probes.
+#   - usgs.gov: the USGS copyright-and-credits page the wetlands row cites
+#     for its rights. The app queries fwspublicservices.wim.usgs.gov, a
+#     different host this does not probe.
+#   - fws.gov: the Fish and Wildlife wetlands-geodatabase disclaimer page
+#     the same row cites. The app never fetches www.fws.gov at all.
+#   - camera operators (state DOTs, cities, research and airport networks): the
+#     camera layers name each operator's page and show its pictures, and the
+#     app fetches those pictures itself. Whether an operator's page or picture
+#     host is up is a scheduled concern like every source host above; one
+#     operator's outage must not turn an unrelated PR red. The domains come
+#     from the source registry, so scripts/test_governance_contract.py fails
+#     until a new camera operator is listed here.
+IgnoreURLs:
+  - "^#"
+  - "^mailto:"
+  - "^tel:"
+  - "^javascript:"
+  - "^https?://(www\\.)?headlessmode\\.com"
+  - "^https?://(www\\.)?github\\.com([/?#]|$)"
+  - "^https?://(www\\.)?linkedin\\.com/"
+  - "^https?://(www\\.)?(twitter|x)\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*fs\\.usda\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*nationalmap\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*geoplatform\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*weather\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*fema\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*nasa\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*dot\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*epa\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*blm\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*ca\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*nps\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*gbif\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*noaa\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*arcgis\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*usgs\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*fws\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*amazonaws\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*arlingtontx\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*cityofsalem\\.net/"
+  - "^https?://([a-z0-9-]+\\.)*lawrenceks\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*trimarc\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*tripcheck\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*utah\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*carsprogram\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*srtmc\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*511la\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*austinmobility\\.io/"
+  - "^https?://([a-z0-9-]+\\.)*iteris-atis\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*vdotcameras\\.com/"
+  - "^https?://([a-z0-9-]+\\.)*aviationwx\\.org/"
+  - "^https?://([a-z0-9-]+\\.)*nau\\.edu/"
+  - "^https?://([a-z0-9-]+\\.)*kirklandwa\\.gov/"
+  - "^https?://([a-z0-9-]+\\.)*wa\\.gov/"
+  - "^https?://localhost"
+IgnoreDirectoryMissingTrailingSlash: true
+# The driftless demo bundle links between its pages EXTENSIONLESS
+# (href="process-map"; Cloudflare Pages serves the .html file at that
+# path without a redirect hop), which htmltest can only read as a
+# missing file. The bundle's own contract proves those links instead:
+# scripts/test_driftless_demo.py resolves every href in every page
+# against the pages and siblings manifest.json owns. The product
+# page's link INTO the bundle is still checked here.
+IgnoreDirs:
+  - "demo/driftless"

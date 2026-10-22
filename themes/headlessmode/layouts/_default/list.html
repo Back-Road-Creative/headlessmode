@@ -1,0 +1,31 @@
+{{ define "main" }}
+<div class="shop-row py-8 list-header">
+    <h1 class="list-heading">{{ .Title }}</h1>
+    {{ if .Content }}
+    <div class="list-intro">{{ .Content }}</div>
+    {{ end }}
+</div>
+
+<div class="shop-row py-4">
+    {{ range .Pages }}
+    <article class="list-item">
+        <a href="{{ .RelPermalink }}" class="list-row">
+            <span class="list-row-main">
+                <span class="list-row-title">{{ .Title }}</span>
+                {{ if .Summary }}
+                <span class="list-row-summary">{{ .Summary | plainify | truncate 120 }}</span>
+                {{ end }}
+            </span>
+            <span class="list-row-meta">
+                <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+                {{ if .ReadingTime }}<span>{{ .ReadingTime }} min</span>{{ end }}
+            </span>
+        </a>
+    </article>
+    {{ end }}
+
+    <div class="list-footer">
+        {{ len .Pages }} {{ if eq (len .Pages) 1 }}item{{ else }}items{{ end }}
+    </div>
+</div>
+{{ end }}

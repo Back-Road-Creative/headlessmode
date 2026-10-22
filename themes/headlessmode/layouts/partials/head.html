@@ -1,0 +1,94 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{{- /* Boutique redesign: light-native site (warm paper, near-black ink) —
+       tell the UA so scrollbars/form controls/spinners render light instead
+       of the OS default dark. The /quiet-corners/ dashboard keeps its own
+       dark "app" surface regardless (scoped in style.css), which is why this
+       is a page-level hint rather than a hardcoded assumption anywhere. */ -}}
+<meta name="color-scheme" content="light">
+{{- /* Title: home uses "Headless Mode — <slogan>" (see site-config params.toml). */ -}}
+{{- $pageTitle := cond .IsHome (printf "%s — %s" .Site.Title .Site.Params.slogan) (printf "%s | %s" .Title .Site.Title) -}}
+{{- /* Description precedence: page .Description → 404 → page .Summary → site default.
+       The 404 branch is not cosmetic: /404.html has no content file, so it has
+       neither .Description nor .Summary (.Kind is "404", so .IsPage is false too)
+       and used to fall all the way through to the storefront marketing line —
+       shipping "Software products and free open tools from one studio…" as the
+       meta description and og:description of an error page. Its own copy says
+       what the page actually is. */ -}}
+{{- $pageDesc := "" -}}
+{{- if .Description -}}{{- $pageDesc = .Description -}}
+{{- else if eq .Kind "404" -}}{{- $pageDesc = "Page not found. This link may be out of date." -}}
+{{- else if and .IsPage .Summary -}}{{- $pageDesc = .Summary | plainify -}}
+{{- else -}}{{- $pageDesc = .Site.Params.description -}}{{- end -}}
+{{- /* OG title: home uses full site+slogan line; pages use .Title. */ -}}
+{{- $ogTitle := cond .IsHome (printf "%s — %s" .Site.Title .Site.Params.slogan) .Title -}}
+{{- /* Per-page OG image override → site default. Always emit an absolute URL. */ -}}
+{{- $ogImagePath := (.Params.ogImage | default .Site.Params.ogImage) -}}
+{{- $ogImageAbs := $ogImagePath | absURL -}}
+<title>{{ $pageTitle }}</title>
+<meta name="description" content="{{ $pageDesc }}">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:title" content="{{ $ogTitle }}">
+<meta property="og:description" content="{{ $pageDesc }}">
+<meta property="og:site_name" content="{{ .Site.Title }}">
+<meta property="og:image" content="{{ $ogImageAbs }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ .Site.Title }} — {{ .Site.Params.slogan }}">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+{{ with .Site.Params.twitterHandle }}<meta name="twitter:site" content="{{ . }}">{{ end }}
+<meta name="twitter:title" content="{{ $ogTitle }}">
+<meta name="twitter:description" content="{{ $pageDesc }}">
+<meta name="twitter:image" content="{{ $ogImageAbs }}">
+<meta name="twitter:image:alt" content="{{ .Site.Title }} — {{ .Site.Params.slogan }}">
+
+<!-- Canonical -->
+<link rel="canonical" href="{{ .Permalink }}">
+
+<!-- JSON-LD structured data (M8) -->
+{{ partial "jsonld.html" . }}
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#faf7f2">
+
+<!--
+    Tailwind is compiled at build time by @tailwindcss/cli (see package.json
+    `build:css`). Source: src/css/main.css. Output: /css/tailwind.css. This
+    replaces the old cdn.tailwindcss.com runtime JIT so CSP no longer needs
+    'unsafe-eval' and FCP is not blocked on a compiler bundle.
+    Site design tokens + component styles live in /css/style.css (no web
+    fonts: type is the platform system stack, so no third-party call).
+-->
+<link rel="stylesheet" href="/css/tailwind.css">
+<link rel="stylesheet" href="/css/style.css">
+{{- /* Chroma's Monokai palette. hugo.toml sets noClasses = false, so syntax
+       colors arrive as class names and this sheet is what paints them —
+       without it every fenced block renders one flat color. Site-wide rather
+       than per-page: code blocks appear across the product pages and the
+       release notes, and one cached 2KB sheet beats a conditional that has
+       to know which pages have a fence. */ -}}
+<link rel="stylesheet" href="/css/chroma-monokai.css">
+{{- /* Leaflet CSS belongs in head, not mid-body after the map container:
+       loaded there, the map paints unstyled before the sheet applies.
+       Dashboard pages only — everything else skips the 14KB sheet. */ -}}
+{{ if eq .Layout "quiet-corners-dashboard" }}<link rel="stylesheet" href="{{ "vendor/leaflet.css" | relURL }}">{{ end }}
+<!--
+    Mermaid is lazy-loaded (see /js/mermaid-loader.js): the ~1MB library is only
+    fetched on pages that actually contain a Mermaid diagram. Triggers on
+    `pre code.language-mermaid` (markdown ```mermaid fences) or an explicit
+    `.mermaid` element. If neither selector matches, no network request is made.
+-->
+<script src="/js/mermaid-loader.js" defer></script>
+<!-- No analytics, no ads, no telemetry. See /privacy/. -->
+<!-- Post-render table enhancements (weight alignment, grade coloring). -->
+<script src="/js/table-enhancements.js" defer></script>

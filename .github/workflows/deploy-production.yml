@@ -1,0 +1,685 @@
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      override_reason:
+        description: 'Deploy without a green PR CI run for this tree. Logged as a warning; leave blank for the normal gate.'
+        required: false
+        default: ''
+  push:
+    branches: [master]
+
+# Queued, NOT cancel-in-progress: a cancelled run is a completed non-success, and the
+# autoland robot gates on this workflow. On 2026-09-20 the robot's own merge of #549
+# cancelled a86cb415's deploy five minutes in — the SHA whose barrier had just freed it.
+# scripts/test_governance_contract.py holds this.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+env:
+  HUGO_VERSION: '0.139.0'
+  # hugo_extended_0.139.0_linux-amd64.tar.gz, from that release's
+  # hugo_0.139.0_checksums.txt. Bump it with HUGO_VERSION above.
+  HUGO_SHA256: 'c3b60907624cacd64c92b53b8b17ead611100d66072836c3c15361929567bf65'
+  CHROME_PATH: '/snap/bin/chromium'
+  CHROMIUM_FLAGS: '--no-sandbox --headless --disable-gpu'
+
+permissions:
+  contents: write   # actions-gh-pages pushes the production branch
+  issues: write     # "Create issue on failure" step
+  pull-requests: read   # deploy gate: the merged PR for the pushed commit
+  actions: read         # deploy gate: that PR head's pr-ci.yml runs
+
+jobs:
+  build-validate-deploy:
+    runs-on: ${{ fromJSON(vars.HM_RUNNER || '["self-hosted","heavy"]') }}
+    # 39 recorded runs on a quiet box: p50 8m38s, max 10m17s. The box is shared, and on
+    # 2026-09-20 at load 31-64 two runs hit the old 30-minute bound (30m21s, 30m32s).
+    # GitHub reports an expired timeout as `cancelled`, which suspended the merge robot
+    # both times. A slow deploy is a success; 60 leaves room for a busy box.
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        # $RUNNER_TEMP, not $HOME: peaceiris/actions-hugo installs into
+        # $HOME/actions_hugo/bin, and the runners are processes under ONE user
+        # account on one box. Two concurrent jobs extract Hugo over the path the
+        # other may be executing — the `Text file busy` (exit 126) that killed run
+        # 34761209179 with htmltest. The action takes no input that moves the
+        # install off the shared home, so the pinned release is fetched here
+        # instead. $RUNNER_TEMP belongs to one runner and is wiped between jobs.
+        #
+        # HUGO_SHA256 sits beside HUGO_VERSION in this file's `env:` block so a
+        # version bump cannot miss it; it is a constant, not a checksums file
+        # fetched at run time, because a checksum the same server serves next to
+        # the tarball verifies nothing.
+        run: |
+          : "${RUNNER_TEMP:?the runner did not set RUNNER_TEMP}"
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSL -o hugo.tar.gz \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          echo "${HUGO_SHA256}  hugo.tar.gz" | sha256sum -c -
+          tar xz -C "$RUNNER_TEMP/bin" hugo -f hugo.tar.gz
+          rm hugo.tar.gz
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Use the hosted runner's Chrome
+        # Hosted runs only (HM_RUNNER set; runner.environment is 'github-hosted'). The
+        # self-hosted box keeps the snap Chromium from the workflow env above, which
+        # bin/verify-worktree.sh reads. The hosted image has no /snap/bin/chromium, the
+        # browser tests fail closed on a CHROME_PATH naming a missing file, and
+        # GITHUB_ENV overrides the workflow env for every later step: the node tests,
+        # pa11y (PUPPETEER_EXECUTABLE_PATH) and Lighthouse (chrome-launcher).
+        # A missing browser fails here, naming itself.
+        if: runner.environment == 'github-hosted'
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$chrome" ]; then
+            echo "::error::no google-chrome or chromium on this hosted runner"
+            exit 1
+          fi
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+
+      - name: Gate - PR CI passed on this tree
+        # QC-E1. Publish only a tree pr-ci.yml passed on. Bound by TREE, not SHA:
+        # squash and merge commits never equal the PR head pr-ci tested. A head that
+        # was behind master is refused as stale (re-run its PR CI after updating it).
+        # Refusal codes and the override are documented in scripts/ci/deploy-gate.mjs.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          OVERRIDE_REASON: ${{ github.event_name == 'workflow_dispatch' && inputs.override_reason || '' }}
+        run: node scripts/ci/deploy-gate.mjs check
+
+      - name: Install validation tools
+        run: |
+          # Self-hosted runner has no interactive sudo; install to a
+          # user-writable dir and expose it on PATH via $GITHUB_PATH
+          # (applies to all subsequent steps, e.g. the htmltest run below).
+          # The binary is SHA256-verified before use — an unverified curl|tar
+          # on the deploy runner would execute whatever the release URL serves.
+          #
+          # $RUNNER_TEMP, not $HOME: this deploy shares its box and its user
+          # account with PR CI, which installs the same binary. A job that
+          # rewrites a file another job is executing gets `Text file busy`.
+          # $RUNNER_TEMP belongs to one runner and is wiped between jobs.
+          HTMLTEST_SHA256=775c597ee74899d6002cd2d93076f897f4ba68686bceabe2e5d72e84c57bc0fb
+          # Empty $RUNNER_TEMP would make the paths below absolute; say so here
+          # rather than letting `mkdir -p /bin` be the error message.
+          : "${RUNNER_TEMP:?the runner did not set RUNNER_TEMP}"
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSL -o htmltest.tar.gz https://github.com/wjdp/htmltest/releases/download/v0.17.0/htmltest_0.17.0_linux_amd64.tar.gz
+          echo "${HTMLTEST_SHA256}  htmltest.tar.gz" | sha256sum -c -
+          tar xz -f htmltest.tar.gz htmltest
+          mv htmltest "$RUNNER_TEMP/bin/"
+          rm htmltest.tar.gz
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Lockfile audit (npm supply-chain IOCs)
+        run: |
+          if grep -nE '@vapi-ai/|@redhat-cloud-services/|"ai-sdk-ollama"' package.json package-lock.json; then
+            echo "::error::Dependency matches a known-compromised npm scope (Miasma / Phantom Gyp, 2026-06). Refusing to install."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build Tailwind CSS
+        run: npm run build:css
+
+      - name: Setup Python for source validation
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m venv venv
+          venv/bin/pip install requests pytest
+
+      - name: Validate - Content accuracy (TDD)
+        run: |
+          echo "=== Validating content accuracy rules ==="
+          venv/bin/python3 -m pytest scripts/test_content_validation.py -v
+          if [ $? -ne 0 ]; then
+            echo "FAILED: Content validation rules violated"
+            echo "Fix content accuracy issues before deploying"
+            exit 1
+          fi
+          echo "PASSED: All content validation rules satisfied"
+
+      - name: Validate - Front matter structure
+        run: |
+          echo "=== Validating Hugo front matter ==="
+          venv/bin/pip install pyyaml -q
+          venv/bin/python3 scripts/test_frontmatter.py
+          if [ $? -ne 0 ]; then
+            echo "FAILED: Front matter validation failed"
+            echo "Check for code-fenced files, missing delimiters, or invalid YAML"
+            exit 1
+          fi
+          echo "PASSED: All front matter valid"
+
+      - name: Build site for production
+        run: bash scripts/build-site.sh --configDir site-config --environment production --minify
+        env:
+          NPS_API_KEY: ${{ secrets.NPS_API_KEY }}
+          WSDOT_ACCESS_CODE: ${{ secrets.WSDOT_ACCESS_CODE }}
+
+      - name: Field Maps engine (node --test)
+        # AFTER the build, deliberately. 75 of these 603 tests drive a real
+        # browser against the pages in `public/`, and helpers/site-server.mjs
+        # skips them rather than failing when there is no build to serve. With
+        # this step ahead of the build they skipped silently here -- measured
+        # 2026-09-12: 528 pass / 75 skipped before the build, 603 pass / 0
+        # skipped after -- while pr-ci.yml, which builds first, ran all 603. So
+        # the deploy job was the weaker gate of the two, on the branch that
+        # actually ships. pr-ci.yml orders these the same way.
+        #
+        # Unquoted so the shell expands the glob, which means a later
+        # scripts/qcm/*.test.mjs needs no workflow edit.
+        #
+        # --test-timeout=600000 for the reason pr-ci.yml records at length:
+        # node --test has no timeout of its own, and a browser test whose
+        # chromium died or starved waits instead of failing. Without it, run
+        # 36361427886 (2026-09-28) sat 45 minutes with six browser test files
+        # idle, held a heavy runner, and ended "cancelled" by this job's
+        # timeout-minutes with no file named. 600s caps each FILE, ~4x the
+        # whole suite's green time, well inside the 60-minute job.
+        #
+        # --test-concurrency: node's default is availableParallelism()-1 files at
+        # once, each browser file its own Chromium -- 11 per job on this box. Two
+        # PR-CI jobs, a deploy job and a session's local run doing that together
+        # is what ran the WSL VM out of memory on 2026-09-28 (~1,900 Chromium
+        # processes in 73 minutes). helpers/test-concurrency.mjs keeps node's
+        # default on a quiet box and throttles by load and free memory; the
+        # box-wide cap on simultaneous Chromiums itself lives in
+        # helpers/browser-slots.mjs, inside launch(), so no job can exceed it.
+        #
+        # run-with-evidence.mjs (QQA-12a) runs this same node --test -- the flags pass
+        # through -- and also writes a record of what ran: the commit, per file its
+        # pass / fail / skip counts, and each skipped test with its reason. The next
+        # step holds that record to this commit.
+        #
+        # The summary is then read back: a skipped or todo test fails the step
+        # (the 2026-09-12 measurement above was 75 silent skips). The log goes to
+        # a file because a pipe would hide node's exit code from the step.
+        run: |
+          node scripts/qcm/run-with-evidence.mjs --out "$RUNNER_TEMP/qcm-test-evidence.json" --test-timeout=600000 --test-concurrency="$(node scripts/qcm/helpers/test-concurrency.mjs)" scripts/qcm/*.test.mjs scripts/test-verify-claims.js scripts/test-pr-ci-scope.mjs scripts/test-deploy-gate.mjs scripts/test-site-surface.mjs scripts/test-qcm-boundary.mjs > "$RUNNER_TEMP/node-test.log" 2>&1 && rc=0 || rc=$?
+          cat "$RUNNER_TEMP/node-test.log"
+          [ "$rc" -eq 0 ] || exit "$rc"
+          node scripts/ci/deploy-gate.mjs counts "$RUNNER_TEMP/node-test.log"
+
+      - name: Field Maps test evidence (every file ran, nothing skipped unlisted)
+        # A green node --test says only that nothing failed. It does not say every
+        # scripts/qcm test file ran, that no browser suite skipped itself (site-server
+        # skips them when there is no build -- the 528-of-603 run recorded above), or
+        # that the run was of this commit. check-evidence.mjs fails the job on any of
+        # those; a skip is allowed only when evidence-skip-allowlist.json names it.
+        # github.sha, not HEAD: the record must match the commit this run was for.
+        run: |
+          node scripts/qcm/check-evidence.mjs --evidence "$RUNNER_TEMP/qcm-test-evidence.json" --sha "${{ github.sha }}" --require scripts/test-verify-claims.js --require scripts/test-site-surface.mjs --require scripts/test-qcm-boundary.mjs
+
+      - name: Validate - Critical pages exist
+        # The list used to be four hardcoded filenames, so any primary page
+        # could vanish from a build
+        # with this step still green. It is derived now, from the files that
+        # decide what the site claims to hold: the nav (menus.toml), the
+        # systems ledger (data/systems.json) and static/llms.txt. The same
+        # test checks tiers and that those three files still agree.
+        run: |
+          echo "=== Checking critical pages + site contract ==="
+          venv/bin/python3 -m pytest scripts/test_systems_contract.py -v
+          venv/bin/python3 -m pytest scripts/test_driftless_demo.py -v
+          venv/bin/python3 -m pytest scripts/test_grant_platform_demo.py -v
+
+      - name: Validate - Links (internal + external)
+        run: |
+          echo "=== Checking links (internal + external) ==="
+          # Config is the tracked .htmltest.yml at the repo root, which
+          # htmltest reads by default — the same file the PR gate uses,
+          # so the two gates cannot drift apart.
+          htmltest
+
+      - name: Validate - github.com links (GitHub API)
+        # .htmltest.yml ignores github.com, whose page views are rate-limited
+        # per IP (pr-ci.yml's "Validate github.com links" step says why). The
+        # same links are checked here through the REST API, so a broken repo
+        # link still blocks the deploy.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/qcm/check-github-links.mjs --dir public
+
+      - name: Validate - Accessibility (pa11y-ci)
+        # Blocking: an accessibility regression on a covered page (/, /about/,
+        # /rigscore/ and every product page) fails the deploy. The Lighthouse gate
+        # already enforces categories:accessibility >= 0.9 on / and /about/;
+        # this WCAG2AA runner extends that to the money pages.
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ env.CHROME_PATH }}
+        run: |
+          echo "=== Accessibility audit (pa11y-ci, WCAG2AA) ==="
+          # On the self-hosted runner, 1315 can still be
+          # held by a server a cancelled run never cleaned up. Binding it
+          # blind fails to start, and pa11y then audits whatever THAT server
+          # is serving — a stale build passing 6/6 while this build is never
+          # checked. Take a port the kernel says is free, and point the audit
+          # at it. The trap means cleanup can never turn a passing audit red
+          # (`kill` on an already-dead PID used to exit the step 1).
+          PORT=$(python3 -c 'import socket;s=socket.socket();s.bind(("",0));print(s.getsockname()[1]);s.close()')
+          sed "s|http://localhost:1315|http://localhost:$PORT|g" .pa11yci.json > .pa11yci.run.json
+          python3 -m http.server "$PORT" --directory public &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true; rm -f .pa11yci.run.json' EXIT
+          sleep 2
+          STATUS=0
+          npx pa11y-ci --config .pa11yci.run.json || STATUS=$?
+          exit $STATUS
+
+      - name: Validate - HTML structure
+        run: |
+          echo "=== Validating HTML structure ==="
+          ERRORS=0
+          for file in public/index.html public/about/index.html; do
+            if [ -f "$file" ]; then
+              if ! grep -q '<title>' "$file"; then
+                echo "FAIL: $file missing <title> tag"
+                ERRORS=$((ERRORS + 1))
+              fi
+              if ! grep -qi 'meta.*description' "$file"; then
+                echo "FAIL: $file missing meta description"
+                ERRORS=$((ERRORS + 1))
+              fi
+              if grep -q '<title></title>' "$file"; then
+                echo "FAIL: $file has empty <title> tag"
+                ERRORS=$((ERRORS + 1))
+              fi
+              echo "OK: $file structure validated"
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then
+            echo "FAILED: $ERRORS HTML structure errors"
+            exit 1
+          fi
+          echo "PASSED: HTML structure valid"
+
+      - name: Validate - Image sizes
+        run: |
+          echo "=== Checking image file sizes ==="
+          ERRORS=0
+          MAX_SIZE_KB=500
+          for img in $(find public -type f \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' -o -name '*.webp' \) 2>/dev/null); do
+            SIZE_KB=$(($(stat -c%s "$img") / 1024))
+            if [ $SIZE_KB -gt $MAX_SIZE_KB ]; then
+              echo "FAIL: $img is ${SIZE_KB}KB (max: ${MAX_SIZE_KB}KB)"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          if [ $ERRORS -gt 0 ]; then
+            echo "FAILED: $ERRORS images exceed ${MAX_SIZE_KB}KB limit"
+            exit 1
+          fi
+          echo "PASSED: All images under size limit"
+
+      - name: Validate - Data payload budget
+        run: |
+          echo "=== Checking public/data payload size ==="
+          # Images fail the deploy at 500KB each, but public/data shipped
+          # ~3.9MB of JSON with no ceiling at all. Budget set with headroom
+          # above the current actual (~3930KB); a parallel workspace chunk
+          # shrinks the quiet-corners payload ~58%, after which this can be
+          # tightened.
+          #
+          # 2026-10-07: the budget is what one dashboard load can pull, not
+          # the sum of every file under public/data. The per-state place
+          # shards (quiet-corners/places-<ST>.json, 53 files, ~1.5MB) are
+          # fetched one state at a time, only once the view reaches the
+          # regional zoom, so they are measured by the largest single shard
+          # instead -- the deploy failed on their sum from d70d47f5
+          # onward while no page ever loaded more than one.
+          #
+          # 2026-10-07, again: the camera snapshot files
+          # (quiet-corners-maps/cameras/<provider>/<region>.json, 38 files,
+          # ~1.8MB) are the same shape -- main.js reads cameras/index.json
+          # once, then each region file alone, only when its bbox meets the
+          # view -- so they are measured by the largest single file too. The
+          # index is one always-loaded read and stays in the sum. Run
+          # 37654249420 (#690's eight new feeds) failed on their sum at
+          # 5472KB while no page ever pulled more than the regions in view.
+          MAX_KB=5120
+          SHARD_MAX_KB=128
+          CAMERA_FILE_MAX_KB=256
+          if [ ! -d public/data ]; then
+            echo "OK: no public/data directory"
+            exit 0
+          fi
+          ACTUAL_KB=$(find public/data -type f ! -name 'places-*.json' \
+            ! -path 'public/data/quiet-corners-maps/cameras/*/*.json' -printf '%k\n' | awk '{s+=$1} END {print s+0}')
+          echo "public/data payload (lazy place shards and camera region files excluded): ${ACTUAL_KB}KB (max: ${MAX_KB}KB)"
+          if [ "$ACTUAL_KB" -gt "$MAX_KB" ]; then
+            echo "FAIL: public/data exceeds the ${MAX_KB}KB budget"
+            exit 1
+          fi
+          BIGGEST_SHARD_KB=$(find public/data -type f -name 'places-*.json' -printf '%k\n' | sort -n | tail -1)
+          echo "largest place shard: ${BIGGEST_SHARD_KB:-0}KB (max: ${SHARD_MAX_KB}KB)"
+          if [ "${BIGGEST_SHARD_KB:-0}" -gt "$SHARD_MAX_KB" ]; then
+            echo "FAIL: a place shard exceeds the ${SHARD_MAX_KB}KB per-shard budget"
+            exit 1
+          fi
+          BIGGEST_CAMERA_KB=$(find public/data/quiet-corners-maps/cameras -mindepth 2 -type f -name '*.json' -printf '%k\n' 2>/dev/null | sort -n | tail -1)
+          echo "largest camera region file: ${BIGGEST_CAMERA_KB:-0}KB (max: ${CAMERA_FILE_MAX_KB}KB)"
+          if [ "${BIGGEST_CAMERA_KB:-0}" -gt "$CAMERA_FILE_MAX_KB" ]; then
+            echo "FAIL: a camera region file exceeds the ${CAMERA_FILE_MAX_KB}KB per-file budget"
+            exit 1
+          fi
+          echo "PASSED: data payload under budget"
+
+      - name: Validate - CSS and JS assets
+        run: |
+          echo "=== Checking CSS and JS assets ==="
+          ERRORS=0
+          shopt -s nullglob
+          for css in public/css/*.css; do
+            if [ -f "$css" ] && [ ! -s "$css" ]; then
+              echo "FAIL: Empty CSS file: $css"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          for js in public/js/*.js; do
+            if [ -f "$js" ] && [ ! -s "$js" ]; then
+              echo "FAIL: Empty JS file: $js"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done
+          shopt -u nullglob
+          if [ $ERRORS -gt 0 ]; then
+            echo "FAILED: $ERRORS asset errors"
+            exit 1
+          fi
+          echo "PASSED: Assets validated"
+
+      - name: Validate - SEO essentials
+        run: |
+          echo "=== Checking SEO essentials ==="
+          ERRORS=0
+          if [ ! -f "public/sitemap.xml" ]; then
+            echo "FAIL: sitemap.xml not found"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "OK: sitemap.xml exists"
+          fi
+          if [ ! -f "public/robots.txt" ]; then
+            echo "FAIL: robots.txt not found"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "OK: robots.txt exists"
+          fi
+          if [ -f "public/index.html" ]; then
+            if ! grep -qi 'meta.*description' public/index.html; then
+              echo "FAIL: Homepage missing meta description"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "OK: Homepage has meta description"
+            fi
+          fi
+          if [ $ERRORS -gt 0 ]; then
+            echo "FAILED: $ERRORS SEO errors"
+            exit 1
+          fi
+          echo "PASSED: SEO essentials validated"
+
+      - name: Validate - Security headers
+        # Blocking as of 2026-08-02. This step counted missing headers into
+        # $WARNINGS and then exited 0, so deleting X-Frame-Options,
+        # X-Content-Type-Options or the CSP from static/_headers deployed
+        # clean. static/_headers carries all three today, so making the count
+        # fatal is green-to-blocking rather than a new red. The pattern is
+        # anchored on the header line, so commenting a header out no longer
+        # satisfies the check either.
+        run: |
+          echo "=== Checking security headers ==="
+          if [ ! -f "public/_headers" ]; then
+            echo "FAIL: No _headers file found"
+            exit 1
+          fi
+          echo "OK: _headers file exists"
+          MISSING=0
+          for header in X-Frame-Options X-Content-Type-Options Content-Security-Policy; do
+            if grep -qE "^[[:space:]]*${header}:" public/_headers; then
+              echo "OK: $header present"
+            else
+              echo "FAIL: $header missing"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+          if [ $MISSING -gt 0 ]; then
+            echo "FAILED: $MISSING required security headers missing"
+            exit 1
+          fi
+          echo "PASSED: All required security headers present"
+
+      - name: Validate - CSP allows required CDNs and is hardened
+        run: |
+          echo "=== Checking CSP allows external resources + no unsafe-eval ==="
+          # These two used to `exit 0`, which meant the one thing this step
+          # cannot survive -- the CSP not being there -- was the one thing it
+          # passed on. Deleting the header, or _headers entirely, is a
+          # hardening regression of the worst kind, so it fails here.
+          if [ ! -f "public/_headers" ]; then
+            echo "FAIL: No _headers file - nothing to enforce a CSP on"
+            exit 1
+          fi
+          CSP=$(grep -i "Content-Security-Policy:" public/_headers | head -1 || echo "")
+          if [ -z "$CSP" ]; then
+            echo "FAIL: No CSP header found in public/_headers"
+            exit 1
+          fi
+          echo "Found CSP header"
+          ERRORS=0
+          # Required domains in the current CSP (static/_headers):
+          # - cdn.jsdelivr.net — mermaid (lazy-loaded on diagram pages)
+          # fonts.googleapis.com / fonts.gstatic.com were dropped from the CSP
+          # on 2026-07-17 (self-hosted fonts, font-src 'self'); keeping them in
+          # this list printed a bogus WARNING every deploy that trained
+          # operators to ignore the step.
+          for domain in cdn.jsdelivr.net; do
+            if echo "$CSP" | grep -q "$domain"; then
+              echo "OK: $domain allowed"
+            else
+              echo "WARNING: $domain may not be in CSP"
+            fi
+          done
+          # A6 hardening: CSP must NOT contain 'unsafe-eval' (Tailwind is
+          # compiled at build time, nothing evals at runtime).
+          if echo "$CSP" | grep -q "'unsafe-eval'"; then
+            echo "FAIL: CSP still contains 'unsafe-eval' — hardening regression"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "OK: 'unsafe-eval' absent"
+          fi
+          # A6 hardening: script-src must NOT contain 'unsafe-inline'.
+          # style-src 'unsafe-inline' is still permitted (see _headers comment).
+          SCRIPT_SRC=$(echo "$CSP" | grep -oE "script-src[^;]*" || echo "")
+          if echo "$SCRIPT_SRC" | grep -q "'unsafe-inline'"; then
+            echo "FAIL: script-src still contains 'unsafe-inline' — hardening regression"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "OK: script-src free of 'unsafe-inline'"
+          fi
+          if [ $ERRORS -gt 0 ]; then
+            echo "FAILED: $ERRORS CSP hardening regressions"
+            exit 1
+          fi
+          echo "CSP validation complete"
+
+      - name: Build summary
+        run: |
+          echo "========================================"
+          echo "   HEADLESS MODE - BUILD SUMMARY"
+          echo "========================================"
+          echo "HTML files:  $(find public -name '*.html' | wc -l)"
+          echo "CSS files:   $(find public -name '*.css' | wc -l)"
+          echo "JS files:    $(find public -name '*.js' | wc -l)"
+          echo "Images:      $(find public \( -name '*.jpg' -o -name '*.png' -o -name '*.webp' \) | wc -l)"
+          echo "Total size:  $(du -sh public | cut -f1)"
+          echo "========================================"
+
+      - name: Run Lighthouse CI (pre-deploy, against local build)
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
+        with:
+          configPath: .lighthouserc.json
+          # Artifact storage quota is finite and was hit 2026-08-28; the
+          # temporary-public-storage link below is the report.
+          uploadArtifacts: false
+          temporaryPublicStorage: true
+
+      - name: Add deployment markers
+        run: |
+          touch public/.nojekyll
+          echo "Built $(date)" > public/.github-built
+          # Per-commit marker the post-deploy wait polls for, so we probe THIS
+          # deploy rather than blindly sleeping and possibly hitting the previous
+          # one on a slow edge propagation.
+          echo "${{ github.sha }}" > public/deploy-marker.txt
+          printf '%s\n' 'name = "headlessmode-production"' 'pages_build_output_dir = "."' > public/wrangler.toml
+
+      - name: Deploy to production branch
+        if: github.ref == 'refs/heads/master'
+        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: production
+          force_orphan: true
+          commit_message: "chore(deploy): publish"
+
+      - name: Reclaim gh-pages staging dirs
+        # peaceiris/actions-gh-pages clones the publish branch into
+        # $HOME/actions_github_pages_<epoch> and never removes it. The runners
+        # share one user account, so every deploy strands ~11 MB there for good
+        # (three dirs, 33 MB, measured on this box 2026-09-13). The gomoveshift
+        # site already cleans up after itself; this is the same step.
+        #
+        # It CANNOT fail the deploy. It runs after the publish, so a failure here
+        # would mark an already-published deploy red and skip the steps below --
+        # which is what happened to gomoveshift on 2026-07-31, when the remove hit
+        # a half-written dir left by a cancelled run. A stranded directory is not
+        # an emergency: _ops/host-cleanup.sh section 5 sweeps this exact glob on
+        # a timer and owns the retention rule. Warn, count, finish green.
+        if: always()
+        run: |
+          set -uo pipefail
+          if [ -z "${HOME:-}" ] || [ ! -d "$HOME" ]; then
+            echo "HOME is unset or not a directory - nothing to clean."
+            exit 0
+          fi
+          shopt -s nullglob
+          removed=0
+          stranded=0
+          for dir in "$HOME"/actions_github_pages_*; do
+            name=${dir##*/}
+            # Only a real directory sitting directly in $HOME, named exactly that.
+            [ "$dir" = "$HOME/$name" ] || continue
+            [ -L "$dir" ] && continue
+            [ -d "$dir" ] || continue
+            size=$(du -sm "$dir" 2>/dev/null | cut -f1) || size="?"
+            echo "Removing $dir (${size} MB)"
+            if rm -rf -- "$dir" 2>&1; then
+              removed=$((removed + 1))
+            else
+              echo "::warning::Could not fully remove $dir - leaving it for _ops/host-cleanup.sh"
+              stranded=$((stranded + 1))
+            fi
+          done
+          echo "Reclaimed $removed gh-pages staging director(ies) from \$HOME; $stranded left behind."
+          exit 0
+
+      - name: Wait for Cloudflare deployment
+        if: github.ref == 'refs/heads/master'
+        run: |
+          # Poll the live deploy marker instead of a blind sleep: return as soon
+          # as Cloudflare serves THIS commit, so the post-deploy audit below can
+          # never probe the previous deploy. Bounded, and FATAL on timeout: a
+          # deploy that never serves its own commit is a failed deploy, not a
+          # warning — warn-and-proceed let a stale edge pass green while the
+          # post-deploy audit probed the previous deploy.
+          EXPECTED='${{ github.sha }}'
+          URL="https://headlessmode.com/deploy-marker.txt"
+          echo "Waiting for Cloudflare to serve commit ${EXPECTED:0:8}..."
+          for i in $(seq 1 30); do
+            LIVE=$(curl -fsSL --max-time 10 "$URL" 2>/dev/null | tr -d '[:space:]')
+            if [ "$LIVE" = "$EXPECTED" ]; then
+              echo "Deploy marker live after ~$((i * 10))s — Cloudflare is serving this commit."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Deploy marker not live after 300s — https://headlessmode.com is not serving commit ${EXPECTED:0:8}. Treating this as a failed deploy."
+          exit 1
+
+      - name: Post-deploy browser smoke (Quiet Corners)
+        if: github.ref == 'refs/heads/master'
+        timeout-minutes: 25
+        run: |
+          # Read-only: drives headless Chromium against the live site after the marker
+          # wait above, so it checks THIS commit (--expect-sha) and not the last deploy.
+          # Seven checks: marker, pages, csp, search, layers, roads, inspection
+          # (scripts/qcm/README.md). An outside map service erroring is reported, not
+          # fatal. One retry after 60s absorbs an edge-cache or network blip; a real
+          # break fails both runs, fails the job and opens the "Deployment failed" issue.
+          smoke() {
+            node scripts/qcm/live-smoke.mjs --base-url https://headlessmode.com \
+              --expect-sha "${{ github.sha }}" --tolerate-service-errors --out "$RUNNER_TEMP/live-smoke-$1"
+          }
+          if smoke 1; then exit 0; fi
+          echo "::warning::Production smoke check failed once; retrying in 60s"
+          sleep 60
+          smoke 2
+
+      - name: Post-Deploy Security Audit
+        if: github.ref == 'refs/heads/master'
+        run: |
+          chmod +x .github/scripts/security-audit.sh
+          # Exit 0=pass, 1=critical (fail build), 2=warnings only (pass build)
+          .github/scripts/security-audit.sh https://headlessmode.com || {
+            exit_code=$?
+            if [ "$exit_code" -eq 2 ]; then
+              echo "::warning::Security audit has warnings (non-blocking)"
+              exit 0
+            else
+              exit "$exit_code"
+            fi
+          }
+
+      - name: Create issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Stable title so repeated deploy failures dedupe onto ONE issue.
+          # (Timestamped titles previously opened a fresh issue every run.)
+          TITLE="Deployment failed"
+          BODY="Commit: \`${{ github.sha }}\`
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          Time: $(date +'%Y-%m-%d %H:%M')"
+          EXISTING=$(gh issue list --state open --search "$TITLE in:title" \
+            --limit 100 --json number,title \
+            --jq "map(select(.title == \"$TITLE\")) | .[0].number // empty")
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY" || echo "Could not comment on #$EXISTING"
+          else
+            gh issue create --title "$TITLE" --body "$BODY" || echo "Could not create issue"
+          fi

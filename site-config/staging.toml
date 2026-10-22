@@ -1,0 +1,20 @@
+# Staging environment configuration
+# This file extends site-config/_default/hugo.toml.
+#
+# baseURL: UNVERIFIED. This assumes Cloudflare Pages' standard branch-alias
+# convention (<branch>.<project>.pages.dev) applies to whatever Cloudflare
+# Pages project this repo is connected to — I could not confirm the project
+# slug or that branch-preview deploys are enabled from this checkout. The
+# build is pushed to the `deploy/staging` branch (see .github/workflows/
+# deploy-staging.yml), and Cloudflare derives the alias from the branch name
+# with `/` rewritten, so the real alias is probably NOT `staging.` — update
+# once the actual staging preview URL is known.
+baseURL = "https://staging.headlessmode.pages.dev/"
+
+# relativeURLs/canonifyURLs are left at _default/hugo.toml's values
+# (false/false) — that file already emits absolute URLs from baseURL, so
+# overriding canonifyURLs here is not needed the way gomoveshiftsite's
+# staging.toml needed it.
+
+[minify]
+  minifyOutput = true

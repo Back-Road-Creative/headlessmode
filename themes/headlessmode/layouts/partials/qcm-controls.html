@@ -1,0 +1,86 @@
+{{/* The Field Maps builder's controls, and the print-proof caveat they oblige.
+     The caveat is HERE, not on the host page, because the promise it qualifies is
+     made by these controls — "Letter", "1:24,000", "0.5 in overlap" are physical
+     claims about paper. In the partial, hosting the builder without it is not
+     possible; the old gate merely asked whether a page LINKED to the builder. */}}
+{{- $proof := index (index site.Data "quiet-corners-maps") "print-proof" -}}
+{{- if ne $proof.status "passed" }}
+<p class="qcm-proof-note" role="note"><strong>Not yet verified on paper.</strong> These sheets are drawn to true scale by construction, but the physical proof — printing a set and measuring the scale bar, the sheet and the seams with a ruler — has not been recorded as passed. Check the scale bar against a ruler before you rely on a distance.</p>
+{{- end }}
+<div class="qcm-controls" role="group" aria-label="Map setup">
+            <fieldset><legend>Area</legend>
+                <button type="button" id="qcm-draw" aria-pressed="false">Draw a rectangle</button>
+                <label for="qcm-quad-name">Quadrangle name</label> <input type="search" id="qcm-quad-name" autocomplete="off" placeholder="e.g. Rainbow Springs">
+                <button type="button" id="qcm-quad">Find a quadrangle</button>
+                <ul id="qcm-quad-results" class="qcm-results" role="listbox" aria-label="Matching quadrangles" hidden></ul>
+                <ul id="qcm-quad-list" class="qcm-quad-list" aria-label="Selected quadrangles" hidden></ul>
+                <p id="qcm-quad-hint" class="qcm-hint" hidden>Typing corners replaces the quadrangles with a rectangle.</p>
+                <label>Min lat <input type="number" id="qcm-min-lat" step="0.001" min="24" max="50"></label>
+                <label>Max lat <input type="number" id="qcm-max-lat" step="0.001" min="24" max="50"></label>
+                <label>Min lon <input type="number" id="qcm-min-lon" step="0.001" min="-125" max="-66"></label>
+                <label>Max lon <input type="number" id="qcm-max-lon" step="0.001" min="-125" max="-66"></label>
+                <label for="qcm-title">Map title</label> <input type="text" id="qcm-title" maxlength="80" value="Field maps">
+                {{/* Moved here from the builder's old page: main.js wires every control
+                     by id with no guard, so a control it wires lives here or nowhere. */}}
+                <p class="qcm-hint">Example area for the print proof: Standing Indian / Wayah Bald, North Carolina (dashed, not selected). <button type="button" id="qcm-use-example">Use this area</button></p>
+            </fieldset>
+            <fieldset><legend>Scale</legend>
+                <label for="qcm-scale">Map scale</label>
+                <select id="qcm-scale"><option value="24000">1:24,000</option><option value="48000">1:48,000</option></select>
+            </fieldset>
+            <dl id="qcm-estimate" class="qcm-estimate">
+                <dt>Page count</dt><dd data-field="pages">&mdash;</dd>
+                <dt>Ground size</dt><dd data-field="ground">&mdash;</dd>
+                <dt>Estimated download</dt><dd data-field="download">&mdash;</dd>
+            </dl>
+            <button type="button" id="qcm-check" disabled>Check sources</button>
+            <p id="qcm-sources" class="qcm-hint"></p>
+            <button type="button" id="qcm-build" class="qcm-build" disabled>Build PDF on this device</button>
+            <button type="button" id="qcm-cancel" hidden>Cancel</button>
+            <progress id="qcm-progress" hidden></progress>
+            <a id="qcm-download" class="qcm-build" hidden>Download the PDF</a>
+            <p class="qcm-hint">Print at Actual size / 100%; disable Fit or Shrink.</p>
+            {{/* QUX-03b-iii: everything below is a paper recipe or an extra sheet, not
+                 the build flow itself — Area, Scale, the estimate and Build/Download now
+                 read top to bottom with nothing between them. Below 1024px the open panel
+                 is capped at 50vh and scrolls inside itself (audit A11); a reader who has
+                 to scroll past Paper/Overlap/Grid/Quality to reach Build met the recipe
+                 before the button it feeds. Closed by default: main.js wires every control
+                 inside by id with no guard, so nesting them here does not touch wiring. */}}
+            <details class="qcm-print-options">
+                <summary>Options</summary>
+                <fieldset><legend>Paper</legend>
+                    <p class="qcm-hint">Letter</p>
+                    <label><input type="radio" name="qcm-orientation" value="portrait" checked> Portrait</label>
+                    <label><input type="radio" name="qcm-orientation" value="landscape"> Landscape</label>
+                </fieldset>
+                <fieldset><legend>Overlap</legend>
+                    <label for="qcm-overlap">Sheet overlap</label>
+                    <select id="qcm-overlap"><option value="0.25">0.25 in</option><option value="0.5" selected>0.5 in</option><option value="0.75">0.75 in</option></select>
+                </fieldset>
+                <fieldset><legend>Grid</legend>
+                    <label><input type="radio" name="qcm-grid" value="utm1km" checked> UTM 1 km</label>
+                    <label><input type="radio" name="qcm-grid" value="none"> None</label>
+                </fieldset>
+                {{/* Layers and Map key used to sit here, between Grid and Quality.
+                     They are on the map now — partials/qcm-map-layers.html — because
+                     they change the screen rather than the paper, and the reader has
+                     to be able to see the map while using them (audit F04). */}}
+                <fieldset><legend>Quality</legend>
+                    <label><input type="radio" name="qcm-dpi" value="300" checked> 300 dpi</label>
+                    <label><input type="radio" name="qcm-dpi" value="200"> 200 dpi</label>
+                </fieldset>
+                {{/* QUX-04b: moved here from the Map key fieldset on the map (Layers panel) —
+                     this is a page for the printed PDF, like the build/calibration buttons
+                     either side of it, not a screen setting. Same ids; main.js wires both by
+                     id with no guard, so the control's location moving does not touch how it
+                     is wired. Built from the same derivation as the on-map key (key-sheet.js),
+                     so it needs no set to be built first. */}}
+                <button type="button" id="qcm-key-sheet">Print the key</button>
+                <a id="qcm-key-sheet-download" class="qcm-build" hidden>Download the map key</a>
+                <p class="qcm-hint">One or two pages: every symbol the chosen layers can draw, with the notices they oblige.</p>
+                <button type="button" id="qcm-calibrate">Calibration sheet</button>
+                <a id="qcm-calibration-download" class="qcm-build" hidden>Download the calibration sheet</a>
+                <p class="qcm-hint">One page, once per printer: measures your printer's scale error and its true unprintable margin.</p>
+            </details>
+        </div>

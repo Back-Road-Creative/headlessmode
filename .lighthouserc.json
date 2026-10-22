@@ -1,0 +1,110 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "./public",
+      "_url_comment": "Every page the nav offers plus every product page. The list once stopped at five and left several pages ungated, so a product could ship with a failing accessibility or SEO score. A URL added here must already build on the branch that adds it: this same file is what .github/workflows/pr-ci.yml feeds Lighthouse on EVERY pull request, and `lhci collect` exits 1 on a 404, so listing a page before it exists reds the whole wave. Add the URL in the PR that adds the page, and DELETE it in the PR that removes the page \u2014 a retired page left here reds the run just as hard as one that never existed.",
+      "url": [
+        "http://localhost/index.html",
+        "http://localhost/about/index.html",
+        "http://localhost/rigscore/index.html",
+        "http://localhost/quiet-corners/index.html",
+        "http://localhost/quiet-corners/maps/index.html",
+        "http://localhost/contact/index.html",
+        "http://localhost/privacy/index.html",
+        "http://localhost/driftless/index.html",
+        "http://localhost/demo/driftless/index.html",
+        "http://localhost/demo/driftless/map.html",
+        "http://localhost/demo/driftless/process-map.html",
+        "http://localhost/demo/driftless/projects-1-flow.html",
+        "http://localhost/demo/driftless/projects-1-gantt.html",
+        "http://localhost/demo/driftless/org-heatmap.html",
+        "http://localhost/demo/driftless/projects-1-assist-cost.html",
+        "http://localhost/demo/driftless/methods.html",
+        "http://localhost/demo/driftless/pmbok-proof.html",
+        "http://localhost/demo/driftless/pmbok.html",
+        "http://localhost/demo/driftless/pmbok-4.1.html",
+        "http://localhost/demo/driftless/techniques.html",
+        "http://localhost/demo/driftless/techniques-earned-value-analysis.html",
+        "http://localhost/demo/driftless/artifacts.html",
+        "http://localhost/demo/driftless/artifacts-project-charter.html",
+        "http://localhost/demo/driftless/glossary.html",
+        "http://localhost/demo/driftless/methods-kanban.html",
+        "http://localhost/grant-platform/index.html",
+        "http://localhost/redactcam/index.html",
+        "http://localhost/sun-track/index.html",
+        "http://localhost/keycut/index.html",
+        "http://localhost/agent-audit/index.html",
+        "http://localhost/claude-batch-runner/index.html",
+        "http://localhost/bot-battle-station/index.html",
+        "http://localhost/pycube-lut/index.html"
+      ],
+      "_output_comment": "No setting in this file can move lhci's output out of the repo \u2014 .gitignore is the mitigation, not a stopgap someone should keep trying to replace. Checked in @lhci/cli@0.15.1 rather than assumed: reports go to a module constant, path.join(process.cwd(), '.lighthouseci') in @lhci/utils/src/saved-reports.js, and collect.js calls saveLHR(lhr) with no directory argument; upload.outputDir is documented '[filesystem only]' and this config uploads to temporary-public-storage. Chrome's profile directory is equally out of reach: lighthouse's getDebuggableChrome (cli/run.js) hands chrome-launcher only port, ignoreDefaultFlags, chromeFlags and logLevel, and chrome-launcher creates its own temp profile before Chrome reads a single flag \u2014 under WSL that lands in the repo root, which is what .gitignore's backslash and undefined: patterns catch. Adding --user-data-dir, --crash-dumps-dir and --disk-cache-dir to chromeFlags below produces byte-identical litter and never creates the /tmp target it names, so do not add them back.",
+      "numberOfRuns": 1,
+      "_chromeflags_comment": "chromeFlags is a space-separated STRING, never a JSON array. @lhci/cli@0.15.1's collect/node-runner.js:47-49 does `let s = chromeFlags || ''; s += ' --headless=new'`, and `+=` stringifies an array by comma-join, so the array form reached Chrome as one bogus switch, `--no-sandbox,--headless,--disable-gpu`. Chrome ignores an unknown switch silently: running that single token alone dies with `Missing X server or $DISPLAY`, proving --headless \u2014 and with it --no-sandbox and --disable-gpu \u2014 never took effect. lighthouse@12.6.1's cli/run.js:33-63 re-splits the string with yargs-parser before handing it to chrome-launcher, so the string form delivers all three. --headless is kept here for intent even though lhci appends its own --headless=new; yargs merges the pair into --headless=true,new, which Chrome resolves to new headless (verified launching).",
+      "settings": {
+        "preset": "desktop",
+        "chromeFlags": "--no-sandbox --headless --disable-gpu"
+      }
+    },
+    "assert": {
+      "_matrix_comment": "Two rows. Site pages keep every category. The generated Driftless demo bundle (static/demo/driftless/, emitted by svc-driftless bin/driftless-showcase.py with <meta name=\"robots\" content=\"noindex, nofollow\"> on purpose, line ~125) can never pass the SEO category: Lighthouse's is-crawlable audit fails by design and drags the score to ~0.54 (PR #345 CI, 2026-09-04). SEO is therefore not asserted there; accessibility stays an error at the same floor as the rest of the site, which is what the demo gate exists for.",
+      "assertMatrix": [
+        {
+          "matchingUrlPattern": "^(?!.*/demo/driftless/).*$",
+          "assertions": {
+            "categories:performance": [
+              "warn",
+              {
+                "minScore": 0.7
+              }
+            ],
+            "categories:accessibility": [
+              "error",
+              {
+                "minScore": 0.9
+              }
+            ],
+            "categories:best-practices": [
+              "warn",
+              {
+                "minScore": 0.8
+              }
+            ],
+            "categories:seo": [
+              "error",
+              {
+                "minScore": 0.9
+              }
+            ]
+          }
+        },
+        {
+          "matchingUrlPattern": ".*/demo/driftless/.*",
+          "assertions": {
+            "categories:performance": [
+              "warn",
+              {
+                "minScore": 0.7
+              }
+            ],
+            "categories:accessibility": [
+              "error",
+              {
+                "minScore": 0.9
+              }
+            ],
+            "categories:best-practices": [
+              "warn",
+              {
+                "minScore": 0.8
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

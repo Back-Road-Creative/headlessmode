@@ -1,0 +1,482 @@
+{{ define "main" }}
+{{- /* ONE header on the tool page, not a product-sheet band and then a second
+       Quiet Corners header under it. Stacked, those two put the map 593px down
+       a 390x844 phone (audit A10): the reader opens a map tool and can see
+       251px of map. The identity the band carried — chip, name and the one-line,
+       all read from data/systems.json — moves into the app frame's own header
+       below, which already held the way back to the site and the link to the
+       methodology. Quiet Corners has no separate artifact to acquire (the
+       dashboard IS the public product), so nothing else on the band was doing
+       work here. Every other system page still renders partials/system-sheet.html
+       through _default/single.html. */ -}}
+{{- $sys := "" -}}
+{{- range site.Data.systems.systems }}{{ if eq .link $.RelPermalink }}{{ $sys = . }}{{ end }}{{ end -}}
+<div id="dashboard" class="max-w-6xl mx-auto px-6 py-12" style="color: var(--text-secondary);">
+    <article class="w-full flex flex-col text-sm themed-[dark]">
+        <!-- Top App Navbar -->
+        <header class="qc-app-header flex justify-between items-center px-6 py-4 bg-[#0a0a14] border-b border-white/10 shadow-md z-50 shrink-0">
+            <div class="qc-app-identity">
+                {{/* The page's one h1. It was a <p> while a separate product-sheet
+                     band above carried the heading; that band is gone, so the app
+                     frame's wordmark is the heading now. The chip and the one-line
+                     beside and under it come from the systems ledger, never typed
+                     here. */}}
+                <div class="qc-app-titlerow">
+                    <h1 class="qc-app-name">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"></path></svg>
+                        {{ with $sys }}{{ .name }}{{ else }}Quiet Corners{{ end }}
+                    </h1>
+                    {{- with $sys }}{{ partial "system-chip.html" . }}{{ end }}
+                </div>
+                {{- with $sys }}
+                <p class="qc-app-line">{{ .blurb }}</p>
+                {{- end }}
+                <div id="qc-meta" class="text-xs text-gray-300 uppercase tracking-wider"></div>
+            </div>
+            
+            <nav class="qc-app-nav" aria-label="Quiet Corners">
+                <a href="/" class="qc-site-return">&larr; Headless Mode</a>
+                <a href="#documentation" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-md border border-white/10 transition-colors flex items-center gap-2 font-mono text-xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Methodology &amp; Data
+                </a>
+            </nav>
+        </header>
+
+        <!-- Main Dashboard Area (div, not <main> — baseof already emits the page's <main id="main-content">) -->
+        <div class="qc-dashboard-main flex flex-col lg:flex-row relative bg-[#0d0d1a]">
+
+            <!-- Data load failure banner (hidden until a load fails) -->
+            <div id="qc-error" class="qc-error" role="alert" style="display:none;">
+                <span id="qc-error-msg"></span>
+                <button id="qc-error-retry" type="button">Retry</button>
+            </div>
+
+            <!-- Leaflet Map (Takes up full space behind or beside panels).
+                 leaflet.css loads from head.html so the map never paints unstyled. -->
+            <div class="qc-map-container flex-1 relative min-w-0" id="qc-map-container">
+            {{/* The four map panels, ahead of #qc-map in the markup so Tab reaches
+                 them before the map, in the order they read: Explore, Conditions,
+                 Layers, Print. At >=1024px this is the dock -- column 1 of the
+                 #qc-map-container grid, with the map in column 2, so no panel is ever
+                 painted over the map (quiet-corners-maps.css). Below 1024px the four
+                 share one bottom sheet that resizes the map instead of covering it or
+                 growing the page under it; a flex `order` puts it back under the map
+                 there (the phone block in quiet-corners.css). The grip/handle/size
+                 button are phone-only chrome, hidden by their own `hidden` attribute
+                 until the phone media query un-hides them; wired in quiet-corners.js's
+                 wirePanels(). */}}
+            <div id="qc-sheet" class="qc-sheet" data-sheet="collapsed" role="group" aria-label="Map panels">
+            <div class="qc-sheet-grip" hidden>
+                <button type="button" class="qc-sheet-handle" aria-label="Resize the panel"><span aria-hidden="true"></span></button>
+                <button type="button" class="qc-sheet-size" hidden>Expand</button>
+            </div>
+            <!-- Explore: the filters, the county/candidate tables and the sort
+                 controls (QUX-03b-i). First in the dock because it is where a visit
+                 starts; the dock keeps one width while it is open and the tables
+                 are cards inside it, and the map column keeps at least 480px
+                 (quiet-corners-maps.css). -->
+            <details class="qcm-panel qcm-panel-explore" id="qc-explore-panel">
+                <summary class="qcm-panel-summary" id="qc-explore-summary">Explore &middot; Compare counties</summary>
+                <div class="qcm-panel-header">
+                    <button type="button" class="qcm-panel-back" hidden>Back</button>
+                    <button type="button" class="qcm-panel-close">Close</button>
+                </div>
+                {{/* No `space-y-3`: .qc-controls is a column flex container and
+                     owns the gap between its children. Both would have applied. */}}
+                <div class="qc-controls" id="qc-controls">
+                    <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-2">
+                        <span class="font-mono font-bold text-gray-300 text-xs tracking-wider uppercase">Filters</span>
+                        <span id="qc-count" class="font-mono text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded"></span>
+                    </div>
+
+                    {{/* "Use my location"'s visible privacy copy and its include-in-link
+                         confirmation (B3, plan §4.3/§7.5): inside the filter panel, so it
+                         costs the map's own overlay row nothing and cannot paint over a
+                         panel below it on a phone. NOT a direct child of the two-column
+                         row: there it became a third flex column at >=1024px and drove
+                         the map to its 480px floor (478px measured, CI on #566). The checkbox stays
+                         hidden until quiet-corners.js shows it (once centerSource is
+                         'location'); its state gates Share view's includeLocation. */}}
+                    <p id="qc-locate-privacy" class="qc-locate-privacy">One click finds your location once — this never watches in the background. Nothing is stored. Your location is added to a shared link only if you tick "Include my location" below, and map tiles are requested only for the area shown.</p>
+                    <label id="qc-locate-include-wrap" class="qc-locate-include-wrap" hidden>
+                        <input type="checkbox" id="qc-locate-include">
+                        Include my location in the link
+                    </label>
+
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                        <div class="filter-group col-span-2 sm:col-span-1" id="qc-remoteness-group">
+                            <label class="filter-label qc-tooltip" for="qc-remoteness">
+                                Remoteness: miles to a city <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">Great-circle distance from county centroid to nearest city &gt;25,000 pop. [Source: US Census Place Gazetteer 2024]</span>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="range" id="qc-remoteness" min="0" max="250" value="75" class="qc-slider flex-1">
+                                <span id="qc-remoteness-val" class="qc-slider-val w-10 text-right font-mono text-emerald-400">75+</span>
+                            </div>
+                        </div>
+                        <div class="filter-group col-span-2 sm:col-span-1" id="qc-stability-group">
+                            <label class="filter-label qc-tooltip" for="qc-stability">
+                                Stability <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">Bessel-corrected coefficient of variation &amp; linear regression slope across 5 years of population estimates. [Source: US Census PEP V2024]</span>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="range" id="qc-stability" min="0" max="100" value="60" class="qc-slider flex-1">
+                                <span id="qc-stability-val" class="qc-slider-val w-8 text-right font-mono text-emerald-400">60+</span>
+                            </div>
+                        </div>
+                        <div class="filter-group col-span-2 sm:col-span-1 qc-sprawl-control" id="qc-sprawl-group" style="display:none;">
+                            <label class="filter-label qc-tooltip" for="qc-sprawl">
+                                Sprawl risk <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">5-factor index: interstate proximity (30%), building permits (25%), state migration (20%), metro growth (15%), recreation/retirement type (10%). A county missing a factor is scored over the ones it has, with the remaining weights renormalized. Lower is better. The trust panel lists how many counties each factor scored in this run. [Source: US Census ACS 1-Year / Building Permits Survey / PEP]</span>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="range" id="qc-sprawl" min="0" max="100" value="50" class="qc-slider flex-1">
+                                <span id="qc-sprawl-val" class="qc-slider-val w-8 text-right font-mono text-emerald-400">&le;50</span>
+                            </div>
+                        </div>
+                        <div class="filter-group col-span-2 sm:col-span-1" id="qc-affordability-group">
+                            <label class="filter-label qc-tooltip" for="qc-affordability">
+                                Affordability <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">Affordability score (higher is better). [Source: US Census ACS 5-Year Estimates]</span>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="range" id="qc-affordability" min="0" max="100" value="0" class="qc-slider flex-1">
+                                <span id="qc-affordability-val" class="qc-slider-val w-8 text-right font-mono text-emerald-400">0+</span>
+                            </div>
+                        </div>
+                        <div class="filter-group col-span-2 sm:col-span-1">
+                            <label class="filter-label qc-tooltip" for="qc-overall">
+                                Overall <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">Quietness 55% + Affordability 45%, where Quietness is Stability 40%, Remoteness 30% and inverted Sprawl risk 30%. Both levels renormalize over the inputs a county actually has; a county with nothing scoreable gets no score rather than a zero.</span>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="range" id="qc-overall" min="0" max="100" value="0" class="qc-slider flex-1">
+                                <span id="qc-overall-val" class="qc-slider-val w-8 text-right font-mono text-emerald-400">0+</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-2 pt-3 border-t border-white/10">
+                        <div class="filter-group flex flex-col items-start gap-1">
+                            <span class="filter-label qc-tooltip">
+                                Population <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">Total resident population. [Source: US Census PEP V2024]</span>
+                            </span>
+                            <div class="flex items-center gap-2 w-full">
+                                <input type="number" id="qc-pop-min" min="0" value="" placeholder="Min" aria-label="Minimum population" class="qc-num-input w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-white placeholder-gray-600 focus:border-emerald-500 outline-none">
+                                <span class="text-gray-600">-</span>
+                                <input type="number" id="qc-pop-max" min="0" value="" placeholder="Max" aria-label="Maximum population" class="qc-num-input w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-white placeholder-gray-600 focus:border-emerald-500 outline-none">
+                            </div>
+                        </div>
+                        <div class="filter-group flex flex-col items-start gap-1">
+                            <label class="filter-label qc-tooltip" for="qc-state">
+                                State <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">US State or equivalent entity. Selecting a state filters the county rows; it does not move the map — use Zoom to state for that. [Source: US Census Bureau]</span>
+                            </label>
+                            <select id="qc-state" class="filter-select w-full bg-black/40 border border-white/10 rounded px-2 py-1.5 text-white focus:border-emerald-500 outline-none appearance-none cursor-pointer">
+                                <option value="">Any state</option>
+                            </select>
+                            <button type="button" id="qc-zoom-state" class="qc-num-input w-full px-2 py-1.5 text-white border border-white/10 rounded hover:border-emerald-500">Zoom to state</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-2 pt-3 border-t border-white/10">
+                        <div class="filter-group flex flex-col items-start gap-1" id="qc-color-by-group" hidden>
+                            <label class="filter-label qc-tooltip" for="qc-color-by">
+                                Color the map by <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">Which measure the county shading and the map key show. The table's sort is separate. [Source: Quiet Corners scoring]</span>
+                            </label>
+                            <select id="qc-color-by" class="filter-select w-full bg-black/40 border border-white/10 rounded px-2 py-1.5 text-white focus:border-emerald-500 outline-none appearance-none cursor-pointer"></select>
+                        </div>
+                        {{/* Score-owned controls, shown only while County score is the chosen
+                             surface under Layers (main.js's one-dominant-surface radio group) --
+                             off by default, alongside the score wash and its legend content. */}}
+                        <div class="filter-group flex flex-col items-start gap-1" id="qc-score-controls" hidden>
+                            <label class="filter-label qc-tooltip" for="qc-score-opacity">
+                                County score wash strength <span class="qc-tooltip-icon">[i]</span>
+                                <span class="qc-tooltip-text">How strongly the ranking colors the map. Stays put across zoom once you set it — it no longer resets when the map crosses into field-map zoom.</span>
+                            </label>
+                            <div class="flex items-center gap-2 w-full">
+                                <input type="range" id="qc-score-opacity" min="0.1" max="1" step="0.05" value="1" class="qc-slider flex-1">
+                            </div>
+                            <p class="qc-tonight-note" id="qc-score-vintage"></p>
+                        </div>
+                    </div>
+
+                    <p class="qc-sort-note" id="qc-cue-note"></p>
+                    {{/* Which column this table is ranked by, and which way. The
+                         accent colour on the active heading is a colour-only cue;
+                         this sentence and the caret beside the heading are what a
+                         reader who cannot separate the two has (audit F19). */}}
+                    <p class="qc-sort-note" id="qc-sort-note" role="status" aria-live="polite"></p>
+                    {{/* How a reader re-ranks the table when the column headings are
+                         not there to click. In the dock and on a phone each row is a comparison card
+                         and the header row is display:none, which took the only sort
+                         control off the page and out of the tab order with it. Shown
+                         at every width: hiding it above 1024px would need a media
+                         query, and a labelled picker is a better keyboard path than a
+                         row of role="button" spans. The options are filled by
+                         fillSortPicker() from this table's own header row, so a column
+                         renamed there cannot leave a stale name here, and both
+                         controls hand the work to the heading's own click handler. */}}
+                    <div class="filter-group">
+                        <label class="filter-label" for="qc-sort-select">Sort the counties by</label>
+                        <div class="flex items-center gap-2">
+                            <select id="qc-sort-select" data-sort-control="qc-table-header" class="filter-select flex-1 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-white focus:border-emerald-500 outline-none appearance-none cursor-pointer"></select>
+                            <button type="button" data-sort-dir="qc-table-header" aria-label="Reverse the order of the county table" class="filter-select shrink-0 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-white focus:border-emerald-500 outline-none">Reverse</button>
+                        </div>
+                    </div>
+                    <div class="timeline-log">
+                        <div class="qc-log-header" id="qc-table-header">
+                            <span data-sort="name" class="qc-tooltip" tabindex="0" role="button">County <span class="qc-tooltip-text">County Name</span></span>
+                            <span data-sort="state" class="qc-tooltip" tabindex="0" role="button">St <span class="qc-tooltip-text">US State Abbreviation [Source: US Census]</span></span>
+                            <span data-sort="population" class="qc-tooltip" tabindex="0" role="button">Pop <span class="qc-tooltip-text">Total resident population [Source: US Census PEP V2024]</span></span>
+                            <span data-sort="overall_score" class="qc-tooltip" tabindex="0" role="button">Overall <span class="qc-tooltip-text">Weighted composite score of all metrics</span></span>
+                            <span data-sort="stability_score" class="qc-tooltip" tabindex="0" role="button">Stability <span class="qc-tooltip-text">Stability score (higher is better) [Source: US Census PEP]</span></span>
+                            <span data-sort="affordability_score" class="qc-tooltip" tabindex="0" role="button">Affordability <span class="qc-tooltip-text">Affordability score (higher is better) [Source: US Census ACS]</span></span>
+                            <span data-sort="distance_to_metro_mi" class="qc-tooltip" tabindex="0" role="button">Remote <span class="qc-tooltip-text">Remoteness in miles (higher is better) [Source: US Census Gazetteer]</span></span>
+                            <span data-sort="sprawl_risk" class="qc-sprawl-col qc-tooltip" style="display:none;" tabindex="0" role="button">Sprawl <span class="qc-tooltip-text">Sprawl risk index (lower is better) [Source: US Census ACS / Building Permits]</span></span>
+                        </div>
+                        <div id="qc-table-body"></div>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="qc-pagination" id="qc-pagination"></div>
+
+                <!-- Candidate Towns -->
+                <div class="qc-candidates-section" id="qc-candidates-section" style="display:none;">
+                    <h3 style="color: var(--accent-500); font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem;">Candidate Towns (pop 1K-3K)</h3>
+                    <p class="text-xs" style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                        Small incorporated places within qualifying counties. Scores inherited from parent county.
+                    </p>
+                    {{/* How many matched, out of how many exist — written by
+                         renderCandidatesStatus on every filter change, and the only place
+                         that says an empty table is a strict filter rather than empty
+                         country (audit F06). */}}
+                    <p class="qc-candidates-status text-xs" id="qc-candidates-status" role="status" aria-live="polite"></p>
+                    <p class="qc-sort-note" id="qc-candidates-sort-note" role="status" aria-live="polite"></p>
+                    {{/* The same picker for the towns table — see the note above it. */}}
+                    <div class="filter-group">
+                        <label class="filter-label" for="qc-candidates-sort-select">Sort the towns by</label>
+                        <div class="flex items-center gap-2">
+                            <select id="qc-candidates-sort-select" data-sort-control="qc-candidates-header" class="filter-select flex-1 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-white focus:border-emerald-500 outline-none appearance-none cursor-pointer"></select>
+                            <button type="button" data-sort-dir="qc-candidates-header" aria-label="Reverse the order of the candidate towns table" class="filter-select shrink-0 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-white focus:border-emerald-500 outline-none">Reverse</button>
+                        </div>
+                    </div>
+                    <div class="timeline-log">
+                        <div class="qc-candidates-header" id="qc-candidates-header">
+                            <span data-sort="name" class="qc-tooltip" tabindex="0" role="button">Town <span class="qc-tooltip-text">Incorporated places pop. 1K-3K [Source: US Census Subcounty Estimates SUB-EST2024]</span></span>
+                            <span data-sort="state" class="qc-tooltip" tabindex="0" role="button">St <span class="qc-tooltip-text">State Abbreviation</span></span>
+                            <span data-sort="population" class="qc-tooltip" tabindex="0" role="button">Pop <span class="qc-tooltip-text">Town population [Source: US Census SUB-EST2024]</span></span>
+                            <span data-sort="county_name" class="qc-tooltip" tabindex="0" role="button">County <span class="qc-tooltip-text">Parent County</span></span>
+                            <span data-sort="overall_score" class="qc-tooltip" tabindex="0" role="button">Overall <span class="qc-tooltip-text">Inherited overall score from parent county</span></span>
+                            <span data-sort="stability_score" class="qc-tooltip" tabindex="0" role="button">Stability <span class="qc-tooltip-text">Inherited stability score from parent county</span></span>
+                            <span data-sort="distance_to_metro_mi" class="qc-tooltip" tabindex="0" role="button">Remote <span class="qc-tooltip-text">Inherited remoteness from parent county</span></span>
+                        </div>
+                        <div id="qc-candidates-body"></div>
+                    </div>
+                    <div class="qc-pagination" id="qc-candidates-pagination"></div>
+                </div>
+                </div>
+            </details>
+
+            <!-- Conditions: the sky/forecast/alert cards for the place the reader just
+                 picked, a fourth .qcm-panel (QUX-03b-ii),
+                 docked under Explore at >=1024px. It used to sit in a Right Side Data Drawer, a flex
+                 sibling of the map; that drawer is gone, and these three <section>s (ids
+                 unchanged) moved here instead. Three cards
+                 stay separately attributed: calculated astronomy (Sun/Moon engine), the NWS
+                 forecast grid for this point (a grid point, not the summit itself), and
+                 issued NWS alert products -- a forecast failure must never blank correct
+                 astronomy, and an alert failure must never blank either. The heading and the
+                 three cards are written by showSky() / showSkyCards() in quiet-corners.js
+                 and js/quiet-corners-sky/*; nothing here is typed except the initial
+                 "no pick yet" state. -->
+            <details class="qcm-panel qcm-panel-conditions" id="qc-conditions-panel">
+                <summary class="qcm-panel-summary" id="qc-conditions-summary">Conditions &middot; Pick a place</summary>
+                <div class="qcm-panel-header">
+                    <button type="button" class="qcm-panel-back" hidden>Back</button>
+                    <button type="button" class="qcm-panel-close">Close</button>
+                </div>
+                <p class="qc-conditions-heading" id="qc-conditions-heading">Pick a county or a town to see conditions there.</p>
+                {{/* QUX-09b: "which place are these three cards even about?" -- the one
+                     question the three of them cannot answer on their own once a card is
+                     opened for somewhere other than the place last picked. Written only by
+                     js/quiet-corners.js (showSky and the window.qcConditionsFor bridge),
+                     never typed here; empty until a place is picked, and :empty hides it so
+                     an unpicked page shows nothing above Tonight's sky. */}}
+                <header class="qc-conditions-for" id="qc-conditions-for" tabindex="-1" aria-live="polite"></header>
+                <section class="qc-tonight" id="qc-tonight" aria-live="polite">
+                    <h3 class="qc-tonight-head">Tonight&rsquo;s sky</h3>
+                    <p class="qc-tonight-note">Pick a county or a town to see what the sky does there tonight.</p>
+                </section>
+                {{/* The forecast for that same place -- wind and gusts -- written by the card at the foot
+                     of tonight.js. A SECOND card because a dark sky is not a clear one, and the two
+                     voices must not merge. */}}
+                <section class="qc-tonight" id="qc-hourly" aria-live="polite"></section>
+                {{/* Active National Weather Service watches, warnings and advisories for that
+                     same place, written by js/quiet-corners-maps/source-nws-alerts.js. A THIRD
+                     card, asked for separately from the forecast above it even though both come
+                     off api.weather.gov: an alert is a product an office issued with a window of
+                     its own, not a forecast value, and a failure in either must leave the other
+                     standing. A quiet card says no NWS product is in force -- never that the
+                     ground is free of danger. */}}
+                <section class="qc-tonight" id="qc-alerts" aria-live="polite"></section>
+                {{/* QUX-09a: bookmarks stored only in this browser (saved-places.js),
+                     filled by saved-places-panel.js's mountSavedPlaces(). Lives here,
+                     not a Layers-panel control, since it cannot push the map down
+                     (:276-282). */}}
+                <section class="qc-tonight qc-saved" id="qc-saved" aria-labelledby="qc-saved-head">
+                    <h3 id="qc-saved-head">Saved places</h3>
+                    <p id="qc-saved-status" aria-live="polite"></p>
+                    <ol id="qc-saved-list"></ol>
+                    <div class="qc-saved-footer">
+                        <button type="button" id="qc-saved-download">Download saved places</button>
+                        <button type="button" id="qc-saved-download-gpx">Download GPX</button>
+                        <label class="qc-saved-import-label">Import saved places
+                            <input type="file" id="qc-saved-import" accept=".json,application/json" class="qc-saved-import-input">
+                        </label>
+                        <button type="button" id="qc-saved-clear">Clear saved places</button>
+                        <button type="button" id="qc-saved-undo" hidden>Undo clear</button>
+                    </div>
+                </section>
+            </details>
+
+            <!-- Layers and the map key. Ahead of the print builder, so the short
+                 panel that redraws the screen comes before the long one that
+                 produces paper, in the dock and in the phone sheet alike. -->
+            <details class="qcm-panel qcm-panel-layers" id="qcm-layer-panel">
+                <summary class="qcm-panel-summary">Layers and map key</summary>
+                <div class="qcm-panel-header">
+                    <button type="button" class="qcm-panel-back" hidden>Back</button>
+                    <button type="button" class="qcm-panel-close">Close</button>
+                </div>
+                {{ partial "qcm-map-layers.html" . }}
+            </details>
+
+            <!-- Field Maps: the print builder, on the SAME map as the county
+                 chooser. It used to be a separate page with a second Leaflet
+                 instance; there is one map now, so this is a panel beside it.
+                 As a flex sibling of a `flex-1 min-w-0` map it once took 625px to
+                 ZERO of the map at 1440px (audit F01); the dock grid's
+                 minmax(480px, 1fr) map column is what rules that out now. -->
+            <details class="qcm-panel qcm-panel-print" id="qcm-app">
+                <summary class="qcm-panel-summary">Print field maps of this area</summary>
+                <div class="qcm-panel-header">
+                    <button type="button" class="qcm-panel-back" hidden>Back</button>
+                    <button type="button" class="qcm-panel-close">Close</button>
+                </div>
+                <p class="qcm-access-note">A boundary marks where a designation begins and ends. It is not a statement that the ground inside is open to you, nor that the ground outside is closed. Confirm access and current closures with the managing agency before you travel.</p>
+                <div id="qcm-status" class="qcm-status" role="status" aria-live="polite"></div>
+                {{/* Its own line, not the status line: a truncation notice must not be
+                     overwritten by the next "Building sheet 3 of 7" message. Empty and
+                     hidden until the preview budget actually bites. */}}
+                <p id="qcm-preview-note" class="qcm-status" role="note" hidden></p>
+                {{ partial "qcm-controls.html" . }}
+            </details>
+            </div>
+
+                <div id="qc-map" class="absolute inset-0 border-b lg:border-b-0 border-white/10"></div>
+                {{/* Size and stacking live in quiet-corners.css, not in a style
+                     attribute: below 1024px the map has to leave the absolute
+                     positioning behind so the print panel below it is not
+                     painted under the map canvas, and an inline height: 100%
+                     cannot be overridden from the stylesheet. */}}
+
+            {{/* The surface caption. One line, on the MAP, naming the continuous-colour
+                 surface currently laid over it and the time that surface's own data refers
+                 to — a forecast's valid time, an observation's observation time, an
+                 inventory's vintage. Never the time it was retrieved. Filled by main.js
+                 (renderSurfaceCaption) from layer-registry.js's surfaceCaption, and hidden
+                 whenever no surface is on, so the resting layout is unchanged. Here rather
+                 than inside the Layers panel because a panel the reader has closed is not
+                 where "this is a picture of two hours ago" belongs. */}}
+            <p id="qcm-surface-caption" class="qcm-surface-caption" role="status" aria-live="polite" hidden></p>
+
+            {{/* Share / Reset the view: a reserved #map= URL fragment carries center,
+                 zoom, base, surface, overlays and the county wash's metric/opacity.
+                 "Share" copies a link to what is on screen now; "Reset" clears saved
+                 display prefs and the fragment back to the default view. Neither one
+                 touches the print recipe, a saved print project or a chosen area —
+                 those are the Field Maps builder's, not this. Wired in quiet-corners.js. */}}
+            <div class="qc-view-controls" id="qc-view-controls">
+                <button id="qc-view-share" type="button" class="qc-view-btn">Share view</button>
+                <button id="qc-view-reset" type="button" class="qc-view-btn">Reset view</button>
+                {{/* "Use my location" (B3): one click, one getCurrentPosition call --
+                     never a background watch. In the same overlay row as
+                     Share/Reset rather than a row of its own. createMap()
+                     moves this row onto the map as a Leaflet control (bottom
+                     left; top right on a phone): pinned to this container it
+                     sat over the panel summaries on a phone, where the panels
+                     live under the map inside the same container. Its visible
+                     privacy copy and the include-location checkbox live inside
+                     the filter panel instead (#qc-locate-privacy).
+                     Wired in quiet-corners.js (wireLocateControl /
+                     syncLocateIncludeControl). */}}
+                <button id="qc-locate" type="button" class="qc-view-btn">Use my location</button>
+                <p id="qc-view-status" class="qc-view-status" role="status" aria-live="polite"></p>
+                <p id="qc-locate-status" class="qc-view-status" role="status" aria-live="polite"></p>
+            </div>
+
+            {{/* Print area Clear/Undo/Edit strip. A plain positioned div, not an
+                 L.control -- it has to be reachable by Tab whether or not the print
+                 builder's details panel is open, and that panel only renders
+                 inside its own <details>. Hidden whenever no area is selected;
+                 shown and driven by main.js (setBbox/clearArea/undoArea/
+                 renderAreaStrip). */}}
+            <div id="qcm-area-strip" class="qcm-area-strip" role="status" aria-live="polite" hidden>
+                <span id="qcm-area-strip-text">Print area selected</span>
+                <button type="button" id="qcm-area-edit">Edit</button>
+                <button type="button" id="qcm-area-undo" disabled>Undo</button>
+                <button type="button" id="qcm-area-clear" aria-label="Clear print area">Clear print area &times;</button>
+            </div>
+            </div>
+        </div>
+    </article>
+</div>
+
+<!-- Quiet Corners has no repository to point at — its method IS its
+     documentation. Render it once in normal document flow so browsers,
+     assistive technology and crawlers all read the same content. -->
+<section class="shop-row system-docs" id="documentation">
+    <h2 class="section-heading">Methodology &amp; data</h2>
+    <div class="prose max-w-none themed-prose">{{ .Content }}</div>
+    <div class="qc-trust-panel-inner" id="qc-trust-panel">
+        <h3>Data provenance</h3>
+        <div id="qc-trust-content" class="font-mono text-xs"></div>
+    </div>
+</section>
+
+{{/* The dashboard's stylesheet, linked from exactly where the <style> block it
+     replaces used to sit. The position is load-bearing: these rules override
+     vendor/leaflet.css -- which head.html loads for this layout only -- at equal
+     specificity and with no !important, so a sheet that arrives any earlier
+     loses .leaflet-container, .leaflet-popup-content-wrapper and
+     .leaflet-popup-tip back to Leaflet's own white-on-#ddd defaults.
+     `stylesheet` is a body-ok rel keyword, so the <link> is valid here, and
+     keeping it here rather than in head.html keeps ~600 lines of single-page
+     CSS off the other 52 pages. */}}
+<link rel="stylesheet" href="{{ "css/quiet-corners.css" | relURL }}">
+
+{{/* All three deferred: defer preserves document order, so Leaflet and
+     topojson-client still execute before the app script that needs them,
+     without blocking HTML parsing mid-body. */}}
+<script src="{{ "vendor/leaflet.js" | relURL }}" defer></script>
+<script src="{{ "vendor/topojson-client.min.js" | relURL }}" defer></script>
+{{/* type="module" so the dashboard can import the ONE handoff serializer the
+     Field Maps app parses. A hand-written query string here would drift from that
+     parser in silence and land the reader on a subtly wrong rectangle. Modules
+     defer by default, so this keeps the load order `defer` gave it. */}}
+<script type="module" src="{{ "js/quiet-corners.js" | relURL }}"></script>
+{{/* The Field Maps builder draws on the map quiet-corners.js just made and handed
+     over, so it loads after it. pdf-lib is the only thing it needs that the
+     dashboard did not already carry. */}}
+<link rel="stylesheet" href="{{ "css/quiet-corners-maps.css" | relURL }}">
+{{/* E1: the lazy 3D terrain panel's own stylesheet -- the "3D" control button is
+     visible on load, so this loads eagerly like the two sheets above it. The
+     vendored maplibre-gl.css stays lazy, injected by Q/terrain-view.js only once
+     the panel is actually opened. */}}
+<link rel="stylesheet" href="{{ "css/quiet-corners-terrain.css" | relURL }}">
+<script src="{{ "vendor/pdf-lib.min.js" | relURL }}" defer></script>
+<script type="module" src="{{ "js/quiet-corners-maps/main.js" | relURL }}"></script>
+{{ end }}

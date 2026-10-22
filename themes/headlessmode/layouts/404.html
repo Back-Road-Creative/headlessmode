@@ -1,0 +1,10 @@
+{{ define "main" }}
+{{/* Plain 404: what happened, one way back. The meta description fallback for
+     this page is in partials/head.html (the 404 branch) and says the same. */}}
+<div class="not-found">
+    <p class="not-found-eyebrow">404</p>
+    <h1 class="not-found-title">Page not found.</h1>
+    <p class="not-found-text">This link may be out of date.</p>
+    <a href="/" class="btn-primary">Back to Headless Mode</a>
+</div>
+{{ end }}

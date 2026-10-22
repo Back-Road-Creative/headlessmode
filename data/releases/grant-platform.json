@@ -1,0 +1,20 @@
+{
+  "product": "grant-platform",
+  "name": "Grant Platform",
+  "release_source": "manual",
+  "source_repo": null,
+  "version": null,
+  "released_at": null,
+  "release_url": null,
+  "source_ref": null,
+  "assets": {},
+  "demo": {
+    "path": "static/demo/grant-platform/",
+    "source": "09d592b",
+    "source_kind": "product-commit",
+    "anchor": "2026-09-01",
+    "pages": 12
+  },
+  "media_source": null,
+  "notes": "Grant Platform has no public source and no tags or releases; the demo bundle's own manifest names the commit it was built from instead."
+}

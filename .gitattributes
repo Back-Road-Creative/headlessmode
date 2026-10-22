@@ -1,0 +1,5 @@
+# Machine-generated Quiet Corners export (129k+ lines of JSON). Suppress
+# line-by-line diffs and never attempt a textual merge — every regeneration
+# rewrites county blocks wholesale; conflicts are resolved by regenerating,
+# not by merging hunks.
+static/data/quiet-corners/*.json -diff -merge

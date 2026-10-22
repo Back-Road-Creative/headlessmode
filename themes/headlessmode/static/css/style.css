@@ -1,0 +1,787 @@
+/* ============================================================
+   HEADLESS MODE — "Boutique" redesign. Design tokens, chrome, and
+   content styles for a light commerce storefront.
+
+   Layout utilities come from Tailwind (/css/tailwind.css). This file owns
+   the design tokens, the site chrome, and long-form content typography.
+   Display serif (var(--font-serif)) is reserved for h1/h2 and product
+   names; body type is the platform system sans stack; monospace
+   (var(--font-mono), set in src/css/main.css) is reserved for code,
+   commands, and literal sample output — never for badges or labels.
+   ============================================================ */
+
+:root {
+    /* ---- Light only, and on purpose ----
+       This is the Boutique direction: a warm-paper storefront, not the dark
+       terminal-facing developer site it replaces. There is no dark theme and
+       no prefers-color-scheme block anywhere in this file — that is a
+       decision, not an oversight. The one exception is scoped, not global:
+       the /quiet-corners/ dashboard is an immersive map "app" screen with its
+       own literal dark backgrounds baked into its markup (never touched by
+       this redesign — see PAGES §4), so its text/border tokens are restored
+       to their pre-redesign dark values under .themed-\[dark\] at the bottom
+       of this file. Everywhere else on the site, these tokens are the whole
+       story. Pairs with <meta name="color-scheme"> in partials/head.html. */
+    color-scheme: light;
+
+    /* Accent — deep green. --accent-500 is the base (links, primary
+       actions): #166534 is 6.67:1 on --bg-primary and 7.13:1 on --bg-card,
+       AA for normal text on both. --accent-600 is its hover/active shade
+       (darkening on hover keeps contrast rising, never falling);
+       --accent-400/300 are lighter steps used for tints and small on-brand
+       accents; --accent-tint* is the pale wash behind the "Product" chip.
+       This green IS the palette the old "Free · open source" chip wore
+       (--success-*), promoted to accent — which is why that chip now wears
+       the warm neutral instead (src/css/main.css, data-status="free"): a
+       chip must never look like a primary action. */
+    /* Forest/kelly family (HM-A4): #1f6f3a is kelly deepened until white
+       text reads on it (6.2:1) and it reads as text on the paper (6.1:1). */
+    --accent-500: #1f6f3a;
+    --accent-600: #1b4d32;
+    --accent-400: #24803f;
+    --accent-300: #4cbb17;
+    --accent-900: #123d2b;
+    --accent-glow: rgba(31, 111, 58, 0.18);
+    --accent-tint: #e9f2ea;
+    --accent-tint-border: #cfe0d3;
+    /* Homepage hero band. --forest is the band (white text 11.6:1);
+       --kelly is the short rule over the headline, an accent only, never
+       text. --on-forest-soft is the line under the headline (8.1:1). */
+    --forest: #123d2b;
+    --kelly: #4cbb17;
+    --on-forest-soft: #cfe0d3;
+
+    /* Neutrals — ink + one secondary. Both verified ≥4.5:1 (WCAG AA, normal
+       text) on --bg-primary (#faf7f2) AND --bg-card (#ffffff): ink is
+       ~15.7:1 / ~16.7:1, secondary (Tailwind stone-600) is ~6.8:1 / ~7.2:1.
+       --text-muted and --text-subtle collapse onto the same secondary rather
+       than introducing a third, lighter grey that would need its own
+       contrast proof for every place it lands — one safe secondary beats
+       three tones of "probably fine". */
+    --text-primary: #18201b;    /* ink, a green-black */
+    --text-secondary: #55605a;  /* secondary, 6.3:1 on paper */
+    --text-muted: #55605a;
+    --text-subtle: #55605a;
+
+    --bg-primary: #faf8f3;      /* paper */
+    --bg-card: #ffffff;         /* panel */
+    --bg-elevated: #eef1ec;     /* tinted panel — inline code, install chips */
+    --border-default: #e3e6df;
+    --border-subtle: #ebeee8;
+    --panel-shadow: 0 1px 3px rgb(24 32 27 / 0.06);
+
+    /* Status chips (the plan's "price-tag-style chips"). The free chip's old
+       green (--success-*) became the accent family above, so free now wears
+       the warm neutral (--bg-elevated / --border-default, styled in
+       src/css/main.css) — undated (available, no proven ship month) keeps
+       stone + dashed, product keeps the pale accent tint: three chips, three
+       looks. */
+    --undated-fg: #57534e;
+    --undated-bg: #f5f5f4;
+
+    /* ---- Type ----
+       Display serif for h1/h2 and product names: Source Serif 4, served from
+       this site (/fonts/, font-src 'self'; licence in NOTICE), falling back
+       to Georgia. Body copy is the platform sans stack. */
+    --font-serif: 'Source Serif 4', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --font-body: -apple-system, 'Segoe UI', system-ui, sans-serif;
+
+    /* Font-size steps still in use by list/entry chrome. h1 is a clamp per
+       spec (2.4rem floor, 3.6rem ceiling, 5vw fluid) rather than a fixed
+       step — the one size below that is genuinely fluid. */
+    --font-size-2xs: 0.75rem;
+    --font-size-xs: 0.8rem;
+    --font-size-sm: 0.85rem;
+    --font-size-md: 0.95rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.35rem;
+    --font-size-xl: 1.85rem;
+    --font-size-hero: clamp(2rem, 5vw, 3.6rem); /* two lines at 390px, still 2x body */
+}
+
+@font-face {
+    font-family: 'Source Serif 4'; font-style: normal; font-weight: 600; font-display: swap;
+    src: url(/fonts/source-serif-4/source-serif-4-latin-600-normal.woff2) format('woff2');
+}
+@font-face {
+    font-family: 'Source Serif 4'; font-style: normal; font-weight: 700; font-display: swap;
+    src: url(/fonts/source-serif-4/source-serif-4-latin-700-normal.woff2) format('woff2');
+}
+
+html, body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    line-height: 1.65;
+    min-height: 100vh;
+}
+
+/* The footer sits at the viewport bottom on short pages: the body is a column
+   and main absorbs the slack, so no page-background band renders below it. */
+body {
+    display: flex;
+    flex-direction: column;
+}
+body > main {
+    flex: 1 0 auto;
+}
+
+/* h1/h2 everywhere (including markdown content headings) and product names
+   take the display serif, per the binding type spec. */
+h1, h2, .shelf-panel__name {
+    font-family: var(--font-serif);
+}
+
+/* Interaction transitions live only on links/buttons. */
+a, button { transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ---- Shared page container ----
+   Replaces the old max-w-4xl (56rem) Tailwind utility everywhere: the
+   spec's max-width is 66rem, generous enough for the shelf grid to breathe. */
+.shop-row {
+    max-width: 66rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+}
+
+/* ---- Skip link (a11y) ---- */
+.skip-link {
+    position: absolute; left: -9999px; top: auto;
+    width: 1px; height: 1px; overflow: hidden; z-index: 10001;
+}
+.skip-link:focus {
+    position: fixed; left: 1rem; top: 1rem; width: auto; height: auto;
+    padding: 0.5rem 1rem; background: var(--bg-card); color: var(--accent-600);
+    border: 1px solid var(--accent-500); border-radius: 6px;
+    font-size: 0.875rem; text-decoration: none; box-shadow: var(--panel-shadow);
+    outline: 2px solid var(--accent-500); outline-offset: 2px;
+}
+
+/* ---- Global focus fallback ----
+   Every interactive component below defines its own ring; this is the net
+   under anything that inherits a plain <a>/<button> and would otherwise get
+   the UA default. */
+a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent-500);
+    outline-offset: 2px;
+}
+
+/* ---- Header ---- */
+/* Forest on every page: on the home page the hero band below continues it,
+   so the masthead and hero read as one green top. White wordmark 11.6:1,
+   soft-green links 8.1:1. */
+.masthead { background: var(--forest); }
+.masthead .shop-row {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 0 1rem; padding-block: 0.5rem;
+}
+.site-wordmark {
+    font-family: var(--font-serif); font-size: 1.25rem; font-weight: 700;
+    letter-spacing: -0.005em; color: #fff; text-decoration: none;
+}
+.site-wordmark:visited, .site-wordmark:hover { color: #fff; }
+.site-nav { display: flex; align-items: center; flex-wrap: wrap; gap: 0 1.25rem; }
+/* Masthead links reach 44px by padding, not larger type; two links wrap under
+   enlarged text instead of needing a menu button. */
+.site-wordmark { display: inline-flex; align-items: center; min-height: 44px; }
+.nav-link {
+    display: inline-flex; align-items: center; min-height: 44px;
+    font-size: var(--font-size-md); color: var(--on-forest-soft); text-decoration: none;
+}
+.nav-link:visited { color: var(--on-forest-soft); }
+.nav-link:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+.nav-link:active { color: #fff; }
+.nav-link[aria-current] {
+    color: #fff; font-weight: 600;
+    text-decoration: underline; text-decoration-color: var(--kelly); text-underline-offset: 4px;
+}
+.masthead a:focus-visible { outline-color: #fff; }
+
+/* ---- Footer ---- */
+.colophon { background: var(--bg-primary); border-top: 1px solid var(--border-default); margin-top: 3rem; }
+.colophon .shop-row { display: flex; flex-direction: column; gap: 0.75rem; padding-block: 1.75rem; }
+.footer-nav { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: var(--font-size-sm); }
+.footer-nav a { color: var(--text-secondary); text-decoration: none; }
+.footer-nav a:hover { color: var(--accent-500); }
+.footer-nav a[aria-current] { color: var(--text-primary); font-weight: 600; }
+.footer-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 1.25rem; font-size: var(--font-size-2xs); color: var(--text-secondary); }
+.footer-meta a { color: var(--text-secondary); text-decoration: none; }
+.footer-meta a:hover { color: var(--accent-500); }
+
+/* ---- Homepage hero ----
+   The forest band continues the masthead: kelly rule, serif headline, one
+   line. No button: the products start right below it. */
+.hero-band { background: var(--forest); color: #fff; }
+.hero {
+    /* padding-block, never the padding shorthand: .hero sits on the same
+       element as .shop-row, whose inline padding is the page gutter at 390px —
+       a shorthand here zeroes it and the text hits the viewport edge. Same
+       rule for .window-row, .sheet-head and the chrome rows above. */
+    padding-block: 2rem 3.1rem;
+}
+.hero-copy { max-width: 46rem; display: grid; gap: 0.9rem; }
+.hero-rule { display: block; width: 56px; height: 4px; border-radius: 2px; background: var(--kelly); }
+.hero-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.9rem, 5vw, 3.25rem); font-weight: 700; letter-spacing: -0.005em;
+    color: #fff; line-height: 1.08; margin: 0; text-wrap: balance;
+}
+.hero-lede {
+    font-size: 1.15rem; color: var(--on-forest-soft); line-height: 1.6;
+    max-width: 38rem; margin: 0;
+}
+.hero-band a:focus-visible { outline-color: #fff; }
+
+/* ---- Buttons ---- */
+.btn-primary {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--accent-500); color: #fff;
+    font-family: var(--font-body); font-weight: 600; font-size: 1rem;
+    padding: 0.85rem 1.6rem; border-radius: 6px;
+    text-decoration: none;
+}
+.btn-primary:hover { background: var(--accent-600); }
+.btn-primary:visited { color: #fff; }
+/* Two-tone ring on green fills: 2px white inside, 2px ink outside. A green
+   ring on a green fill was ~1.1:1; both tones here clear 3:1 against the fill
+   and against the paper around it. */
+.btn-primary:focus-visible, .try-cta:focus-visible {
+    outline: 2px solid var(--text-primary); outline-offset: 2px;
+    box-shadow: 0 0 0 2px #fff;
+}
+.btn-primary:active { background: var(--accent-600); }
+
+/* ---- Section heading (serif, used for "From the shelf" etc.) ---- */
+.section-heading {
+    font-size: 1.55rem; font-weight: 700; color: var(--text-primary);
+    margin-bottom: 1.75rem; letter-spacing: -0.005em;
+}
+
+/* ---- The products (#software) ----
+   One row per product: picture, then name + Free/Preview tag, the canonical
+   sentence, one filled button and "Details". Picture above the text on a
+   phone (capped at 190px tall), beside it from 48rem up. */
+.software-roster { padding-block: 1rem 0.5rem; }
+.home-section { padding: 0 0 0.5rem; }
+.product-stanza {
+    display: grid; gap: 0.9rem;
+    padding: 1.6rem 0; border-top: 1px solid var(--border-default);
+}
+.product-stanza:first-of-type { border-top: 0; }
+.product-shot {
+    display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; max-height: 190px;
+    object-fit: cover; object-position: top left;
+    border-radius: 8px; border: 1px solid var(--border-default); background: var(--accent-tint);
+}
+/* A designed tile is composed to the full frame, so it is never cropped. */
+.product-shot[src$=".svg"] { max-height: none; }
+.product-text { display: grid; gap: 0.5rem; align-content: start; }
+.product-id { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.75rem; }
+.product-name {
+    font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700;
+    line-height: 1.2; margin: 0; color: var(--text-primary);
+}
+.product-name a { color: inherit; text-decoration: none; }
+.product-name a:visited { color: inherit; }
+.product-name a:hover { text-decoration: underline; text-underline-offset: 4px; }
+/* HM-A4: squared tags everywhere (tailwind.css draws them as pills). */
+.shelf-panel__chip { border-radius: 4px; }
+.product-id .shelf-panel__chip { border-radius: 4px; padding: 0.3rem 0.5rem; font-size: 0.72rem; letter-spacing: 0.04em; line-height: 1; }
+.product-id .shelf-panel__chip[data-status="free"] {
+    color: var(--text-primary); background: var(--accent-tint); border-color: transparent;
+}
+.product-id .shelf-panel__chip[data-status="preview"] {
+    color: var(--text-secondary); background: transparent; border-color: var(--border-default);
+}
+.product-area {
+    margin: 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-secondary); line-height: 1;
+}
+.product-blurb { margin: 0; color: var(--text-primary); max-width: 62ch; }
+.product-meta { margin: 0.25rem 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.25rem; }
+.product-meta .btn-primary { padding: 0 1.15rem; min-height: 44px; font-size: 0.95rem; }
+.details-link {
+    display: inline-flex; align-items: center; gap: 0.3em; min-height: 44px; padding-inline: 0.25rem;
+    font-weight: 600; font-size: 0.9rem; color: var(--text-primary);
+    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+}
+.details-link:visited { color: var(--text-primary); }
+.details-link:hover { color: var(--accent-500); text-decoration-thickness: 2px; }
+@media (min-width: 48rem) {
+    .product-stanza { grid-template-columns: 15rem minmax(0, 1fr); gap: 0 1.75rem; align-items: start; }
+    .product-shot { max-height: none; }
+}
+@media (max-width: 600px) {
+    .hero { padding-block: 1.25rem 1.75rem; }
+    .hero-copy { gap: 0.6rem; }
+    .hero-title { font-size: 1.75rem; }
+    .hero-lede { font-size: 1rem; }
+    .software-roster { padding-top: 0.25rem; }
+}
+
+/* ---- Action link — the one text action ----
+   Green with a visible underline. Filled green primaries are .btn-primary and
+   .try-cta (white text). Hover/pressed darken to --accent-600. */
+.action-link {
+    display: inline-flex; align-items: center; min-height: 44px;
+    font-family: var(--font-body); font-weight: 600; font-size: var(--font-size-md);
+    color: var(--accent-500); text-decoration: underline;
+    text-decoration-thickness: 1px; text-underline-offset: 4px;
+}
+.action-link:visited { color: var(--accent-500); }
+.action-link:hover, .action-link:active { color: var(--accent-600); text-decoration-thickness: 2px; }
+@media (max-width: 640px) {
+    .install-box { padding: 0.9rem 1.1rem; }
+}
+
+/* ---- Hire band ---- */
+.hire-band {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 1rem 1.5rem; padding: 1.5rem; margin: 1.5rem 0 1rem;
+    background: var(--accent-tint); border-radius: 8px;
+}
+.hire-text { margin: 0; max-width: 56ch; color: var(--text-primary); }
+
+/* ---- Product sheet (system pages) ----
+   Full-width tinted band: chip + serif name + one-line left, buy box (the
+   get-system install-box) as a right column at desktop, stacking under the
+   intro on mobile. */
+/* Neutral, not the pale accent tint: the band is a marketing header (chip +
+   name + one-line + buy box), not a status surface — the mint wash read as
+   a second "success" color competing with the accent green above it. */
+.sheet-band {
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-default);
+}
+.sheet-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    gap: 1.5rem 3rem;
+    align-items: center;
+    padding-block: 3rem 2.75rem;
+}
+.sheet-intro { display: flex; flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+.sheet-name {
+    font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700;
+    line-height: 1.08; letter-spacing: -0.01em; color: var(--text-primary);
+    margin: 0;
+}
+.sheet-line {
+    font-size: 1.1rem; line-height: 1.55; color: var(--text-secondary);
+    max-width: 34rem; margin: 0;
+}
+.sheet-shipped {
+    font-size: var(--font-size-2xs); color: var(--text-secondary);
+    font-variant-numeric: tabular-nums; margin: 0;
+}
+.sheet-buy { min-width: 0; }
+.sheet-buy .install-box { margin-bottom: 0; max-width: none; }
+@media (max-width: 900px) {
+    .sheet-head { grid-template-columns: 1fr; padding-block: 2.25rem 2rem; }
+}
+
+/* ---- Documentation section rendered by a layout (quiet-corners) ---- */
+.system-docs { padding: 0 1.5rem 3rem; }
+.system-docs__line { max-width: 46rem; color: var(--text-secondary); line-height: 1.65; margin: 0; }
+.system-docs .qc-trust-panel-inner {
+    margin-top: 2rem; background: var(--bg-card); border-color: var(--border-default);
+}
+.system-docs .qc-trust-panel-inner h3 {
+    font-family: var(--font-mono); font-size: 1rem; color: var(--accent-600);
+    margin: 0 0 0.75rem;
+}
+.system-docs #qc-trust-content { color: var(--text-secondary); }
+
+/* Field Maps' documentation page (/quiet-corners/maps/) and its state-land
+   coverage table. These live HERE, not in quiet-corners-maps.css, because that
+   sheet is linked by exactly one layout -- the dashboard -- and this page is not
+   it. Written down in a template is not the same as reachable on the page that
+   writes it: for months these rules named real elements and painted none of
+   them, which is the same shape as the .qcm-app rules that left ten dashboard
+   controls looking like plain text. style.css is on every page, so a rule here
+   reaches the markup that carries it. scripts/qcm/docs-page-chrome.test.mjs
+   measures that on the rendered page. */
+.qcm-docs { padding-top: 3rem; }
+/* A host or path in inline code is one unbroken word; let it wrap so a phone never scrolls sideways. */
+.qcm-docs :not(pre) > code { overflow-wrap: anywhere; }
+/* The page names itself, then lists its sections, before the record starts. */
+.qcm-doc-title { margin-top: 0; }
+.qcm-doc-contents {
+    max-width: 36rem; margin: 0 0 2rem; padding: 0.9rem 1.2rem;
+    background: var(--bg-card); border: 1px solid var(--border-default); border-radius: 12px;
+}
+.qcm-doc-contents p { margin: 0 0 0.4rem; color: var(--text-secondary); }
+.qcm-doc-contents ul { margin: 0; padding-left: 1.1rem; }
+.qcm-doc-contents li { margin: 0.15rem 0; }
+/* 51 rows, so it scrolls inside its own box rather than widening the document.
+   The box is the site's own `.table-scroll` above, not a class of its own:
+   scripts/test_table_scroll.py counts tables against THAT spelling, and a
+   bespoke wrapper is a table the gate reads as unwrapped. */
+.qcm-coverage { border-collapse: collapse; font-size: 0.85rem; min-width: 32rem; }
+.qcm-coverage th, .qcm-coverage td { padding: 0.3rem 0.6rem; border-bottom: 1px solid rgba(0, 0, 0, 0.1); text-align: left; }
+.qcm-coverage thead th { font-weight: 600; white-space: nowrap; }
+.qcm-coverage tbody th { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.qcm-coverage abbr { text-decoration: none; border-bottom: 1px dotted currentColor; }
+/* Never colour alone: each cell carries its own word, so the table reads the same
+   in grayscale, to a screen reader, and to anyone who cannot separate the hues. */
+.qcm-cov-yes { color: #1b5e20; }
+.qcm-cov-no { color: #6b6b6b; }
+
+/* ---- Install / Get-it block (product & tool pages) ---- */
+.install-box {
+    background: var(--bg-card); border: 1px solid var(--border-default);
+    border-radius: 12px; padding: 1.15rem 1.4rem; max-width: 36rem; margin-bottom: 1.5rem;
+    overflow-x: auto; box-shadow: var(--panel-shadow);
+}
+/* Compact by construction: get-system.html renders at most one primary
+   action and one secondary evidence line, so the box never needs the
+   default <p> block margin stacking them into a tall column. */
+.install-box p { margin: 0 0 0.5rem; }
+.install-box p:last-child { margin-bottom: 0; }
+.install-label {
+    font-size: var(--font-size-2xs); font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.4rem;
+}
+.install-cmd {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--font-size-md); color: var(--text-primary);
+    background: var(--bg-elevated); display: inline-block;
+    padding: 0.3rem 0.55rem; border-radius: 6px;
+}
+.score-card {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--font-size-xs); line-height: 1.45; color: var(--text-primary);
+    background: var(--bg-card); border: 1px solid var(--border-default);
+    border-radius: 10px; padding: 1rem 1.25rem; overflow-x: auto; margin-bottom: 1.25rem;
+}
+
+/* ---- List pages (releases / products) ---- */
+.list-header { border-bottom: 1px solid var(--border-default); }
+.list-heading { font-size: var(--font-size-xl); font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+.list-intro { margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
+.list-item { border-bottom: 1px solid var(--border-default); }
+.list-row {
+    display: flex; align-items: baseline; gap: 1.25rem;
+    padding: 1rem 0; text-decoration: none;
+}
+.list-row-main { flex: 1 1 auto; min-width: 0; }
+.list-row-title { display: block; color: var(--text-primary); font-weight: 600; font-size: var(--font-size-base); }
+.list-row:hover .list-row-title { color: var(--accent-600); }
+.list-row-summary { display: block; margin-top: 0.2rem; color: var(--text-secondary); font-size: var(--font-size-sm); line-height: 1.5; }
+.list-row-meta {
+    flex-shrink: 0; display: flex; gap: 1rem;
+    font-size: var(--font-size-2xs); color: var(--text-secondary); font-variant-numeric: tabular-nums;
+}
+.list-footer {
+    margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-default);
+    font-size: var(--font-size-2xs); color: var(--text-secondary);
+}
+
+/* ---- Post / page header ---- */
+.entry-header { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-default); }
+.post-title, .page-title {
+    font-size: 2.1rem; font-weight: 700; line-height: 1.2;
+    color: var(--text-primary); margin-bottom: 1rem;
+}
+.page-subtitle { font-size: var(--font-size-sm); color: var(--text-secondary); }
+.post-meta {
+    display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.85rem;
+    font-size: var(--font-size-sm); color: var(--accent-600);
+}
+.post-meta-read { color: var(--text-secondary); }
+
+/* ---- Tag pills ---- */
+.tag-row { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tag-row li { margin: 0; padding: 0; }
+.tag-pill {
+    display: inline-block;
+    font-size: var(--font-size-2xs); padding: 0.18rem 0.6rem;
+    background: var(--accent-tint);
+    border: 1px solid var(--accent-tint-border);
+    color: var(--accent-600); border-radius: 4px; letter-spacing: 0.02em;
+}
+
+/* ---- Release CTA ---- */
+.post-cta { margin-top: 2.5rem; padding-top: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; border-top: 1px solid var(--border-default); }
+.try-cta {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-weight: 600; font-size: 0.9rem; padding: 0.6rem 1.15rem; border-radius: 6px;
+    background: var(--accent-500); border: 1px solid var(--accent-500);
+    color: #fff; text-decoration: none;
+}
+.try-cta:hover, .try-cta:active { background: var(--accent-600); border-color: var(--accent-600); }
+.try-cta:visited { color: #fff; }
+.cta-secondary {
+    font-size: 0.9rem; color: var(--text-secondary); text-decoration: none;
+}
+.cta-secondary:hover { color: var(--accent-600); }
+
+/* ---- Prev / next nav ---- */
+.prev-next-nav { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border-default); }
+.prev-next-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.prev-next-col-right { text-align: right; }
+.prev-next-link {
+    display: flex; flex-direction: column; gap: 0.25rem;
+    padding: 0.85rem 1.1rem; background: var(--bg-card);
+    border: 1px solid var(--border-default); border-radius: 10px;
+    color: var(--text-secondary); text-decoration: none;
+}
+.prev-next-link:hover { border-color: var(--accent-500); }
+.prev-next-link:hover .prev-next-title { color: var(--accent-600); }
+.prev-next-label {
+    font-size: 0.7rem; color: var(--accent-600); letter-spacing: 0.05em;
+}
+.prev-next-title { font-size: var(--font-size-sm); color: var(--text-primary); line-height: 1.35; }
+
+/* ---- Back link ---- */
+.post-backlink { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-default); }
+.back-link {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-weight: 600; font-size: 0.9rem; color: var(--accent-500); text-decoration: none;
+}
+.back-link:hover { color: var(--accent-600); }
+
+/* ---- 404 ---- */
+.not-found {
+    max-width: 32rem; margin: 5rem auto; padding: 0 1.5rem; text-align: left;
+}
+.not-found-eyebrow {
+    font-size: var(--font-size-2xs); font-weight: 600; letter-spacing: 0.08em;
+    color: var(--accent-600); margin: 0 0 0.5rem; text-transform: uppercase;
+}
+.not-found-title { font-size: 2rem; margin: 0 0 1rem; color: var(--text-primary); }
+.not-found-text { color: var(--text-secondary); line-height: 1.6; margin: 0 0 1.75rem; }
+
+/* ---- Prose theming (Tailwind typography plugin) ---- */
+.themed-prose {
+    --tw-prose-body: var(--text-secondary);
+    --tw-prose-headings: var(--text-primary);
+    --tw-prose-links: var(--accent-500);
+    --tw-prose-bold: var(--text-primary);
+    --tw-prose-code: var(--accent-600);
+    --tw-prose-quotes: var(--text-secondary);
+    --tw-prose-quote-borders: var(--border-default);
+    --tw-prose-hr: var(--border-default);
+    --tw-prose-bullets: var(--accent-400);
+    --tw-prose-counters: var(--text-secondary);
+    --tw-prose-captions: var(--text-secondary);
+    --tw-prose-th-borders: var(--border-default);
+    --tw-prose-td-borders: var(--border-subtle);
+}
+
+/* ============================================================
+   CONTENT BODY — base text styles
+   ============================================================ */
+/* Readable measure: the outer .prose wrapper carries max-w-none (the shared
+   .shop-row container is 66rem, too wide for body copy), so the line length
+   is capped here instead, on the text itself rather than the page. */
+.content-body { max-width: 70ch; }
+.content-body,
+.content-body p,
+.content-body li,
+.content-body ul,
+.content-body ol { color: var(--text-secondary); }
+/* <span> is split out because it alone still needs the hammer: it flattens
+   inline color. A span inside content that carries a style attribute gets
+   repainted body-secondary by this one declaration, and only !important
+   reaches past a style attribute — so it is load-bearing rather than cargo,
+   and it stays for prose and for the hand-colored cells in the
+   ascii-output shortcode. The :not()s carve out the two places spans carry
+   their own AA-tuned colors: Chroma's token spans (inside .highlight) keep
+   Monokai, and the redactcam demo's .rc-tag chart markers keep their light
+   ink on the near-black tag chip (their style attribute is positional only —
+   the hammer was repainting them 2.6:1 grey-on-black). */
+.content-body span:not(.highlight *):not(.rc-tag) { color: var(--text-secondary) !important; }
+.content-body h1,
+.content-body h2,
+.content-body h3,
+.content-body h4 { color: var(--text-primary); }
+.content-body strong,
+.content-body b { color: var(--text-primary); }
+.content-body a { color: var(--accent-600); }
+.content-body code {
+    color: var(--accent-600);
+    background-color: var(--bg-elevated);
+    padding: 2px 6px; border-radius: 4px;
+}
+.content-body pre {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-default);
+}
+
+/* ============================================================
+   SECTION CONTENT — headings, tables, rules
+   ============================================================ */
+.section-content h2 {
+    color: var(--accent-600);
+    border-bottom: 1px solid var(--border-default);
+    padding-bottom: 0.5rem; margin-top: 2rem;
+}
+.section-content h3 { color: var(--text-primary); margin-top: 1.5rem; }
+.section-content table { width: 100%; border-collapse: collapse; font-size: var(--font-size-md); }
+/* Every table sits in a .table-scroll box (layouts/_default/_markup/render-table.html
+   for markdown, the rigscore-check-table shortcode for the data-driven one), so a wide
+   table scrolls inside its own box instead of pushing the page sideways. preview-shots.sh
+   measures this: /rigscore/ was 1024px wide in a 390px viewport on 2026-09-02. */
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.section-content .table-scroll { margin: 1.25rem 0; }
+.section-content .table-scroll table { margin: 0; }
+.section-content th {
+    text-align: left; padding: 0.75rem; background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-default);
+    color: var(--text-secondary); font-weight: 600;
+}
+.section-content td { padding: 0.75rem; border-bottom: 1px solid var(--border-subtle); }
+.section-content hr { border-color: var(--border-default); margin: 2rem 0; }
+@media (max-width: 640px) {
+    .section-content table { font-size: var(--font-size-xs); }
+    .section-content th, .section-content td { padding: 0.5rem; }
+}
+
+/* ============================================================
+   CODE BLOCK POLISH
+
+   One deliberate dark surface survives the redesign: fenced code blocks
+   (Chroma/Monokai). Monokai's palette is WCAG-AA-tuned in
+   chroma-monokai.css against a #18181b block background and a #27272a
+   inline-code background — both hardcoded literally here rather than
+   pulled from the (now light) --bg-card/--bg-elevated tokens, so that
+   tuning stays valid without regenerating or re-verifying the palette.
+   This is a scoped, intentional exception (a dark "terminal inset" for
+   literal code, the same convention plenty of light-themed docs sites
+   use), not a re-admission of the dark theme the rest of this file kills.
+   ============================================================ */
+.highlight {
+    background: #18181b;
+    border: 1px solid #3f3f46; border-radius: 10px;
+    padding: 0.85rem 1.1rem; margin: 1.5rem 0; overflow-x: auto;
+}
+.highlight pre {
+    background: transparent; margin: 0; padding: 0;
+    font-size: var(--font-size-sm); line-height: 1.55; color: #f3f4f6;
+}
+/* The .content-body code rule above (accent ink, light chip background) also
+   matches the <code> element Chroma emits INSIDE every fenced block — which
+   painted dark-red-on-near-black at ~1.5:1 on the terminal inset. Two classes
+   beat its one, so code inside a highlight block inherits the inset's light
+   text and no chip styling. */
+.content-body .highlight code,
+.section-content .highlight code {
+    color: inherit; background: transparent; padding: 0; border-radius: 0;
+}
+
+/* Inline code pills — text-only marker with a subtle underline cue. These
+   undo the .content-body code block above (two classes plus a child
+   combinator outrank its one class and one element). */
+.section-content p > code,
+.section-content li > code,
+.content-body p > code,
+.content-body li > code {
+    background: transparent; padding: 0; border-radius: 0;
+    color: var(--accent-600); font-weight: 600;
+    border-bottom: 1px dotted var(--accent-tint-border);
+}
+
+/* ASCII status markers (see layouts/shortcodes/ascii-output.html). Colors
+   re-tuned for the white panel that block now sits on — all ≥4.5:1. */
+.marker-ok  { color: #166534; font-weight: 600; }
+.marker-x   { color: #b91c1c; font-weight: 600; }
+.marker-na  { color: var(--text-secondary); }
+.marker-adv { color: #1d4ed8; }
+
+/* Scoring grade table — subtle color hierarchy, same re-tuned palette as
+   the ascii-output shortcode's inline Grade coloring. */
+.grade-table td[data-grade="A"] { color: #166534; font-weight: 600; }
+.grade-table td[data-grade="B"] { color: #3f6212; font-weight: 600; }
+.grade-table td[data-grade="C"] { color: #92400e; font-weight: 600; }
+.grade-table td[data-grade="D"] { color: #9a3412; font-weight: 600; }
+.grade-table td[data-grade="F"] { color: #b91c1c; font-weight: 600; }
+
+/* Right-align numeric weight columns in check tables. */
+.section-content table td.weight,
+.section-content table th.weight { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   MERMAID diagrams — theme is 'default' (light) in mermaid-loader.js;
+   the card surface now matches it instead of fighting it.
+   ============================================================ */
+.mermaid,
+pre.mermaid {
+    background: var(--bg-card); border: 1px solid var(--border-default);
+    padding: 1.5rem; border-radius: 10px; margin: 2rem 0;
+    text-align: center; overflow-x: auto;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+    .prev-next-grid { grid-template-columns: 1fr; }
+    .prev-next-col-right { text-align: left; }
+    .list-row { flex-direction: column; gap: 0.35rem; }
+    .list-row-meta { gap: 0.85rem; }
+    .hire-band { flex-direction: column; align-items: flex-start; }
+}
+
+/* ---- Print (M1) — legible print, not a print design ---- */
+@media print {
+    :root { --bg-primary: #fff; --bg-card: #fff; }
+    body { background: #fff; color: #111; }
+    .masthead, .colophon, .skip-link { display: none; }
+    a { color: #111; text-decoration: underline; }
+    .shelf-panel, .install-box, .hire-band { box-shadow: none; }
+}
+
+/* ============================================================
+   DARK-SURFACE SCOPE — /quiet-corners/ dashboard only.
+
+   quiet-corners-dashboard.html is explicitly out of scope for this
+   redesign (PAGES §4: "minimum = don't break; recolor via the shared
+   stylesheet only") — it is an immersive Leaflet map "app" screen with
+   literal dark backgrounds baked into its own markup (bg-[#0a0a14] etc.),
+   not something this pass restyles. Its methodology panel, modal and
+   filter chrome read var(--text-secondary)/var(--text-muted)/
+   var(--accent-500)/var(--bg-card)/var(--border-default) etc. directly, so
+   repointing those tokens to the new light palette would silently paint
+   dark-ink text onto its still-dark panels — breaking exactly the page
+   this rule says not to touch, without editing a single line of its HTML.
+
+   `.themed-\[dark\]` is the literal class already on that page's outer
+   <article> (themed-[dark] — inert as a Tailwind utility, but a valid CSS
+   hook). Restoring the pre-redesign dark values here, scoped to that
+   subtree, keeps the dashboard pixel-identical while every other var()
+   consumer on the site — including redactcam's and sun-track's demo
+   charts, which are ordinary content-page sections, not app screens — picks
+   up the new light tokens automatically, exactly as instructed. Custom
+   properties inherit down the DOM regardless of which stylesheet queries
+   them, so this single block also covers quiet-corners.css and the
+   inline styles quiet-corners.js writes.
+   ============================================================ */
+.themed-\[dark\] {
+    color-scheme: dark;
+    --text-primary: #f3f4f6;
+    --text-secondary: #d1d5db;
+    --text-muted: #a1a1aa;
+    --text-subtle: #a1a1aa;
+    --bg-primary: #09090b;
+    --bg-card: #18181b;
+    --bg-elevated: #27272a;
+    --border-default: #3f3f46;
+    --border-subtle: #27272a;
+    --accent-500: #4caf63;
+    --accent-400: #6cc77f;
+    --accent-300: #9fdcaa;
+}
+
+/* product sheet */
+.sheet-provenance { grid-column: 1 / -1; font-size: var(--font-size-2xs); color: var(--text-secondary); }
+.sheet-provenance summary { cursor: pointer; width: max-content; }
+.sheet-provenance p { margin: 0.35rem 0 0; font-variant-numeric: tabular-nums; }
+.install-meta { font-size: var(--font-size-2xs); color: var(--text-secondary); }

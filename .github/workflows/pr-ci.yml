@@ -1,0 +1,711 @@
+name: PR CI
+
+# Runs on every pull request whose base is the integration branch (`master`). Until this workflow, no CI
+# triggered on non-release PRs at all — human edits (e.g. drift-fix PRs
+# #130-#143) merged with zero checks: no Hugo build, no frontmatter, no
+# link check (audit finding D3-no-PR-CI). This gates every PR on a clean
+# build + the same validations the deploy pipeline runs.
+#
+# Runner placement is tiered by the `scope` job's qcm_scope (scripts/ci/pr-scope.mjs).
+# `site` and `skip` (homepage, content and static-asset PRs) run pr-ci on
+# `ubuntu-latest`, so they no longer queue behind wsl2-runner-3, the only runner the
+# `heavy` label reaches and one shared with other repos' heavy jobs (website PRs
+# waited a median 84 min, p90 313, for a job that executes in about 30). `full`, and
+# any empty or unknown scope, stay on `[self-hosted, heavy]`. The expression matches
+# the two hosted tiers by name rather than testing `!= 'full'`, so a scope the job
+# cannot name never reaches a hosted runner. Hosted minutes are the Free plan's
+# standard-runner allowance (org budget $0, further usage prevented): a used-up
+# allowance stops jobs, it never bills them, and in 2026-08 hosted jobs here never
+# started at all ("recent account payments have failed"; that is why a0d2d1af moved
+# the repo to self-hosted on 2026-08-28). The repository variable
+# HM_PR_CI_RUNNER=self-hosted forces every tier back to `[self-hosted, heavy]` with no
+# code change, and the job id, name and check names are the same on both. The lane
+# label stays required on the self-hosted side: a bare `runs-on: self-hosted` also
+# matches wsl2-runner, reserved (label `gms-video`) for the 25-30 minute GoMoveShift
+# video suite. scripts/test_governance_contract.py pins this exact expression on this
+# job only. Every other job, here and in every workflow, takes its runner from the
+# repository variable HM_RUNNER (heavy lane) or HM_RUNNER_QUICK (quick lane), a JSON
+# string or array, and falls back to the same self-hosted lane while it is unset; the
+# self-hosted arm above reads HM_RUNNER too. The cut-over to GitHub-hosted runners
+# (README, "CI runners") is setting those two variables, with no code change.
+# Draft pull requests skip all four jobs; `ready_for_review` starts the run.
+# That reintroduces the fork-PR hazard flagged by audit finding
+# I-runner-hazard: if this repo is ever made public, a pull_request-
+# triggered workflow on a self-hosted runner would let a fork PR queue
+# arbitrary jobs onto the workstation. The `if:` guard on the job below
+# closes that exposure by refusing to run for any pull_request whose head
+# repo is not this one — same-repo PRs (and every non-pull_request
+# trigger) are unaffected.
+#
+# NOTE (audit finding H-site-private): this repo is private on a plan
+# without required status checks, so this workflow runs and shows a
+# red/green result but CANNOT be marked *required* until the repo is made
+# public or the plan is upgraded. Merge gating stays advisory for now — a
+# visible red X still helps reviewers even while it can't block the merge.
+
+# Stacked children: a PR whose base is another feature branch gets no CI until
+# it is retargeted to `master`. It cannot merge before its parent lands, and a
+# rebased stack queued several 28-45 minute runs on the `heavy` runner at once.
+# The job's `if:` checks the base ref and the run shows as skipped, not failed.
+# `edited` is in the trigger types so a retarget (a base change fires it) starts
+# CI. A title or body edit fires `edited` too; that run cancels nothing and
+# skips every job under a different check name (see the concurrency block).
+# scripts/test_governance_contract.py holds the rule.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+  # product-sync opens release PRs with the workflow token; such a PR starts no
+  # pull_request run until a human approves it, so product-sync dispatches this
+  # workflow on the release branch instead (#821, 2026-10-19). A dispatched run has
+  # no base ref, so `scope` classifies it as full.
+  workflow_dispatch:
+
+# One run per PR. A new push cancels that PR's in-flight run: the old head can no
+# longer merge, and on 2026-09-26 a stack of rebased Quiet Corners branches kept
+# superseded runs on both `heavy` runners for up to 25 minutes while the current
+# heads queued. The group is keyed on the PR number, so it never cancels another
+# PR's run; the merge wrapper and autoland judge the head SHA's runs only. A
+# dispatched run has no PR number and groups by its branch instead.
+# A title or body edit (`edited` with no base change) gets a group of its own, so
+# it no longer cancels the head's run and re-tests the same SHA (7 such reruns,
+# ~163 runner-minutes, in the week to 2026-10-20); its jobs all skip.
+# scripts/test_governance_contract.py holds both halves.
+concurrency:
+  group: pr-ci-${{ github.event.pull_request.number || github.ref }}${{ (github.event.action == 'edited' && !github.event.changes.base) && format('-edit-{0}', github.run_id) || '' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  HUGO_VERSION: '0.139.0'
+  # hugo_extended_0.139.0_linux-amd64.tar.gz, from that release's
+  # hugo_0.139.0_checksums.txt. Bump it with HUGO_VERSION above.
+  HUGO_SHA256: 'c3b60907624cacd64c92b53b8b17ead611100d66072836c3c15361929567bf65'
+  # Same Chrome as deploy-production.yml: the self-hosted runner has no
+  # /usr/bin/google-chrome; pa11y and Lighthouse use the snap Chromium. A hosted run
+  # replaces it in the first step below (the hosted image has no snap).
+  # bin/verify-worktree.sh reads this line, so it stays the self-hosted value.
+  CHROME_PATH: '/snap/bin/chromium'
+  CHROMIUM_FLAGS: '--no-sandbox --headless --disable-gpu'
+
+jobs:
+  # Cheap first job: classifies the PR's changed files into a tier (see
+  # scripts/ci/pr-scope.mjs). No workflow-level `paths:` filter exists on
+  # purpose: a filtered-out workflow leaves a required check "expected" forever.
+  scope:
+    # A skipped edit run must not reuse the real run's check name.
+    name: ${{ (github.event.action == 'edited' && !github.event.changes.base) && 'PR CI scope (edit, not re-run)' || 'PR CI scope' }}
+    runs-on: ${{ fromJSON(vars.HM_RUNNER_QUICK || '["self-hosted","quick"]') }}
+    timeout-minutes: 10
+    # A stacked child skips every job (see pr-ci below), not only pr-ci.
+    if: (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'master' && github.event.pull_request.draft == false)) && !(github.event.action == 'edited' && !github.event.changes.base)
+    outputs:
+      tier: ${{ steps.scope.outputs.tier }}
+      lhci_urls: ${{ steps.scope.outputs.lhci_urls }}
+      qcm_pattern: ${{ steps.scope.outputs.qcm_pattern }}
+      qcm_scope: ${{ steps.scope.outputs.qcm_scope }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Classify changed files
+        id: scope
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -n "$BASE_REF" ]; then
+            git fetch --no-tags origin "$BASE_REF"
+            git diff --name-only "origin/$BASE_REF...HEAD" > changed.txt
+          else
+            : > changed.txt   # not a PR: empty list classifies as full
+          fi
+          cat changed.txt
+          node scripts/ci/pr-scope.mjs scope < changed.txt | tee -a "$GITHUB_OUTPUT"
+
+  pr-ci:
+    # A skipped edit run must not reuse the real run's check name.
+    name: ${{ (github.event.action == 'edited' && !github.event.changes.base) && 'PR CI (build + validate) (edit, not re-run)' || 'PR CI (build + validate)' }}
+    needs: scope
+    runs-on: ${{ contains(fromJSON('["site", "skip"]'), needs.scope.outputs.qcm_scope) && vars.HM_PR_CI_RUNNER != 'self-hosted' && 'ubuntu-latest' || fromJSON(vars.HM_RUNNER || '["self-hosted","heavy"]') }}
+    # Two tiers from the `scope` job. `full` (any change outside content-only
+    # paths, or any path it cannot classify): everything below, 32 Lighthouse
+    # URLs. `narrow` (only content/**/*.md, static/img|og, root *.md): Lighthouse
+    # runs a 3-URL smoke list (home, /keycut/, /rigscore/). node --test and
+    # pa11y are identical in both tiers. The `result` job below fails when this
+    # job or `scope` is cancelled, skipped or failed.
+    # A second axis, qcm_scope, three tiers (scripts/ci/pr-scope.mjs). `skip`: every
+    # changed file is on the allowlist (content/*.md outside quiet-corners, static/img|og,
+    # root *.md, scripts/test_*.py), none of which any Field Maps test or quiet-corners
+    # page reads; the scripts/qcm glob is not run (13.7 min p50 of a shared heavy runner).
+    # `site`: only those plus the site chrome (homepage index.html, partials/head.html,
+    # params.toml, data/systems.json, static/llms.txt); only the SITE-COUPLED qcm files
+    # run (scripts/qcm/site-coupling.json: the ones that read the built site, layouts,
+    # content, data, site-config, llms.txt or images). `full`: anything else, unknown
+    # included. In every tier the build, every validator, pa11y, htmltest, Lighthouse and
+    # the five named node tests still run, and the evidence step is told the tier.
+    # Measured 2026-10-08 10:14 AM ET over the last 60 completed runs (job
+    # started_at to completed_at, queue time excluded): the 28 green jobs took
+    # p50 27.9 min, p90 35.8, slowest 43.0, and nine runs were cancelled at
+    # 45.3-45.7 min by the old 45 cap, #759's 37715513309 among them. 65 is 1.5x
+    # the slowest green run. The 2026-10-06 measurement (p50 17.7, slowest 28.1)
+    # set 45; the job has since grown and the box is shared with local suites.
+    # GitHub does not cancel a self-hosted job at 60 (run 37642869684 ran 107.9
+    # min), so this cap is the only bound on a hang; 90 is the ceiling.
+    # scripts/test_governance_contract.py holds the ratio; re-measure with the
+    # runs API before changing it, never from this comment.
+    timeout-minutes: 65
+    # Refuse fork PRs: a pull_request from a fork has a different
+    # head.repo.full_name, so this is false and the self-hosted runner never
+    # picks up the job. Every non-pull_request trigger and same-repo PRs pass.
+    # Also refuse a stacked child: its base is not the integration branch.
+    if: (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'master' && github.event.pull_request.draft == false)) && !(github.event.action == 'edited' && !github.event.changes.base)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Use the hosted runner's Chrome
+        # Hosted tiers only (runner.environment is 'github-hosted'; HM_PR_CI_RUNNER=self-hosted
+        # makes it 'self-hosted' and this step is skipped, leaving the snap path above).
+        # The browser tests fail closed on a CHROME_PATH naming a missing file, and the
+        # hosted image has no /snap/bin/chromium. GITHUB_ENV overrides the workflow env
+        # for every later step, including `env.CHROME_PATH` in the pa11y step; Lighthouse
+        # (chrome-launcher) reads CHROME_PATH too. A missing browser fails here, naming itself.
+        if: runner.environment == 'github-hosted'
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$chrome" ]; then
+            echo "::error::no google-chrome or chromium on this hosted runner"
+            exit 1
+          fi
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+
+      - name: Setup Hugo
+        # $RUNNER_TEMP, not $HOME: peaceiris/actions-hugo installs into
+        # $HOME/actions_hugo/bin, and the runners are processes under ONE user
+        # account on one box. Two concurrent jobs extract Hugo over the path the
+        # other may be executing — the `Text file busy` (exit 126) that killed run
+        # 34761209179 with htmltest. The action takes no input that moves the
+        # install off the shared home, so the pinned release is fetched here
+        # instead. $RUNNER_TEMP belongs to one runner and is wiped between jobs.
+        #
+        # HUGO_SHA256 sits beside HUGO_VERSION in this file's `env:` block so a
+        # version bump cannot miss it; it is a constant, not a checksums file
+        # fetched at run time, because a checksum the same server serves next to
+        # the tarball verifies nothing.
+        run: |
+          : "${RUNNER_TEMP:?the runner did not set RUNNER_TEMP}"
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSL -o hugo.tar.gz \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          echo "${HUGO_SHA256}  hugo.tar.gz" | sha256sum -c -
+          tar xz -C "$RUNNER_TEMP/bin" hugo -f hugo.tar.gz
+          rm hugo.tar.gz
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Setup Python for validation
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m venv venv
+          venv/bin/pip install pyyaml pytest
+
+      - name: Security audit self-test
+        # The audit script itself had never been tested, which is how three
+        # defects survived in it — including a regex that silently stopped
+        # matching single-quoted credentials. It runs post-deploy against the
+        # live site, so a broken scanner reports clean and nobody notices.
+        # These tests are pure logic and need no network.
+        run: |
+          echo "=== security-audit.sh regression tests ==="
+          bash .github/scripts/security-audit.test.sh
+
+      - name: Validate frontmatter
+        run: |
+          echo "=== Front Matter Validation ==="
+          venv/bin/python3 scripts/test_frontmatter.py
+
+      - name: Validate content accuracy (TDD)
+        # Moved out of deploy-only into PR CI: a content-accuracy violation used
+        # to surface post-merge as a blocked production deploy (a late gate).
+        run: |
+          echo "=== Content Accuracy Validation ==="
+          venv/bin/python3 -m pytest scripts/test_content_validation.py -v
+          venv/bin/python3 -m pytest scripts/test_copy_metrics.py -v
+          # Readability bar for the driftless page (same command as
+          # scripts/validate.sh): 800 words, Flesch >= 60, 30 words/sentence,
+          # exactly three body links, no British spellings.
+          venv/bin/python3 scripts/copy_metrics.py content/driftless.md --links 3
+
+      - name: Validate data contract (JS fieldset vs committed export)
+        # The Quiet Corners JS reads a fixed fieldset off the committed JSON;
+        # this asserts the two still agree so an exporter rename goes red here
+        # instead of rendering dashes in production.
+        run: |
+          echo "=== Data Contract Validation ==="
+          venv/bin/python3 -m pytest scripts/test_data_contract.py -v
+
+      - name: Validate governance contract (README sections + content schema)
+        # The Back Road Creative workspace requires Purpose/Owner/Status/Exit
+        # Condition in this README and a content/_content.schema.yaml here, but
+        # it cannot check either: it consumes this repo as a submodule and no
+        # workflow there passes `submodules:` to actions/checkout, so the
+        # directory is empty in its CI. Checked where the files live instead.
+        run: |
+          echo "=== Governance Contract Validation ==="
+          venv/bin/python3 -m pytest scripts/test_governance_contract.py -v
+
+      - name: Public tree check (no private repo, local path, key or .enc file tracked)
+        # This repo is published from one commit of its tracked files, so a
+        # private repo name or a developer's local path must fail the PR, not
+        # surface after publishing.
+        run: |
+          echo "=== Public Tree Validation ==="
+          venv/bin/python3 -m pytest scripts/test_public_tree.py -v
+
+      - name: Validate product release data (data/releases/<slug>.json contract)
+        # H12b: the product-sync workflow writes these files unattended; this
+        # is the same offline contract test it runs on itself before opening
+        # a PR, run again here so a hand edit to data/releases/** can't merge
+        # broken.
+        run: |
+          echo "=== Release Data Validation ==="
+          venv/bin/python3 -m pytest scripts/test_release_data.py -v
+          venv/bin/python3 -m pytest scripts/test_media_manifest.py -v
+          venv/bin/python3 -m pytest scripts/test_product_sync.py -v
+          venv/bin/python3 -m pytest scripts/test_framegrade_page.py -v
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build Tailwind CSS
+        # Hugo's head partial links /css/tailwind.css, which build:css emits;
+        # without this the htmltest step below would flag a broken CSS link.
+        run: npm run build:css
+
+      - name: Hugo build
+        # --minify because deploy-production.yml builds with it and this job's
+        # validation reads public/. Without it the two jobs check different
+        # bytes: the systems-contract step below went green here on unminified
+        # markup and red on every deploy, holding production at #253 while
+        # three merged PRs sat undeployed. The remaining difference is
+        # --environment production, which only swaps baseURL to the live host —
+        # deliberately not adopted here, because it would turn this build's
+        # internal links into absolute ones and send htmltest at the live site.
+        run: |
+          echo "=== Hugo Build ==="
+          bash scripts/build-site.sh --configDir site-config --minify
+
+      - name: Validate systems contract (nav + ledger + llms.txt vs the build)
+        # Checks the three files that claim what this site holds against the
+        # pages Hugo just wrote: every data/systems.json link and menus.toml
+        # entry resolves to a built page, every tier is one the roster renders,
+        # and static/llms.txt names the same systems the roster does. It was wired
+        # only into deploy-production.yml, so a broken link surfaced post-merge
+        # as a blocked production deploy — a late gate where an upstream one was
+        # available. Reads public/, so it must follow the Hugo build above.
+        run: |
+          echo "=== Systems Contract Validation ==="
+          venv/bin/python3 -m pytest scripts/test_systems_contract.py -v
+          venv/bin/python3 -m pytest scripts/test_driftless_demo.py -v
+          venv/bin/python3 -m pytest scripts/test_driftless_bin.py -v
+          venv/bin/python3 -m pytest scripts/test_grant_platform_demo.py -v
+          venv/bin/python3 -m pytest scripts/test_table_scroll.py -v
+          # These four existed and passed but no workflow ran them, so each read
+          # as a gate while guarding nothing. test_governance_contract.py now
+          # fails on any scripts/test_*.py this file does not name.
+          venv/bin/python3 -m pytest scripts/test_qc_privacy_accuracy.py -v
+          venv/bin/python3 -m pytest scripts/test_a11y_config.py -v
+          venv/bin/python3 -m pytest scripts/test_headers_build_wiring.py -v
+          venv/bin/python3 -m pytest scripts/test_waypost_demo.py -v
+          # Both read the minified build above, so they parse the HTML rather than
+          # match quoted attributes, which --minify drops.
+          venv/bin/python3 -m pytest scripts/test_chip_readiness.py -v
+          venv/bin/python3 -m pytest scripts/test_homepage_media.py -v
+          venv/bin/python3 -m pytest scripts/test_homepage_design.py -v
+          # preview.sh is the helper an autonomous visual review trusts to say
+          # "this URL is the site you just built". It once reported a foreign
+          # server holding the port as ready. These tests launch it for real, so
+          # they need the hugo binary the step above already installed.
+          venv/bin/python3 -m pytest scripts/test_preview_readiness.py -v
+          # preview-shots.sh is what decides a render is good enough to ship. It
+          # used to exit 0 on a 404 and on a blank image. The capture tests skip
+          # themselves when no chromium is on PATH; CHROME_PATH is set for the
+          # whole workflow, so here they run.
+          venv/bin/python3 -m pytest scripts/test_preview_shots.py -v
+
+      - name: Verify rigscore product-page data (offline)
+        # The two data gates the retired release-post pipeline used to run,
+        # now wired here so they gate the product page on every PR instead of
+        # only at release time: check-rigscore-sync.js (data/rigscore.json
+        # version is semver-shaped) and verify-rigscore-toolpage.js
+        # (checkCount/advisoryCount/weights internally consistent). Offline
+        # modes only — no network. A failure fails the job (not piped, so
+        # each exit code is the step's).
+        run: |
+          echo "=== Verify rigscore product-page data ==="
+          node scripts/check-rigscore-sync.js
+          node scripts/verify-rigscore-toolpage.js
+
+      - name: Verify rigscore facts
+        # scripts/verify-facts.js is added by E4 (PR #150 chain). Merge E4
+        # before E5 or this step fails because the script is not yet present.
+        run: |
+          echo "=== Verify rigscore facts ==="
+          node scripts/verify-facts.js
+
+      - name: Field Maps engine + script unit tests (node --test)
+        # Node's built-in runner over the quoted glob: later PRs add a
+        # scripts/qcm/*.test.mjs file and it runs here with no workflow edit.
+        # scripts/test-verify-claims.js (offline tests for verify-claims.js)
+        # is named explicitly — it sits outside the glob.
+        #
+        # --test-timeout, because node --test has NO per-test timeout of its own.
+        # These tests drive a real chromium, and three runners share one box: a
+        # starved browser launch does not fail, it waits. Twice a run went silent
+        # mid-suite and was killed 25 minutes later by the job's own
+        # timeout-minutes, which GitHub reports as "cancelled" — no failing test
+        # name, nothing to read.
+        #
+        # 180s was chosen as "~60x the slowest TEST" and that reasoning was wrong,
+        # measured on run 35006758172: --test-timeout also caps each FILE, which
+        # node runs as a test of its own. find-and-scale.test.mjs holds 17 tests
+        # across four viewports, so the cap fired on the file, not on a hang:
+        #
+        #   not ok 24 - scripts/qcm/find-and-scale.test.mjs
+        #     failureType: 'testTimeoutFailure'
+        #     error: 'test timed out after 180000ms'
+        #   # pass 734  # fail 0  # cancelled 1
+        #
+        # The budget has to clear the slowest FILE under contention, not the
+        # slowest test. A green run of the whole suite is ~156s (run 34990651987),
+        # so 600s is ~4x the entire suite and still well inside the job's
+        # timeout-minutes: a genuine hang is caught with the hung file named, and a file merely
+        # starved by two sibling runners finishes and passes.
+        #
+        # --test-concurrency: node's default is availableParallelism()-1 files at
+        # once, each browser file its own Chromium -- 11 per job on this box. Two
+        # PR-CI jobs, a deploy job and a session's local run doing that together
+        # is what ran the WSL VM out of memory on 2026-09-28 (~1,900 Chromium
+        # processes in 73 minutes). helpers/test-concurrency.mjs keeps node's
+        # default on a quiet box and throttles by load and free memory; the
+        # box-wide cap on simultaneous Chromiums itself lives in
+        # helpers/browser-slots.mjs, inside launch(), so no job can exceed it.
+        #
+        # run-with-evidence.mjs (QQA-12a) runs this same node --test -- the flags pass
+        # through -- and also writes a record of what ran: the commit, per file its
+        # pass / fail / skip counts, and each skipped test with its reason. The next
+        # step holds that record to this commit.
+        #
+        # QCM_PATTERN comes from the scope job: the full glob, or EMPTY when qcm_scope
+        # is skip or site. ${QCM_PATTERN:+"$QCM_PATTERN"} expands an empty pattern to no
+        # argument at all, never an empty one, and run-with-evidence.mjs only falls
+        # back to its default glob when it is given no file, so the named tests keep the
+        # skip tier from ever widening. QCM_SCOPE is passed as --qcm-scope: for `site`
+        # run-with-evidence.mjs adds the files of scripts/qcm/site-coupling.json (and
+        # exits 2 on an empty or unreadable list rather than widening or running nothing).
+        # The named tests run in every tier: scripts/test-pr-ci-scope.mjs (classifier +
+        # workflow contract), scripts/test-site-surface.mjs (claim checks on the site's own
+        # data and llms.txt, moved out of print-proof) and scripts/test-qcm-boundary.mjs
+        # (the manifest equals what the scan finds, so an ENGINE file cannot read the site).
+        #
+        # QCM_SHOT_DIR: session-journey-browser.test.mjs (journey J11) saves a JPEG of
+        # each 3D state there; the next step keeps them when the job passes.
+        env:
+          QCM_PATTERN: ${{ needs.scope.outputs.qcm_pattern }}
+          QCM_SCOPE: ${{ needs.scope.outputs.qcm_scope }}
+          QCM_SHOT_DIR: ${{ runner.temp }}/qcm-shots
+        run: node scripts/qcm/run-with-evidence.mjs --out "$RUNNER_TEMP/qcm-test-evidence.json" --qcm-scope "$QCM_SCOPE" --test-timeout=600000 --test-concurrency="$(node scripts/qcm/helpers/test-concurrency.mjs)" ${QCM_PATTERN:+"$QCM_PATTERN"} scripts/test-verify-claims.js scripts/test-pr-ci-scope.mjs scripts/test-deploy-gate.mjs scripts/test-site-surface.mjs scripts/test-qcm-boundary.mjs
+
+      - name: Field Maps test evidence (every file ran, nothing skipped unlisted)
+        # A green node --test says only that nothing failed. It does not say every
+        # scripts/qcm test file ran, that no browser suite skipped itself (site-server
+        # skips them when there is no build -- the 528-of-603 run recorded above), or
+        # that the run was of this commit. check-evidence.mjs fails the job on any of
+        # those; a skip is allowed only when evidence-skip-allowlist.json names it.
+        # github.sha, not HEAD: the record must match the commit this run was for.
+        #
+        # QCM_SCOPE is the scope job's tier, passed explicitly. `full` demands every
+        # scripts/qcm test file on disk, as always. `skip` does not (they were
+        # deliberately not selected) but check-evidence.mjs then insists on --require,
+        # so all the named tests must be in the record: the skip is an input, never
+        # an implicit pass. `site` demands every file of scripts/qcm/site-coupling.json
+        # (and fails if the list is empty, unreadable, or names a file not on disk) plus
+        # the named tests. The named tests are required in every tier (the run command
+        # always includes them); an empty or missing tier value exits 2 and fails the step.
+        env:
+          QCM_SCOPE: ${{ needs.scope.outputs.qcm_scope }}
+        run: |
+          node scripts/qcm/check-evidence.mjs --evidence "$RUNNER_TEMP/qcm-test-evidence.json" --sha "${{ github.sha }}" --qcm-scope "$QCM_SCOPE" --require scripts/test-verify-claims.js --require scripts/test-pr-ci-scope.mjs --require scripts/test-deploy-gate.mjs --require scripts/test-site-surface.mjs --require scripts/test-qcm-boundary.mjs
+          { echo "### Field Maps test evidence"; echo '```json'; cat "$RUNNER_TEMP/qcm-test-evidence.json"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the J11 3D screenshots
+        # A handful of ~60 KB JPEGs from a passing run, so a reviewer can see what the
+        # 3D view drew. Artifact storage is finite (quota hit 2026-08-28, see the
+        # Lighthouse step), hence one day and nothing when the proof did not run.
+        # A convenience copy, not evidence: an upload that fails (DNS ENOTFOUND on #791's
+        # run 39455905553, every test green) must not turn a passing build red.
+        if: success()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: qcm-3d-shots
+          path: ${{ runner.temp }}/qcm-shots
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Hand the build to site-audit
+        # The browser and link audits (htmltest, github.com links, pa11y, Lighthouse)
+        # were ~9-11.5 of this job's 21-26 minutes and all of it held one heavy runner.
+        # They run in the site-audit job on the built site, so it is passed on as an
+        # artifact. Not continue-on-error: site-audit cannot run without it. One day
+        # is enough (artifact storage quota was hit 2026-08-28). Hidden files stay in.
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: site-public
+          path: public
+          retention-days: 1
+          include-hidden-files: true
+          if-no-files-found: error
+
+  # The browser and link audits, split out of pr-ci so they queue on the idle `quick`
+  # lane (or a hosted runner, on the same site/skip tiers as pr-ci) instead of holding
+  # a heavy runner for another 9-11 minutes. `needs: scope` is listed beside pr-ci
+  # because a job reads only the outputs of the jobs it names. It skips whenever pr-ci
+  # skips or fails (same `if:`, and a failed need skips it), and `result` reads both.
+  site-audit:
+    # A skipped edit run must not reuse the real run's check name.
+    name: ${{ (github.event.action == 'edited' && !github.event.changes.base) && 'PR CI site audit (edit, not re-run)' || 'PR CI site audit' }}
+    needs: [scope, pr-ci]
+    runs-on: ${{ contains(fromJSON('["site", "skip"]'), needs.scope.outputs.qcm_scope) && vars.HM_PR_CI_RUNNER != 'self-hosted' && 'ubuntu-latest' || fromJSON(vars.HM_RUNNER_QUICK || '["self-hosted","quick"]') }}
+    timeout-minutes: 30
+    if: (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'master' && github.event.pull_request.draft == false)) && !(github.event.action == 'edited' && !github.event.changes.base)
+    steps:
+      - name: Checkout code
+        # The htmltest, pa11y and Lighthouse configs and the check scripts are tracked
+        # files; the built site arrives as the artifact below.
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Download the built site
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: site-public
+          path: public
+
+      - name: Use the hosted runner's Chrome
+        # Same step as pr-ci: the hosted image has no /snap/bin/chromium, and pa11y and
+        # Lighthouse fail closed on a CHROME_PATH naming a missing file.
+        if: runner.environment == 'github-hosted'
+        run: |
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$chrome" ]; then
+            echo "::error::no google-chrome or chromium on this hosted runner"
+            exit 1
+          fi
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Setup Python (static server for pa11y)
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        # pa11y-ci comes from node_modules (npx). Lighthouse CI is fetched by the action.
+        run: npm ci --ignore-scripts
+
+      - name: Probe the self-hosted Chromium, else install Chrome for Testing
+        # wsl2-ci-1 runs its runner under NoNewPrivileges=yes, so the setuid
+        # snap-confine cannot start /snap/bin/chromium there ("snap-confine is
+        # packaged without necessary permissions", run 39684764854); the runners
+        # under joe start it fine. Launch-probe the browser CHROME_PATH names and,
+        # when it cannot start, install Chrome for Testing (every library it needs
+        # is on the host) into the runner's tool cache, kept across runs, and
+        # repoint CHROME_PATH for pa11y and Lighthouse. The runner itself is not
+        # the fix: its hardening is deliberate and stays.
+        if: runner.environment == 'self-hosted'
+        run: |
+          err="$RUNNER_TEMP/chrome-probe.err"
+          if timeout 60 "$CHROME_PATH" --headless --no-sandbox --disable-gpu --dump-dom about:blank >/dev/null 2>"$err"; then
+            echo "$CHROME_PATH launches on $RUNNER_NAME"
+            exit 0
+          fi
+          echo "::warning::$CHROME_PATH cannot launch on $RUNNER_NAME: $(head -c 300 "$err" | tr '\n' ' ')"
+          cache="$RUNNER_TOOL_CACHE/puppeteer-chrome"
+          npx @puppeteer/browsers install chrome@stable --path "$cache"
+          chrome="$(find "$cache" -type f -name chrome -path '*chrome-linux64*' | head -1)"
+          if [ -z "$chrome" ] || ! timeout 60 "$chrome" --headless --no-sandbox --disable-gpu --dump-dom about:blank >/dev/null; then
+            echo "::error::no browser launches on $RUNNER_NAME"
+            exit 1
+          fi
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+
+      - name: Restore htmltest external-link cache
+        # htmltest's own refcache.json (tmp/.htmltest, see .htmltest.yml's
+        # CacheExpires) never survived past one job here: actions/checkout
+        # runs `git clean -ffdx` before every checkout, which wipes that
+        # untracked directory even on a reused self-hosted workspace. This
+        # step persists it across runs instead, so a link this build has
+        # already verified within CacheExpires is skipped entirely rather
+        # than re-fetched — the fix for two PRs each timing out on a
+        # DIFFERENT github.com link during a concurrent multi-PR sitting
+        # (#544, #545, 2026-09-19): fewer total requests to a throttled
+        # host, independent of the per-request ExternalTimeout above.
+        # Restore only: the save is its own step after the link check,
+        # because actions/cache saves only when the job succeeds, and a red
+        # link check is the run whose retrigger most needs a warm cache. The
+        # key is new on every run attempt, so it never hits; restore-keys
+        # takes the newest cache saved under the prefix. Never gates the
+        # job — a cache miss just means a cold run.
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tmp/.htmltest
+          key: htmltest-refcache-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            htmltest-refcache-v1-
+
+      - name: Install htmltest
+        # Sudo-free install: download, SHA256-verify, then extract to a
+        # user-writable dir and add it to PATH. Needs no root. The checksum
+        # pins the exact binary — an unverified curl|tar would run whatever
+        # the release URL serves.
+        #
+        # $RUNNER_TEMP, not $HOME: the two runners are processes under ONE
+        # user account on one box, so $HOME is shared between concurrent jobs.
+        # On 2026-09-13 two jobs raced $HOME/.local/bin/htmltest — one exec'd
+        # it while the other extracted over the top — and the link check below
+        # died with `Text file busy` (exit 126). $RUNNER_TEMP belongs to one
+        # runner and is wiped between jobs, so neither job can see the other's
+        # copy.
+        run: |
+          HTMLTEST_SHA256=775c597ee74899d6002cd2d93076f897f4ba68686bceabe2e5d72e84c57bc0fb
+          # Empty $RUNNER_TEMP would make the paths below absolute; say so here
+          # rather than letting `mkdir -p /bin` be the error message.
+          : "${RUNNER_TEMP:?the runner did not set RUNNER_TEMP}"
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSL -o htmltest.tar.gz https://github.com/wjdp/htmltest/releases/download/v0.17.0/htmltest_0.17.0_linux_amd64.tar.gz
+          echo "${HTMLTEST_SHA256}  htmltest.tar.gz" | sha256sum -c -
+          tar xz -C "$RUNNER_TEMP/bin" htmltest -f htmltest.tar.gz
+          rm htmltest.tar.gz
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Validate links (htmltest, internal + external)
+        id: links
+        run: |
+          echo "=== Link Check (internal + external) ==="
+          # Config is the tracked .htmltest.yml at the repo root, which
+          # htmltest reads by default — the same file the deploy gate uses,
+          # so the two gates cannot drift apart.
+          htmltest
+
+      - name: Save htmltest external-link cache
+        # Whenever the link check ran, passed or failed. htmltest writes
+        # refcache.json once it has tested the documents, and reuses only
+        # links it cached as OK, so a red run's cache keeps what it verified
+        # and the failures are fetched again next time. Held in place by
+        # scripts/test_governance_contract.py.
+        if: ${{ !cancelled() && (steps.links.outcome == 'success' || steps.links.outcome == 'failure') }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tmp/.htmltest
+          key: htmltest-refcache-v1-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Validate github.com links (GitHub API)
+        # .htmltest.yml ignores github.com: github.com rate-limits page views
+        # per IP and the self-hosted runners share one, so on 2026-10-02 htmltest
+        # went red on 503 "Unicorn!" pages for links that were fine
+        # (#665-#668). This checks the same links through the REST API with
+        # the job's token: one request per repository tree, not one per link.
+        # Runs whenever the link check ran, so a red htmltest still reports
+        # the github.com half. Held in place by scripts/test_governance_contract.py.
+        if: ${{ !cancelled() && (steps.links.outcome == 'success' || steps.links.outcome == 'failure') }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/qcm/check-github-links.mjs --dir public
+
+      - name: Validate accessibility (pa11y-ci, WCAG2AA)
+        # Mirrors the deploy workflow's blocking invocation (same config, same
+        # localhost:1315 serve) so PR results agree with the deploy gate — an
+        # a11y regression used to surface only after merge, on push-to-master
+        # (a late gate). `npm ci --ignore-scripts` skips Puppeteer's own
+        # Chromium download, so point pa11y at the runner's Chromium.
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ env.CHROME_PATH }}
+        run: |
+          echo "=== Accessibility audit (pa11y-ci, WCAG2AA) ==="
+          # Same free-port + trap shape as the deploy workflow (see the comment
+          # there): a hosted runner rarely collides on 1315, but keeping the two
+          # invocations identical is the point of this step.
+          PORT=$(python3 -c 'import socket;s=socket.socket();s.bind(("",0));print(s.getsockname()[1]);s.close()')
+          sed "s|http://localhost:1315|http://localhost:$PORT|g" .pa11yci.json > .pa11yci.run.json
+          python3 -m http.server "$PORT" --directory public &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true; rm -f .pa11yci.run.json' EXIT
+          sleep 2
+          STATUS=0
+          npx pa11y-ci --config .pa11yci.run.json || STATUS=$?
+          exit $STATUS
+
+      - name: Select Lighthouse URLs (tier from scope job)
+        env:
+          LHCI_URLS: ${{ needs.scope.outputs.lhci_urls }}
+        run: node scripts/ci/pr-scope.mjs rc "$LHCI_URLS" .lighthouserc.run.json
+
+      - name: Run Lighthouse CI (against local build)
+        # Same action + config as the deploy workflow so scores agree;
+        # .lighthouserc.json serves ./public itself via staticDistDir. Another
+        # push-to-master-only gate made PR-visible.
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
+        with:
+          configPath: .lighthouserc.run.json
+          # Artifact storage quota is finite and was hit 2026-08-28; the
+          # temporary-public-storage link below is the report.
+          uploadArtifacts: false
+          temporaryPublicStorage: true
+
+  # Never lets a missing, skipped or cancelled required job read as green.
+  result:
+    # A skipped edit run must not reuse the real run's check name.
+    name: ${{ (github.event.action == 'edited' && !github.event.changes.base) && 'PR CI result (edit, not re-run)' || 'PR CI result' }}
+    needs: [scope, pr-ci, site-audit]
+    runs-on: ${{ fromJSON(vars.HM_RUNNER_QUICK || '["self-hosted","quick"]') }}
+    timeout-minutes: 5
+    # Same base gate as scope and pr-ci: on a stacked child all four skip, so this
+    # job cannot report a skipped pr-ci or site-audit as red.
+    if: always() && (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'master' && github.event.pull_request.draft == false)) && !(github.event.action == 'edited' && !github.event.changes.base)
+    steps:
+      - name: Fail unless every needed job succeeded
+        env:
+          RESULTS: ${{ needs.scope.result }} ${{ needs.pr-ci.result }} ${{ needs.site-audit.result }}
+        run: |
+          echo "scope/pr-ci/site-audit results: $RESULTS"
+          for r in $RESULTS; do
+            case "$r" in
+              cancelled|skipped|failure) echo "::error::a needed job ended $r"; exit 1 ;;
+            esac
+          done

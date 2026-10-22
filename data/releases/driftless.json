@@ -1,0 +1,25 @@
+{
+  "product": "driftless",
+  "name": "Driftless",
+  "release_source": "github-release",
+  "source_repo": "Back-Road-Creative/driftless",
+  "version": "0.9.0",
+  "released_at": "2026-10-14T14:05:40Z",
+  "release_url": "https://github.com/Back-Road-Creative/driftless/releases/tag/v0.9.0",
+  "source_ref": "v0.9.0",
+  "assets": {
+    "driftless-showcase-v0.9.0.tar.gz": {
+      "url": "https://github.com/Back-Road-Creative/driftless/releases/download/v0.9.0/driftless-showcase-v0.9.0.tar.gz",
+      "sha256": "321e1f3c03e74f30db2203879bba9499ae32cfd3735094a0bc1a60b6dfc75857"
+    }
+  },
+  "demo": {
+    "path": "static/demo/driftless/",
+    "source": "v0.9.0",
+    "source_kind": "product-tag",
+    "anchor": "2026-07-01",
+    "pages": 282
+  },
+  "media_source": null,
+  "notes": "Releases are tagged in the public repo Back-Road-Creative/driftless (data/systems.json's repo key); release_url, the asset URLs and the demo bundle's product-tag source all point there."
+}

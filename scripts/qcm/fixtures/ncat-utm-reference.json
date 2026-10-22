@@ -1,0 +1,17 @@
+{
+ "source": "NOAA NGS NCAT llh endpoint (https://geodesy.noaa.gov/api/ncat/llh), NAD83(2011) in/out, retrieved 2026-09-05; NAD83(2011) and WGS84 differ by ~1-2 m, far below print tolerance, and the UTM formulas are datum-independent given the GRS80/WGS84 ellipsoid (a=6378137, 1/f=298.257222101 vs 298.257223563 \u2014 sub-mm effect)",
+ "points": [
+  {"name":"standing-indian-summit","lat":35.0327,"lon":-83.5299,"zone":17,"hemisphere":"N","easting":269208.537,"northing":3879595.433,"convergenceDms":"-01 27 10.49","scaleFactor":1.00025651,"usng":"17SKU6920979595"},
+  {"name":"wayah-bald","lat":35.1798,"lon":-83.561,"zone":17,"hemisphere":"N","easting":266790.539,"northing":3895986.531,"convergenceDms":"-01 28 34.22","scaleFactor":1.00027032,"usng":"17SKU6679195987"},
+  {"name":"hightower-bald-cell-sw","lat":34.875,"lon":-83.625,"zone":17,"hemisphere":"N","easting":260071.418,"northing":3862325.118,"convergenceDms":"-01 30 05.98","scaleFactor":1.00030955,"usng":"17SKU6007162325"},
+  {"name":"rainbow-springs-cell-ne","lat":35.125,"lon":-83.5,"zone":17,"hemisphere":"N","easting":272193.702,"northing":3889765.831,"convergenceDms":"-01 26 20.49","scaleFactor":1.00023962,"usng":"17SKU7219489766"},
+  {"name":"zone-16-side-of-edge","lat":35.0,"lon":-84.0001,"zone":16,"hemisphere":"N","easting":773788.967,"northing":3877156.417,"convergenceDms":"01 43 18.27","scaleFactor":1.00052396,"usng":"16SGD7378977156"},
+  {"name":"zone-17-interior","lat":35.0,"lon":-83.0,"zone":17,"hemisphere":"N","easting":317483.906,"northing":3874870.635,"convergenceDms":"-01 08 50.89","scaleFactor":1.00001057,"usng":"17SLU1748474871"},
+  {"name":"boulder-co-zone-13","lat":40.015,"lon":-105.2705,"zone":13,"hemisphere":"N","easting":476915.239,"northing":4429457.113,"convergenceDms":"-00 10 26.14","scaleFactor":0.99960656,"usng":"13TDE7691529457"},
+  {"name":"seattle-zone-10","lat":47.6062,"lon":-122.3321,"zone":10,"hemisphere":"N","easting":550200.213,"northing":5272748.591,"convergenceDms":"00 29 35.78","scaleFactor":0.99963097,"usng":"10TET5020072749"},
+  {"name":"key-west-zone-17","lat":24.5551,"lon":-81.78,"zone":17,"hemisphere":"N","easting":421007.761,"northing":2715909.523,"convergenceDms":"-00 19 26.98","scaleFactor":0.99967706,"usng":"17RMH2100815910"},
+  {"name":"caribou-me-zone-19","lat":46.8606,"lon":-68.012,"zone":19,"hemisphere":"N","easting":575308.171,"northing":5190147.096,"convergenceDms":"00 43 15.49","scaleFactor":0.9996697,"usng":"19TEM7530890147"},
+  {"name":"san-diego-zone-11","lat":32.7157,"lon":-117.1611,"zone":11,"hemisphere":"N","easting":484902.621,"northing":3619781.608,"convergenceDms":"-00 05 13.45","scaleFactor":0.99960281,"usng":"11SMS8490319782"},
+  {"name":"zone-17-west-edge-plus","lat":35.05,"lon":-83.95,"zone":17,"hemisphere":"N","easting":230930.679,"northing":3882567.982,"convergenceDms":"-01 41 42.63","scaleFactor":1.00049237,"usng":"17SKU3093182568"}
+ ]
+}

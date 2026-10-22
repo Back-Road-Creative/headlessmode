@@ -1,0 +1,20 @@
+{{/* Boutique redesign: the footer mirrors the header nav, in the same order,
+     on every page, plus /privacy/ and one GitHub link — nothing more. It
+     ranges over the same menus.toml the header does rather than restating the
+     links, so the two can never disagree. */}}
+<footer class="colophon">
+    <div class="shop-row">
+        <nav class="footer-nav" aria-label="Footer">
+            {{/* URL-only menu entries (no pageRef) — .IsMenuCurrent can't resolve
+                 a Page for them, so compare URL to RelPermalink directly. */}}
+            {{ range .Site.Menus.main }}
+            <a href="{{ .URL }}"{{ if eq .URL $.RelPermalink }} aria-current="page"{{ end }}{{ if hasPrefix .URL "http" }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Name }}</a>
+            {{ end }}
+            <a href="/privacy/">Privacy</a>
+        </nav>
+        <div class="footer-meta">
+            <span>&copy; {{ now.Year }} {{ .Site.Title }}</span>
+            <a href="https://github.com/Back-Road-Creative" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+    </div>
+</footer>

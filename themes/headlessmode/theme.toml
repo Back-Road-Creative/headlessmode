@@ -1,0 +1,10 @@
+name = "Headless Mode"
+license = "MIT"
+description = "Light storefront theme for Headless Mode: a home-page product roster plus one product sheet per system"
+homepage = "https://headlessmode.com"
+tags = ["storefront", "product", "minimal", "responsive"]
+min_version = "0.110.0"
+
+[author]
+  name = "Headless Mode"
+  homepage = "https://headlessmode.com"

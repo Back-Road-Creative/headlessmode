@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Decomposition — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-scope">Scope</a> &gt; <span aria-current="page">Decomposition</span></nav>
+
+
+
+<h1>Decomposition</h1>
+<p><em>Scope technique</em> ·
+   <a href="map-all#node-technique:decomposition">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Splitting project work into progressively smaller pieces until each is small enough to plan and track.</p>
+<h2>When to use it</h2><p>Use it once scope is defined and you need to turn &#39;what we&#39;re delivering&#39; into &#39;what work that requires&#39; -- creating the <dfn><a href="glossary#wbs">WBS</a></dfn>, or re-decomposing a deliverable that turned out to be too coarse to estimate or assign to one owner.</p>
+<h2>When to avoid it</h2><p>Don&#39;t decompose past the point a work package can be usefully estimated and assigned -- decomposing every deliverable down to hour-level tasks up front produces a <dfn><a href="glossary#wbs">WBS</a></dfn> nobody maintains and that goes stale the first week. For work far enough out that its detail genuinely isn&#39;t knowable yet, decompose only the near-term deliverables now and leave the rest as a single placeholder package to break down later (rolling wave), rather than guessing at detail you&#39;ll just rewrite.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-decomposition-0"> Start from the accepted scope statement and the deliverables it names -- decomposition subdivides deliverables, not the org chart and not a task list you already have in your head.</label></li>
+
+<li><label><input type="checkbox" id="step-decomposition-1"> Identify the major deliverables (or, on a driftless-planned project without a WBS, the workstreams) and break each one into its component deliverables one level at a time.</label></li>
+
+<li><label><input type="checkbox" id="step-decomposition-2"> Keep going until a component deliverable is small enough that one task -- or a short, ownable set of tasks -- can produce it and one person can be accountable for it.</label></li>
+
+<li><label><input type="checkbox" id="step-decomposition-3"> Name each level by the deliverable it produces (&#39;Payment integration tested&#39;, not &#39;Backend team&#39;), and verify with the team that does the work that the lowest level is estimable.</label></li>
+
+<li><label><input type="checkbox" id="step-decomposition-4"> Since driftless has no dedicated WBS node today, record the decomposition as tasks nested under the workstream (or project) the deliverable belongs to, with the deliverable name as the workstream or task title -- the hierarchy the reader has is project / workstream / task, and decomposition&#39;s job is to make sure each task in it is a deliverable-sized piece of work, not an activity fragment.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A hierarchy of deliverables broken down to work-package level (in driftless: workstreams and tasks named after what they produce).</li><li>A set of work packages each small enough for one owner to estimate and be accountable for.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Decomposing by organizational team (&#39;Frontend team&#39;, &#39;DBA team&#39;) instead of by deliverable -- the breakdown mirrors the org chart, not the product, and two teams&#39; work on the same deliverable ends up untracked as a single thing.</li><li>Stopping a level too coarse to estimate (&#39;Build the reporting module&#39; as one task no one can size) or going a level too fine to manage (tracking fifty two-hour tasks that turn every status update into an audit).</li><li>The classic error: decomposing into activities (&#39;design&#39;, &#39;code&#39;, &#39;test&#39;) instead of deliverables. A WBS is a hierarchy of things produced, not a hierarchy of verbs -- &#39;design the login screen&#39; is an activity that belongs inside a task against the deliverable &#39;Login screen&#39;, not a decomposition level of its own.</li></ul>
+
+
+<h2>Worked example</h2><p>A regional credit union is building a new online loan application. The scope statement names one deliverable: &#39;Online loan application, application through decision&#39;. The PM decomposes it into component deliverables -- &#39;Applicant identity verification&#39;, &#39;Document upload&#39;, &#39;Underwriting decision integration&#39;, &#39;Applicant status notifications&#39; -- each sized so one engineer or a small pair can own it. In driftless, each becomes a workstream under the project, with tasks underneath named for what they produce (&#39;Document upload accepts PDF and JPEG&#39;, not &#39;Write upload code&#39;). When &#39;Underwriting decision integration&#39; turns out too big to estimate as one task, the PM decomposes it one more level into &#39;Send application to underwriting API&#39; and &#39;Receive and store decision result&#39; rather than leaving it as one unestimable line.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §5.4.2.2</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-5.4">Create WBS</a></li>
+
+      <li><a href="pmbok-6.2">Define Activities</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-benchmarking">Benchmarking</a></li>
+
+      <li><a href="techniques-context-diagram">Context Diagram</a></li>
+
+      <li><a href="techniques-inspection">Inspection</a></li>
+
+      <li><a href="techniques-product-analysis">Product Analysis</a></li>
+
+      <li><a href="techniques-prototypes">Prototypes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-activity-attributes">Activity Attributes</a></li>
+
+      <li><a href="artifacts-activity-list">Activity List</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-milestone-list">Milestone List</a></li>
+
+      <li><a href="artifacts-scope-baseline">Scope Baseline</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Agile practices</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="methods-scrum">Scrum: Product Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-4">Map</h3>
+    <ul aria-labelledby="related-4">
+
+      <li><a href="map-all#node-technique:decomposition">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

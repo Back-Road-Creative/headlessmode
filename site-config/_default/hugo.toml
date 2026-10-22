@@ -1,0 +1,54 @@
+######################## default configuration ####################
+
+baseURL = 'https://headlessmode.com/'
+# BCP 47 canonical form: 'en-US'. Site.LanguageCode emitted into <html lang="…">.
+languageCode = 'en-US'
+title = 'Headless Mode'
+theme = 'headlessmode'
+relativeURLs = false
+canonifyURLs = false
+
+# No template links to /tags/ term pages (tag pills render as plain text) and
+# head.html noindexes them — disable taxonomy page generation entirely so the
+# sitemap and robots directives stop contradicting each other.
+# .Params.tags still works in templates (front matter, not taxonomy pages).
+disableKinds = ['taxonomy', 'term']
+
+# content/_content.schema.yaml is a governance artifact the workspace suite
+# requires at that exact path. Hugo treats any non-.md file under content/ as a
+# page resource and copies it into public/, so without this it would ship to
+# https://headlessmode.com/_content.schema.yaml. Verified: a build with the file
+# present and no ignore rule wrote it to the site root.
+ignoreFiles = ['content/_content\.schema\.yaml$']
+
+# Top-level outputs. HTML only — the site publishes no feed. These lists are
+# stated explicitly because Hugo's own defaults include RSS for both kinds, so
+# omitting the block would re-emit /index.xml and /<section>/index.xml from the
+# built-in template.
+[outputs]
+  home = ["HTML"]
+  section = ["HTML"]
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    style = 'monokai'
+    # Emit the palette as class names, not inline style attributes. An inline
+    # color cannot be corrected from CSS, and Monokai is not WCAG AA on this
+    # site's code surface: line numbers, keywords and comments landed at
+    # 3.7/3.9/3.0:1 on --bg-elevated and failed the pa11y gate. Classes move the
+    # palette into themes/headlessmode/static/css/chroma-monokai.css, where each
+    # sub-AA color is raised once for the whole site rather than chased page by
+    # page as a new one appears. `style` still matters — `hugo gen chromastyles
+    # --style=monokai` regenerates that file. layouts/shortcodes/cmd.html has
+    # always passed noclasses=false per fence; this makes it the site default.
+    noClasses = false
+    # Inline line numbers (not a <table>) — avoids the full-width whitespace
+    # artifact the table layout produces (audit L3).
+    lineNos = true
+    lineNumbersInTable = false
+    # Per-fence control: use `linenos=false` on single-line install commands (audit L2).
+    codeFences = true
+    guessSyntax = true

@@ -1,0 +1,53 @@
+{{- /*
+    Table render hook — every markdown table lands inside a .table-scroll box.
+
+    A wide table used to push the whole document sideways on a phone: on
+    2026-09-02 the first overflow-aware preview-shots run measured /rigscore/
+    at 1024px in a 390px viewport, and the two markdown tables in its
+    documentation were the entire cause. A wrapper here means no page can
+    forget it; the markup below is Hugo's own default table template with
+    the div added around it. (Hugo >= 0.134 — CI runs 0.139.)
+
+    The box is keyboard-reachable (tabindex) and named for assistive tech by
+    the table's own first header row, so axe's scrollable-region-focusable
+    rule stays quiet.
+*/ -}}
+<div class="table-scroll" tabindex="0" role="region" aria-label="{{ with index .THead 0 }}{{ range . }}{{ .Text | plainify }} {{ end }}{{ end }}table">
+<table
+  {{- range $k, $v := .Attributes }}
+    {{- if $v }}
+      {{- printf " %s=%q" $k $v | safeHTMLAttr }}
+    {{- end }}
+  {{- end }}>
+  <thead>
+    {{- range .THead }}
+    <tr>
+      {{- range . }}
+      <th
+        {{- with .Alignment }}
+          {{- printf " style=%q" (printf "text-align: %s" .) | safeHTMLAttr }}
+        {{- end -}}
+      >
+        {{- .Text -}}
+      </th>
+      {{- end }}
+    </tr>
+    {{- end }}
+  </thead>
+  <tbody>
+    {{- range .TBody }}
+    <tr>
+      {{- range . }}
+      <td
+        {{- with .Alignment }}
+          {{- printf " style=%q" (printf "text-align: %s" .) | safeHTMLAttr }}
+        {{- end -}}
+      >
+        {{- .Text -}}
+      </td>
+      {{- end }}
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+</div>

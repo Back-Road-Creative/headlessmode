@@ -1,0 +1,8 @@
+# Local development environment configuration
+
+baseURL = "http://localhost:1315/"
+relativeURLs = true
+buildDrafts = true
+buildFuture = true
+
+# No analytics, no ads, no telemetry — enforced site-wide.

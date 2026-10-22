@@ -1,0 +1,20 @@
+<!-- Skip link (first focusable element for keyboard nav / a11y) -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+{{/* The wordmark is the one route Home. The menu stays limited to the two
+     other primary destinations, avoiding a second home-page link whose only
+     difference is the #software fragment. */}}
+<header class="masthead">
+    <div class="shop-row">
+        <a href="/" class="site-wordmark">Headless Mode</a>
+
+        <nav class="site-nav" aria-label="Primary">
+            {{/* menus.toml entries are URL-only (no pageRef), so .IsMenuCurrent
+                 can't resolve a Page for them — compare the entry's URL to the
+                 current page's RelPermalink directly. */}}
+            {{ range .Site.Menus.main }}
+            <a href="{{ .URL }}" class="nav-link"{{ if eq .URL $.RelPermalink }} aria-current="page"{{ end }}{{ if hasPrefix .URL "http" }} target="_blank" rel="noopener noreferrer"{{ end }}>{{ .Name }}</a>
+            {{ end }}
+        </nav>
+    </div>
+</header>

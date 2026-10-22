@@ -1,0 +1,186 @@
+{{/* The layer switches and the map key. Their own partial, and on the dashboard
+     their own panel on the map, because they are not paper settings: they change
+     what is drawn on the screen right now. Inside the print builder they sat sixth
+     and seventh, after Area/Paper/Scale/Overlap/Grid — 1,050px below the map on a
+     phone, so turning a layer on meant scrolling a screen and a half back up to see
+     what it did (audit F04). scripts/qcm/layout.test.mjs measures that distance.
+
+     main.js wires both by id (`qcm-layers`, `qcm-legend`) with no guard, so the ids
+     travel with the markup and nothing in the app changes. */}}
+<div class="qcm-controls" role="group" aria-label="Map layers">
+    {{/* QUX-04c: the Map key sits ABOVE the list, not after it. It used to follow the list, so
+         layout.test.mjs's MAX_LAYERS_GAP (with every disclosure forced open) only held because a
+         nested 40vh cap kept #qcm-layers' box short; a key ahead of the list no longer depends on
+         how tall the list renders, so that cap is gone and the open panel is the one scroller. */}}
+    <fieldset><legend>Map key</legend>
+        <ul id="qcm-legend" class="qcm-legend"></ul>
+        <p class="qcm-hint">What each mark on the map above means, right now. Marks that need a closer zoom say so; the grid and sheet seams are printed furniture and are listed on the key you print. After Check sources, symbols the area does not contain are marked.</p>
+    </fieldset>
+    <fieldset><legend>Layers</legend>
+        {{/* Filled from layer-presets.js by main.js. A preset only moves the switches below:
+             a shortcut to a set of them, never a mode, and every one stays yours to move back.
+             The explanation is the group's label, not a paragraph: layout.test.mjs holds the map
+             key within 600px of the map at 390px, and a line of hint here spends 30 of them. */}}
+        <div id="qcm-presets" class="qcm-presets" role="group" aria-label="Starting sets, Undo and Reset — a preset moves the switches below, and you can change any of them after"></div>
+        {{/* U0: find a layer among the growing list without scrolling past all of them, and
+             see at a glance how many are on. Neither control ever changes a switch's checked
+             state — main.js hides rows, it never re-renders them from these.
+             The toolbar is sticky at the top of the PANEL's scroll box (the open panel is the
+             one scroller, QUX-04c), so search stays in reach however far the list has been
+             scrolled. The Map key is above this fieldset so MAX_LAYERS_GAP measures it where a
+             reader finds it, not below a list that can be thousands of px tall with every group
+             open. */}}
+        <div class="qcm-layer-scroll">
+        <div class="qcm-layer-toolbar">
+            <label for="qcm-layer-search">Find a layer
+                <input type="search" id="qcm-layer-search" placeholder="Search layers…" autocomplete="off">
+            </label>
+            <label for="qcm-layers-active-only">
+                <input type="checkbox" id="qcm-layers-active-only"> Only layers that are on
+            </label>
+            <p id="qcm-layer-count" class="qcm-hint" role="status" aria-live="polite">No layers on</p>
+        </div>
+        {{/* Filled from layer-registry.js by main.js: a new layer is a
+             registry entry, never an edit here. */}}
+        <div id="qcm-layers"></div>
+        </div>
+    </fieldset>
+    {{/* QUX-04b: the manual hillshade light knobs, collapsed by default — only
+         meaningful once "Hillshade (adjustable light)" is chosen under Land, sky &
+         light context above, yet they sat open in the panel whether or not a reader
+         had that surface on. They sit after the list, so this is panel length and
+         clutter, not MAX_LAYERS_GAP (nothing after #qcm-legend moves it). The brief
+         for this unit also named the Highlight fieldset below for the same wrapper;
+         kept it out instead — layout.test.mjs's "the extended Layers panel (Highlight
+         + Advanced, then Layers) still caps and scrolls within itself on a phone"
+         opens only #qcm-layer-panel itself (no nested disclosure) and then requires
+         #qcm-highlight-clear reachable, which a closed <details> around it cannot
+         satisfy (Chromium drops closed-<details> content from hit-testing). */}}
+    <details class="qcm-appearance">
+        <summary>Map appearance</summary>
+    {{/* QUX-05b / QQA-05a: the map-label controls. They size and thin EVERY label the map
+         owns -- the towns and nearby cities the dashboard names, the GNIS names layer and
+         the 3D view's names -- so they sit with the layer switches that draw those names,
+         not in Explore. A display preference like County score wash strength (view.labels
+         rides the same #map= fragment and saved-display-prefs write), wired in
+         quiet-corners.js (currentView/applyLabelsFromView/wireViewControls) by id, so
+         the ids travel with the markup. Always visible: gating them on the names layer's
+         own checkbox would hide the only way to resize the towns, so they are the first
+         thing under the Map appearance disclosure, which is closed by default: the
+         all-collapsed panel keeps its length budget (layer-panel-compact-browser.test.mjs
+         COLLAPSED_PANEL_BUDGET) and nothing moves #qcm-layers/#qcm-legend further from
+         the map (layout.test.mjs MAX_LAYERS_GAP). Changing a value needs no click inside
+         the disclosure once it is open; the tests set the selects by id. */}}
+    <fieldset id="qc-label-prefs-group"><legend>Map labels</legend>
+        <label for="qc-label-size">Map label size
+            <select id="qc-label-size">
+                <option value="normal" selected>Normal</option>
+                <option value="large">Large</option>
+                <option value="xlarge">Extra large</option>
+            </select>
+        </label>
+        <label for="qc-label-density">Map label crowding
+            <select id="qc-label-density">
+                <option value="sparse">Sparse</option>
+                <option value="standard" selected>Standard</option>
+                <option value="more">More</option>
+            </select>
+        </label>
+        <p class="qcm-hint">How large names print on the map, and how many show at once before it stops adding more. Saved with your other display choices and carried in a shared link.</p>
+    </fieldset>
+        {{/* main.js shows exactly one of the next two: the hint while another surface
+             is chosen, so this disclosure never opens onto nothing, and the light
+             controls (hidden, never removed — their ids stay wired) while "Hillshade
+             (adjustable light)" is. */}}
+        <p id="qcm-appearance-hint" class="qcm-hint">Light controls appear here once Hillshade (adjustable light) is chosen under Land, sky &amp; light context.</p>
+        <fieldset id="qcm-hillshade-fieldset" aria-label="Hillshade light" hidden>
+            <legend>Hillshade light</legend>
+            <div class="qcm-hillshade-light" role="group" aria-label="Hillshade light">
+                <label for="qcm-hillshade-azimuth">Light azimuth (°)
+                    <input type="number" id="qcm-hillshade-azimuth" min="0" max="360" step="1" value="315">
+                </label>
+                <label for="qcm-hillshade-altitude">Light altitude (°)
+                    <input type="number" id="qcm-hillshade-altitude" min="0" max="90" step="1" value="45">
+                </label>
+                <button type="button" id="qcm-hillshade-sun-now">Sun now</button>
+                <button type="button" id="qcm-hillshade-reset-light">Reset light</button>
+            </div>
+        </fieldset>
+    </details>
+    {{/* D1: highlight shortcuts, and the Advanced screen-only emphasis controls. Pure
+         state (display-controls.js) driven by main.js; nothing here decides what a
+         highlight or a spotlight looks like. Unwrapped (see the comment above). */}}
+    <fieldset class="qcm-highlight" aria-label="Highlight shortcuts">
+        <legend>Highlight</legend>
+        <div class="qcm-highlight-buttons" role="group" aria-label="Highlight shortcuts">
+            <button type="button" id="qcm-highlight-trails" aria-pressed="false">Highlight trails</button>
+            <button type="button" id="qcm-highlight-boundaries" aria-pressed="false">Highlight boundaries</button>
+            <button type="button" id="qcm-highlight-clear">Clear highlight</button>
+        </div>
+        <p id="qcm-display-summary" class="qcm-hint" role="status" aria-live="polite">No changes from the default display.</p>
+        <details class="qcm-advanced">
+            <summary>Advanced</summary>
+            <div class="qcm-advanced-controls">
+                <label for="qcm-emphasis-dim">Dim everything not highlighted
+                    <input type="range" id="qcm-emphasis-dim" min="0" max="0.8" step="0.1" value="0"
+                        aria-describedby="qcm-emphasis-dim-value" aria-valuetext="0% dimmed">
+                    <output id="qcm-emphasis-dim-value" for="qcm-emphasis-dim">0%</output>
+                </label>
+                <label for="qcm-emphasis-lines">Line weight
+                    <input type="range" id="qcm-emphasis-lines" min="0.5" max="2.5" step="0.1" value="1"
+                        aria-describedby="qcm-emphasis-lines-value" aria-valuetext="1×">
+                    <output id="qcm-emphasis-lines-value" for="qcm-emphasis-lines">1×</output>
+                </label>
+                <label for="qcm-emphasis-fill">Polygon fill
+                    <input type="range" id="qcm-emphasis-fill" min="0" max="2" step="0.1" value="1"
+                        aria-describedby="qcm-emphasis-fill-value" aria-valuetext="100%">
+                    <output id="qcm-emphasis-fill-value" for="qcm-emphasis-fill">100%</output>
+                </label>
+                <label for="qcm-emphasis-spotlight">Spotlight one layer
+                    <select id="qcm-emphasis-spotlight">
+                        <option value="">No spotlight</option>
+                    </select>
+                </label>
+            </div>
+        </details>
+    </fieldset>
+    {{/* N2: named places & landmarks (GNIS) discoverability list — placed AFTER
+         Highlight for the same MAX_LAYERS_GAP reason as Highlight itself: trailing
+         content here cannot push #qcm-layers/#qcm-legend further from the map. Filled
+         by main.js's renderNameList() from state.names, only while the layer is on.
+         QUX-11a: the summary, filter checkboxes and count line are all written by
+         renderNameList (Q/places-in-view.js drives the counts); the three ids below
+         are kept from before 11a (E2) even though what they show has changed. */}}
+    <fieldset class="qcm-names" aria-label="Named places & landmarks">
+        <legend>Named places & landmarks</legend>
+        {{/* N3: the row opens ON, so this fieldset is on screen at every load. Its caveat
+             (one GNIS point per name, no elevation, declutter, the printed base's own names)
+             lives once, in the row's About (layer-registry.js coverageCaveat), not as a
+             137px paragraph here as well. */}}
+        <p id="qcm-names-report" class="qcm-layer-report" hidden></p>
+        <details id="qcm-names-suppressed" hidden>
+            <summary>Places in this view</summary>
+            <fieldset class="qcm-places-filters">
+                <legend>Filter this list</legend>
+                <span id="qcm-places-filter-groups"></span>
+                <label><input type="checkbox" id="qcm-places-only-unlabelled"> Only places not labelled on the map</label>
+                <button type="button" id="qcm-places-show-all">Show all</button>
+            </fieldset>
+            {{/* QUX-11b §2.6 "Nearby": the second option's text and enabled state
+                 are written by main.js (renderNameList) once state.nearbyFrom is
+                 set -- a row selection, a GNIS or rec pin click, or a card's Nearby
+                 action. The caption states the straight-line/loaded-only caveat only
+                 while nearbyFrom is set. */}}
+            <p class="qcm-places-sort">
+                <label for="qcm-places-sort">Sort</label>
+                <select id="qcm-places-sort">
+                    <option value="az">A to Z</option>
+                    <option value="nearby" id="qcm-places-sort-nearby" disabled>Nearest to</option>
+                </select>
+            </p>
+            <p id="qcm-places-nearby-caption" class="qcm-hint" hidden></p>
+            <p id="qcm-places-count" tabindex="-1"></p>
+            <ul id="qcm-names-list" class="qcm-names-list"></ul>
+        </details>
+    </fieldset>
+</div>

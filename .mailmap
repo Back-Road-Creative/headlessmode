@@ -1,0 +1,18 @@
+# Canonical author identities for this repository.
+#
+# git reads this file for `git shortlog`, `git log --use-mailmap`, `git blame`
+# and anything built on them, so one person committing under several addresses
+# or spellings counts once instead of several times. It rewrites what those
+# commands DISPLAY; it never rewrites history.
+#
+# Format: Proper Name <canonical@email> <address-seen-in-history>
+# One line per historical address. Adding an address here is the fix when a new
+# machine or a GitHub web edit commits under a different one.
+
+Joe Petrucelli <backroadcreativeco@gmail.com> <joepetjr@gmail.com>
+Joe Petrucelli <backroadcreativeco@gmail.com> <joepetjr@users.noreply.github.com>
+Joe Petrucelli <backroadcreativeco@gmail.com> <info@backroadcreative.com>
+
+# Bot identities are deliberately NOT mapped. Buddy was an agent that wrote its
+# own commits here (see the /work/ ledger); folding its authorship into a human
+# would erase exactly the record this repository keeps on purpose.

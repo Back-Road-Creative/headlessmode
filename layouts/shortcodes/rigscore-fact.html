@@ -1,0 +1,21 @@
+{{/*
+    rigscore-fact shortcode — render a single field from data/rigscore.json
+    (Site.Data.rigscore), the machine-readable facts snapshot the rigscore
+    release job regenerates on every release. Hand-written counts and versions
+    structurally cease to exist: the number printed is the registry's, always.
+
+    Supports dotted paths for nested keys (enforcementGrades.*).
+
+    Usage:
+        {{< rigscore-fact field="checkCount" >}}                    -> 28
+        {{< rigscore-fact field="version" >}}                       -> 2.1.0
+        {{< rigscore-fact field="scoredCount" >}}                   -> 13
+        {{< rigscore-fact field="enforcementGrades.mechanical" >}}  -> 15
+*/}}
+{{- $facts := .Site.Data.rigscore -}}
+{{- if not $facts }}{{ errorf "rigscore-fact: data/rigscore.json not found (Site.Data.rigscore is empty)" }}{{ end -}}
+{{- $field := or (.Get "field") (.Get 0) -}}
+{{- $parts := split $field "." -}}
+{{- $val := index $facts (index $parts 0) -}}
+{{- if gt (len $parts) 1 }}{{ $val = index $val (index $parts 1) }}{{ end -}}
+{{- $val -}}

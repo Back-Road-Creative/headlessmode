@@ -1,0 +1,460 @@
+name: Drift Sentinel
+
+# Late-gate backstop (detection only) for the rigscore -> headlessmode fact chain.
+#
+# Audit 2026-07-15 (C2-no-cron): NO scheduled drift check existed in any repo. The
+# sync/verify gates ran ONLY inside release-post.yml's PR validate job, which fires
+# only on rigscore-release/* PRs. So when the upstream product release job fails (as
+# it did for v2.1.0 — a dead PAT killed the cross-repo job in 4s), zero gates run and
+# drift is invisible. The live site served the stale 2026-06-09 build for weeks with
+# no alert. This daily cron closes that hole: it compares the latest product release
+# against the committed data/rigscore.json AND against the live-rendered site, and
+# opens a single deduped issue on any drift.
+#
+# Dedupe is two-layered: one issue per stable title, and at most one comment per DISTINCT
+# drift snapshot. While the same drift persists the run still fails — red every day — but
+# it stops restating itself on the issue.
+#
+# Runs on the self-hosted `quick` lane. The original intent was ubuntu-latest, so a
+# deploy-staleness backstop would not depend on the same box whose failure it is meant
+# to catch; that ended when the repo moved off GitHub-hosted runners (a0d2d1af,
+# 2026-08-28) for want of purchased minutes, and this comment described a runner the
+# workflow no longer used. The residual risk is real and unfixed: if the box is down,
+# this sentinel does not run to say so. What the `quick` label does fix is the reverse
+# hazard — a bare `runs-on: self-hosted` matches every runner by superset, including
+# wsl2-runner, reserved (label `gms-video`) for the 25-30 minute GoMoveShift video
+# suite. This job only makes a few API calls and opens an issue, so it belongs on the
+# `quick` runner and leaves the 2-runner `heavy` pool alone.
+#
+# Mid-cycle policy (C2-mid-cycle): the site tracks RELEASED versions only. Merges to
+# product `main` between releases intentionally do NOT update the site; this sentinel
+# alerts on missed *releases*, never on mid-cycle main churn. If mid-cycle sync is ever
+# wanted, add a `repository_dispatch` from product CI (on src/checks/** changes) that
+# pushes interim facts to the site — a deliberate future option, NOT built here.
+
+on:
+  schedule:
+    - cron: '17 6 * * *'   # daily at 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read   # read the committed data/rigscore.json
+  issues: write    # open / append the single deduped drift issue
+  actions: read    # read this workflow's previous run conclusion (unchanged-snapshot gate)
+
+concurrency:
+  group: drift-sentinel
+  cancel-in-progress: false
+
+env:
+  PRODUCT_REPO: Back-Road-Creative/rigscore
+  SITE_URL: https://headlessmode.com
+  # Stable title = the dedupe key. Reused across runs so we comment, never duplicate.
+  ISSUE_TITLE: 'drift sentinel: rigscore facts out of sync'
+
+jobs:
+  drift-sentinel:
+    runs-on: ${{ fromJSON(vars.HM_RUNNER_QUICK || '["self-hosted","quick"]') }}
+    # 57 recorded runs: p50 9s, max 24s. 10 minutes is >20x the worst one, so a
+    # slow GitHub API call cannot trip it, and a wedged job frees one of the two
+    # `quick` runners inside a scheduling cycle instead of holding it for 24h
+    # (run 34122929742, 2026-09-07) or 6h (run 34220360290, 2026-09-08).
+    timeout-minutes: 10
+    steps:
+      - name: Checkout site (committed data/rigscore.json)
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Detect drift and alert
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e            # guard-and-continue: individual probes may fail; we handle each
+          set +o pipefail
+
+          # 1. Latest product release (tag -> version).
+          REL_TAG=$(gh release view --repo "$PRODUCT_REPO" --json tagName -q .tagName 2>/dev/null)
+          if [ -z "$REL_TAG" ]; then
+            echo "::warning::Could not read latest release from $PRODUCT_REPO; skipping this run."
+            exit 0
+          fi
+          REL_VER="${REL_TAG#v}"
+
+          # 2. Committed data facts (source of the rendered site).
+          DATA_VER=$(jq -r '.version' data/rigscore.json)
+          DATA_CHECKS=$(jq -r '.checkCount' data/rigscore.json)
+          DATA_SCORED=$(jq -r '.scoredCount' data/rigscore.json)
+          DATA_ADV=$(jq -r '.advisoryCount' data/rigscore.json)
+
+          # 3. Release facts asset (attached by product job E1). Absent on older
+          #    releases -> count comparison is skipped, version/live checks still run.
+          FACTS_STATUS="not attached to $REL_TAG (count comparison skipped; product job E1 attaches it)"
+          REL_CHECKS=""; REL_SCORED=""; REL_ADV=""
+          if gh release download "$REL_TAG" --repo "$PRODUCT_REPO" \
+               --pattern 'rigscore-facts.json' --output release-facts.json --clobber 2>/dev/null; then
+            REL_CHECKS=$(jq -r '.checkCount' release-facts.json)
+            REL_SCORED=$(jq -r '.scoredCount' release-facts.json)
+            REL_ADV=$(jq -r '.advisoryCount' release-facts.json)
+            FACTS_STATUS="attached ($REL_CHECKS checks / $REL_SCORED scored / $REL_ADV advisory)"
+          fi
+
+          # 4. Live-site probe: the version rendered on the rigscore page
+          #    (/rigscore/ — the manual folded into the product page in the
+          #    boutique redesign; the /docs/ hub is gone).
+          #    This is the deploy-staleness catch: it reads the actually-served HTML,
+          #    so it fires even when data/rigscore.json is correct but the deploy is
+          #    stuck (the 2026-06-09 failure mode).
+          LIVE_HTML=$(curl -fsSL --max-time 30 "$SITE_URL/rigscore/" 2>/dev/null || true)
+          LIVE_VER=$(printf '%s' "$LIVE_HTML" | grep -oE 'rigscore v[0-9]+\.[0-9]+\.[0-9]+' | head -1 | sed -E 's/^rigscore v//')
+          [ -z "$LIVE_VER" ] && LIVE_VER="UNREACHABLE"
+
+          # 5. Deploy-freshness signal (independent of rendered content): the deploy job
+          #    force-pushes public/ to the `production` branch. If master's HEAD is more
+          #    than a day newer than production's, a merged change never reached the live
+          #    build -> the deploy is stuck.
+          MASTER_DATE=$(gh api "repos/$GITHUB_REPOSITORY/branches/master" -q '.commit.commit.committer.date' 2>/dev/null)
+          PROD_DATE=$(gh api "repos/$GITHUB_REPOSITORY/branches/production" -q '.commit.commit.committer.date' 2>/dev/null)
+          FRESH_NOTE="master=${MASTER_DATE:-?} production=${PROD_DATE:-?}"
+          DEPLOY_STALE=""
+          if [ -n "$MASTER_DATE" ] && [ -n "$PROD_DATE" ]; then
+            GAP=$(( $(date -d "$MASTER_DATE" +%s) - $(date -d "$PROD_DATE" +%s) ))
+            if [ "$GAP" -gt 86400 ]; then
+              DEPLOY_STALE="production branch is $((GAP / 3600))h behind master — deploy appears stuck"
+            fi
+          fi
+
+          # 5a. Quiet-corners export freshness: summary.json's generated_at should
+          #     advance at least quarterly. Reads the LIVE file (not the committed
+          #     static/ copy) so a stuck deploy also shows up here.
+          QC_URL="$SITE_URL/data/quiet-corners/summary.json"
+          QC_JSON=$(curl -fsSL --max-time 30 "$QC_URL" 2>/dev/null || true)
+          QC_GEN=$(printf '%s' "$QC_JSON" | jq -r '.generated_at // empty' 2>/dev/null)
+          QC_GEN_EPOCH=""
+          [ -n "$QC_GEN" ] && QC_GEN_EPOCH=$(date -d "$QC_GEN" +%s 2>/dev/null)
+          QC_AGE_DAYS=""
+          [ -n "$QC_GEN_EPOCH" ] && QC_AGE_DAYS=$(( ($(date +%s) - QC_GEN_EPOCH) / 86400 ))
+
+          # 5a2. systems.json claims re-verification (HM-A1, scripts/verify-claims.js):
+          #      re-checks every roster entry against live GitHub reality —
+          #      visibility/archived, release asset count, license.spdx_id — the
+          #      claim BEHIND the 200 that htmltest's link probe never re-checks.
+          CLAIMS_OUT=$(node scripts/verify-claims.js --strict 2>&1)
+          CLAIMS_STATUS=$?
+          {
+            echo ""
+            echo "### systems.json claims verification"
+            echo '```'
+            echo "$CLAIMS_OUT"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # 5b. Live-build check: the deploy writes master's SHA to
+          #     public/deploy-marker.txt, so the marker the edge serves names the
+          #     build actually in front of users. The existing freshness probe (5)
+          #     compares master to the `production` BRANCH, which says nothing
+          #     about whether Cloudflare picked that branch up.
+          #
+          #     2026-07-31: it didn't. The production branch was current, the
+          #     deploy job reported success, and the edge served the previous
+          #     build for 30+ minutes — the workflow's own wait step timed out
+          #     and warned-but-proceeded, which is a gate that cannot fail. This
+          #     is the detector for that: it names the build users actually get.
+          MASTER_SHA=$(gh api "repos/$GITHUB_REPOSITORY/branches/master" -q '.commit.sha' 2>/dev/null)
+          LIVE_MARKER=$(curl -fsSL --max-time 30 "$SITE_URL/deploy-marker.txt" 2>/dev/null | tr -d '[:space:]')
+
+          # 5c. Driftless demo probe (scripts/drift_probe_demo.py): the rigscore
+          #     and quiet-corners probes above cover their own surfaces, but
+          #     nothing checked /demo/driftless/ after a deploy — and
+          #     deploy-production.yml's wait step only polls deploy-marker.txt,
+          #     which proves a deploy landed, not that the committed demo bundle
+          #     it shipped still matches what's live. Reads the committed
+          #     static/demo/driftless/manifest.json and probes the live site
+          #     against it (source/files match, index + one page 200 with the
+          #     source string in the body, a hash spot-check once one exists).
+          DEMO_OUT=$(python3 scripts/drift_probe_demo.py "$SITE_URL" 2>&1)
+          DEMO_STATUS=$?
+          {
+            echo ""
+            echo "### Driftless demo probe"
+            echo '```'
+            echo "$DEMO_OUT"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # 5d. Field Maps CSP probe (scripts/drift_probe_maps_csp.mjs): scripts/qcm/
+          #     csp.test.mjs proves the committed _headers is right, but nothing proved
+          #     the EDGE serves it. Cloudflare Pages joins a header applied twice with a
+          #     comma, and a browser intersects two policies — so a broader rule creeping
+          #     back would silently block the three government map services the page
+          #     exists to reach, with the offline test still green and the deploy log
+          #     still clean. GETs the page (never HEAD; this site's HEAD has lied about
+          #     content-length) and compares the served policy against the committed one.
+          CSP_OUT=$(node scripts/drift_probe_maps_csp.mjs "$SITE_URL" 2>&1)
+          CSP_STATUS=$?
+          {
+            echo ""
+            echo "### Field Maps CSP probe"
+            echo '```'
+            echo "$CSP_OUT"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # 6. Assemble drift reasons.
+          REASONS=""
+          addr() { REASONS="${REASONS}- ${1}"$'\n'; }
+          [ "$REL_VER" != "$DATA_VER" ] && addr "**Data file stale**: latest release is \`v$REL_VER\`, committed data/rigscore.json is \`v$DATA_VER\` (missed-release drift)."
+          if [ -n "$REL_CHECKS" ]; then
+            [ "$REL_CHECKS" != "$DATA_CHECKS" ] && addr "**checkCount mismatch**: release facts=$REL_CHECKS, data/rigscore.json=$DATA_CHECKS."
+            [ "$REL_SCORED" != "$DATA_SCORED" ] && addr "**scoredCount mismatch**: release facts=$REL_SCORED, data/rigscore.json=$DATA_SCORED."
+            [ "$REL_ADV" != "$DATA_ADV" ] && addr "**advisoryCount mismatch**: release facts=$REL_ADV, data/rigscore.json=$DATA_ADV."
+          fi
+          if [ "$LIVE_VER" = "UNREACHABLE" ]; then
+            addr "**Live tool page unreadable**: no version found at $SITE_URL/rigscore/ (site down or markup changed)."
+          elif [ "$LIVE_VER" != "$REL_VER" ]; then
+            addr "**Live site stale**: $SITE_URL/rigscore/ renders \`v$LIVE_VER\`, latest release is \`v$REL_VER\` (deploy staleness — the 2026-06-09 failure mode)."
+          fi
+          [ -n "$DEPLOY_STALE" ] && addr "**Deploy freshness**: $DEPLOY_STALE."
+          if [ -z "$LIVE_MARKER" ]; then
+            addr "**Live build unidentifiable**: no readable \`deploy-marker.txt\` at $SITE_URL (fetch failed, or a build predating the marker is still live)."
+          elif [ -n "$MASTER_SHA" ] && [ "$LIVE_MARKER" != "$MASTER_SHA" ]; then
+            addr "**Live build is not master**: the edge serves \`${LIVE_MARKER:0:8}\`, master is \`${MASTER_SHA:0:8}\` — the deploy job can report success while Cloudflare keeps serving the previous build."
+          fi
+          if [ -z "$QC_AGE_DAYS" ]; then
+            addr "**Quiet-corners export unreadable**: no \`generated_at\` found at $QC_URL (fetch failed or malformed JSON)."
+          elif [ "$QC_AGE_DAYS" -gt 120 ]; then
+            addr "**Quiet-corners export stale**: \`generated_at\` is $QC_AGE_DAYS days old (quarterly cadence + slack exceeded) at $QC_URL."
+          fi
+          if [ "$CLAIMS_STATUS" -ne 0 ]; then
+            CLAIMS_BREACHES=$(echo "$CLAIMS_OUT" | grep -c '^FAIL:' || true)
+            addr "**systems.json claims verification failed**: $CLAIMS_BREACHES claim(s) no longer match GitHub reality (visibility/archived, release assets, or license) — see the claims verification section in the run summary."
+          fi
+          if [ "$CSP_STATUS" -ne 0 ]; then
+            addr "**Field Maps CSP probe failed**: $SITE_URL/quiet-corners/maps/ no longer serves the policy committed in \`static/_headers\` — two joined policies or a dropped host silently break the page's map-service requests. See the Field Maps CSP probe section in the run summary."
+          fi
+          if [ "$DEMO_STATUS" -ne 0 ]; then
+            DEMO_FAILS=$(echo "$DEMO_OUT" | grep -c '^FAIL:' || true)
+            addr "**Driftless demo probe failed**: $DEMO_FAILS check(s) at $SITE_URL/demo/driftless/ no longer match the committed manifest — see the Driftless demo probe section in the run summary."
+          fi
+
+          # Always write a run summary, drift or not.
+          {
+            echo "## Drift sentinel"
+            echo ""
+            echo "| Source | Version |"
+            echo "|---|---|"
+            echo "| Latest release ($PRODUCT_REPO) | v$REL_VER |"
+            echo "| Committed data/rigscore.json | v$DATA_VER |"
+            echo "| Live $SITE_URL/rigscore/ | v$LIVE_VER |"
+            echo ""
+            echo "Release facts asset: $FACTS_STATUS"
+            echo ""
+            echo "Deploy freshness: $FRESH_NOTE"
+            echo ""
+            echo "Live build marker: ${LIVE_MARKER:-unreadable} (master ${MASTER_SHA:-?})"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "$REASONS" ]; then
+            echo "No drift detected."
+            exit 0
+          fi
+
+          # Build the issue body.
+          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          cat > drift-body.md <<BODY
+          Automated daily check found the rigscore fact chain out of sync.
+
+          **Drift detected**
+
+          $REASONS
+          **Snapshot**
+          - Latest release ($PRODUCT_REPO): \`v$REL_VER\`
+          - Committed data/rigscore.json: \`v$DATA_VER\` ($DATA_CHECKS checks / $DATA_SCORED scored / $DATA_ADV advisory)
+          - Live $SITE_URL/rigscore/: \`v$LIVE_VER\`
+          - Release facts asset: $FACTS_STATUS
+          - Deploy freshness: $FRESH_NOTE
+          - Live build marker: \`${LIVE_MARKER:-unreadable}\` (master \`${MASTER_SHA:-?}\`)
+
+          **What to do**
+          - *Data file stale* -> re-run the product release site-post job (writes data/rigscore.json) or hand-sync from \`scripts/generate-facts.js\` output.
+          - *Live site stale but data correct* -> the deploy is stuck; re-run **Build and Deploy** and check the self-hosted runner.
+          - *Count mismatch* -> a release added/removed checks; data/rigscore.json needs the fresh facts asset.
+          - *Quiet-corners export stale/unreadable* -> re-run the quiet-corners pipeline export and redeploy so \`static/data/quiet-corners/summary.json\` picks up a fresh \`generated_at\`.
+          - *Live build is not master* -> the \`production\` branch has the build but Cloudflare has not served it. Re-run **Build and Deploy** (it force-pushes a fresh production commit) and check the Pages project for a failed or queued deployment.
+          - *Claims verification failed* -> systems.json asserts something GitHub no longer backs (private/archived repo, a release with no assets, or a changed license). Run \`node scripts/verify-claims.js\` locally to see which entry, then fix the data or the claim.
+          - *Field Maps CSP probe failed* -> run \`node scripts/drift_probe_maps_csp.mjs\` locally to see which directive differs. A comma in the served policy means a broader \`_headers\` rule is applying on top of the \`/quiet-corners/maps/*\` block; the block must detach the global policy (\`! Content-Security-Policy\`) before setting its own.
+          - *Driftless demo probe failed* -> the live \`/demo/driftless/\` bundle no longer matches \`static/demo/driftless/manifest.json\` (stuck deploy, or the committed bundle changed without a redeploy). Run \`python3 scripts/drift_probe_demo.py\` locally to see which check failed, then redeploy or regenerate the bundle with \`bin/driftless-showcase.py\` in the Driftless repo.
+
+          Mid-cycle note: the site tracks RELEASED versions only; merges to product \`main\` between releases do not update the site by design, so this alert fires on missed *releases*, not mid-cycle churn.
+
+          [Sentinel run]($RUN_URL) · re-run on demand via the *Drift Sentinel* workflow (workflow_dispatch).
+          BODY
+
+          # Dedupe: exactly one open issue with the stable title. Comment if present,
+          # else create. (Same pattern R1 added to deploy-production.yml.)
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "in:title \"$ISSUE_TITLE\"" --json number,title \
+            -q "[.[] | select(.title == \"$ISSUE_TITLE\")][0].number" 2>/dev/null)
+
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            # Unchanged-snapshot gate. The title dedupe above stops a second ISSUE, not a
+            # second COMMENT: v2.2.0 drift piled 8 near-byte-identical comments onto #169
+            # between 2026-07-19 and 07-27. Compare this body against the last bot comment,
+            # blanking the fields that move on their own — otherwise "identical" never fires.
+            norm() {
+              tr -d '\r' | sed -E \
+                -e 's#^\[Sentinel run\]\(.*$#[Sentinel run](NORMALIZED)#' \
+                -e 's#^- Deploy freshness: .*$#- Deploy freshness: NORMALIZED#' \
+                -e 's#[0-9]+h behind master#Nh behind master#'
+            }
+
+            # REST lists comments oldest-first, so the last bot line is the newest one.
+            LAST_B64=$(gh api "repos/$GITHUB_REPOSITORY/issues/$EXISTING/comments?per_page=100" \
+              --paginate --jq '.[] | select(.user.login == "github-actions[bot]") | .body | @base64' \
+              2>/dev/null | tail -1)
+
+            # Suppress only while drift is CONTINUOUS. If the previous run was green the
+            # drift went away and came back, and that deserves a comment even when the
+            # facts read the same — first-alert-after-a-quiet-period must never be silent.
+            # Anything unreadable (empty conclusion, API error) falls through to commenting.
+            PREV_RUN=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow drift-sentinel.yml \
+              --status completed --limit 1 --json conclusion -q '.[0].conclusion' 2>/dev/null)
+
+            SUPPRESS=""
+            if [ -n "$LAST_B64" ] && [ "$PREV_RUN" = "failure" ]; then
+              printf '%s' "$LAST_B64" | base64 -d > last-comment.md
+              norm < drift-body.md   > new.norm
+              norm < last-comment.md > last.norm
+              cmp -s new.norm last.norm && SUPPRESS=1
+            fi
+
+            if [ -n "$SUPPRESS" ]; then
+              echo "Drift unchanged since the last comment on #$EXISTING — comment suppressed."
+              {
+                echo ""
+                echo "Duplicate comment suppressed: drift snapshot unchanged since the last"
+                echo "comment on #$EXISTING. The run still fails so the signal is not lost."
+              } >> "$GITHUB_STEP_SUMMARY"
+            else
+              gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file drift-body.md
+              echo "Commented on existing drift issue #$EXISTING (deduped)."
+            fi
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_TITLE" --body-file drift-body.md
+            echo "Opened a new drift issue."
+          fi
+
+          # Non-zero exit so the scheduled run is visibly red while drift is open —
+          # the issue is the primary alert; a red run is the secondary, hard-to-miss one.
+          exit 1
+
+  # H12b: rigscore's own sentinel above stays untouched (it checks the
+  # Node-shaped facts pipeline this repo doesn't have for other products).
+  # This job generalises the SAME "release vs committed data" check to
+  # every product with a data/releases/<slug>.json (unit H12a's contract),
+  # so a missed release on ANY product is caught, not just rigscore's.
+  product-drift:
+    runs-on: ${{ fromJSON(vars.HM_RUNNER_QUICK || '["self-hosted","quick"]') }}
+    timeout-minutes: 10
+    steps:
+      - name: Checkout site (committed data/releases/*.json)
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Detect per-product drift and alert
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          set +o pipefail
+
+          echo "## Product drift (per data/releases/*.json)" >> "$GITHUB_STEP_SUMMARY"
+          MANUAL_LIST=""
+          ANY_DRIFT=0
+
+          for f in data/releases/*.json; do
+            [ -e "$f" ] || continue
+            slug=$(basename "$f" .json)
+            product=$(jq -r --arg d "$slug" '.product // $d' "$f")
+            name=$(jq -r --arg d "$product" '.name // $d' "$f")
+            release_source=$(jq -r '.release_source // "manual"' "$f")
+            version=$(jq -r '.version // ""' "$f")
+            source_repo=$(jq -r '.source_repo // ""' "$f")
+            demo_source=$(jq -r '.demo.source // ""' "$f")
+            demo_source_kind=$(jq -r '.demo.source_kind // ""' "$f")
+            media_source=$(jq -r '.media_source // empty' "$f")
+
+            if [ "$release_source" != "github-release" ]; then
+              MANUAL_LIST="${MANUAL_LIST}- ${name} (\`${slug}\`)"$'\n'
+              continue
+            fi
+
+            REASONS=""
+            addr() { REASONS="${REASONS}- ${1}"$'\n'; }
+
+            REL_TAG=$(gh api "repos/${source_repo}/releases/latest" --jq .tag_name 2>/dev/null)
+            if [ -z "$REL_TAG" ]; then
+              addr "**Latest release unreadable**: could not read the latest release from \`${source_repo}\`."
+            else
+              REL_VER="${REL_TAG#v}"
+              if [ "$REL_VER" != "$version" ]; then
+                addr "**Site behind release**: latest release of \`${source_repo}\` is \`${REL_TAG}\`, committed \`data/releases/${slug}.json\` version is \`${version}\`."
+              fi
+              if [ "$demo_source_kind" = "product-tag" ] && [ -n "$demo_source" ] && [ "$demo_source" != "v${version}" ] && [ "$demo_source" != "${version}" ]; then
+                addr "**Demo behind**: \`demo.source\` is \`${demo_source}\`, release data version is \`${version}\`."
+              fi
+              if [ -n "$media_source" ] && [ "$media_source" != "v${version}" ] && [ "$media_source" != "${version}" ]; then
+                addr "**Stale screenshots**: \`media_source\` is \`${media_source}\`, release data version is \`${version}\`."
+              fi
+            fi
+
+            {
+              echo ""
+              echo "### ${name} (\`${slug}\`)"
+              echo "- Latest release (${source_repo}): \`${REL_TAG:-unreadable}\`"
+              echo "- Committed data/releases/${slug}.json: \`${version}\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            if [ -z "$REASONS" ]; then
+              echo "No drift detected." >> "$GITHUB_STEP_SUMMARY"
+              continue
+            fi
+
+            ANY_DRIFT=1
+            RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            ISSUE_TITLE="[drift] ${name}: release data out of sync"
+            cat > "product-drift-${slug}-body.md" <<BODY
+          Automated daily check found ${name}'s release data out of sync with its
+          GitHub release source (\`${source_repo}\`).
+
+          **Drift detected**
+
+          ${REASONS}
+          [Sentinel run](${RUN_URL}) · re-run on demand via the *Drift Sentinel* workflow (workflow_dispatch).
+          BODY
+
+            EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+              --search "in:title \"$ISSUE_TITLE\"" --json number,title \
+              -q "[.[] | select(.title == \"$ISSUE_TITLE\")][0].number" 2>/dev/null)
+
+            if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+              gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file "product-drift-${slug}-body.md"
+              echo "Commented on existing drift issue #${EXISTING} for ${slug} (deduped)."
+            else
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_TITLE" --body-file "product-drift-${slug}-body.md"
+              echo "Opened a new drift issue for ${slug}."
+            fi
+          done
+
+          if [ -n "$MANUAL_LIST" ]; then
+            {
+              echo ""
+              echo "### manual (no release source)"
+              echo "$MANUAL_LIST"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # Same convention as the rigscore job above: red while drift is open.
+          [ "$ANY_DRIFT" = "0" ] || exit 1

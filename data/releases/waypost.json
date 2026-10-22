@@ -1,0 +1,20 @@
+{
+  "product": "waypost",
+  "name": "Waypost",
+  "release_source": "manual",
+  "source_repo": null,
+  "version": null,
+  "released_at": null,
+  "release_url": null,
+  "source_ref": null,
+  "assets": {},
+  "demo": {
+    "path": "static/demo/waypost/",
+    "source": "62f9408",
+    "source_kind": "site-commit",
+    "anchor": "2026-09-01",
+    "pages": 5
+  },
+  "media_source": null,
+  "notes": "waypost has no product repository to tag a release against. The demo bundle's manifest.json 'source' (62f9408) is honestly a SITE commit (PR #331) that built the bundle, not a product ref."
+}

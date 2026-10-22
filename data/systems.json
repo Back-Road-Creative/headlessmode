@@ -1,0 +1,222 @@
+{
+  "_contract": {
+    "purpose": "Every system this studio has shipped or is building, in one place. The home page renders the products once, at /#software (also /#products) — as rows (screenshot, name, Free/Preview tag, blurb, one action and a Details link) in homepage_rank order; a product with \"homepage\": false is left off the home page. Free tools (tier oss) have their own pages and llms.txt entries and are not listed on the home page unless one opts in with \"homepage\": true (rigscore, bot-battle-station). There is no separate catalog page. Adding a system is one entry here and nothing else.",
+    "name": "Display name, spelled the way the system is branded. Required. Products are proper names and take title case (Driftless, Waypost, Quiet Corners, Band Coach) even when the repository is lowercase; a free tool named after its repository keeps the repository's lowercase (rigscore, keycut, sun-track). Match the brand, never normalize the casing.",
+    "tier": "One of: oss (source is public, go read it), product (a whole system built for the people whose work it does, rather than for developers building something else), case-study (the work exists here as a written account of what was built). Required — it decides which section of the roster an entry renders in (product → a home page stanza unless \"homepage\": false; oss renders a home page row only with \"homepage\": true; case-study renders none) and which chip the system's own page shows.",
+    "access": "How a product is acquired, so presentation can derive the acquisition path from data instead of hand-written prose. One of: public (used directly in the browser — self-serve, nothing to arrange), engagement (acquired through the studio — the path is /contact/). Required on every tier: product entry. Meaningless and forbidden on any other tier: a tool's acquisition is already its download/install/repo actions, so the key would claim nothing any template reads.",
+    "blurb": "One sentence, plain words, no closing period. What the thing does, not why it matters. Required.",
+    "link": "Where the entry's name points — a site path like /rigscore/ or a full URL. Omit the key entirely when there is nothing public to point at; the entry then renders as plain text rather than as a link to nowhere, because both the product stanza heading and the tool row name are guarded on it. CI probes every link here on the branch that adds it, so an entry only merges once its target is live.",
+    "repo": "The public repository, for a system whose 'link' points at a page here rather than at its source. Optional: omit it when 'link' is already the repository, and the entry's action falls back to 'link'. Same CI link probe applies. Required when 'shipped' is null on every tier except product — verify-facts.js gates it — because an undated tool row renders no source action without one. An undated product may omit it: its sheet then states no source-public claim (the chip reads Pre-release and the action is Contact for setup), which is the honest line for a product whose source is not yet public.",
+    "shipped": "The month it was first released, YYYY-MM, taken from version control rather than memory. It determines roster order and renders on the system's own page, inside the Release details disclosure, as 'Published <month>'. It says published, not in use: a release in version control evidences publication and cannot evidence that anyone used the thing. null when version control holds no dated release to take a month from: the system page then shows the Pre-release chip and no date, and the entry sorts below the dated ones. null is NOT a statement that the system is unavailable. Never infer a month from a first commit, a squashed import or a file date. It also gates 'download'/'store' below: either key may sit on an unshipped entry ahead of the asset actually existing, but nothing renders a Download or Store action until 'shipped' is truthy — flipping 'shipped' to a real month is the one-line change that turns it on, once the release is real. Same CI link probe applies once shipped, so nothing 404s before then.",
+    "download": "A releases page carrying an installer someone can actually run, OR a direct-asset permalink under that same repo's latest release for a system shipped as one file — either the entry's own repository plus '/releases/latest' (rather than a pinned asset, so the site cannot go on offering a version that has been superseded), or '<repo>/releases/latest/download/<file>' naming that file. Optional. Omit it unless an installer or asset exists; when present it renders nothing until 'shipped' is also truthy (see 'shipped') — a download can be written ahead of the release it names without offering a link CI would 404 on. Windows installers here are unsigned — the get-system buy box repeats it on the page of whatever you are downloading, UNLESS 'platforms' is set and the file is not a Windows installer (no '.exe'/'.msi'), in which case the note does not apply. Same CI link probe applies once shipped.",
+    "store": "A Microsoft Store listing for the system, once one exists — either the store's https://apps.microsoft.com/ web listing or an ms-windows-store: URI. Optional, and only ever added once the listing is live: a Store button with no URL to fill it must not render, so omit the key entirely rather than writing a placeholder. When present it is get-system's first, primary action, with the file download (if any) as the secondary one.",
+    "download_label": "A short label replacing the roster row's and buy box's literal 'Download for Windows' text, for a download that is not a Windows installer (a cross-platform file, for instance). Optional; every entry that omits it keeps the historical literal so existing rows render byte-identical to before this key existed.",
+    "platforms": "The operating systems a download runs on, an array drawn from windows, mac, linux, chromebook. Optional. Its presence is what tells 'download's unsigned-installer note whether it applies (see 'download') — a plain file that runs the same everywhere is not a Windows installer needing a SmartScreen warning, even without the note being told so directly.",
+    "install": "A literal one-line install command, such as 'pip install name', 'pip install git+<repo URL>' for a package that is not on an index, or 'npx github:owner/name'. Optional, and added only once the command has been run and confirmed to install THIS project right now. Resolving is not enough: a short name on a public index may belong to someone else entirely — 'pip install keycut' fetches an unrelated keyboard-shortcut tool, not the video cutter listed here — and an install that quietly delivers a stranger's package is worse than no Install action at all. Omit it otherwise: the Install action appears only where this key does.",
+    "order": "Products on the home page sort by 'homepage_rank' (integer, ascending, 1 first) — an explicit storefront order, tier=product, or a free tool with \"homepage\": true. A product without a rank follows the ranked ones in the ledger rule: dated newest first, ties by name ascending case-insensitive, undated last. File order decides nothing, so a new system is a one-line append anywhere in the array; give it a homepage_rank to place it among the ranked products.",
+    "homepage_rank": "Optional integer, tier=product, or a tier=oss entry with \"homepage\": true. The product's place on the home page, 1 first; ranks need not be contiguous but should be unique. Unranked products fall back to the ledger rule (see 'order') and render after every ranked one.",
+    "homepage": "Optional boolean. On tier=product, false keeps a product off the home page while its own page, its llms.txt entry and every link to it stay; omit the key otherwise. On tier=oss, true puts a free tool on the home page (its row is tagged Free and needs the same homepage_* keys as a product); omit it otherwise. An entry off the home page carries no homepage_rank, homepage_image or homepage_action.",
+    "homepage_image": "Required on every product the home page shows: a path relative to /img/ (\"<slug>/home.jpg\") naming a file with a provenance entry in static/img/<slug>/manifest.json, plus homepage_image_alt (what the picture shows) and homepage_image_width/homepage_image_height matching that entry's viewport. A real screenshot where the product has a screen to show; otherwise a designed tile that claims nothing the product's page does not already say.",
+    "homepage_area": "Required on every product the home page shows: one short category word (Music, Maps, Code, Media) printed small and uppercase under the product name.",
+    "homepage_action": "Optional {\"label\", \"href\"}, tier=product, or a tier=oss entry with \"homepage\": true: the home page row's one primary button. Without it the button is derived: public with download and shipped -> Download (the download URL); engagement -> Request a demo (/contact/). A public product with no download must set it. Every row also carries Details, to its link. A free tool on the home page must set it."
+  },
+  "systems": [
+    {
+      "name": "rigscore",
+      "tier": "oss",
+      "blurb": "Checks an AI development setup's configuration for security, consistency and governance problems",
+      "link": "/rigscore/",
+      "repo": "https://github.com/Back-Road-Creative/rigscore",
+      "install": "npx github:Back-Road-Creative/rigscore",
+      "shipped": "2026-03",
+      "homepage": true,
+      "homepage_rank": 3,
+      "homepage_image": "rigscore/home.svg",
+      "homepage_image_alt": "rigscore's terminal report: a failing MCP server check, a passing check, an advisory, then the Hygiene and Practice grades",
+      "homepage_image_width": 800,
+      "homepage_image_height": 500,
+      "homepage_area": "Code",
+      "homepage_action": {
+        "label": "Install",
+        "href": "/rigscore/"
+      }
+    },
+    {
+      "name": "Quiet Corners",
+      "tier": "product",
+      "access": "public",
+      "blurb": "Scores rural U.S. counties on stability, remoteness, sprawl risk and affordability using Census and USDA data, and prints true-scale field maps of any area you draw",
+      "link": "/quiet-corners/",
+      "shipped": "2026-02",
+      "homepage_rank": 2,
+      "homepage_image": "quiet-corners/home.jpg",
+      "homepage_action": {
+        "label": "Open the map",
+        "href": "/quiet-corners/#dashboard"
+      },
+      "homepage_image_alt": "Quiet Corners' map of the United States with candidate towns marked and major cities labeled",
+      "homepage_image_width": 800,
+      "homepage_image_height": 500,
+      "homepage_area": "Maps"
+    },
+    {
+      "name": "Driftless",
+      "tier": "product",
+      "access": "engagement",
+      "blurb": "Project, program and portfolio management where status, schedules and earned value are calculated from the work you record, so nobody types in a percent complete",
+      "link": "/driftless/",
+      "repo": "https://github.com/Back-Road-Creative/driftless",
+      "shipped": "2026-07",
+      "homepage": false
+    },
+    {
+      "name": "keycut",
+      "tier": "oss",
+      "blurb": "Cuts and joins multiple video ranges, copying video by default and moving each start forward to the next keyframe",
+      "link": "/keycut/",
+      "repo": "https://github.com/Back-Road-Creative/keycut",
+      "download": "https://github.com/Back-Road-Creative/keycut/releases/latest",
+      "shipped": "2026-07"
+    },
+    {
+      "name": "agent-audit",
+      "tier": "oss",
+      "blurb": "Audits the configuration you give an AI coding agent: skill and instruction files, and workflow maturity",
+      "link": "/agent-audit/",
+      "repo": "https://github.com/Back-Road-Creative/agent-audit",
+      "download": "https://github.com/Back-Road-Creative/agent-audit/releases/latest",
+      "shipped": "2026-07"
+    },
+    {
+      "name": "claude-batch-runner",
+      "tier": "oss",
+      "blurb": "Runs batches of Claude Code tasks from a spec, validates outputs and reports cost",
+      "link": "/claude-batch-runner/",
+      "repo": "https://github.com/Back-Road-Creative/claude-batch-runner",
+      "download": "https://github.com/Back-Road-Creative/claude-batch-runner/releases/latest",
+      "shipped": "2026-07"
+    },
+    {
+      "name": "bot-battle-station",
+      "tier": "oss",
+      "blurb": "A live wall screen for every Claude Code session on your machine: which need you, which are working, which wait on a job",
+      "link": "/bot-battle-station/",
+      "repo": "https://github.com/Back-Road-Creative/bot-battle-station",
+      "install": "git clone https://github.com/Back-Road-Creative/bot-battle-station.git",
+      "download": "https://github.com/Back-Road-Creative/bot-battle-station/releases/latest",
+      "download_label": "Download the files",
+      "platforms": ["linux", "mac"],
+      "shipped": "2026-10",
+      "homepage": true,
+      "homepage_rank": 4,
+      "homepage_image": "bot-battle-station/home.jpg",
+      "homepage_image_alt": "The bot-battle-station board with demo sessions, limits and one tile per session",
+      "homepage_image_width": 800,
+      "homepage_image_height": 500,
+      "homepage_area": "Code",
+      "homepage_action": {
+        "label": "Install",
+        "href": "/bot-battle-station/"
+      }
+    },
+    {
+      "name": "pycube-lut",
+      "tier": "oss",
+      "blurb": "Applies .cube LUTs, HALD CLUTs and 1D tone curves to NumPy images",
+      "link": "/pycube-lut/",
+      "repo": "https://github.com/Back-Road-Creative/pycube-lut",
+      "install": "pip install git+https://github.com/Back-Road-Creative/pycube-lut",
+      "shipped": "2026-07"
+    },
+    {
+      "name": "Grant Platform",
+      "tier": "product",
+      "access": "engagement",
+      "blurb": "Runs grant work end to end on one platform — funder award administration and compliance, and recipient discovery, applications, reporting and closeout",
+      "link": "/grant-platform/",
+      "shipped": null,
+      "homepage": false
+    },
+    {
+      "name": "Band Coach",
+      "tier": "product",
+      "access": "public",
+      "blurb": "A practice coach for 26 instruments that listens through your microphone or MIDI keyboard, checks pitch and timing, and picks what to practice next",
+      "link": "/band-coach/",
+      "repo": "https://github.com/Back-Road-Creative/band-coach",
+      "download": "https://github.com/Back-Road-Creative/band-coach/releases/latest/download/band-coach.html",
+      "download_label": "Download the file",
+      "platforms": [
+        "windows",
+        "mac",
+        "linux",
+        "chromebook"
+      ],
+      "shipped": "2026-09",
+      "homepage_rank": 1,
+      "homepage_image": "band-coach/home.jpg",
+      "homepage_image_alt": "Band Coach's keyboard trainer: an on-screen keyboard with the note to play highlighted",
+      "homepage_image_width": 800,
+      "homepage_image_height": 500,
+      "homepage_area": "Music"
+    },
+    {
+      "name": "redactcam",
+      "tier": "oss",
+      "blurb": "Blurs faces, license plates and vehicle cabins in video, and checks cabin masks against a second detection pass before encoding",
+      "link": "/redactcam/",
+      "repo": "https://github.com/Back-Road-Creative/redactcam",
+      "download": "https://github.com/Back-Road-Creative/redactcam/releases/latest",
+      "shipped": "2026-07"
+    },
+    {
+      "name": "sun-track",
+      "tier": "oss",
+      "blurb": "Calculates solar elevation and golden-hour windows, and matches capture times to positions in GPX tracks",
+      "link": "/sun-track/",
+      "repo": "https://github.com/Back-Road-Creative/sun-track",
+      "install": "pip install git+https://github.com/Back-Road-Creative/sun-track",
+      "shipped": "2026-07"
+    },
+    {
+      "name": "push-guard",
+      "tier": "oss",
+      "blurb": "A client-side hook that blocks direct pushes to protected branches so changes go through pull requests",
+      "link": "https://github.com/Back-Road-Creative/push-guard",
+      "repo": "https://github.com/Back-Road-Creative/push-guard",
+      "shipped": null
+    },
+    {
+      "name": "Waypost",
+      "tier": "product",
+      "access": "engagement",
+      "blurb": "A console on your own computer that runs a creator's video, photo and SEO work and schedules posts to YouTube, TikTok, Instagram and Facebook, one tab per brand",
+      "link": "/waypost/",
+      "shipped": null,
+      "homepage_rank": 5,
+      "homepage_image": "waypost/home.jpg",
+      "homepage_action": {
+        "label": "Try the demo",
+        "href": "/demo/waypost/"
+      },
+      "homepage_image_alt": "The Waypost demo console's Jobs page: a table of video, SEO and comment runs with their status, and the upcoming schedules",
+      "homepage_image_width": 800,
+      "homepage_image_height": 500,
+      "homepage_area": "Media"
+    },
+    {
+      "name": "Framegrade",
+      "tier": "product",
+      "access": "engagement",
+      "blurb": "The media engine under Waypost: it grades video and photos, checks every finished file before delivery, and builds route films from GPS tracks",
+      "link": "/framegrade/",
+      "shipped": null,
+      "homepage_rank": 6,
+      "homepage_image": "framegrade/home.svg",
+      "homepage_image_alt": "Framegrade: one landscape frame, flat and gray on the left, graded with color on the right",
+      "homepage_image_width": 800,
+      "homepage_image_height": 500,
+      "homepage_area": "Media"
+    }
+  ]
+}

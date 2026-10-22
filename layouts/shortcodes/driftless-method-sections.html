@@ -1,0 +1,24 @@
+{{/*
+    driftless-method-sections shortcode — one link per Method section of the
+    driftless demo bundle (static/demo/driftless/). Every target is checked
+    against the bundle's own manifest.json at build time, so a section the
+    bundle no longer ships fails the build instead of shipping a dead link.
+
+        {{< driftless-method-sections >}}
+*/}}
+{{- $manifestPath := "static/demo/driftless/manifest.json" -}}
+{{- $manifest := readFile $manifestPath | unmarshal -}}
+{{- $sections := slice
+    (dict "label" "PMBOK reference" "file" "pmbok.html")
+    (dict "label" "Technique library" "file" "techniques.html")
+    (dict "label" "Methods" "file" "methods.html")
+    (dict "label" "Artifacts" "file" "artifacts.html")
+    (dict "label" "Glossary" "file" "glossary.html")
+    (dict "label" "Business process map" "file" "process-map.html")
+    (dict "label" "Method map" "file" "map.html") -}}
+<ul>
+{{- range $sections }}
+  {{- if not (in $manifest.files .file) }}{{ errorf "driftless-method-sections: %s is not in %s" .file $manifestPath }}{{ end }}
+  <li><a href="/demo/driftless/{{ .file }}">{{ .label }}</a></li>
+{{- end }}
+</ul>

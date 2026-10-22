@@ -1,0 +1,24 @@
+######################## navigation menus ######################
+#
+# The wordmark carries Home. Keep this menu to destinations outside the home
+# page rather than adding a second home link for its #software roster. Direct
+# links and retired-catalog redirects still land on that roster. The /systems/
+# catalog and /releases/ section are gone; release notes live on each project's
+# GitHub releases page.
+#
+# The footer partial renders THIS list plus /privacy/ and a GitHub link on
+# every page. Adding a menu slot here adds it to both header and footer.
+#
+# scripts/test_systems_contract.py asserts every entry below resolves to a
+# page Hugo actually built. The #software anchor has its own assertion because
+# it remains a public CTA and redirect target even though it is not a menu slot.
+
+[[main]]
+  name = "About"
+  url = "/about/"
+  weight = 1
+
+[[main]]
+  name = "Contact"
+  url = "/contact/"
+  weight = 2

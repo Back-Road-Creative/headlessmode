@@ -1,0 +1,6 @@
+# Production environment configuration
+
+baseURL = "https://headlessmode.com/"
+
+[minify]
+  minifyOutput = true

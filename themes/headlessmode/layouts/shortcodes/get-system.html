@@ -1,0 +1,13 @@
+{{/*
+    get-system shortcode — wraps partials/get-system.html so a content page
+    can render a system's "Get it" block with one line:
+
+        {{< get-system name="keycut" >}}
+
+    "name" is the only input; the partial looks the rest up in
+    data/systems.json, so this can never hand-type a URL the ledger disagrees
+    with.
+*/}}
+{{- $name := .Get "name" -}}
+{{- if not $name }}{{ errorf "get-system shortcode: missing required \"name\" attribute" }}{{ end -}}
+{{ partial "get-system.html" $name }}

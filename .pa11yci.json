@@ -1,0 +1,54 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "timeout": 30000,
+    "_needsReview_comment": "pa11y's axe runner defaults levelCapWhenNeedsReview to 'error', promoting axe's INCOMPLETE results (could-not-determine, e.g. text partially clipped by an overflow-x container — flaky per run because it depends on scroll/paint state) to hard failures. Cap them at 'warning' so they stay visible in the log without failing the gate; genuine axe VIOLATIONS are unaffected and still fail.",
+    "levelCapWhenNeedsReview": "warning",
+    "_exemptions_comment": "No per-URL ignore/hideElements. /quiet-corners/ carried a rule-wide color-contrast ignore from 2026-07-30 citing a methodology <summary> block that #314 deleted; measured 2026-09-04 without it (3 runs, built site, this config) the page reports 0 errors. The three remaining color-contrast items (the zoom-out control's aria-hidden minus glyph and the Leaflet attribution link, under #qc-map) are axe needs-review results the cap above already holds at warning. Any exemption added back must carry an _ignore_comment naming elements that exist: scripts/test_a11y_config.py checks it.",
+    "chromeLaunchConfig": {
+      "args": [
+        "--no-sandbox",
+        "--disable-gpu"
+      ]
+    },
+    "runners": [
+      "axe",
+      "htmlcs"
+    ]
+  },
+  "urls": [
+    "http://localhost:1315/",
+    "http://localhost:1315/about/",
+    "http://localhost:1315/redactcam/",
+    "http://localhost:1315/rigscore/",
+    "http://localhost:1315/driftless/",
+    "http://localhost:1315/demo/driftless/",
+    "http://localhost:1315/demo/driftless/map.html",
+    "http://localhost:1315/demo/driftless/process-map.html",
+    "http://localhost:1315/demo/driftless/projects-1-flow.html",
+    "http://localhost:1315/demo/driftless/projects-1-gantt.html",
+    "http://localhost:1315/demo/driftless/org-heatmap.html",
+    "http://localhost:1315/demo/driftless/projects-1-assist-cost.html",
+    "http://localhost:1315/demo/driftless/methods.html",
+    "http://localhost:1315/demo/driftless/pmbok-proof.html",
+    "http://localhost:1315/demo/driftless/pmbok.html",
+    "http://localhost:1315/demo/driftless/pmbok-4.1.html",
+    "http://localhost:1315/demo/driftless/techniques.html",
+    "http://localhost:1315/demo/driftless/techniques-earned-value-analysis.html",
+    "http://localhost:1315/demo/driftless/artifacts.html",
+    "http://localhost:1315/demo/driftless/artifacts-project-charter.html",
+    "http://localhost:1315/demo/driftless/glossary.html",
+    "http://localhost:1315/demo/driftless/methods-kanban.html",
+    "http://localhost:1315/sun-track/",
+    "http://localhost:1315/contact/",
+    "http://localhost:1315/privacy/",
+    "http://localhost:1315/grant-platform/",
+    "http://localhost:1315/keycut/",
+    "http://localhost:1315/agent-audit/",
+    "http://localhost:1315/claude-batch-runner/",
+    "http://localhost:1315/bot-battle-station/",
+    "http://localhost:1315/pycube-lut/",
+    "http://localhost:1315/quiet-corners/",
+    "http://localhost:1315/quiet-corners/maps/"
+  ]
+}

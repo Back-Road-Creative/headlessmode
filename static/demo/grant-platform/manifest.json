@@ -1,0 +1,19 @@
+{
+  "anchor": "2026-09-01",
+  "files": [
+    "applications.html",
+    "awards.html",
+    "engagements.html",
+    "index.html",
+    "opportunities-search.html",
+    "opportunities.html",
+    "organizations.html",
+    "reports-core.activity_log.html",
+    "reports-core.artifact_register.html",
+    "reports-core.work_schedule.html",
+    "reports-path.opportunity_matches.html",
+    "reports.html"
+  ],
+  "kind": "grant-platform-static-showcase",
+  "source": "09d592b"
+}

@@ -1,0 +1,4 @@
+{
+  "about": "Skips that check-evidence.mjs accepts. Each entry: file (repo-relative test file), test (a regular expression matched against the test name), reason (why this skip is legitimate in CI), owner (who answers for it). Empty on purpose: with CI=true the browser and build skips fail instead (QQA-01), so no skip is legitimate in CI today. An entry here is a hole in the gate; add one only with a reason a reviewer would accept.",
+  "entries": []
+}

@@ -1,0 +1,43 @@
+# Content Schema for Headless Mode
+#
+# Frontmatter requirements for this site's content types.
+# See: _governance/templates/content.schema.template.yaml
+#
+# WHAT ENFORCES WHAT. This file is descriptive; it is not the gate. The gate is
+# `scripts/test_frontmatter.py`, which runs in `.github/workflows/pr-ci.yml` and
+# in `scripts/validate.sh` (so `make publish` fails for the same reason a PR
+# does). To avoid two contracts that can drift apart, the `required` lists below
+# state exactly what that script rejects a file for — `title` and `description`
+# everywhere — and
+# nothing more. The `optional` lists are what the existing content actually
+# carries, so a new file has something to copy.
+#
+# Changing a `required` list here changes nothing on its own. Change
+# REQUIRED_FIELDS_ALL in scripts/test_frontmatter.py and mirror it here.
+
+# Content Type: Top-level pages (about.md, driftless.md, …)
+# System pages carry their documentation in a "## Documentation" section —
+# there is no separate docs content type since the boutique redesign removed
+# the /docs/ hub, and no releases content type since the hybrid redesign
+# moved release notes to each project's GitHub releases page.
+pages:
+  required:
+    - title
+    - description
+
+  optional:
+    - date
+    - draft
+    - tags
+    - layout         # custom layout template
+    - slug           # custom URL slug
+    - aliases        # Array of URL redirects
+
+  forbidden: []
+
+  notes: |
+    - `_index.md` files are skipped by the validator entirely.
+
+# Schema Metadata
+schema_version: "1.0.0"
+last_updated: "2026-08-06"

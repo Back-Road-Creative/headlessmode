@@ -1,0 +1,108 @@
+{{ define "main" }}
+{{- /* Product-sheet header (chip + name + one-line + buy box) from the
+       data/systems.json entry for this page — replaces the old post-style
+       title + date header, which read as a blog frame. */ -}}
+{{- $sys := "" -}}
+{{- range site.Data.systems.systems }}{{ if eq .link $.RelPermalink }}{{ $sys = . }}{{ end }}{{ end -}}
+{{- with $sys }}{{ partial "system-sheet.html" (dict "system" .) }}{{ end }}
+<div class="max-w-4xl mx-auto px-6 py-12 page-wrap">
+    <article class="prose prose-invert max-w-none themed-prose">
+        <div class="content-body section-content">
+            <section class="not-prose rc-demo" id="rc-demo">
+                <h2 class="feature-label">Illustration: the plate filter in the ROAD_FOOTAGE preset</h2>
+                <p class="rc-intro">redactcam blurs faces, license plates and vehicle cabins in video,
+                    and checks the mask against a second vehicle detection pass before the video is
+                    encoded. A plate model also fires on road signs, so the preset drops boxes whose
+                    shape or size falls outside a window. The figure below draws that window and the
+                    ranges recorded for four kinds of object. It illustrates the preset's numbers; it is
+                    not a test of the filter on any footage.</p>
+                <p class="rc-note" id="rc-fallback">This figure is drawn in your browser from
+                    <a href="/data/redactcam/plate-gate.json">a JSON file in this repository</a>. Without
+                    JavaScript the chart and table below stay empty &mdash; the same numbers are readable
+                    directly in that JSON file.</p>
+                <p class="rc-caption">Shaded region: boxes the plate gate accepts &mdash; <span
+                    id="rc-gate-label">the aspect and area window</span>. Numbered rectangles are the
+                    ranges the preset's comments record for four kinds of road object.</p>
+
+                {{/* No SVG <text> anywhere: axe cannot resolve a background color behind SVG text,
+                     so it reports each such label as indeterminate contrast. The tick labels and the
+                     box numbers are HTML, positioned over and around the chart. */}}
+                <div class="rc-plot">
+                    <ul class="rc-yaxis rc-mono" aria-label="Vertical axis: box area, percent of frame"><li>10%</li><li>1%</li><li>0.1%</li><li>0.01%</li></ul>
+                    <div class="rc-plot-main">
+                        <div class="rc-canvas">
+                            <svg id="rc-chart" class="rc-chart" viewBox="0 0 720 360" role="img"
+                                 aria-labelledby="rc-chart-title" preserveAspectRatio="none"><title
+                                 id="rc-chart-title">Aspect ratio against box area for four road objects.</title></svg>
+                            <div class="rc-labels" id="rc-labels" aria-hidden="true"></div>
+                        </div>
+                        <ul class="rc-xaxis rc-mono" aria-label="Horizontal axis: box aspect ratio"><li>1:1</li><li>2:1</li><li>4:1</li><li>8:1</li><li>16:1</li></ul>
+                    </div>
+                </div>
+
+                <div class="table-scroll" tabindex="0" role="region" aria-label="redactcam results table">
+                <table class="rc-table rc-mono">
+                    <caption>Each object's recorded box shape, and what the gate does with it. Both axes on the figure are logarithmic.</caption>
+                    <thead><tr><th scope="col">Object</th><th scope="col">Aspect</th><th scope="col">Area</th><th scope="col">Gate</th></tr></thead>
+                    <tbody id="rc-rows"></tbody>
+                </table>
+                </div>
+                <ol class="rc-notes" id="rc-notes"></ol>
+                <p class="rc-note">Thresholds are read verbatim from <span id="rc-source">redactcam</span>. The
+                    plotted rectangles are per-class ranges that the preset's comments record from
+                    forward-facing 4K road footage. They are not detections from one video, the footage
+                    itself is not published here, and the figure does not show which plates or signs a
+                    detector missed. The filter was tuned for that kind of footage and can fail on other
+                    footage, for example a plate at an unusual angle or a sign inside the plate window.</p>
+            </section>
+
+            {{ .Content }}
+        </div>
+        <div class="not-prose post-backlink"><a href="/#software" class="back-link">&larr; All software</a></div>
+    </article>
+</div>
+
+<style>
+    /* Demo-local styles. Page-specific CSS lives in the layout here for the same
+       reason quiet-corners-dashboard.html carries its own: style-src keeps
+       'unsafe-inline', script-src does not. */
+    .rc-demo { margin: 0 0 2.5rem; }
+    .rc-mono { font-family: var(--font-mono, ui-monospace, monospace); }
+    .rc-intro { margin: 0 0 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+    .rc-caption { margin: 0 0 0.6rem; color: var(--text-secondary); font-size: 0.9rem; }
+    .rc-plot { display: flex; gap: 0.5rem; }
+    .rc-plot-main { flex: 1; min-width: 0; }
+    .rc-canvas { position: relative; }
+    .rc-chart { display: block; width: 100%; height: 18rem; background: var(--bg-card);
+        border: 1px solid var(--border-default); border-radius: 8px; }
+    .rc-gate { fill: #10b981; fill-opacity: 0.16; stroke: #34d399; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+    .rc-box { stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+    .rc-kept { fill: #34d399; fill-opacity: 0.5; stroke: #6ee7b7; }
+    .rc-dropped { fill: #a1a1aa; fill-opacity: 0.28; stroke: #d4d4d8; stroke-dasharray: 5 4; }
+    .rc-labels { position: absolute; inset: 0; pointer-events: none; }
+    .rc-tag { position: absolute; transform: translate(-50%, -50%); padding: 0 0.32rem; border-radius: 3px;
+        background: #09090b; border: 1px solid #52525b; color: #f3f4f6; font-size: 0.72rem;
+        font-family: var(--font-mono, ui-monospace, monospace); line-height: 1.5; }
+    .rc-yaxis, .rc-xaxis { list-style: none; margin: 0; padding: 0; display: flex;
+        color: var(--text-secondary); font-size: 0.72rem; }
+    .rc-yaxis { flex-direction: column; justify-content: space-between; height: 18rem; text-align: right; }
+    .rc-xaxis { justify-content: space-between; margin-top: 0.3rem; }
+    .rc-table { width: 100%; margin: 1.1rem 0 0.5rem; border-collapse: collapse; }
+    .rc-table caption { color: var(--text-muted); font-size: 0.8rem; text-align: left; padding-bottom: 0.5rem; }
+    .rc-table th, .rc-table td { padding: 0.4rem 0.6rem; text-align: left; font-size: 0.82rem;
+        border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+    .rc-table th { color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; }
+    .rc-table td { color: var(--text-secondary); }
+    /* Tailwind's preflight strips list markers; these ones key the notes to the numbered chart boxes. */
+    .rc-notes { margin: 0.75rem 0 0; padding-left: 1.4rem; list-style: decimal;
+        color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+    .rc-note { margin: 0.75rem 0 0; color: var(--text-muted); font-size: 0.82rem; line-height: 1.6; }
+    /* not-prose drops the prose underline, which left the fallback's link told apart by
+       color alone (axe link-in-text-block; scripts/qcm/redactcam-fallback.test.mjs). */
+    .rc-note a { text-decoration: underline; text-underline-offset: 2px; }
+    .rc-ready #rc-fallback { display: none; }
+</style>
+
+{{/* Deferred and external — script-src carries no 'unsafe-inline'. */}}
+<script src="{{ "js/redactcam-demo.js" | relURL }}" defer></script>
+{{ end }}

@@ -1,0 +1,25 @@
+{{/*
+    system-chip partial — the one price-tag chip for a data/systems.json entry.
+    Context: the entry itself. Status outranks tier: an entry with
+    "shipped": null reads "Pre-release" whatever its tier — a system with no
+    proven ship month has not shipped yet. The month it was published is a
+    separate claim, made only from a "shipped" value, because "shipped" is a
+    fact only version control can prove.
+    Product-sheet headers render their chip through this partial, so the
+    wording and data-status hook stay derived from the ledger.
+    With "availability" set (the homepage rows merge it into the entry), the
+    chip is the row's tag, derived from "access": public (used directly,
+    nothing to arrange) -> Free; anything else -> Preview. A free tool on the
+    home page (tier oss, no "access") is Free. No new data key.
+    Product pages omit it and keep the tier label.
+*/}}
+{{- $tierLabel := dict "oss" "Free · open source" "product" "Product" "case-study" "Case study" -}}
+{{- $tierStatus := dict "oss" "free" "product" "product" "case-study" "product" -}}
+{{- $chipStatus := cond (not .shipped) "undated" (index $tierStatus .tier | default "product") -}}
+{{- $chipText := cond (not .shipped) "Pre-release" (index $tierLabel .tier | default .tier) -}}
+{{- if .availability -}}
+{{- $free := or (eq .access "public") (eq .tier "oss") -}}
+{{- $chipText = cond $free "Free" "Preview" -}}
+{{- $chipStatus = cond $free "free" "preview" -}}
+{{- end -}}
+<span class="shelf-panel__chip" data-status="{{ $chipStatus }}">{{ $chipText }}</span>

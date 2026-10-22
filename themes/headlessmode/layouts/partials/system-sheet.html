@@ -1,0 +1,66 @@
+{{/*
+    system-sheet partial — the product-sheet header band for one system page.
+
+    Context: a dict with "system" (the data/systems.json entry for this page).
+    Callers find the entry by matching the entry's "link" against the page's
+    RelPermalink, so a page is a product sheet exactly when the ledger says a
+    system lives at its URL — no front-matter flag, no hand-typed name.
+
+    Order, so the action is on the first screen of a 390px phone: chip, serif
+    name and one-line (all from the entry), then the get-system box (exactly
+    one primary action first, its format and requirements beside it), then a
+    collapsed <details> that holds the provenance. Desktop puts the box in a
+    right column and the disclosure under both. The box renders only when
+    there is something to acquire: an engagement product's path is
+    "Contact for setup" (/contact/); a public dashboard product needs no jump
+    link immediately above the dashboard that is already its page content. An
+    oss entry still needs a real artifact or repo, and get-system errors
+    loudly rather than render empty.
+
+    Provenance is stated once, inside <details>: "Published <month>" when the
+    entry is dated, "Latest release <version> · <Month YYYY>" when
+    data/releases/<slug>.json (slug = path.Base of the entry's "link")
+    records a version, and "Demo built from <demo.source>" when it records a
+    demo bundle whose source is a ref of the PRODUCT (source_kind product-tag
+    or product-commit). A bundle whose only provenance is a site commit
+    (source_kind site-commit) says nothing about which product build it
+    shows, so that line stays off rather than pass a site SHA off as a
+    product version. The chip already says "Pre-release" for an undated
+    entry, so an undated entry states no date. With nothing to state, no
+    disclosure renders.
+*/}}
+{{- $s := .system -}}
+{{- $slug := path.Base $s.link -}}
+{{- $release := index site.Data.releases $slug -}}
+{{- $demoSource := "" -}}
+{{- if and $release $release.demo (ne $release.demo.source_kind "site-commit") }}{{ $demoSource = $release.demo.source }}{{ end -}}
+{{- $version := "" -}}
+{{- if and $release $release.version }}{{ $version = $release.version }}{{ end -}}
+<section class="sheet-band">
+    <div class="shop-row sheet-head">
+        <div class="sheet-intro">
+            {{ partial "system-chip.html" $s }}
+            <h1 class="sheet-name">{{ $s.name }}</h1>
+            <p class="sheet-line">{{ $s.blurb }}</p>
+        </div>
+        {{- if or (and (eq $s.tier "product") (eq $s.access "engagement")) $s.store $s.download $s.install $s.repo (and $s.link (hasPrefix $s.link "http")) }}
+        <aside class="sheet-buy" aria-label="Get {{ $s.name }}">
+            {{ partial "get-system.html" $s.name }}
+        </aside>
+        {{- end }}
+        {{- if or $s.shipped $version $demoSource }}
+        <details class="sheet-provenance">
+            <summary>Release details</summary>
+            {{- if $s.shipped }}
+            <p>Published <time datetime="{{ $s.shipped }}">{{ time.Format "January 2006" (printf "%s-01" $s.shipped) }}</time></p>
+            {{- end }}
+            {{- if $version }}
+            <p>Latest release {{ $version }} &middot; {{ time.Format "January 2006" $release.released_at }}</p>
+            {{- end }}
+            {{- if $demoSource }}
+            <p>Demo built from {{ $demoSource }}</p>
+            {{- end }}
+        </details>
+        {{- end }}
+    </div>
+</section>

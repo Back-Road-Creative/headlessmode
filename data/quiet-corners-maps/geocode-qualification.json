@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "selection": {
+    "selectedAt": "2026-10-08T20:19:47.640Z",
+    "source": "https://carto.nationalmap.gov/arcgis/rest/services/structures/MapServer",
+    "layers": {
+      "courthouse": 40,
+      "post-office": 38
+    },
+    "counts": {
+      "courthouse": {
+        "records": 3713,
+        "withFullAddress": 3709,
+        "inRuralCounty": 1097
+      },
+      "post-office": {
+        "records": 31033,
+        "withFullAddress": 31031,
+        "inRuralCounty": 5674
+      }
+    },
+    "candidates": 6771,
+    "candidateKinds": {
+      "street-number": 6713,
+      "po-box": 0,
+      "rural-route": 0,
+      "no-number": 58
+    },
+    "rural": "counties.json rucc in [8,9]; county found by point-in-polygon on counties-10m.json",
+    "pick": "sha256(permanent_identifier) ascending, 20 per type, at most 2 per state"
+  },
+  "summary": {
+    "overall": {
+      "n": 40,
+      "errors": 0,
+      "queried": 40,
+      "matched": 33,
+      "unmatched": 7,
+      "matchRatePct": 82.5,
+      "stateAgrees": 33,
+      "zipAgrees": 33
+    },
+    "distance": {
+      "n": 33,
+      "minM": 11.3,
+      "medianM": 50.2,
+      "p90M": 90.1,
+      "maxM": 299.5,
+      "within100": 31,
+      "within250": 32,
+      "within500": 33,
+      "within1000": 33,
+      "over1000": 0
+    },
+    "byType": {
+      "courthouse": {
+        "n": 20,
+        "errors": 0,
+        "queried": 20,
+        "matched": 17,
+        "unmatched": 3,
+        "matchRatePct": 85,
+        "stateAgrees": 17,
+        "zipAgrees": 17
+      },
+      "post-office": {
+        "n": 20,
+        "errors": 0,
+        "queried": 20,
+        "matched": 16,
+        "unmatched": 4,
+        "matchRatePct": 80,
+        "stateAgrees": 16,
+        "zipAgrees": 16
+      }
+    },
+    "byAddressKind": {
+      "street-number": {
+        "n": 40,
+        "errors": 0,
+        "queried": 40,
+        "matched": 33,
+        "unmatched": 7,
+        "matchRatePct": 82.5,
+        "stateAgrees": 33,
+        "zipAgrees": 33
+      }
+    }
+  },
+  "run": {
+    "startedAt": "2026-10-08T20:20:56.696Z",
+    "finishedAt": "2026-10-08T20:21:45.846Z",
+    "intervalMs": 1000,
+    "via": "handleGeocode in static/functions/api/geocode.js, live upstream, benchmark Public_AR_Current"
+  },
+  "corpus": [
+    {"id":"a8a642c6-8ccb-4baa-b6f0-a87239331f3d","type":"courthouse","name":"Moultrie County Courthouse","address":"10 South Main Street","city":"Sullivan","state":"IL","zip":"61951-1969","addressKind":"street-number","lon":-88.60703208405269,"lat":39.598996668805846,"pointLocationType":"Centroid","county":{"fips":"17139","name":"Moultrie County","state":"IL","rucc":8},"sourceDatadesc":"830 TNMC Update 6/27/2018","result":{"resultCount":1,"ms":944,"label":"10 S MAIN ST, SULLIVAN, IL, 61951","tigerId":"tiger:5818429:R","lat":39.599244045817,"lon":-88.607409473372,"matchClass":"interpolated","distanceM":42.5,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"cc35992a-f851-46a3-94f9-c480be1da595","type":"courthouse","name":"Burt County Courthouse","address":"111 North 13th Street","city":"Tekamah","state":"NE","zip":"68061","addressKind":"street-number","lon":-96.22054343647088,"lat":41.77870909530752,"pointLocationType":"Centroid","county":{"fips":"31021","name":"Burt County","state":"NE","rucc":8},"sourceDatadesc":"830 TNMC Update 5/17/2018","result":{"resultCount":0,"ms":134}},
+    {"id":"750001c3-7cca-4307-b8ca-3e81adb1d00d","type":"courthouse","name":"Chautauqua County Courthouse","address":"215 North Chautauqua Street","city":"Sedan","state":"KS","zip":"67361","addressKind":"street-number","lon":-96.18736272414746,"lat":37.12850844768406,"pointLocationType":"Centroid","county":{"fips":"20019","name":"Chautauqua County","state":"KS","rucc":9},"sourceDatadesc":"830 TNMC Update 5/22/2018","result":{"resultCount":1,"ms":363,"label":"215 N CHAUTAUQUA ST, SEDAN, KS, 67361","tigerId":"tiger:639101764:L","lat":37.128135828545,"lon":-96.186881007485,"matchClass":"interpolated","distanceM":59.5,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"92fdeb97-4114-4728-88c6-62b18d24d812","type":"courthouse","name":"Linn County Courthouse","address":"108 North High Street","city":"Linneus","state":"MO","zip":"64653","addressKind":"street-number","lon":-93.18936870511477,"lat":39.87934069225419,"pointLocationType":"Centroid","county":{"fips":"29115","name":"Linn County","state":"MO","rucc":9},"sourceDatadesc":"830 TNMC Update 4/6/2018","result":{"resultCount":1,"ms":112,"label":"108 N HIGH ST, LINNEUS, MO, 64653","tigerId":"tiger:25591878:R","lat":39.879143706802,"lon":-93.189640293299,"matchClass":"interpolated","distanceM":31.9,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"245bd357-9dd0-4e87-a8bd-c46ce5c1811d","type":"courthouse","name":"Charlotte County Courthouse","address":"125 David Bruce Avenue","city":"Charlotte","state":"VA","zip":"23923","addressKind":"street-number","lon":-78.63762967849426,"lat":37.05621734795311,"pointLocationType":"Centroid","county":{"fips":"51037","name":"Charlotte County","state":"VA","rucc":8},"sourceDatadesc":"830 TNMC Update 12/15/2018","result":{"resultCount":0,"ms":119}},
+    {"id":"df4cae56-0337-48b3-b54b-f7a781a19ec6","type":"courthouse","name":"Castro County Courthouse","address":"100 East Bedford Street","city":"Dimmitt","state":"TX","zip":"79027","addressKind":"street-number","lon":-102.31178420094061,"lat":34.55024916969991,"pointLocationType":"Centroid","county":{"fips":"48069","name":"Castro County","state":"TX","rucc":9},"sourceDatadesc":"830 TNMC Update 4/26/2018","result":{"resultCount":1,"ms":112,"label":"100 E BEDFORD ST, DIMMITT, TX, 79027","tigerId":"tiger:186498499:L","lat":34.550904900274,"lon":-102.312362650617,"matchClass":"interpolated","distanceM":90.1,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"58b0aad5-90cf-40e8-a2d8-2bc4f1d960a3","type":"courthouse","name":"Bayfield County Courthouse","address":"117 East 5th Street","city":"Washburn","state":"WI","zip":"54891","addressKind":"street-number","lon":-90.8926987223641,"lat":46.67709662482315,"pointLocationType":"Centroid","county":{"fips":"55007","name":"Bayfield County","state":"WI","rucc":8},"sourceDatadesc":"830 TNMC Update 8/1/2018","result":{"resultCount":1,"ms":123,"label":"117 E 5TH ST, WASHBURN, WI, 54891","tigerId":"tiger:194282170:L","lat":46.676398199174,"lon":-90.892616675697,"matchClass":"interpolated","distanceM":77.9,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"2257c630-0949-4b0c-8021-1f4d6c060993","type":"courthouse","name":"Foster County Court House","address":"1000 5th Street North","city":"Carrington","state":"ND","zip":"58421","addressKind":"street-number","lon":-99.12624574066741,"lat":47.455082185627454,"pointLocationType":"Centroid","county":{"fips":"38031","name":"Foster County","state":"ND","rucc":9},"sourceDatadesc":"830 TNMC Update 5/25/2018","result":{"resultCount":1,"ms":118,"label":"1000 5TH ST N, CARRINGTON, ND, 58421","tigerId":"tiger:657841110:L","lat":47.45455268915,"lon":-99.126368707892,"matchClass":"interpolated","distanceM":59.6,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"8fc39eb9-60e3-4e33-9934-eac0a33c146a","type":"courthouse","name":"Cheyenne County Courthouse","address":"212 Washington Street","city":"Saint Francis","state":"KS","zip":"67756","addressKind":"street-number","lon":-101.79943090329647,"lat":39.77457163150136,"pointLocationType":"Centroid","county":{"fips":"20023","name":"Cheyenne County","state":"KS","rucc":9},"sourceDatadesc":"830 TNMC Update 5/18/2021","result":{"resultCount":1,"ms":134,"label":"212 WASHINGTON ST, SAINT FRANCIS, KS, 67756","tigerId":"tiger:161415565:R","lat":39.774227789028,"lon":-101.802906645484,"matchClass":"interpolated","distanceM":299.5,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"590453e2-0193-4936-8455-d43e05ddf336","type":"courthouse","name":"Worth County Courthouse","address":"1000 Central Avenue","city":"Northwood","state":"IA","zip":"50459-1526","addressKind":"street-number","lon":-93.21773835608509,"lat":43.444491139698464,"pointLocationType":"Centroid","county":{"fips":"19195","name":"Worth County","state":"IA","rucc":9},"sourceDatadesc":"830 TNMC Update 9/25/2018","result":{"resultCount":1,"ms":354,"label":"1000 CENTRAL AVE, NORTHWOOD, IA, 50459","tigerId":"tiger:7495830:R","lat":43.444085924577,"lon":-93.218256517746,"matchClass":"interpolated","distanceM":61.5,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"769146fb-d3f5-4f29-ad24-5dfbaaa67496","type":"courthouse","name":"Pope County Courthouse","address":"310 East Main Street","city":"Golconda","state":"IL","zip":"62938","addressKind":"street-number","lon":-88.48473160456808,"lat":37.36661799326919,"pointLocationType":"Centroid","county":{"fips":"17151","name":"Pope County","state":"IL","rucc":8},"sourceDatadesc":"830 TNMC Update 6/27/2018","result":{"resultCount":0,"ms":108}},
+    {"id":"536b2fdc-1d50-41ea-a5c0-0a15c7c39faa","type":"courthouse","name":"Boone County Courthouse","address":"222 South 4th Street","city":"Albion","state":"NE","zip":"68620","addressKind":"street-number","lon":-98.0018396747751,"lat":41.69113114317411,"pointLocationType":"Centroid","county":{"fips":"31011","name":"Boone County","state":"NE","rucc":9},"sourceDatadesc":"830 TNMC Update 5/17/2018","result":{"resultCount":1,"ms":132,"label":"222 S 4TH ST, ALBION, NE, 68620","tigerId":"tiger:161720795:L","lat":41.691182751549,"lon":-98.00121483975,"matchClass":"interpolated","distanceM":52.2,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"60f9892d-b293-4784-bde4-809d6df09e55","type":"courthouse","name":"Jones County Courthouse","address":"101 Market Street","city":"Trenton","state":"NC","zip":"28585-5000","addressKind":"street-number","lon":-77.3532511821399,"lat":35.063071966866076,"pointLocationType":"Centroid","county":{"fips":"37103","name":"Jones County","state":"NC","rucc":8},"sourceDatadesc":"830 TNMC Update 7/17/2018","result":{"resultCount":1,"ms":113,"label":"101 MARKET ST, TRENTON, NC, 28585","tigerId":"tiger:656505117:R","lat":35.06473310622,"lon":-77.352985261195,"matchClass":"interpolated","distanceM":186.3,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"99a10342-b721-4d20-9243-680d32b8bd24","type":"courthouse","name":"Washington County Courthouse","address":"85 Court Street","city":"Machias","state":"ME","zip":"04654","addressKind":"street-number","lon":-67.45947217586232,"lat":44.716169037108614,"pointLocationType":"Centroid","county":{"fips":"23029","name":"Washington County","state":"ME","rucc":9},"sourceDatadesc":"830 TNMC Update 4/9/2018","result":{"resultCount":1,"ms":101,"label":"85 COURT ST, MACHIAS, ME, 04654","tigerId":"tiger:657733215:L","lat":44.715910564474,"lon":-67.459249114174,"matchClass":"interpolated","distanceM":33.7,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"580aff62-5879-4387-95ab-9f8035e3f9a6","type":"courthouse","name":"Holmes County Courthouse","address":"201 North Oklahoma Street","city":"Bonifay","state":"FL","zip":"32425","addressKind":"street-number","lon":-85.67870735244428,"lat":30.79334879319119,"pointLocationType":"Centroid","county":{"fips":"12059","name":"Holmes County","state":"FL","rucc":8},"sourceDatadesc":"830 TNMC Update 10/23/2018","result":{"resultCount":1,"ms":113,"label":"201 N OKLAHOMA ST, BONIFAY, FL, 32425","tigerId":"tiger:32656487:L","lat":30.793054076843,"lon":-85.678481564824,"matchClass":"interpolated","distanceM":39.2,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"ebde22e5-eb00-40a9-9247-c38a179c79c1","type":"courthouse","name":"Robert A Barclay Justice Center","address":"205 South East Street","city":"Alturas","state":"CA","zip":"96101-4079","addressKind":"street-number","lon":-120.54029662261809,"lat":41.48321309614716,"pointLocationType":"Centroid","county":{"fips":"06049","name":"Modoc County","state":"CA","rucc":8},"sourceDatadesc":"830 TNMC Update 6/5/2018","result":{"resultCount":1,"ms":107,"label":"205 S EAST ST, ALTURAS, CA, 96101","tigerId":"tiger:127094757:L","lat":41.483770237081,"lon":-120.540060782758,"matchClass":"interpolated","distanceM":65,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"a6e7f253-0b82-4964-b2cf-eace58aadc3f","type":"courthouse","name":"Wrangell Public Safety Building and Courthouse","address":"431 Zimovia Highway","city":"Wrangell","state":"AK","zip":"99929-0869","addressKind":"street-number","lon":-132.3775270178511,"lat":56.46936732837637,"pointLocationType":"Centroid","county":{"fips":"02275","name":"Wrangell City and Borough","state":"AK","rucc":9},"sourceDatadesc":"830 TNMC Update 10/4/2018","result":{"resultCount":1,"ms":106,"label":"431 ZIMOVIA HWY, WRANGELL, AK, 99929","tigerId":"tiger:635186358:R","lat":56.470199293233,"lon":-132.37769070331,"matchClass":"interpolated","distanceM":93.1,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"7f7d17d5-6d9e-4e50-966f-850b2ca1def7","type":"courthouse","name":"Morgan County Courthouse Annex","address":"37 East Main","city":"McConnelsville","state":"OH","zip":"43756","addressKind":"street-number","lon":-81.85271079636105,"lat":39.64907897927218,"pointLocationType":"Centroid","county":{"fips":"39115","name":"Morgan County","state":"OH","rucc":8},"sourceDatadesc":"830 TNMC Update 7/24/2018","result":{"resultCount":1,"ms":136,"label":"37 E MAIN ST, MCCONNELSVILLE, OH, 43756","tigerId":"tiger:656461210:R","lat":39.648847338149,"lon":-81.85267021045,"matchClass":"interpolated","distanceM":26,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"6e369360-6eb4-47b3-9769-1502e3d55a56","type":"courthouse","name":"Sheridan County Courthouse","address":"100 West Laurel Avenue","city":"Plentywood","state":"MT","zip":"59254","addressKind":"street-number","lon":-104.55649187449653,"lat":48.778457552217795,"pointLocationType":"Centroid","county":{"fips":"30091","name":"Sheridan County","state":"MT","rucc":9},"sourceDatadesc":"830 TNMC Update 6/5/2018","result":{"resultCount":1,"ms":109,"label":"100 W LAUREL AVE, PLENTYWOOD, MT, 59254","tigerId":"tiger:617822841:R","lat":48.778277061019,"lon":-104.557466385853,"matchClass":"interpolated","distanceM":74.2,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"ea3c30a7-5e97-4c83-8339-bc34dadf892e","type":"courthouse","name":"Swift County Courthouse","address":"301 14th Street North","city":"Benson","state":"MN","zip":"56215","addressKind":"street-number","lon":-95.60109606558724,"lat":45.317091507371366,"pointLocationType":"Centroid","county":{"fips":"27151","name":"Swift County","state":"MN","rucc":9},"sourceDatadesc":"830 TNMC Update 2/14/2019","result":{"resultCount":1,"ms":141,"label":"301 14TH ST N, BENSON, MN, 56215","tigerId":"tiger:164918080:L","lat":45.316573772023,"lon":-95.600784418065,"matchClass":"interpolated","distanceM":62.5,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"69896b95-ec51-42c6-b24a-b0ebf2999fed","type":"post-office","name":"Leeds Post Office","address":"150 Main Street West","city":"Leeds","state":"ND","zip":"58346","addressKind":"street-number","lon":-99.44238622199026,"lat":48.29013104822583,"pointLocationType":"Centroid","county":{"fips":"38005","name":"Benson County","state":"ND","rucc":9},"sourceDatadesc":"780 TNMC Update 3/13/2025","result":{"resultCount":1,"ms":108,"label":"150 W MAIN ST, LEEDS, ND, 58346","tigerId":"tiger:181311085:R","lat":48.289990001332,"lon":-99.44185795931,"matchClass":"interpolated","distanceM":42.1,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"3950a509-879d-4cf0-9c71-21177f3f8cac","type":"post-office","name":"Sandy Point Post Office","address":"951 Sandy Point Road","city":"Sandy Point","state":"VA","zip":"22577","addressKind":"street-number","lon":-76.5529455333704,"lat":38.06388115078907,"pointLocationType":"Centroid","county":{"fips":"51193","name":"Westmoreland County","state":"VA","rucc":8},"sourceDatadesc":"780 TNMC Update 3/12/2020","result":{"resultCount":1,"ms":132,"label":"951 SANDY POINT RD, SANDY POINT, VA, 22577","tigerId":"tiger:22166694:R","lat":38.064006317874,"lon":-76.552315350751,"matchClass":"interpolated","distanceM":56.9,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"8e3d2b5d-2b5f-4684-b144-f667b3261ad5","type":"post-office","name":"Ellendale Post Office","address":"111 1st Street North","city":"Ellendale","state":"ND","zip":"58436","addressKind":"street-number","lon":-98.5266583672042,"lat":46.002769743477465,"pointLocationType":"Centroid","county":{"fips":"38021","name":"Dickey County","state":"ND","rucc":9},"sourceDatadesc":"780 TNMC Update 8/28/2018","result":{"resultCount":1,"ms":116,"label":"111 1ST ST N, ELLENDALE, ND, 58436","tigerId":"tiger:204417415:R","lat":46.002620983816,"lon":-98.527105750825,"matchClass":"interpolated","distanceM":38.3,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"3114b7b8-036f-435d-a9a7-4bea7a859421","type":"post-office","name":"Saint Catharine Post Office","address":"2645 Bardstown Road","city":"Saint Catharine","state":"KY","zip":"40061","addressKind":"street-number","lon":-85.2617752665242,"lat":37.70989892730964,"pointLocationType":"Centroid","county":{"fips":"21229","name":"Washington County","state":"KY","rucc":8},"sourceDatadesc":"780 TNMC Update 5/10/2019","result":{"resultCount":0,"ms":131}},
+    {"id":"e2128e3e-42cd-4a8c-bad0-c12dfd514e5f","type":"post-office","name":"Ulysses Post Office","address":"210 North 4th Street","city":"Ulysses","state":"NE","zip":"68669","addressKind":"street-number","lon":-97.20182233760112,"lat":41.07307414039419,"pointLocationType":"Centroid","county":{"fips":"31023","name":"Butler County","state":"NE","rucc":8},"sourceDatadesc":"780 TNMC Update 8/5/2019","result":{"resultCount":1,"ms":130,"label":"210 4TH ST, ULYSSES, NE, 68669","tigerId":"tiger:56962871:R","lat":41.073013255975,"lon":-97.201931007964,"matchClass":"interpolated","distanceM":11.3,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"89bf1b07-e4a7-4045-b72f-9c44756b5e7e","type":"post-office","name":"Forest City Post Office","address":"101 North Main Street","city":"Forest City","state":"IL","zip":"61532","addressKind":"street-number","lon":-89.8295202407109,"lat":40.36961347059952,"pointLocationType":"Centroid","county":{"fips":"17125","name":"Mason County","state":"IL","rucc":8},"sourceDatadesc":"780 TNMC Update 12/20/2019","result":{"resultCount":1,"ms":131,"label":"101 S MAIN ST, FOREST CITY, IL, 61532","tigerId":"tiger:37755507:L","lat":40.36938973024,"lon":-89.829610552106,"matchClass":"interpolated","distanceM":26,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"6433a36d-7fcb-4355-8c89-ea3c403c1e88","type":"post-office","name":"Bone Gap Post Office","address":"105 North State Street","city":"Bone Gap","state":"IL","zip":"62815","addressKind":"street-number","lon":-87.9960075490383,"lat":38.447498220322835,"pointLocationType":"Centroid","county":{"fips":"17047","name":"Edwards County","state":"IL","rucc":9},"sourceDatadesc":"780 TNMC Update 9/18/2019","result":{"resultCount":1,"ms":111,"label":"105 STATE ST, BONE GAP, IL, 62815","tigerId":"tiger:639871881:L","lat":38.44735009513,"lon":-87.995972064304,"matchClass":"interpolated","distanceM":16.8,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"b98d8e47-7aae-4a11-b55c-9708e17cae83","type":"post-office","name":"Belgrade Post Office","address":"14135 State Highway C","city":"Belgrade","state":"MO","zip":"63622","addressKind":"street-number","lon":-90.84884530042325,"lat":37.78619095444299,"pointLocationType":"Centroid","county":{"fips":"29221","name":"Washington County","state":"MO","rucc":8},"sourceDatadesc":"780 TNMC Update 8/28/2020","result":{"resultCount":1,"ms":176,"label":"14135 STATE HWY C, BELGRADE, MO, 63622","tigerId":"tiger:658532088:L","lat":37.785812424893,"lon":-90.847977065724,"matchClass":"interpolated","distanceM":87.1,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"6cd1707e-3b39-4394-98b2-95d0cbead7ae","type":"post-office","name":"Mechanicsville Post Office","address":"200 East 1st Street","city":"Mechanicsville","state":"IA","zip":"52306","addressKind":"street-number","lon":-91.25417327918476,"lat":41.90471649199579,"pointLocationType":"Centroid","county":{"fips":"19031","name":"Cedar County","state":"IA","rucc":8},"sourceDatadesc":"IA post office GNIS ID update 8/30/2018","result":{"resultCount":1,"ms":133,"label":"200 E 1ST ST, MECHANICSVILLE, IA, 52306","tigerId":"tiger:16699744:R","lat":41.904624252268,"lon":-91.254520520357,"matchClass":"interpolated","distanceM":30.5,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"8d162181-3199-45c4-b3e3-8f6329e1b1e1","type":"post-office","name":"Enterprise Post Office","address":"201 West North Street","city":"Enterprise","state":"OR","zip":"97828","addressKind":"street-number","lon":-117.27917993215318,"lat":45.426713135560334,"pointLocationType":"Centroid","county":{"fips":"41063","name":"Wallowa County","state":"OR","rucc":9},"sourceDatadesc":"780 TNMC Update 4/6/2023","result":{"resultCount":1,"ms":109,"label":"201 W NORTH ST, ENTERPRISE, OR, 97828","tigerId":"tiger:139009243:R","lat":45.42647431125,"lon":-117.279496167072,"matchClass":"interpolated","distanceM":36.3,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"99fdcbd2-aaa1-4bcc-b6a3-266b2e9e39ac","type":"post-office","name":"Luray Post Office","address":"101 South Main Street","city":"Luray","state":"KS","zip":"67649","addressKind":"street-number","lon":-98.6917578099795,"lat":39.11222747472731,"pointLocationType":"Centroid","county":{"fips":"20167","name":"Russell County","state":"KS","rucc":9},"sourceDatadesc":"780 TNMC Update 5/25/2020","result":{"resultCount":1,"ms":109,"label":"101 MAIN ST, LURAY, KS, 67649","tigerId":"tiger:133213260:R","lat":39.112478078286,"lon":-98.691951860855,"matchClass":"interpolated","distanceM":32.5,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"005b668a-e6bb-4169-ba83-52ddf7af5549","type":"post-office","name":"Lynco Post Office","address":"473 Clear Fork Valley Road","city":"Lynco","state":"WV","zip":"24857","addressKind":"street-number","lon":-81.65820754229742,"lat":37.6858569482075,"pointLocationType":"Centroid","county":{"fips":"54109","name":"Wyoming County","state":"WV","rucc":8},"sourceDatadesc":"780 TNMC Update 5/19/2022","result":{"resultCount":0,"ms":128}},
+    {"id":"62ce47ce-5628-42ce-bd9e-12847a093b63","type":"post-office","name":"Roscoe Post Office","address":"100 Pecan Street","city":"Roscoe","state":"MO","zip":"64781","addressKind":"street-number","lon":-93.80508002944416,"lat":37.97678625514525,"pointLocationType":"Centroid","county":{"fips":"29185","name":"St. Clair County","state":"MO","rucc":8},"sourceDatadesc":"780 TNMC Update 8/11/2020","result":{"resultCount":0,"ms":113}},
+    {"id":"9ded9752-e277-4cfc-bf15-76b6bbdea8b7","type":"post-office","name":"Renville Post Office","address":"334 North Main Street","city":"Renville","state":"MN","zip":"56284-5000","addressKind":"street-number","lon":-95.21242602324624,"lat":44.79201125519501,"pointLocationType":"Centroid","county":{"fips":"27129","name":"Renville County","state":"MN","rucc":9},"sourceDatadesc":"MN Post Office GNIS ID Update 10/29/2018","result":{"resultCount":1,"ms":112,"label":"334 MAIN ST N, RENVILLE, MN, 56284","tigerId":"tiger:34052168:L","lat":44.791667970453,"lon":-95.212163482647,"matchClass":"interpolated","distanceM":43.4,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"0299f10b-3399-41af-bdb6-a97a96815b4d","type":"post-office","name":"Argyle Post Office","address":"329 East Milwaukee Street","city":"Argyle","state":"WI","zip":"53504","addressKind":"street-number","lon":-89.86614431679092,"lat":42.70144434267327,"pointLocationType":"Centroid","county":{"fips":"55065","name":"Lafayette County","state":"WI","rucc":8},"sourceDatadesc":"780 TNMC Update 12/21/2018","result":{"resultCount":1,"ms":106,"label":"329 E MILWAUKEE ST, ARGYLE, WI, 53504","tigerId":"tiger:32871416:R","lat":42.701267801452,"lon":-89.866710351515,"matchClass":"interpolated","distanceM":50.2,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"a168a474-c893-4f79-873c-9fd16eabc92a","type":"post-office","name":"Swink Post Office","address":"100 Front Street","city":"Swink","state":"OK","zip":"74761","addressKind":"street-number","lon":-95.20224219387438,"lat":34.019000042167676,"pointLocationType":"Centroid","county":{"fips":"40023","name":"Choctaw County","state":"OK","rucc":9},"sourceDatadesc":"780 TNMC Update 4/19/2022","result":{"resultCount":0,"ms":105}},
+    {"id":"0980c6db-3f5c-48ea-805c-49b93f3937de","type":"post-office","name":"Harrell Post Office","address":"118 East Central Street","city":"Harrell","state":"AR","zip":"71745","addressKind":"street-number","lon":-92.3994515767361,"lat":33.511147965894565,"pointLocationType":"Centroid","county":{"fips":"05013","name":"Calhoun County","state":"AR","rucc":9},"sourceDatadesc":"780 TNMC Update 8/14/2019","result":{"resultCount":1,"ms":107,"label":"118 E CENTRAL, HARRELL, AR, 71745","tigerId":"tiger:2350575:R","lat":33.511079286106,"lon":-92.399924663933,"matchClass":"interpolated","distanceM":44.5,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"c81f648b-4502-40fe-8042-87c776b60997","type":"post-office","name":"Cherokee Post Office","address":"1780 South Grand Avenue","city":"Cherokee","state":"OK","zip":"73728","addressKind":"street-number","lon":-98.35958862346511,"lat":36.73955917334516,"pointLocationType":"Centroid","county":{"fips":"40003","name":"Alfalfa County","state":"OK","rucc":8},"sourceDatadesc":"OK West Post Office GNIS ID Update 10/03/2018","result":{"resultCount":1,"ms":111,"label":"1780 S GRAND AVE, CHEROKEE, OK, 73728","tigerId":"tiger:154411179:R","lat":36.7395911103,"lon":-98.360077091815,"matchClass":"interpolated","distanceM":43.7,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"1615a967-e1d4-49a5-b4f4-54b046e4702e","type":"post-office","name":"Cathlamet Post Office","address":"30 River Street","city":"Cathlamet","state":"WA","zip":"98612","addressKind":"street-number","lon":-123.38487564686146,"lat":46.20228257161676,"pointLocationType":"Centroid","county":{"fips":"53069","name":"Wahkiakum County","state":"WA","rucc":8},"sourceDatadesc":"780 TNMC Update 4/2/2023","result":{"resultCount":1,"ms":107,"label":"30 RIVER ST, CATHLAMET, WA, 98612","tigerId":"tiger:176296355:R","lat":46.201807677784,"lon":-123.384913211406,"matchClass":"interpolated","distanceM":52.9,"stateAgrees":true,"zipAgrees":true}},
+    {"id":"2b3e386e-8307-45cf-8573-33f902aae44b","type":"post-office","name":"Isola Post Office","address":"400 Julia Street","city":"Isola","state":"MS","zip":"38754","addressKind":"street-number","lon":-90.59389795654162,"lat":33.26236933452379,"pointLocationType":"Centroid","county":{"fips":"28053","name":"Humphreys County","state":"MS","rucc":8},"sourceDatadesc":"780 TNMC Update 8/11/2019","result":{"resultCount":1,"ms":99,"label":"400 JULIA ST, ISOLA, MS, 38754","tigerId":"tiger:1007695:R","lat":33.26201528485,"lon":-90.594335555393,"matchClass":"interpolated","distanceM":56.6,"stateAgrees":true,"zipAgrees":true}}
+  ]
+}

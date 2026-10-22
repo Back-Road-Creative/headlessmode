@@ -1,0 +1,12 @@
+{
+  "product": "quiet-corners",
+  "images": {
+    "home.jpg": {
+      "source": null,
+      "captured_at": "2026-10-19T08:50:00-04:00",
+      "viewport": "800x500",
+      "scenario": "home page: crop of the /quiet-corners/ map (candidate towns, major cities labeled), legend excluded, scaled to 800x500",
+      "alt": "Quiet Corners' map of the United States with candidate towns marked and major cities labeled"
+    }
+  }
+}

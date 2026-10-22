@@ -1,0 +1,18 @@
+{{- /* Alias stub for every `aliases:` entry (today: /cv/ → /about/).
+       Hugo's built-in alias template titles the stub with the raw permalink, so
+       /cv/index.html shipped `<title>https://headlessmode.com/about/</title>` —
+       a URL where a page name belongs. The stub is noindex and out of the
+       sitemap, so this is cosmetic; everything load-bearing is copied from the
+       built-in unchanged (same canonical, same noindex, same meta-refresh), so
+       the redirect still fires. The context here is Hugo's alias data struct:
+       .Permalink (the target URL) and .Page (the target page). */ -}}
+<!DOCTYPE html>
+<html lang="{{ site.Language.LanguageCode }}">
+<head>
+<title>{{ with .Page }}{{ .Title }} | {{ site.Title }}{{ else }}{{ $.Permalink }}{{ end }}</title>
+<link rel="canonical" href="{{ .Permalink }}">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="0; url={{ .Permalink }}">
+</head>
+</html>

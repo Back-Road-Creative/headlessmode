@@ -1,0 +1,33 @@
+{{/* State land coverage, one row per state.
+     Rendered from data/quiet-corners-maps/coverage.json, which
+     scripts/qcm/gen-coverage.mjs generates from the measured catalogue. This
+     template does no deciding: whether a state's family is usable folds in CORS,
+     the licence refusal and whether the layer is the kind of area it claims to be,
+     and a Go template re-deriving that would be a second implementation free to
+     drift from the one the map actually fetches with. One character per cell. */}}
+{{- $cov := index (index site.Data "quiet-corners-maps") "coverage" -}}
+{{- $words := dict "y" "yes" "n" "no source" "l" "licence" "u" "unmeasured" "x" "not usable" -}}
+{{- $why := dict
+      "y" "Drawn from the state's own service"
+      "n" "No statewide service was found"
+      "l" "The publisher forbids redistribution, so this map never requests it"
+      "u" "Not yet measured against the live service"
+      "x" "A service exists but cannot be read from a browser, or covers a different kind of area" -}}
+{{- $ok := 0 }}{{ range $code, $row := $cov.states }}{{ if in $row "y" }}{{ $ok = add $ok 1 }}{{ end }}{{ end -}}
+<p>{{ $ok }} of {{ len $cov.states }} states publish at least one land layer this map can read, measured {{ $cov.measuredOn }}. Federal layers work everywhere, so a state with none here still gets a map.</p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="State land coverage">
+<table class="qcm-coverage">
+  <caption class="sr-only">State land coverage by family</caption>
+  <thead><tr><th scope="col">State</th>{{ range $cov.families }}<th scope="col">{{ .label }}</th>{{ end }}</tr></thead>
+  <tbody>
+  {{- range $code, $row := $cov.states }}
+    <tr><th scope="row">{{ $code }}</th>
+    {{- range $i, $f := $cov.families }}
+      {{- $c := substr $row $i 1 }}
+      <td class="{{ if eq $c "y" }}qcm-cov-yes{{ else }}qcm-cov-no{{ end }}"><abbr title="{{ index $why $c }}">{{ index $words $c }}</abbr></td>
+    {{- end }}
+    </tr>
+  {{- end }}
+  </tbody>
+</table>
+</div>

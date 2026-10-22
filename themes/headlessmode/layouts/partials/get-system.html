@@ -1,0 +1,86 @@
+{{/*
+    get-system partial — renders the "Get it" block for one system, looked up
+    by name in .Site.Data.systems.systems. Every URL and command in the block
+    comes from that entry, so a content page never hand-types an install
+    command, a download link or a repo URL that data/systems.json could drift
+    out from under.
+
+    Context: a system NAME string (not the entry itself), so the
+    {{< get-system name="…" >}} shortcode can pass its "name" attribute
+    straight through.
+
+    ONE primary action leads, the first that applies of: Microsoft Store
+    ("store"), Download ("download", once "shipped" is also truthy; an entry
+    may carry "download" ahead of its release existing, see data/systems.json's
+    "shipped" contract), the literal install command ("install", copyable
+    <code>), or, for tier="product" access="engagement", "Contact for setup"
+    (/contact/). When another primary already leads, an engagement product's
+    "Contact for setup" follows as a secondary link, so contact never
+    displaces the download. Directly under the primary sits one line with the
+    format and requirements, derived only from the entry: the file kind from
+    the download's extension, the platforms list when set, and the unsigned
+    installer note (SmartScreen) unless "platforms" is set and the file is not
+    a Windows installer (no .exe/.msi). Secondary links follow: the file
+    download when a store listing took the primary slot, then the repo/source
+    link ("Source on GitHub", the entry's "repo" or its off-site "link").
+
+    An oss entry with none of download/install/repo has nothing to get, so
+    this errors loudly rather than rendering an empty box. Reuses the
+    install-box / install-label / install-cmd / install-meta / try-cta /
+    cta-secondary classes from style.css.
+*/}}
+{{- $name := . -}}
+{{- $s := "" -}}
+{{- range site.Data.systems.systems -}}
+  {{- if eq .name $name -}}{{- $s = . -}}{{- end -}}
+{{- end -}}
+{{- if not $s }}{{ errorf "get-system: no data/systems.json entry named %q" $name }}{{ end -}}
+{{- $repoURL := "" -}}
+{{- if $s.repo -}}
+  {{- $repoURL = $s.repo -}}
+{{- else if and $s.link (hasPrefix $s.link "http") -}}
+  {{- $repoURL = $s.link -}}
+{{- end -}}
+{{- $engagementProduct := and (eq $s.tier "product") (eq $s.access "engagement") -}}
+{{- $liveDownload := and $s.download $s.shipped -}}
+{{- if not (or $engagementProduct $s.store $liveDownload $s.install $repoURL) }}{{ errorf "get-system: %q has nothing to get — no engagement path, download, install or repo on its data/systems.json entry" $name }}{{ end -}}
+{{- $isInstaller := and (not (hasSuffix (default "" $s.download) ".html")) (or (not $s.platforms) (hasSuffix (default "" $s.download) ".exe") (hasSuffix (default "" $s.download) ".msi")) -}}
+{{- $downloadIsSecondary := and $liveDownload $s.store -}}
+{{- $installOnly := and $s.install (not $engagementProduct) (not $s.store) (not $liveDownload) -}}
+<div class="install-box not-prose">
+  {{- if $installOnly }}
+  <div class="install-label">Install</div>
+  {{- else }}
+  <div class="install-label">Get {{ $s.name }}{{ if and $liveDownload (not $downloadIsSecondary) (not $s.download_label) }} for Windows{{ end }}</div>
+  {{- end }}
+  {{- if $s.store }}
+  <p><a class="try-cta" href="{{ $s.store }}">Microsoft Store &rarr;</a></p>
+  {{- else if $liveDownload }}
+  <p><a class="try-cta" href="{{ $s.download }}" target="_blank" rel="noopener noreferrer">Download &rarr;</a></p>
+  {{- else if $s.install }}
+  <code class="install-cmd">{{ $s.install }}</code>
+  {{- else if $engagementProduct }}
+  <p><a class="try-cta" href="/contact/">Contact for setup &rarr;</a></p>
+  {{- end }}
+  {{- if $downloadIsSecondary }}
+  <p><a class="cta-secondary" href="{{ $s.download }}" target="_blank" rel="noopener noreferrer">Download{{ if not $s.download_label }} for Windows{{ end }} &rarr;</a></p>
+  {{- end }}
+  {{- if $liveDownload }}
+  {{- $parts := slice }}
+  {{- if hasSuffix (default "" $s.download) ".html" }}{{ $parts = $parts | append "HTML file" }}{{ else if $isInstaller }}{{ $parts = $parts | append "Windows installer, not code-signed: SmartScreen will warn on first run" }}{{ end }}
+  {{- if $s.platforms }}
+  {{- $plats := slice }}
+  {{- range $s.platforms }}{{ $plats = $plats | append (index (dict "windows" "Windows" "mac" "macOS" "linux" "Linux" "chromebook" "Chromebook") . | default .) }}{{ end }}
+  {{- $parts = $parts | append (printf "Runs on %s" (delimit $plats ", ")) }}
+  {{- end }}
+  {{- with $parts }}
+  <p class="install-meta">{{ delimit . ". " }}.</p>
+  {{- end }}
+  {{- end }}
+  {{- if and $engagementProduct (or $s.store $liveDownload $s.install) }}
+  <p><a class="cta-secondary" href="/contact/">Contact for setup &rarr;</a></p>
+  {{- end }}
+  {{- with $repoURL }}
+  <p><a class="cta-secondary" href="{{ . }}" target="_blank" rel="noopener noreferrer">Source on GitHub &rarr;</a></p>
+  {{- end }}
+</div>

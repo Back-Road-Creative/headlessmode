@@ -1,0 +1,27 @@
+{
+  "product": "rigscore",
+  "name": "rigscore",
+  "release_source": "github-release",
+  "source_repo": "https://github.com/Back-Road-Creative/rigscore",
+  "version": "2.2.0",
+  "released_at": "2026-07-19T02:57:28Z",
+  "release_url": "https://github.com/Back-Road-Creative/rigscore/releases/tag/v2.2.0",
+  "source_ref": "v2.2.0",
+  "assets": {
+    "rigscore-2.2.0.tgz": {
+      "url": "https://github.com/Back-Road-Creative/rigscore/releases/download/v2.2.0/rigscore-2.2.0.tgz",
+      "sha256": "3b1fa4a14ec2d96bd856485a96938e8696d13921ad26a73b313e7d34fd5950aa"
+    },
+    "rigscore-facts.json": {
+      "url": "https://github.com/Back-Road-Creative/rigscore/releases/download/v2.2.0/rigscore-facts.json",
+      "sha256": "d137723e00ffc6a639006b2fb6995bee601f8f489d49727b58851c911662ec2a"
+    },
+    "sbom.cdx.json": {
+      "url": "https://github.com/Back-Road-Creative/rigscore/releases/download/v2.2.0/sbom.cdx.json",
+      "sha256": "3fee4b62563d11669572e29dd2d78e4941c80cff4694c514b161b09f2fc73a17"
+    }
+  },
+  "demo": null,
+  "media_source": null,
+  "notes": "Synced from the public GitHub release; data/rigscore.json already carries the product facts, this file adds the release provenance."
+}

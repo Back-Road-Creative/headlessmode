@@ -1,0 +1,12 @@
+{
+  "product": "rigscore",
+  "images": {
+    "home.svg": {
+      "source": null,
+      "captured_at": "2026-10-19T21:30:00-04:00",
+      "viewport": "800x500",
+      "scenario": "home page: designed tile, not a screenshot (the Sample output block on /rigscore/, drawn as a terminal window)",
+      "alt": "rigscore's terminal report: a failing MCP server check, a passing check, an advisory, then the Hygiene and Practice grades"
+    }
+  }
+}

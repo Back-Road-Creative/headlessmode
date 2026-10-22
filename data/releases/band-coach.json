@@ -1,0 +1,19 @@
+{
+  "product": "band-coach",
+  "name": "Band Coach",
+  "release_source": "github-release",
+  "source_repo": "https://github.com/Back-Road-Creative/band-coach",
+  "version": "1.9.0",
+  "released_at": "2026-09-24T13:42:00Z",
+  "release_url": "https://github.com/Back-Road-Creative/band-coach/releases/tag/v1.9.0",
+  "source_ref": "v1.9.0",
+  "assets": {
+    "band-coach.html": {
+      "url": "https://github.com/Back-Road-Creative/band-coach/releases/download/v1.9.0/band-coach.html",
+      "sha256": "05d267982c3ed7140fb862280cfa21c44c6ac0ae630ea9615d1a54f4171a085b"
+    }
+  },
+  "demo": null,
+  "media_source": "v1.9.0",
+  "notes": "Screenshots in static/img/band-coach/ were captured from a checkout verified at tag v1.9.0 (scripts/capture-band-coach-shots.mjs --ref v1.9.0), matching this release; per-image capture dates and viewports are recorded in static/img/band-coach/manifest.json."
+}

@@ -1,0 +1,82 @@
+/*
+ * Tailwind v4 source stylesheet for Headless Mode.
+ *
+ * Compiled at build time by @tailwindcss/cli (see package.json "build:css")
+ * and written to themes/headlessmode/static/css/tailwind.css which Hugo then
+ * serves as /css/tailwind.css. Replaces the prior runtime cdn.tailwindcss.com
+ * script so there is no JIT compiler in the browser.
+ */
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+ * Template sources scanned for utility classes.
+ * Tailwind v4 supports this CSS-level @source directive so we do not need
+ * a tailwind.config.js. Paths are relative to this file.
+ */
+@source "../../layouts/**/*.html";
+@source "../../themes/headlessmode/layouts/**/*.html";
+@source "../../content/**/*.md";
+@source "../../content/**/*.html";
+
+/*
+ * Monospace is reserved for code, commands, sample output, and metadata; the
+ * body type is the platform system sans stack (see style.css). Uses the
+ * platform monospace so there is no third-party web-font call.
+ */
+@theme {
+    --font-mono: ui-monospace, SFMono-Regular, "Menlo", "Monaco", "Consolas",
+        "Liberation Mono", monospace;
+}
+
+/* ============================================================
+   THE CHIP — price-tag-style tier/status chip, rendered standalone via
+   partials/system-chip.html on the homepage hero box and the product-sheet
+   headers. The catalog card component it once headed (/systems/ shelf
+   panels) retired with the catalog in the hybrid redesign — the roster now
+   lives on the homepage as stanzas and rows (style.css, .software-roster).
+
+   Data:   data/systems.json
+   Design tokens come from /css/style.css (:root).
+   ============================================================ */
+
+/* Status first (whether an entry carries a proven ship month outranks what
+   kind of thing it is), tier second. Never monospace — this is retail
+   signage, not a terminal status line. */
+.shelf-panel__chip {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+.shelf-panel__chip[data-status="free"] {
+    /* Warm neutral, NOT stone — undated already owns stone (dashed border
+       below) and green is the accent now. #57534e on #f5f0e8 ≈ 6.5:1, AA. */
+    color: var(--text-secondary);
+    background: var(--bg-elevated);
+    border-color: var(--border-default);
+}
+.shelf-panel__chip[data-status="product"] {
+    color: var(--accent-600);
+    background: var(--accent-tint);
+    border-color: var(--accent-tint-border);
+}
+/* "Available now", no proven ship month: available like the others, so the
+   dash is the only thing that marks it apart — not a colour that reads as
+   unavailable. */
+.shelf-panel__chip[data-status="undated"] {
+    color: var(--undated-fg);
+    background: var(--undated-bg);
+    border-style: dashed;
+    border-color: var(--border-default);
+}
+
+.section-content .shelf-panel__action { margin: auto 0 0; }
+
+@media (max-width: 640px) {
+    .shelf-grid { grid-template-columns: 1fr; }
+}

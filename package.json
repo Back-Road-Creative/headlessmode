@@ -1,0 +1,26 @@
+{
+  "name": "headlessmode",
+  "version": "1.0.0",
+  "description": "Headless Mode - storefront site for the studio's software products and free open tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:css": "tailwindcss -i src/css/main.css -o themes/headlessmode/static/css/tailwind.css --minify",
+    "csp:headroom": "node scripts/qcm/csp-headroom.mjs",
+    "watch:css": "tailwindcss -i src/css/main.css -o themes/headlessmode/static/css/tailwind.css --watch",
+    "test:a11y": "echo 'Note: Install from Windows PowerShell to use pa11y-ci' && pa11y-ci --config .pa11yci.json",
+    "test:html": "bash scripts/test-html.sh"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "@tailwindcss/typography": "^0.5.19",
+    "htmlparser2": "^9.1.0",
+    "pa11y-ci": "^4.0.0",
+    "parse5": "^7.3.0",
+    "tailwindcss": "^4.2.2"
+  },
+  "notes": {
+    "wsl-install": "Due to WSL/Windows path limitations, run 'npm install' from Windows PowerShell in the mounted path, not from WSL bash",
+    "build:css": "Runs before `hugo` in both scripts/build.sh and CI (.github/workflows/deploy-production.yml). Outputs themes/headlessmode/static/css/tailwind.css which Hugo serves as /css/tailwind.css. Replaces the prior cdn.tailwindcss.com runtime JIT."
+  }
+}

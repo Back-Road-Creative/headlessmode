@@ -1,0 +1,20 @@
+{{ define "main" }}
+<div class="shop-row py-12 page-wrap">
+    <article class="prose max-w-none themed-prose">
+        <!-- Page Header -->
+        <header class="not-prose entry-header">
+            <h1 class="page-title">{{ .Title }}</h1>
+        </header>
+
+        <!-- Page Content -->
+        <div class="content-body section-content">
+            {{ .Content }}
+        </div>
+
+        <!-- Back Link -->
+        <div class="not-prose post-backlink">
+            <a href="/" class="back-link">&larr; Back to Home</a>
+        </div>
+    </article>
+</div>
+{{ end }}

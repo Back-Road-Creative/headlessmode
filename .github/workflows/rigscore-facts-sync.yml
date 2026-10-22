@@ -1,0 +1,135 @@
+# Pull-based replacement for the headlessmode-post job that used to live in
+# rigscore's release.yml. That job made a PUBLIC workflow clone this private
+# repo by name (token URL, gh pr create --repo), which the org leak-scan
+# rightly flags: a public repo must not disclose a private sibling. This repo
+# is private, so it can name rigscore freely — the sync now lives on the
+# consuming side and pulls from rigscore's public releases.
+#
+# Behavior preserved from the old job: facts are regenerated AT THE RELEASED
+# TAG (default-branch HEAD can carry merged-but-unreleased check changes, so
+# it is the wrong source), the branch is force-pushed so a re-run updates an
+# open PR in place, and any failure opens a tracking issue so a broken sync
+# cannot sit unnoticed (the v2.1.0 lesson). What changed: no HEADLESSMODE_PAT
+# — everything runs on this repo's own token — and the trigger is a daily
+# poll plus manual dispatch instead of a push from the releasing repo.
+name: rigscore-facts-sync
+
+on:
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: >-
+          Regenerate and re-post even if data/rigscore.json already matches the
+          latest release (e.g. after a bad merge of the sync PR).
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ${{ fromJSON(vars.HM_RUNNER_QUICK || '["self-hosted","quick"]') }}
+    # 31 recorded runs: p50 5s, max 18s. Same 10-minute `quick`-lane bound as
+    # drift-sentinel.yml — both are a handful of API calls on a shared runner.
+    timeout-minutes: 10
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Latest rigscore release vs the facts file
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force && '1' || '' }}
+        run: |
+          set -euo pipefail
+          tag=$(gh api repos/Back-Road-Creative/rigscore/releases/latest --jq .tag_name)
+          version=${tag#v}
+          have=$(jq -r .version data/rigscore.json)
+          echo "released=${version} site=${have}"
+          if [ "${version}" = "${have}" ] && [ -z "${FORCE}" ]; then
+            echo "Facts already match the latest release — nothing to sync."
+            echo "skip=true" >> "$GITHUB_ENV"
+          fi
+          echo "VERSION=${version}" >> "$GITHUB_ENV"
+
+      # Facts pinned to the release: generate-facts.js must exist in the tag,
+      # which holds for every release after v2.1.0. A tag that lacks it fails
+      # loudly here and opens the tracking issue below.
+      - name: Check out rigscore at the released tag
+        if: env.skip != 'true'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          repository: Back-Road-Creative/rigscore
+          ref: v${{ env.VERSION }}
+          path: rigscore-src
+
+      - name: Set up Node
+        if: env.skip != 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      # generate-facts.js loads the check modules, which pull in the two
+      # runtime deps (chalk, yaml), so npm ci is required. It resolves the
+      # registry from its own checkout dir; cwd only decides where --out lands.
+      - name: Regenerate data/rigscore.json from the released registry
+        if: env.skip != 'true'
+        run: |
+          set -euo pipefail
+          npm ci --prefix rigscore-src
+          node rigscore-src/scripts/generate-facts.js --out data/rigscore.json
+          rm -rf rigscore-src
+          # The generator stamps generatedAt/date with the run day, so a forced
+          # re-run on an unchanged version always shows a 2-line diff. Only
+          # content differences justify a PR — compare with timestamps
+          # normalized out. (Caught by the first live smoke run: it pushed a
+          # timestamp-only branch and tried to PR it.)
+          if diff <(jq -S 'del(.generatedAt, .date)' data/rigscore.json) \
+                  <(git show HEAD:data/rigscore.json | jq -S 'del(.generatedAt, .date)') \
+                  >/dev/null; then
+            git checkout -- data/rigscore.json
+            echo "Facts content identical (only generation timestamps differ) — nothing to post."
+            echo "skip=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Open or update the sync PR
+        if: env.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BRANCH="rigscore-release/v${VERSION}"
+          git config user.name "rigscore-bot"
+          git config user.email "rigscore-bot@headlessmode.com"
+          # -B, not -b: a re-dispatch must not die because the name is taken.
+          git checkout -B "${BRANCH}"
+          git add data/rigscore.json
+          git commit -m "release: rigscore v${VERSION} — facts data refresh"
+          # Force is correct rather than merely convenient: every byte of this
+          # branch derives from the released tag and the generator, so the
+          # regenerated commit is by definition the authoritative one.
+          git push --force origin "${BRANCH}"
+          if gh pr view "${BRANCH}" --json state --jq '.state' 2>/dev/null | grep -qx OPEN; then
+            echo "PR for ${BRANCH} is already open — the force-push updated it in place."
+          else
+            gh pr create \
+              --title "release: rigscore v${VERSION} facts refresh" \
+              --body "Auto-generated data/rigscore.json refresh for rigscore v${VERSION} — the one file every rigscore fact on the site renders from. Release notes live on rigscore's GitHub releases page. Created by the rigscore-facts-sync workflow." \
+              --head "${BRANCH}" \
+              --base master
+          fi
+
+      # Mirrors the old job's alerting: a broken sync must not sit unnoticed.
+      - name: Create issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "rigscore-facts-sync failed for v${VERSION:-unknown}" \
+            --body "The scheduled rigscore facts sync failed — see the run log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Until this is fixed the site's rigscore facts lag the latest release."

@@ -1,0 +1,24 @@
+{{ define "main" }}
+{{- /* Field Maps is a sub-surface of the Quiet Corners product, so the sheet
+       band is looked up by that product's link, not this page's own URL. */ -}}
+{{- $sys := "" -}}
+{{- range site.Data.systems.systems }}{{ if eq .link "/quiet-corners/" }}{{ $sys = . }}{{ end }}{{ end -}}
+{{- with $sys }}{{ partial "system-sheet.html" (dict "system" .) }}{{ end }}
+
+{{/* Documentation only. The builder used to live here too, on a SECOND Leaflet
+     instance — two maps for one product. The map is /quiet-corners/ now; this page
+     keeps the source decision record, the printing and calibration instructions
+     and the #documentation anchor (on this section) the systems contract expects. */}}
+<section id="documentation" class="shop-row system-docs qcm-docs">
+    <div class="prose max-w-none themed-prose">
+        <h2 class="qcm-doc-title">{{ .Title }}</h2>
+        {{- with .TableOfContents }}
+        <nav class="qcm-doc-contents" aria-label="Contents">
+            <p><strong>Contents</strong></p>
+            {{ . }}
+        </nav>
+        {{- end }}
+        {{ .Content }}
+    </div>
+</section>
+{{ end }}

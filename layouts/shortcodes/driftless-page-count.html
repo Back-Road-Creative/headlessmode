@@ -1,0 +1,14 @@
+{{/*
+    driftless-page-count shortcode — render the driftless demo bundle's page
+    count straight from its own manifest.json (static/demo/driftless/), the
+    same contract scripts/test_driftless_demo.py enforces. The number printed
+    here cannot go stale the way "Thirty-four pages" did: it is read, never
+    typed.
+
+        {{< driftless-page-count >}}  -> 271
+*/}}
+{{- $manifestPath := "static/demo/driftless/manifest.json" -}}
+{{- $raw := readFile $manifestPath -}}
+{{- $manifest := unmarshal $raw -}}
+{{- if not $manifest.pages }}{{ errorf "driftless-page-count: %s has no numeric \"pages\" field" $manifestPath }}{{ end -}}
+{{- $manifest.pages -}}

@@ -1,0 +1,66 @@
+{{ define "main" }}
+{{- /* The homepage is the storefront: under the forest masthead, a forest-green hero, then the products
+       once, then the contact band. Free tools have their own pages and are
+       not listed here unless one opts in with "homepage": true (rigscore,
+       bot-battle-station); a
+       product with "homepage": false keeps its page and is left off. #software is the anchor the retired /systems/ catalog 301s
+       to; #products is kept for old links. Everything is derived from
+       data/systems.json. Order: homepage_rank ascending; a product with no
+       rank follows the ranked ones in the ledger rule (shipped desc, name asc
+       case-insensitive, still-building last). */ -}}
+{{- $systems := .Site.Data.systems.systems -}}
+{{- $ranked := slice -}}{{- $prodLive := slice -}}{{- $prodBuilding := slice -}}
+{{- range $systems -}}
+  {{- if not (or (and (eq .tier "product") (ne .homepage false)) (and (eq .tier "oss") (eq .homepage true))) -}}
+  {{- else if isset . "homepage_rank" -}}{{- $ranked = $ranked | append . -}}
+  {{- else if .shipped -}}{{- $prodLive = $prodLive | append . -}}
+  {{- else -}}{{- $prodBuilding = $prodBuilding | append . -}}{{- end -}}
+{{- end -}}
+{{- $productsOrdered := (sort $ranked "homepage_rank") | append (sort (sort $prodLive "name") "shipped" "desc") | append (sort $prodBuilding "name") -}}
+<section class="hero-band">
+    <div class="shop-row hero">
+        <div class="hero-copy">
+            <span class="hero-rule" aria-hidden="true"></span>
+            <h1 class="hero-title">The name means focus. So does the software.</h1>
+            <p class="hero-lede">Straightforward to use, and honest about what it can't do.</p>
+        </div>
+    </div>
+</section>
+
+<section id="software" class="shop-row software-roster">
+    <div id="products" class="home-section">
+        <h2 class="sr-only">Products</h2>
+        {{- range $productsOrdered }}
+        {{- $sys := . }}
+        {{- /* One button: homepage_action when set, else Download for a
+               public product with a live download, else Request a demo.
+               Details always goes to the product page. */ -}}
+        {{- $label := "Request a demo" }}{{ $href := "/contact/" }}{{ $external := false }}
+        {{- with $sys.homepage_action }}{{ $label = .label }}{{ $href = .href }}
+        {{- else }}{{ if and (eq $sys.access "public") $sys.download $sys.shipped }}{{ $label = "Download" }}{{ $href = $sys.download }}{{ $external = true }}{{ end }}{{ end }}
+        <div class="product-stanza">
+            {{ with $sys.homepage_image }}<img class="product-shot" src="/img/{{ . }}" alt="{{ $sys.homepage_image_alt }}" width="{{ $sys.homepage_image_width }}" height="{{ $sys.homepage_image_height }}" loading="lazy" decoding="async">{{ end }}
+            <div class="product-text">
+                <div class="product-id">
+                    <h3 class="product-name"><a href="{{ $sys.link }}">{{ $sys.name }}</a></h3>
+                    {{ partial "system-chip.html" (merge $sys (dict "availability" true)) }}
+                </div>
+                {{ with $sys.homepage_area }}<p class="product-area">{{ . }}</p>{{ end }}
+                <p class="product-blurb">{{ $sys.blurb }}.</p>
+                <p class="product-meta">
+                    <a class="btn-primary" href="{{ $href }}"{{ if $external }} aria-label="{{ $label }} {{ $sys.name }}" target="_blank" rel="noopener noreferrer"{{ end }}>{{ $label }}</a>
+                    <a class="details-link" href="{{ $sys.link }}" aria-label="{{ $sys.name }} details">Details <span aria-hidden="true">→</span></a>
+                </p>
+            </div>
+        </div>
+        {{- end }}
+    </div>
+</section>
+
+<section class="shop-row">
+    <div class="hire-band">
+        <p class="hire-text">Have a question, an idea, or a project in mind?</p>
+        <a href="/contact/" class="btn-primary">Get in touch</a>
+    </div>
+</section>
+{{ end }}

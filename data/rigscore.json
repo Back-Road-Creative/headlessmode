@@ -1,0 +1,285 @@
+{
+  "generatedBy": "scripts/generate-facts.js",
+  "generatedAt": "2026-07-31",
+  "version": "2.2.0",
+  "date": "2026-07-31",
+  "checkCount": 28,
+  "scoredCount": 13,
+  "advisoryCount": 15,
+  "enforcementGrades": {
+    "mechanical": 15,
+    "keyword": 6,
+    "pattern": 7
+  },
+  "checks": [
+    {
+      "id": "agent-output-schemas",
+      "weight": 0,
+      "category": "governance",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "ai-disclosure",
+      "weight": 0,
+      "category": "governance",
+      "enforcementGrade": "keyword"
+    },
+    {
+      "id": "ci-agent-caps",
+      "weight": 0,
+      "category": "process",
+      "enforcementGrade": "pattern"
+    },
+    {
+      "id": "claude-settings",
+      "weight": 8,
+      "category": "governance",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "coherence",
+      "weight": 14,
+      "category": "governance",
+      "enforcementGrade": "keyword"
+    },
+    {
+      "id": "credential-storage",
+      "weight": 6,
+      "category": "secrets",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "deep-secrets",
+      "weight": 8,
+      "category": "secrets",
+      "enforcementGrade": "pattern"
+    },
+    {
+      "id": "docker-security",
+      "weight": 6,
+      "category": "isolation",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "documentation",
+      "weight": 0,
+      "category": "process",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "env-exposure",
+      "weight": 8,
+      "category": "secrets",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "git-hooks",
+      "weight": 2,
+      "category": "process",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "governance-docs",
+      "weight": 10,
+      "category": "governance",
+      "enforcementGrade": "pattern"
+    },
+    {
+      "id": "infrastructure-security",
+      "weight": 6,
+      "category": "process",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "instruction-effectiveness",
+      "weight": 0,
+      "category": "governance",
+      "enforcementGrade": "keyword"
+    },
+    {
+      "id": "loop-governance",
+      "weight": 0,
+      "category": "process",
+      "enforcementGrade": "pattern"
+    },
+    {
+      "id": "mcp-config",
+      "weight": 14,
+      "category": "supply-chain",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "memory-hygiene",
+      "weight": 0,
+      "category": "governance",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "network-exposure",
+      "weight": 0,
+      "category": "isolation",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "permissions-hygiene",
+      "weight": 4,
+      "category": "process",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "sandbox-posture",
+      "weight": 0,
+      "category": "isolation",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "semantic-tools",
+      "weight": 0,
+      "category": "supply-chain",
+      "enforcementGrade": "pattern"
+    },
+    {
+      "id": "site-security",
+      "weight": 0,
+      "category": "isolation",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "skill-coherence",
+      "weight": 0,
+      "category": "governance",
+      "enforcementGrade": "keyword"
+    },
+    {
+      "id": "skill-files",
+      "weight": 10,
+      "category": "supply-chain",
+      "enforcementGrade": "pattern"
+    },
+    {
+      "id": "spec-goals",
+      "weight": 0,
+      "category": "governance",
+      "enforcementGrade": "keyword"
+    },
+    {
+      "id": "unicode-steganography",
+      "weight": 4,
+      "category": "governance",
+      "enforcementGrade": "pattern"
+    },
+    {
+      "id": "windows-security",
+      "weight": 0,
+      "category": "isolation",
+      "enforcementGrade": "mechanical"
+    },
+    {
+      "id": "workflow-maturity",
+      "weight": 0,
+      "category": "governance",
+      "enforcementGrade": "keyword"
+    }
+  ],
+  "frameworks": [
+    {
+      "id": "owasp-agentic",
+      "name": "OWASP Top 10 for Agentic Applications 2026",
+      "status": "final (published 2025-12-09)",
+      "coverage": "full",
+      "url": "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+      "controlCount": 6
+    },
+    {
+      "id": "owasp-mcp",
+      "name": "OWASP MCP Top 10",
+      "status": "BETA — upstream Phase 3 (Beta Release and Pilot Testing); IDs and rankings may still change. Do not cite as settled.",
+      "coverage": "partial",
+      "url": "https://owasp.org/www-project-mcp-top-10/",
+      "controlCount": 10
+    },
+    {
+      "id": "nist-ai-rmf",
+      "name": "NIST AI RMF 1.0 (NIST AI 100-1)",
+      "status": "final (January 2023)",
+      "coverage": "full",
+      "url": "https://nvlpubs.nist.gov/nistpubs/ai/nist.ai.100-1.pdf",
+      "controlCount": 4
+    },
+    {
+      "id": "eu-ai-act",
+      "name": "EU AI Act — Regulation (EU) 2024/1689",
+      "status": "in force, phased application",
+      "coverage": "full",
+      "url": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act",
+      "controlCount": 4
+    }
+  ],
+  "exitCodes": [
+    {
+      "code": 0,
+      "meaning": "Scan completed; score at or above --fail-under (baseline mode: no new findings)."
+    },
+    {
+      "code": 1,
+      "meaning": "Scan completed; score below --fail-under, or baseline mode found new findings."
+    },
+    {
+      "code": 2,
+      "meaning": "Configuration/argument/scan error, or bad input to an mcp-* subcommand."
+    },
+    {
+      "code": 3,
+      "meaning": "Subcommand pre-condition: mcp-verify found no pinned runtime tool hash for the server."
+    },
+    {
+      "code": 4,
+      "meaning": "mcp-verify drift: the pinned tool hash no longer matches the piped tools/list."
+    }
+  ],
+  "cliFlags": [
+    "--badge",
+    "--badge-format",
+    "--baseline",
+    "--baseline-refresh",
+    "--check",
+    "--ci",
+    "--code-quality",
+    "--cta",
+    "--cyclonedx",
+    "--deep",
+    "--depth",
+    "--fail-under",
+    "--fix",
+    "--help",
+    "--ignore",
+    "--include-home-skills",
+    "--init-hook",
+    "--install-packs",
+    "--json",
+    "--junit",
+    "--no-color",
+    "--no-cta",
+    "--no-state-write",
+    "--online",
+    "--profile",
+    "--quiet",
+    "--record-score",
+    "--recursive",
+    "--refresh-mcp-registry",
+    "--report",
+    "--sarif",
+    "--semantic",
+    "--trend",
+    "--verbose",
+    "--verify-state",
+    "--version",
+    "--watch",
+    "--yes",
+    "-h",
+    "-q",
+    "-r",
+    "-v",
+    "-y"
+  ]
+}

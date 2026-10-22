@@ -1,0 +1,198 @@
+name: Deploy to Staging
+
+# Staging build of the site: same build steps as deploy-production.yml, built
+# with the new site-config/staging.toml (baseURL only — see that file's
+# UNVERIFIED note), pushed to the `deploy/staging` branch instead of
+# `production`. Never to a branch named `staging`: scripts/
+# test_governance_contract.py forbids publishing a build to any integration-
+# branch name (master/main/staging/develop/...) — a force-orphan build commit
+# under that name made every branch-model tool misread it as the integration
+# branch (2026-09-04). Cloudflare Pages' own GitHub integration is expected to
+# serve `deploy/staging` as a preview deploy (the Pages project's preview
+# branch must be pointed at it in the dashboard) — this workflow only pushes
+# to it, exactly as deploy-production.yml only pushes to `production` and
+# never calls wrangler.
+#
+# Content/accessibility/link/security validation is NOT duplicated here:
+# pr-ci.yml already runs the full suite (frontmatter, content accuracy,
+# systems contract, htmltest links, pa11y-ci accessibility, Lighthouse,
+# security-audit self-test) on every pull request. This workflow only builds
+# and re-checks that public/ exists before pushing it.
+#
+# Triggered by LABELLING a pull request `staging-preview`, and by
+# workflow_dispatch (manual rebuild). Not on every pull request, and not on
+# push to master — that's deploy-production.yml's job.
+#
+# It fired on every pull_request until 2026-09-09. There is one shared
+# `deploy/staging` branch, so only the last build to finish is a preview anyone
+# can look at; every other run was a discarded build on the shared 12-core box.
+# Worse, they displaced each other — see the concurrency note below. Asking for
+# a preview is now an explicit act, which is what it always was in substance.
+#
+# To refresh a stale preview: remove and re-add the label, or dispatch the
+# workflow on the branch.
+
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+
+# One group, because every run force-pushes the same `deploy/staging` branch and
+# two concurrent pushes would race. NOT cancel-in-progress: a cancelled run is
+# reported as a failed check, so cancelling meant that with more than one PR open
+# every PR but the newest carried a permanently red "Build + deploy staging
+# preview" and every merge was refused (2026-09-05, five PRs stuck).
+#
+# That flag was only half the fix. A concurrency group holds ONE pending run: when
+# a third arrives, GitHub cancels the one that was waiting, cancel-in-progress or
+# not. On 2026-09-09 a push across eight stacked branches created eight runs in
+# 24 seconds and SEVEN came back cancelled, leaving seven head SHAs permanently
+# red. The trigger above is the actual fix — a run is created when somebody asks
+# for a preview, so there is no queue to be displaced from.
+# scripts/test_governance_contract.py holds both halves.
+concurrency:
+  group: "pages-staging"
+  cancel-in-progress: false
+
+env:
+  HUGO_VERSION: '0.139.0'
+  # hugo_extended_0.139.0_linux-amd64.tar.gz, from that release's
+  # hugo_0.139.0_checksums.txt. Bump it with HUGO_VERSION above.
+  HUGO_SHA256: 'c3b60907624cacd64c92b53b8b17ead611100d66072836c3c15361929567bf65'
+
+permissions:
+  contents: write   # actions-gh-pages pushes the deploy/staging branch
+
+jobs:
+  build-deploy:
+    name: Build + deploy staging preview
+    runs-on: ${{ fromJSON(vars.HM_RUNNER || '["self-hosted","heavy"]') }}
+    # 44 recorded runs: p50 20s, max 32s. It builds and pushes the preview and
+    # runs none of the validation suites, so it is a `quick`-shaped job on the
+    # `heavy` lane; 10 minutes is ~19x its worst observed run.
+    timeout-minutes: 10
+    # Same fork-PR guard as pr-ci.yml: this runs on the self-hosted runner,
+    # so refuse any pull_request whose head repo is not this one. The label check
+    # is belt and braces — `types: [labeled]` fires for ANY label, so without it
+    # adding `stuck-red` would build a preview nobody asked for.
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.label.name == 'staging-preview')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        # $RUNNER_TEMP, not $HOME: peaceiris/actions-hugo installs into
+        # $HOME/actions_hugo/bin, and the runners are processes under ONE user
+        # account on one box. Two concurrent jobs extract Hugo over the path the
+        # other may be executing — the `Text file busy` (exit 126) that killed run
+        # 34761209179 with htmltest. The action takes no input that moves the
+        # install off the shared home, so the pinned release is fetched here
+        # instead. $RUNNER_TEMP belongs to one runner and is wiped between jobs.
+        #
+        # HUGO_SHA256 sits beside HUGO_VERSION in this file's `env:` block so a
+        # version bump cannot miss it; it is a constant, not a checksums file
+        # fetched at run time, because a checksum the same server serves next to
+        # the tarball verifies nothing.
+        run: |
+          : "${RUNNER_TEMP:?the runner did not set RUNNER_TEMP}"
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSL -o hugo.tar.gz \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          echo "${HUGO_SHA256}  hugo.tar.gz" | sha256sum -c -
+          tar xz -C "$RUNNER_TEMP/bin" hugo -f hugo.tar.gz
+          rm hugo.tar.gz
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+
+      - name: Lockfile audit (npm supply-chain IOCs)
+        # Same check deploy-production.yml runs — see that file's comment.
+        run: |
+          if grep -nE '@vapi-ai/|@redhat-cloud-services/|"ai-sdk-ollama"' package.json package-lock.json; then
+            echo "::error::Dependency matches a known-compromised npm scope (Miasma / Phantom Gyp, 2026-06). Refusing to install."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build Tailwind CSS
+        run: npm run build:css
+
+      - name: Build site for staging
+        run: bash scripts/build-site.sh --configDir site-config --environment staging --minify
+        env:
+          NPS_API_KEY: ${{ secrets.NPS_API_KEY }}
+          WSDOT_ACCESS_CODE: ${{ secrets.WSDOT_ACCESS_CODE }}
+
+      - name: Validate - build output exists
+        run: |
+          if [ ! -f public/index.html ]; then
+            echo "::error::public/index.html missing after build"
+            exit 1
+          fi
+
+      - name: Add deployment markers
+        run: |
+          touch public/.nojekyll
+          echo "Built $(date)" > public/.github-built
+          printf '%s\n' 'name = "headlessmode-staging"' 'pages_build_output_dir = "."' > public/wrangler.toml
+
+      - name: Deploy to deploy/staging branch
+        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: deploy/staging
+          force_orphan: true
+          commit_message: "chore(deploy): staging build"
+
+      - name: Reclaim gh-pages staging dirs
+        # peaceiris/actions-gh-pages clones the publish branch into
+        # $HOME/actions_github_pages_<epoch> and never removes it. The runners
+        # share one user account, so every deploy strands ~11 MB there for good
+        # (three dirs, 33 MB, measured on this box 2026-09-13). The gomoveshift
+        # site already cleans up after itself; this is the same step.
+        #
+        # It CANNOT fail the deploy. It runs after the publish, so a failure here
+        # would mark an already-published deploy red and skip the steps below --
+        # which is what happened to gomoveshift on 2026-07-31, when the remove hit
+        # a half-written dir left by a cancelled run. A stranded directory is not
+        # an emergency: _ops/host-cleanup.sh section 5 sweeps this exact glob on
+        # a timer and owns the retention rule. Warn, count, finish green.
+        if: always()
+        run: |
+          set -uo pipefail
+          if [ -z "${HOME:-}" ] || [ ! -d "$HOME" ]; then
+            echo "HOME is unset or not a directory - nothing to clean."
+            exit 0
+          fi
+          shopt -s nullglob
+          removed=0
+          stranded=0
+          for dir in "$HOME"/actions_github_pages_*; do
+            name=${dir##*/}
+            # Only a real directory sitting directly in $HOME, named exactly that.
+            [ "$dir" = "$HOME/$name" ] || continue
+            [ -L "$dir" ] && continue
+            [ -d "$dir" ] || continue
+            size=$(du -sm "$dir" 2>/dev/null | cut -f1) || size="?"
+            echo "Removing $dir (${size} MB)"
+            if rm -rf -- "$dir" 2>&1; then
+              removed=$((removed + 1))
+            else
+              echo "::warning::Could not fully remove $dir - leaving it for _ops/host-cleanup.sh"
+              stranded=$((stranded + 1))
+            fi
+          done
+          echo "Reclaimed $removed gh-pages staging director(ies) from \$HOME; $stranded left behind."
+          exit 0

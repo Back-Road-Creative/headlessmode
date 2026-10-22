@@ -1,0 +1,14 @@
+{
+  "product": "quiet-corners",
+  "name": "Quiet Corners",
+  "release_source": "manual",
+  "source_repo": "Quiet Corners is site code — this repo — plus hand-exported county data",
+  "version": null,
+  "released_at": null,
+  "release_url": null,
+  "source_ref": null,
+  "assets": {},
+  "demo": null,
+  "media_source": null,
+  "notes": "No release tag: the map lives in this repo's own theme code, and static/data/quiet-corners/ is exported by hand from the monorepo rather than shipped as a versioned release."
+}

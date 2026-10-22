@@ -1,0 +1,17 @@
+{{- /*
+    download-action partial — renders the one download anchor both the
+    homepage's free-tool rows and product stanzas use, so the label default,
+    aria-label wording and unsigned-installer semantics live in one place
+    instead of two copies drifting apart.
+
+    Context: a dict with
+      - "sys":   the data/systems.json entry (must carry "download").
+      - "class": optional CSS class for the anchor (omit for none).
+
+    Callers gate on ".download" and ".shipped" themselves before calling
+    this partial — see data/systems.json's "download"/"shipped" contract —
+    so it renders unconditionally once invoked.
+*/ -}}
+{{- $s := .sys -}}
+{{- $label := $s.download_label | default "Download for Windows" -}}
+<a{{ with .class }} class="{{ . }}"{{ end }} href="{{ $s.download }}" aria-label="Download {{ $s.name }}{{ if not $s.download_label }} for Windows{{ end }}" target="_blank" rel="noopener noreferrer">{{ $label }}</a>

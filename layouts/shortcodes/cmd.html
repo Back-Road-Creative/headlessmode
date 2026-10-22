@@ -1,0 +1,11 @@
+{{/*
+    cmd shortcode — render a single-line shell command without line numbers.
+    Use for install/run lines (audit L2). Optional attrs: lang (default "bash").
+
+    Usage:
+        {{< cmd >}}npx github:Back-Road-Creative/rigscore{{< /cmd >}}
+        {{< cmd lang="yaml" >}}- uses: Back-Road-Creative/rigscore@v2.1.0{{< /cmd >}}
+*/}}
+{{- $lang := default "bash" (.Get "lang") -}}
+{{- $code := trim (.Inner) "\n" -}}
+{{- transform.Highlight $code $lang "linenos=false,noclasses=false" -}}

@@ -1,0 +1,42 @@
+{{ define "main" }}
+{{- /* A page is a PRODUCT SHEET exactly when data/systems.json says a system
+       lives at its URL: chip + name + one-line + buy box come from the entry
+       via the system-sheet partial, the markdown below is the what-it-is
+       prose, and the page's own "## Documentation" section closes it. Every
+       other page (contact, privacy, demo pages) keeps the plain article
+       header. */ -}}
+{{- $sys := "" -}}
+{{- range site.Data.systems.systems }}{{ if eq .link $.RelPermalink }}{{ $sys = . }}{{ end }}{{ end -}}
+{{- if $sys }}
+{{ partial "system-sheet.html" (dict "system" $sys) }}
+<div class="shop-row py-12 page-wrap">
+    <article class="prose max-w-none themed-prose">
+        <div class="content-body section-content">
+            {{ .Content }}
+        </div>
+        <div class="not-prose post-backlink">
+            <a href="/#software" class="back-link">&larr; All software</a>
+        </div>
+    </article>
+</div>
+{{- else }}
+<div class="shop-row py-12 page-wrap">
+    <article class="prose max-w-none themed-prose">
+        <!-- Post Header -->
+        <header class="not-prose entry-header">
+            <h1 class="post-title">{{ .Title }}</h1>
+        </header>
+
+        <!-- Post Content -->
+        <div class="content-body section-content">
+            {{ .Content }}
+        </div>
+
+        <!-- Back Link -->
+        <div class="not-prose post-backlink">
+            <a href="/" class="back-link">&larr; Back to Home</a>
+        </div>
+    </article>
+</div>
+{{- end }}
+{{ end }}

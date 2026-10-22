@@ -1,0 +1,213 @@
+# Generalises rigscore-facts-sync.yml's pattern (release -> site PR, no human
+# step) to every product with a GitHub-release source. rigscore keeps its own
+# workflow for now (its facts pipeline is npm/Node-shaped, not this JSON
+# contract) — this one covers band-coach and driftless, and grows a matrix
+# entry the day a third product gets a release workflow. Data contract:
+# data/releases/<slug>.json (unit H12a). Named product-sync.yml, not
+# sync-*, because .github/workflows/sync-* is hard-denied by the autoland
+# policy (bin/autoland-policy.toml) — this workflow itself is not
+# autoland-eligible either way (it lives in .github/**, outside the site
+# lane), so a human always merges the PRs it opens.
+#
+# Same conventions as rigscore-facts-sync.yml: branch force-pushed so a
+# re-run updates an open PR in place, one tracking issue per product on
+# failure, self-hosted `quick` lane (a handful of API calls + one script run).
+
+name: product-sync
+
+on:
+  schedule:
+    # 6:47 UTC — offset from rigscore-facts-sync's 06:23 so the two don't
+    # contend for the same `quick` runner slot.
+    - cron: '47 6 * * *'
+  workflow_dispatch:
+    inputs:
+      product:
+        description: 'Limit to one product slug (band-coach, driftless). Empty = all.'
+        type: string
+        default: ''
+      tag:
+        description: 'Force a specific release tag instead of "latest". Empty = latest.'
+        type: string
+        default: ''
+  repository_dispatch:
+    types: [product-release]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  # Dispatches pr-ci.yml on the release branch; see the open step.
+  actions: write
+
+jobs:
+  sync:
+    runs-on: ${{ fromJSON(vars.HM_RUNNER_QUICK || '["self-hosted","quick"]') }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - slug: band-coach
+            source_repo: Back-Road-Creative/band-coach
+            asset_pattern: ''
+            test_files: scripts/test_release_data.py
+          - slug: driftless
+            source_repo: Back-Road-Creative/driftless
+            asset_pattern: 'driftless-showcase-{tag}.tar.gz'
+            test_files: scripts/test_release_data.py scripts/test_driftless_demo.py
+    steps:
+      - name: Skip this matrix entry if the dispatch named a different product
+        id: gate
+        run: |
+          set -euo pipefail
+          WANT=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            WANT="${{ inputs.product }}"
+          elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            WANT="${{ github.event.client_payload.product }}"
+          fi
+          if [ -n "$WANT" ] && [ "$WANT" != "${{ matrix.slug }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out the site
+        if: steps.gate.outputs.skip != 'true'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Resolve the target release
+        if: steps.gate.outputs.skip != 'true'
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ matrix.source_repo }}
+        run: |
+          set -euo pipefail
+          TAG_INPUT=""
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_INPUT="${{ inputs.tag }}"
+          elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            TAG_INPUT="${{ github.event.client_payload.tag }}"
+          fi
+          HAVE=$(jq -r '.version // ""' "data/releases/${{ matrix.slug }}.json")
+          if [ -n "$TAG_INPUT" ]; then
+            gh api "repos/$REPO/releases/tags/$TAG_INPUT" > release.json
+          elif ! gh api "repos/$REPO/releases/latest" > release.json 2> gh-error.txt; then
+            # A product with no published release yet is a skip, not a failure:
+            # the sync has nothing to compare against until the first release exists.
+            if grep -q 'HTTP 404' gh-error.txt; then
+              echo "::notice::${REPO} has no published release yet — nothing to sync."
+              echo "tag=" >> "$GITHUB_OUTPUT"
+              echo "have=${HAVE}" >> "$GITHUB_OUTPUT"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            cat gh-error.txt >&2
+            exit 1
+          fi
+          TAG=$(jq -r .tag_name release.json)
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+          VERSION="${TAG#v}"
+          echo "have=${HAVE}" >> "$GITHUB_OUTPUT"
+          if [ "$VERSION" = "$HAVE" ]; then
+            echo "Already synced to ${TAG} — nothing to do."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download the release asset
+        if: steps.gate.outputs.skip != 'true' && steps.release.outputs.skip != 'true' && matrix.asset_pattern != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ matrix.source_repo }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          ASSET=$(python3 -c "print('${{ matrix.asset_pattern }}'.format(tag='$TAG'))")
+          gh release download "$TAG" --repo "$REPO" --pattern "$ASSET" --output "$ASSET" --clobber
+          echo "ASSET_PATH=$ASSET" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        if: steps.gate.outputs.skip != 'true' && steps.release.outputs.skip != 'true'
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        if: steps.gate.outputs.skip != 'true' && steps.release.outputs.skip != 'true'
+        run: |
+          python3 -m venv venv
+          venv/bin/pip install pyyaml pytest
+
+      - name: Run bin/product-sync.sh
+        if: steps.gate.outputs.skip != 'true' && steps.release.outputs.skip != 'true'
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "${ASSET_PATH:-}" ]; then
+            bash bin/product-sync.sh "${{ matrix.slug }}" "$TAG" --release-json release.json --asset "$ASSET_PATH"
+          else
+            bash bin/product-sync.sh "${{ matrix.slug }}" "$TAG" --release-json release.json
+          fi
+
+      - name: Validate the synced data
+        if: steps.gate.outputs.skip != 'true' && steps.release.outputs.skip != 'true'
+        run: venv/bin/python3 -m pytest ${{ matrix.test_files }} -v
+
+      - name: Open or update the sync PR
+        if: steps.gate.outputs.skip != 'true' && steps.release.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          BRANCH="release/${{ matrix.slug }}/${TAG}"
+          git config user.name "product-sync-bot"
+          git config user.email "product-sync-bot@headlessmode.com"
+          # -B, not -b: a re-dispatch must not die because the name is taken.
+          git checkout -B "${BRANCH}"
+          git add "data/releases/${{ matrix.slug }}.json"
+          [ -n "${ASSET_PATH:-}" ] && git add "static/demo/${{ matrix.slug }}"
+          if git diff --cached --quiet; then
+            echo "Nothing changed after the sync — not opening a PR."
+            exit 0
+          fi
+          git commit -m "release: ${{ matrix.slug }} ${TAG} — release data + demo sync"
+          # Force is correct rather than merely convenient: every byte of this
+          # branch derives from the released tag and this workflow's own
+          # sync step, so the regenerated commit is by definition the
+          # authoritative one.
+          git push --force origin "${BRANCH}"
+          RELEASE_URL=$(jq -r .html_url release.json)
+          if gh pr view "${BRANCH}" --json state --jq '.state' 2>/dev/null | grep -qx OPEN; then
+            echo "PR for ${BRANCH} is already open — the force-push updated it in place."
+          else
+            gh pr create \
+              --title "release: ${{ matrix.slug }} ${TAG} data + demo sync" \
+              --body "Auto-generated data/releases/${{ matrix.slug }}.json refresh (and demo bundle, if this product ships one) for ${{ matrix.slug }} ${TAG}. Release notes: ${RELEASE_URL}. Opened by the product-sync workflow — no human step in between." \
+              --head "${BRANCH}" \
+              --base master
+          fi
+          # A push or PR made with the workflow token starts no PR CI run until a
+          # human approves it on GitHub (#821 waited at action_required, 2026-10-19).
+          # Dispatch it on the branch so the head SHA gets its check either way.
+          gh workflow run pr-ci.yml --ref "${BRANCH}"
+
+      - name: Create or update the failure issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="product-sync failed for ${{ matrix.slug }}"
+          BODY="The scheduled product sync for ${{ matrix.slug }} failed — see the run log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Until this is fixed the site's ${{ matrix.slug }} release data lags the latest release."
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$TITLE\"" --json number,title -q "[.[] | select(.title == \"$TITLE\")][0].number" 2>/dev/null)
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body "$BODY"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body "$BODY"
+          fi

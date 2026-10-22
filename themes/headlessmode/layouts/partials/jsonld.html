@@ -1,0 +1,94 @@
+{{/*
+  JSON-LD structured data.
+  Emits exactly one <script type="application/ld+json"> block per invocation,
+  selected by page type:
+    - Home or /about/      → Organization
+    - /quiet-corners/      → Dataset
+    - /rigscore/           → SoftwareApplication (rigscore)
+  Silent on any other page (section lists, taxonomy, releases index). The
+  SoftwareApplication block lives on /rigscore/ — the product sheet, which
+  since the boutique redesign also carries the manual in its Documentation
+  section — so exactly one page claims to BE the software.
+*/ -}}
+
+{{- $site := .Site -}}
+{{- $baseURL := $site.BaseURL | strings.TrimRight "/" -}}
+{{- $ogImage := (.Params.ogImage | default $site.Params.ogImage) -}}
+{{- $ogImageAbs := printf "%s%s" $baseURL $ogImage -}}
+{{- /* Org identity mark: the square favicon, not the 1200x630 OG banner
+       (schema.org logo expects a roughly square image). */ -}}
+{{- $logoAbs := printf "%s/android-chrome-512x512.png" $baseURL -}}
+{{- $sameAs := slice
+    "https://github.com/Back-Road-Creative"
+    "https://x.com/HeadlessMode" -}}
+{{- with $site.Params.facebookPage -}}{{- $sameAs = $sameAs | append . -}}{{- end -}}
+
+{{- /* Organization block, reused below as the Dataset's creator and the
+       SoftwareApplication's publisher. No BlogPosting is ever emitted. */ -}}
+{{- $organization := dict
+    "@type" "Organization"
+    "name" $site.Title
+    "url" (printf "%s/" $baseURL)
+    "logo" $logoAbs
+    "sameAs" $sameAs
+-}}
+
+{{- if or .IsHome (eq .RelPermalink "/about/") -}}
+<script type="application/ld+json">
+{{ (dict
+    "@context" "https://schema.org"
+    "@type" "Organization"
+    "name" $site.Title
+    "url" (printf "%s/" $baseURL)
+    "logo" $logoAbs
+    "description" $site.Params.description
+    "sameAs" $sameAs
+) | jsonify (dict "indent" "  ") | safeJS }}
+</script>
+{{- end -}}
+
+{{- if eq .RelPermalink "/quiet-corners/" -}}
+<script type="application/ld+json">
+{{ (dict
+    "@context" "https://schema.org"
+    "@type" "Dataset"
+    "name" .Title
+    "description" (.Description | default $site.Params.description)
+    "url" .Permalink
+    "creator" $organization
+    "spatialCoverage" "United States"
+    "keywords" (cond (gt (len .Params.tags) 0) (delimit .Params.tags ", ") "")
+    "isBasedOn" (slice
+        "https://www.census.gov/programs-surveys/popest.html"
+        "https://www.ers.usda.gov/data-products/rural-urban-continuum-codes/"
+        "https://github.com/topojson/us-atlas")
+    "distribution" (dict
+        "@type" "DataDownload"
+        "encodingFormat" "application/json"
+        "contentUrl" (printf "%s/data/quiet-corners/counties.json" $baseURL))
+) | jsonify (dict "indent" "  ") | safeJS }}
+</script>
+{{- end -}}
+
+{{- if eq .RelPermalink "/rigscore/" -}}
+<script type="application/ld+json">
+{{ (dict
+    "@context" "https://schema.org"
+    "@type" "SoftwareApplication"
+    "name" "rigscore"
+    "url" .Permalink
+    "description" (.Description | default $site.Params.description)
+    "applicationCategory" "DeveloperApplication"
+    "operatingSystem" "Linux, macOS, Windows (WSL2)"
+    "offers" (dict
+        "@type" "Offer"
+        "price" "0"
+        "priceCurrency" "USD")
+    "publisher" $organization
+    "image" $ogImageAbs
+    "downloadUrl" "https://github.com/Back-Road-Creative/rigscore"
+    "softwareVersion" $site.Data.rigscore.version
+    "license" "https://opensource.org/license/mit"
+) | jsonify (dict "indent" "  ") | safeJS }}
+</script>
+{{- end -}}

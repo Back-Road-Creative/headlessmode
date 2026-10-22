@@ -1,0 +1,84 @@
+{{/*
+    rigscore-check-table shortcode — render the scored or advisory check table
+    straight from data/rigscore.json (Site.Data.rigscore.checks). The row set,
+    weights, categories and enforcement grades are the live registry's — they
+    cannot drift from a hand-edit, and the rigscore release job re-renders them
+    by overwriting one JSON file. Only the human display name lives in $names
+    (fallback: humanize the id); a release that adds a check appears here
+    automatically, unlabeled until someone names it — a visible cue, never a
+    wrong count. Each row's Check cell links to that check's per-check doc on the
+    rigscore repo, built from the row id ($docBase) so the link follows a rename
+    on the next data regen. ($names carries both `claude-md` and its unreleased
+    rename `governance-docs`, so the label is correct across the release boundary.)
+
+    Usage:
+        {{< rigscore-check-table kind="scored" >}}    weight > 0, by weight desc
+        {{< rigscore-check-table kind="advisory" >}}  weight == 0, by id
+*/}}
+{{- $kind := or (.Get "kind") (.Get 0) | default "scored" -}}
+{{- $facts := .Site.Data.rigscore -}}
+{{- if not $facts }}{{ errorf "rigscore-check-table: data/rigscore.json not found (Site.Data.rigscore is empty)" }}{{ end -}}
+{{- $names := dict
+    "mcp-config" "MCP server configuration"
+    "coherence" "Cross-config coherence"
+    "skill-files" "Skill file safety"
+    "governance-docs" "Governance documentation"
+    "claude-md" "Governance documentation"
+    "claude-settings" "Claude settings safety"
+    "deep-secrets" "Deep source secrets"
+    "env-exposure" "Secret exposure"
+    "credential-storage" "Credential storage hygiene"
+    "docker-security" "Docker security"
+    "infrastructure-security" "Infrastructure security"
+    "unicode-steganography" "Unicode steganography"
+    "permissions-hygiene" "Permissions hygiene"
+    "git-hooks" "Git hooks"
+    "windows-security" "Windows/WSL security"
+    "network-exposure" "Network exposure"
+    "site-security" "Site security"
+    "instruction-effectiveness" "Instruction effectiveness"
+    "skill-coherence" "Skill ↔ governance coherence"
+    "workflow-maturity" "Workflow maturity"
+    "documentation" "Documentation coverage"
+    "agent-output-schemas" "Agent output schemas"
+    "loop-governance" "Loop governance"
+    "spec-goals" "Spec goals"
+    "ci-agent-caps" "CI agent caps"
+    "memory-hygiene" "Memory hygiene"
+    "ai-disclosure" "AI disclosure"
+    "sandbox-posture" "Sandbox posture"
+    "semantic-tools" "Semantic tool-description judge"
+-}}
+{{- /* Per-check GitHub doc on the rigscore repo (main), keyed by the row's id —
+       same single-source principle as the label: derived from the live registry,
+       so a renamed/added check re-points its own link on the next data regen. */ -}}
+{{- $docBase := "https://github.com/Back-Road-Creative/rigscore/blob/main/docs/checks" -}}
+{{- /* Doc-filename aliases: the released data id can lag a doc rename upstream.
+       `claude-md` is still the released id, but its doc already shipped as
+       governance-docs.md on main — without this the link 404s under the
+       external-link gate. Drop the entry once the data regens to the new id. */ -}}
+{{- $docSlugs := dict "claude-md" "governance-docs" -}}
+{{- $rows := where $facts.checks "weight" "gt" 0 -}}
+{{- if eq $kind "advisory" }}{{ $rows = sort (where $facts.checks "weight" "eq" 0) "id" }}{{ else }}{{ $rows = sort $rows "weight" "desc" }}{{ end -}}
+<div class="table-scroll" tabindex="0" role="region" aria-label="rigscore {{ $kind }} checks table">
+<table>
+<thead>
+{{- if eq $kind "advisory" }}
+<tr><th>Check</th><th>Category</th><th>Enforcement</th></tr>
+{{- else }}
+<tr><th>Check</th><th>Weight</th><th>Category</th></tr>
+{{- end }}
+</thead>
+<tbody>
+{{- range $rows }}
+{{- $name := index $names .id | default (humanize .id) }}
+{{- $docUrl := printf "%s/%s.md" $docBase (index $docSlugs .id | default .id) }}
+{{- if eq $kind "advisory" }}
+<tr><td><a href="{{ $docUrl }}" rel="noopener">{{ $name }}</a></td><td>{{ .category }}</td><td>{{ .enforcementGrade }}</td></tr>
+{{- else }}
+<tr><td><a href="{{ $docUrl }}" rel="noopener">{{ $name }}</a></td><td>{{ .weight }}</td><td>{{ .category }}</td></tr>
+{{- end }}
+{{- end }}
+</tbody>
+</table>
+</div>
