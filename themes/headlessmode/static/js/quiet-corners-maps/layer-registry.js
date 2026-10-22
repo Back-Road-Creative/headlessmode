@@ -22,6 +22,7 @@ import { LAYER_LABEL as RADAR_LABEL, LAYER_CAVEAT as RADAR_CAVEAT } from './sour
 // header: "the unit that wires the reader appends this row" -- the layers-reach-paper guard).
 import { CONTEXT_ROW as HILLSHADE_ROW } from './source-hillshade.js';
 import { CONTEXT_ROW as CONTOURS_ROW } from './source-contours.js';
+import { CONTEXT_ROW as GAUGES_ROW } from './source-stream-gauges.js';
 import { LAYER_LABEL as AURORA_LABEL, LAYER_CAVEAT as AURORA_CAVEAT } from './source-aurora.js';
 import { LAYER_LABEL as FLOOD_LABEL, LAYER_CAVEAT as FLOOD_CAVEAT } from './source-flood-zones.js';
 import { LAYER_LABEL as AQI_LABEL, LAYER_CAVEAT as AQI_CAVEAT } from './source-aqi.js';
@@ -700,6 +701,8 @@ export const LAYERS = Object.freeze([
   }),
   HILLSHADE_ROW,
   CONTOURS_ROW,
+  // The first context row that draws POINTS from a JSON feed (source-stream-gauges.js).
+  GAUGES_ROW,
   // A camera pin marks a point, and its picture is fetched only when a reader opens
   // that pin's popup (main.js), never as part of the printable-vector fetch loop --
   // so it gets its own `cameras` group instead of joining `overlay` (QUX-08D C22).

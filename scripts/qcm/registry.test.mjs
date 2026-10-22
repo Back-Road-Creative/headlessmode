@@ -33,8 +33,10 @@ test('every source carries the required keys and its kind-specific block', () =>
     // one GeoJSON collection asked by point whose FEATURES carry the times, added
     // with the NWS alerts source rather than bent into one of the five above -- and a
     // camera feed: a still (and sometimes a stream link) per record, never a tile and
-    // never queried by geometry (QUX-08D).
-    assert.ok(['raster-tiles', 'feature-query', 'raster-image', 'point-forecast', 'gridded-forecast', 'alert-feed', 'camera-feed'].includes(src.kind), `${key} kind=${src.kind}`);
+    // never queried by geometry (QUX-08D) -- and an observation feed: a JSON point
+    // feed asked by bounding box whose FEATURES carry their own reading times, with no
+    // ArcGIS layer behind it (the USGS stream gauges).
+    assert.ok(['raster-tiles', 'feature-query', 'raster-image', 'point-forecast', 'gridded-forecast', 'alert-feed', 'camera-feed', 'observation-feed'].includes(src.kind), `${key} kind=${src.kind}`);
     if (src.kind === 'raster-tiles') assert.ok(src.tile && src.tile.urlTemplate, `${key} lacks tile`);
     else if (src.kind === 'raster-image') assert.ok(src.serviceUrl && src.limits, `${key} lacks serviceUrl/limits`);
     else if (src.kind === 'point-forecast') assert.ok(src.endpoints && src.endpoints.point, `${key} lacks endpoints.point`);
@@ -46,6 +48,11 @@ test('every source carries the required keys and its kind-specific block', () =>
     else if (src.kind === 'gridded-forecast') assert.ok(src.grid && src.grid.cellDegrees && src.grid.lonRange, `${key} lacks grid`);
     // A camera catalogue has a serviceUrl and a coverageSemantics naming its real
     // footprint (QUX-08D: District 5 only), and is never a tile cache.
+    else if (src.kind === 'observation-feed') {
+      assert.ok(src.endpoints && src.endpoints.byBox && src.endpoints.byBox.includes('{bbox}'), `${key} lacks endpoints.byBox`);
+      assert.ok(Array.isArray(src.parameterCodes) && src.parameterCodes.length > 0, `${key} lacks parameterCodes`);
+      assert.ok(!('tile' in src) && !('layers' in src), `${key} is a point feed, not tiles or an ArcGIS layer`);
+    }
     else if (src.kind === 'camera-feed') {
       assert.ok(src.serviceUrl && src.coverageSemantics, `${key} lacks serviceUrl/coverageSemantics`);
       assert.ok(!('tile' in src), `${key} is a camera feed, not a tile cache`);

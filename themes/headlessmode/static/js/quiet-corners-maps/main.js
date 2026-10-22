@@ -18,6 +18,7 @@ import {
   setSunNow, ruleForLightState, lightStateText, DEFAULT_MANUAL, LIGHT_COPY,
 } from './source-hillshade.js';
 import { contoursRequestFor, createContoursFetcher } from './source-contours.js';
+import { gaugeLayer, gaugeReader, areaReport as gaugeAreaReport } from './source-stream-gauges.js';
 import { fetchRecSites } from './source-rec-sites.js';
 import { fetchBlmRecSites } from './source-blm-rec-sites.js';
 import { fetchTrails } from './source-trails.js';
@@ -201,6 +202,9 @@ let flood, floodReads = null;
  *  so a pan asks something new rather than re-indexing what is held. The reader debounces
  *  and abandons the in-flight query, which is why it is a value and not a bare fetch. */
 let aqi, aqiReads = null;
+/** Stream gauges (E3): a bounded JSON question like the air quality above, drawn as one marker
+ *  per station. `gaugesNewestMs` is the newest reading's own time, for the caption. */
+let gauges, gaugeReads = null, gaugesNewestMs = null;
 /** Wildlife records: the other bounded question, and the only surface that draws no picture
  *  at all -- three limit=0 counts per cell, shaded as one box, because 97% of GBIF records
  *  state no coordinate precision and a dot would claim one. */
@@ -408,6 +412,10 @@ function attach(hostedMap) {
   aqiReads = aqiReader({});
   map.on('moveend zoomend', renderAqi);
   renderAqi();
+  gauges = gaugeLayer(L);
+  gaugeReads = gaugeReader({});
+  map.on('moveend zoomend', renderGauges);
+  renderGauges();
   wildlife = gbifLayer(L);
   wildlifeReads = gbifReader({});
   map.on('moveend zoomend', renderWildlife);
@@ -871,6 +879,8 @@ const SURFACE_TIME = {
   // the screen, so the caption says the time is unknown and the panel RANGE goes in the
   // layer's own row, where it can say which panels it belongs to.
   epaAirNowAqi: () => ({ timeMs: aqiObservedMs }),
+  // The newest reading in view: each station states its own, and the row says so.
+  streamGauges: () => ({ timeMs: gaugesNewestMs }),
   // Nothing goes here for the terrain surface on purpose. It is a CALCULATION over a
   // national compilation that states no date for a given piece of ground, so there is no
   // honest moment to show -- and the caption says the time is unknown rather than
@@ -1219,6 +1229,7 @@ const CONTEXT_RENDER = {
   femaNfhl: renderFlood,
 
   epaAirNowAqi: renderAqi,
+  streamGauges: renderGauges,
   gbifOccurrence: renderWildlife,
 
   terrainSlope: renderTerrain,
@@ -2130,6 +2141,37 @@ async function renderAqi() {
     if (!map.hasLayer(aqi)) aqi.addTo(map);
     if (!el) return;
     el.textContent = aqiAreaReport(got).text;
+    el.hidden = false;
+  });
+}
+
+/** Stream gauges, on or off. A bounded question like renderAqi: a pan asks again, a drag does
+ *  not, and the answer about a view the reader left is dropped. A view over the area cap asks
+ *  nothing, and a failed request is a stated line -- the markers are cleared either way so the
+ *  last view's gauges never sit on ground this answer says nothing about. */
+async function renderGauges() {
+  if (!gauges || !map) return;
+  const layers = layersFromControls();
+  const on = !!layers.streamGauges;
+  const el = $('qcm-layer-streamGauges-report');
+  if (!on) {
+    gaugeReads.cancel();
+    if (map.hasLayer(gauges)) map.removeLayer(gauges);
+    gauges.draw([], null);
+    if (el) { el.textContent = ''; el.hidden = true; }
+    return;
+  }
+  const b = map.getBounds();
+  const bbox = { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() };
+  await gaugeReads.ask(bbox, (got) => {
+    const sites = got && got.status !== 'unavailable' ? got.sites : [];
+    const times = sites.flatMap((s) => s.readings.map((r) => r.timeMs));
+    gaugesNewestMs = times.length ? Math.max(...times) : null;
+    renderSurfaceCaption();
+    gauges.draw(sites, got && got.fetchedMs);
+    if (!map.hasLayer(gauges)) gauges.addTo(map);
+    if (!el) return;
+    el.textContent = gaugeAreaReport(got).text;
     el.hidden = false;
   });
 }

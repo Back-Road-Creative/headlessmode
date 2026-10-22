@@ -177,6 +177,7 @@
     "nlcdTreeCanopy": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"How much tree crown covers the ground (NLCD canopy percent, by year)\" as the surface; the surface caption names it and its data time."},
     "countyScore": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"County score\" as the surface; the surface caption names it and its data time."},
     "hillshadeLight": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Hillshade (adjustable light)\" as the surface; the surface caption names it and its data time."},
+    "streamGauges": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Stream gauges (flow and gage height, latest USGS reading)\" as the surface; the surface caption names it and its data time."},
     "terrainContours": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Contour lines (25 m interval)\" as the surface; the surface caption names it and its data time."},
     "none": {"scope":"The one continuous-colour surface laid over the base map.","effect":"No surface: removes the current one."}
    }

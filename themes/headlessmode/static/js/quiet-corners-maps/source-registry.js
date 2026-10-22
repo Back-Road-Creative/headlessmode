@@ -1188,6 +1188,54 @@ export const SOURCES = deepFreeze({
       + 'its end time still says. United States and its territories only.',
     measuredOn: '2026-09-14',
   },
+  // USGS stream gauges: the newest flow (00060) and gage-height (00065) reading each active
+  // station has published, from the USGS Water Data OGC API. Measured 2026-10-20: a GET with
+  // `bbox=-83.6,35.5,-83.0,35.9` answered 200 application/json, `access-control-allow-origin: *`,
+  // no key, 9 features / 7,546 bytes with the whole property list; `limit=1000` is the page
+  // ceiling asked for. A feature is one station + parameter with its OWN `time`, `value` (a
+  // STRING) and `unit_of_measure` (`ft^3/s`, `ft`); names live in a second collection
+  // (`monitoring-locations`, `id=` takes a comma list). One station's newest flow reading was
+  // dated 2009-10-01, so a reading's age is never assumed.
+  //
+  // WHY NOT THE LEGACY HOST. https://waterservices.usgs.gov/ (the NWIS `iv` service, which
+  // also answered 200 + CORS `*` + 12,715 B for the same box) carries on its landing page,
+  // checked 2026-10-20: "WaterServices will be permanently shut down on February 22nd, 2027 ...
+  // Users must migrate to https://api.waterdata.usgs.gov". A layer built on it would break
+  // four months after it shipped. The new API's bbox query answered a 100 square degree box
+  // as well (limit 10), so the 25 square degree ceiling below is the legacy documented cap
+  // kept on purpose, not a measured refusal. A new kind, `observation-feed`: a JSON
+  // point feed asked by bounding box, with no ArcGIS layer behind it, whose features carry
+  // their own reading times.
+  usgsWaterGauges: {
+    id: 'usgsWaterGauges',
+    name: 'USGS stream gauges (flow and gage height, latest reading)',
+    kind: 'observation-feed',
+    origin: 'https://api.waterdata.usgs.gov',
+    serviceUrl: 'https://api.waterdata.usgs.gov/ogcapi/v1',
+    metadataUrl: 'https://api.waterdata.usgs.gov/ogcapi/v1/collections/latest-continuous',
+    endpoints: {
+      byBox: 'https://api.waterdata.usgs.gov/ogcapi/v1/collections/latest-continuous/items?bbox={bbox}&parameter_code={codes}&limit={limit}&f=json',
+      names: 'https://api.waterdata.usgs.gov/ogcapi/v1/collections/monitoring-locations/items?id={ids}&properties=monitoring_location_name,id&limit={limit}&f=json',
+    },
+    parameterCodes: ['00060', '00065'],
+    spatialReference: { wkid: 4326 },
+    limits: { requiresKey: false, maxBboxSquareDegrees: 25, recordBudgetPerExtent: 1000,
+      boxObservedBytes: 7546, legacyBoxObservedBytes: 12715 },
+    pagination: false,
+    cors: 'star',
+    attribution: 'U.S. Geological Survey, National Water Information System',
+    termsUrl: 'https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs',
+    dateBasis: 'feature-field',   // each value carries its own `time`
+    claim: 'observation',
+    coverageSemantics: 'The newest value each active USGS station has published for streamflow and '
+      + 'gage height, each with its own reading time (one station\u2019s newest flow was from 2009). '
+      + 'Most values are provisional and subject to revision. It covers stations USGS operates, '
+      + 'not every stream, and no gauge in view means none reports here, not that the water is low or '
+      + 'quiet. It is a reading from a past moment: not a forecast, not a flood warning, and never a '
+      + 'statement that a crossing is safe. The legacy waterservices.usgs.gov host is announced for '
+      + 'decommission on 2027-02-22 and is not used.',
+    measuredOn: '2026-10-20',
+  },
   // NOAA's Hazard Mapping System smoke analysis. `Start` and `End_` are STRINGS in the HMS
   // wire format `YYYYDDD HHMM`, UTC day-of-year (`2026257 1200` is 2026-09-14 12:00Z): the
   // satellite image sequence the analyst outlined the plume from. The service's own

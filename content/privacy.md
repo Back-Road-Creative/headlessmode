@@ -111,8 +111,8 @@ Every other layer is off until you switch it on. The Layers panel is shared by
 the dashboard and the builder: switching on any other layer, or choosing another
 base map, on either page, requests map tiles or map data directly from that
 layer's own service, for the area on screen. Today those services are U.S.
-federal agencies (USGS, whose elevation service also draws contour lines, the
-Forest Service, FEMA, BLM and NOAA), NASA satellite
+federal agencies (USGS, whose elevation service also draws contour lines and whose
+water service reports stream gauges, the Forest Service, FEMA, BLM and NOAA), NASA satellite
 imagery, the Bureau of Transportation Statistics (noise-map tiles), and the
 biodiversity data aggregator GBIF; several of those agencies'
 public services are hosted on Esri's commercial ArcGIS Online platform rather
