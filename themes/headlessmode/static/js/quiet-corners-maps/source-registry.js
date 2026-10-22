@@ -913,6 +913,48 @@ export const SOURCES = deepFreeze({
       + 'birds. It is an observation of the last few minutes and never an outlook.',
     measuredOn: '2026-09-11',
   },
+  // NOAA NOHRSC's Snow Analysis, layer 3 (snow depth) of a two-layer MapServer; layer 7 is
+  // snow water equivalent and is never asked for. Same host as nwsRadar above, so the CSP
+  // costs nothing: the export is FETCHED as bytes (connect-src) and handed to the overlay as
+  // a blob: URL, which img-src already allows. Measured 2026-10-20 with an
+  // `Origin: https://headlessmode.com` header: ?f=json and export answered 200 with the Origin
+  // echoed; maxImageWidth/Height 4096; no tile cache and no time dimension. /legend lists 12
+  // bins for layer 3, "0 - 0.39" to "394 - 787", and NO unit appears in the service, layer or
+  // legend metadata -- so none is stated here. A view inside coverage with no snow (Great
+  // Smokies) and one outside it (Spain) answered the identical 2,231-byte transparent PNG,
+  // so modelled zero and no data cannot be told apart.
+  nohrscSnowDepth: {
+    id: 'nohrscSnowDepth',
+    name: 'NOAA NOHRSC modelled snow depth',
+    kind: 'raster-image',
+    origin: 'https://mapservices.weather.noaa.gov',
+    serviceUrl: 'https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer',
+    metadataUrl: 'https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer?f=json',
+    spatialReference: { wkid: 4269 },   // the service's own; the export is requested in 3857
+    layers: { depth: 3, sweNotUsed: 7 },
+    // bboxSR is NOT optional (see usgs3depSurface); png32 keeps the empty ground transparent.
+    request: { bboxSR: 4326, imageSR: 3857, format: 'png32', transparent: true, f: 'image' },
+    limits: { requiresKey: false, maxImageSide: 1024, serviceMaxImageSide: 4096,
+      pixelSizeMeters: 1000, legendBins: 12, exportTilesAllowed: false },
+    pagination: false,
+    cors: 'reflects-origin',
+    attribution: 'NOAA National Weather Service, National Operational Hydrologic Remote Sensing '
+      + 'Center (NOHRSC), National Snow Analysis',
+    termsUrl: 'https://www.weather.gov/disclaimer',
+    dateBasis: 'unknown',   // the service states a cadence, not the valid time of the picture
+    // Its own description: a snow MODEL at 1 km that assimilates ground, air and satellite snow
+    // observations daily. An analysis, not a measurement at your location.
+    claim: 'model',
+    coverageSemantics: 'A MODELLED snow depth on a 1 km grid, from an energy-and-mass-balance snow '
+      + 'model that takes in ground, airborne and satellite snow observations once a day: an '
+      + 'analysis, not a measurement where you stand. A 1 km square averages out what a slope, a '
+      + 'tree line or a road cut does to snow, so it can miss local drifts and bare ridges. The '
+      + 'service states no unit for its 12 bins, so none is stated here. An empty (transparent) '
+      + 'area is either modelled zero or no data and the service does not let the two be told '
+      + 'apart; the coverage is the coterminous United States. SNOTEL sites report measured depth '
+      + 'in the West; this is the surface that fills in between sites, and in the East.',
+    measuredOn: '2026-10-20',
+  },
   // The USGS Protected Areas Database, read for its ACCESS field rather than its
   // boundaries — which usgsGovUnits already draws. Three measurements shape every use of
   // it and none of them is guessable from the documentation.

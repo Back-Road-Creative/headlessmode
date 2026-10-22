@@ -18,6 +18,7 @@ import {
   setSunNow, ruleForLightState, lightStateText, DEFAULT_MANUAL, LIGHT_COPY,
 } from './source-hillshade.js';
 import { contoursRequestFor, createContoursFetcher } from './source-contours.js';
+import { snowDepthRequestFor, createSnowDepthFetcher, legendText as snowDepthLegend } from './source-snow-depth.js';
 import { gaugeLayer, gaugeReader, areaReport as gaugeAreaReport } from './source-stream-gauges.js';
 import { railLayer, airportLayer, ntadReader, fetchRail, fetchAirports, railReport, airportReport } from './source-ntad-rail-airports.js';
 import { nrhpLayer, fetchNrhp, nrhpReport } from './source-nrhp.js';
@@ -254,6 +255,9 @@ const hillshadeFetcher = createHillshadeFetcher();
 // Contours (E2): one more per-view export from the same 3DEP service, fetched as the hillshade is.
 let contours;
 const contoursFetcher = createContoursFetcher();
+// Modelled snow depth: the same per-view export shape from NOHRSC's MapServer.
+let snowDepth;
+const snowDepthFetcher = createSnowDepthFetcher();
 // E1: while the 3D terrain panel is open, Leaflet's own settle-triggered viewport
 // fetches (browseViewport, below) must not start -- the panel dispatches
 // qc:terrain-panel and this is the one flag check that consults it.
@@ -463,6 +467,9 @@ function attach(hostedMap) {
   contours = contoursContextLayer(L);
   map.on('moveend zoomend', renderContours);
   renderContours();
+  snowDepth = snowDepthContextLayer(L);
+  map.on('moveend zoomend', renderSnowDepth);
+  renderSnowDepth();
   // Two more per-view exports with no tile cache, each pinned to a year it states.
   landCover = landCoverLayer(L, { product: 'landCover' });
   treeCanopy = landCoverLayer(L, { product: 'canopy' });
@@ -1271,6 +1278,7 @@ const CONTEXT_RENDER = {
   countyScore: renderCountyScore,
   hillshadeLight: renderHillshade,
   terrainContours: renderContours,
+  snowDepthModel: renderSnowDepth,
 };
 
 /** The dashboard's own county-comparison colour wash, wired into the same one-dominant-
@@ -2500,6 +2508,57 @@ async function renderContours() {
   el.textContent = result.status === 'ready' || result.status === 'stale'
     ? ''
     : `The contour service did not answer for this view (${result.status}), so nothing is drawn.`;
+  el.hidden = !el.textContent;
+}
+
+/** Modelled snow depth: a transparent PNG from NOHRSC's MapServer, handed to an ImageOverlay as an
+ *  object URL, the contours' shape with a different request. */
+function snowDepthContextLayer(mapL) {
+  const layer = mapL.imageOverlay('', [[0, 0], [0, 0]], { opacity: 0.7, interactive: false, alt: '' });
+  let objectUrl = null;
+  layer.refresh = async function refresh(mapRef) {
+    const b = mapRef.getBounds();
+    const size = mapRef.getSize();
+    const request = snowDepthRequestFor({
+      bboxLonLat: { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() },
+      width: size.x, height: size.y,
+    });
+    const result = await snowDepthFetcher.fetchImage(request);
+    if (result.status === 'ready') {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = URL.createObjectURL(result.blob);
+      layer.setBounds(b);
+      layer.setUrl(objectUrl);
+    }
+    return result;
+  };
+  return layer;
+}
+
+/** The snow depth row's render function, named for CONTEXT_RENDER. Off removes the overlay and asks
+ *  nothing; on, the report line carries the service's own key (no unit is claimed) or says the
+ *  service did not answer and nothing is drawn. */
+async function renderSnowDepth() {
+  if (!snowDepth || !map) return;
+  const layers = layersFromControls();
+  const el = $('qcm-layer-snowDepthModel-report');
+  if (!layers.snowDepthModel) {
+    if (map.hasLayer(snowDepth)) map.removeLayer(snowDepth);
+    if (el) { el.textContent = ''; el.hidden = true; }
+    return;
+  }
+  renderSurfaceCaption();
+  const result = await snowDepth.refresh(map);
+  if (!map) return;
+  if (result.status === 'ready') {
+    if (!map.hasLayer(snowDepth)) snowDepth.addTo(map);
+  } else if (result.status !== 'stale' && map.hasLayer(snowDepth)) {
+    map.removeLayer(snowDepth);
+  }
+  if (!el) return;
+  el.textContent = result.status === 'ready' || result.status === 'stale'
+    ? snowDepthLegend()
+    : `The snow depth service did not answer for this view (${result.status}), so nothing is drawn.`;
   el.hidden = !el.textContent;
 }
 
