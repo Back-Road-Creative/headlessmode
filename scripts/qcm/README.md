@@ -393,4 +393,13 @@ is the decision record for JP: provider, terms, privacy, measured rural results 
 `address-geocode.js` (the browser half of `GET /api/geocode?q=`). `finder-geocode-browser.test.mjs`
 drives the finder against a stubbed `/api/geocode` (match, no match, 429/502/504/offline/404,
 slow then superseded, no leak of the typed address to the URL, title, storage or shared
-link). Fixtures are synthetic addresses only; never put a private residence in a fixture.
+link, and the Census Bureau notice: shown, at least 12px and 4.5:1, with address rows and the
+geocoder's no-match and unavailable sentences, absent for town-only results; and at 390x844, 360x640 and
+844x390 inside the box and the map frame once the capped, scrolling box is scrolled to its end). Fixtures are synthetic addresses only; never put a private residence in a fixture.
+
+The notice (QQA-04c) is the Census Bureau's attribution sentence, verbatim: `CENSUS_NOTICE` in
+`quiet-corners-maps/search-shell.js`, shown in `#qc-census-credit` inside the finder box by
+`quiet-corners.js` with street matches, the no-match sentence and the unavailable sentences (429, 502,
+504, slow, offline, endpoint missing), never with town, named-place or coordinate results. The box is
+capped to the room the stage has left and scrolls what the cap leaves over, with a two-row minimum for
+the suggestion list, so on a short stage the notice is reached by scrolling rather than clipped.

@@ -195,7 +195,10 @@ longitude, or dragging the map to the spot. When the lookup is unavailable (the 
 is down, busy, slow past ten seconds, or you are offline) it says address lookup is
 unavailable right now and offers the same alternatives. A place already in the town list
 wins, and then nothing is sent. A newer search cancels an older one and a late answer
-is dropped. The typed address is never written to the page's link, a shared link, saved
+is dropped. Beside every street-address answer, and beside the no-match and unavailable
+sentences, the box shows the Census Bureau's notice: "This product uses the Census Bureau
+Data API but is not endorsed or certified by the Census Bureau." A town or a named place
+never carries it. The typed address is never written to the page's link, a shared link, saved
 views, browser storage, the page title or analytics. A name that only looks like an
 address ("Lake Unit 4", "Highway 441") is searched like any other name, and an address
 never reports a missing town or swaps in a nearby one.
