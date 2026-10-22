@@ -8,7 +8,7 @@ draft: false
 aliases: ["/cv/"]
 ---
 
-I'm JP, and I run Headless Mode, a one-person software studio in Franklin, North Carolina. I build software for music practice, project and grant work, media production, and exploring rural places. The [home page](/#products) lists the products; each has its own page describing what it does and what access it has.
+Headless Mode is a one-person software studio in Franklin, North Carolina. I build software for music practice, project and grant work, media production, and exploring rural places. The [home page](/#products) lists the products; each has its own page describing what it does and what access it has.
 
 ## Studio and practice
 

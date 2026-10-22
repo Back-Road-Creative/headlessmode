@@ -16,6 +16,7 @@ cannot submit anything.
 
 Waypost is a web console that runs on your own machine. It starts video and photo runs in
 the GoMoveShift pipeline, shows their progress and holds the publishing queue.
+[Go Move Shift](https://gomoveshift.com/), a travel video channel, is made with it.
 Each brand gets its own tab, with its own queue and credentials.
 
 ## Media workflow
