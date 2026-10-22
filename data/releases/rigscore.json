@@ -2,7 +2,7 @@
   "product": "rigscore",
   "name": "rigscore",
   "release_source": "github-release",
-  "source_repo": "https://github.com/Back-Road-Creative/rigscore",
+  "source_repo": "Back-Road-Creative/rigscore",
   "version": "2.2.0",
   "released_at": "2026-07-19T02:57:28Z",
   "release_url": "https://github.com/Back-Road-Creative/rigscore/releases/tag/v2.2.0",

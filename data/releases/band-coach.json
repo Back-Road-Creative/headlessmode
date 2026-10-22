@@ -2,7 +2,7 @@
   "product": "band-coach",
   "name": "Band Coach",
   "release_source": "github-release",
-  "source_repo": "https://github.com/Back-Road-Creative/band-coach",
+  "source_repo": "Back-Road-Creative/band-coach",
   "version": "1.9.0",
   "released_at": "2026-09-24T13:42:00Z",
   "release_url": "https://github.com/Back-Road-Creative/band-coach/releases/tag/v1.9.0",

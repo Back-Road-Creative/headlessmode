@@ -11,6 +11,7 @@ Run: pytest scripts/test_release_data.py -v
 """
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -133,6 +134,13 @@ def test_release_source_requires_its_fields(slug: str) -> None:
             assert record[key] is not None, (
                 f"{slug}.json release_source=github-release but {key!r} is null"
             )
+        # drift-sentinel.yml calls `gh api repos/${source_repo}/releases/latest`,
+        # so a URL or a prose note here makes every daily run open a false
+        # drift issue (#583, #585, #857). Notes go in `notes`.
+        assert re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", record["source_repo"] or ""), (
+            f"{slug}.json release_source=github-release needs source_repo as bare "
+            f"owner/repo, got {record['source_repo']!r}"
+        )
     elif record["release_source"] == "manual":
         assert record["notes"], f"{slug}.json release_source=manual but notes is empty/null"
 
