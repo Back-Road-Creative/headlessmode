@@ -109,6 +109,8 @@ const NTAD_RAIL_FIELDS = ['objectid', 'fraarcid', 'frfranode', 'tofranode', 'stf
   'area_length_miles', 'SHAPE__Length'];
 const NTAD_AIRPORT_FIELDS = ['loc_id', 'fac_name', 'fac_type', 'fac_use', 'city', 'state_name', 'owner_type',
   'status_code', 'atc_tower', 'icao_identifier', 'role', 'category', 'hub'];
+const NPS_NRHP_SERVICE = 'https://mapservices.nps.gov/arcgis/rest/services/cultural_resources/nrhp_locations/MapServer';
+const NPS_NRHP_FIELDS = ['RESNAME', 'NRIS_Refnum', 'CertDate', 'City', 'State', 'STATUS'];
 const AIRNOW_AQI_SERVICE = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursCombined/FeatureServer/0';
 // gridcode -> the label the service's own renderer gives that value, word for word.
 const AIRNOW_AQI_CATEGORIES = { 1: 'Good', 2: 'Moderate', 3: 'Unhealthy for Sensitive Groups', 4: 'Unhealthy', 5: 'Very Unhealthy', 6: 'Hazardous' };
@@ -1100,6 +1102,41 @@ export const SOURCES = deepFreeze({
     coverageSemantics: 'Airports the FAA lists as open to the public, as BTS republishes them. It lists the '
       + 'facility, not its traffic: a grass strip and a hub are both one point, and it says nothing about '
       + 'how often aircraft use it. Private-use fields, heliports and military-only fields are not asked.',
+    measuredOn: '2026-10-20',
+  },
+  // The National Register of Historic Places as the National Park Service publishes it (layer 0 of
+  // cultural_resources/nrhp_locations: POINTS; layer 1 is the polygons and is not asked). Measured
+  // 2026-10-20, GET only, no key: 74,636 points nationally (STATUS Listed 73,928, Removed 648, blank
+  // 60), 114 in -84.2,35.8,-83.6,36.2 and 112 of them Listed; maxRecordCount 2000; formats JSON,
+  // geoJSON and PBF. CORS: a real /query echoed the request Origin with allow-credentials true. The
+  // host is NEW to this map (the NPS webcam row is www.nps.gov). CertDate is a string 'YYYY-MM-',
+  // empty on some records. The points are approximate: the sample record says its point is an
+  // unspecified coordinate from NPS NRIS, and the layer's constraint text says it is general
+  // reference, not Section 106 consultation. Density is why there is a view gate and a row budget:
+  // 993 Listed points sat in 0.09 sq deg of Boston.
+  npsNrhp: {
+    id: 'npsNrhp',
+    name: 'National Park Service National Register of Historic Places (points)',
+    kind: 'feature-query',
+    origin: 'https://mapservices.nps.gov',
+    serviceUrl: NPS_NRHP_SERVICE,
+    metadataUrl: `${NPS_NRHP_SERVICE}/0?f=pjson`,
+    layers: [{ id: 0, name: 'National Register Of Historic Places Points', queryUrl: `${NPS_NRHP_SERVICE}/0/query`,
+      geometryType: 'esriGeometryPoint', fields: NPS_NRHP_FIELDS }],
+    spatialReference: null,   // outSR 4326 is asked and answered
+    limits: { requiresKey: false, maxRecordCount: 2000, partialPageFlag: 'exceededTransferLimit',
+      maxBboxSquareDegrees: 0.25, recordBudgetPerExtent: 500 },
+    pagination: false,   // one page of the budget; a fuller view is told to zoom in
+    cors: 'reflects-origin',
+    attribution: 'National Park Service, National Register of Historic Places',
+    termsUrl: 'https://www.nps.gov/subjects/nationalregister/database-research.htm',
+    dateBasis: 'feature-field',   // CertDate, the month the NPS certified the listing
+    claim: 'inventory',
+    coverageSemantics: 'Properties on the National Register of Historic Places, as the National Park Service '
+      + 'lists them: a point per record, with its reference number and the month it was certified. A listing '
+      + 'is a record of significance, not a statement about access, condition or whether anything still stands, '
+      + 'and many are private. Positions are approximate (some are an unspecified coordinate from the register '
+      + 'database). No point in view means none is listed there, not that nothing old is there.',
     measuredOn: '2026-10-20',
   },
   // GBIF occurrence records, read as AGGREGATES and never as records. Four measured facts

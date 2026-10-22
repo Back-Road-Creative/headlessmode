@@ -27,6 +27,8 @@ import { CONTEXT_ROW as STATIONS_ROW } from './source-nws-observations.js';
 // Screen-only CHECKBOXES in the federal group, not context rows: the context group is a radio of
 // one, so a preset holding the noise surface beside rail and airports could not be built there.
 import { RAIL_ROW, AIRPORT_ROW } from './source-ntad-rail-airports.js';
+// Historic places: a screen-only mark layer read live per view, beside them (source-nrhp.js).
+import { NRHP_ROW } from './source-nrhp.js';
 import { LAYER_LABEL as AURORA_LABEL, LAYER_CAVEAT as AURORA_CAVEAT } from './source-aurora.js';
 import { LAYER_LABEL as FLOOD_LABEL, LAYER_CAVEAT as FLOOD_CAVEAT } from './source-flood-zones.js';
 import { LAYER_LABEL as AQI_LABEL, LAYER_CAVEAT as AQI_CAVEAT } from './source-aqi.js';
@@ -330,6 +332,7 @@ export const LAYERS = Object.freeze([
   // Their rows live with their words in source-ntad-rail-airports.js (screen-only, off by default).
   RAIL_ROW,
   AIRPORT_ROW,
+  NRHP_ROW,
   // A CONTINUOUS-COLOUR SURFACE: a third kind, neither ink on the map nor a page in the PDF
   // but a raster under the vectors on screen. main.js hands Leaflet the URL, so there is no
   // fetch of its own; `screenOnly` keeps it out of the overlay fetch as `extraPage` does a sheet.

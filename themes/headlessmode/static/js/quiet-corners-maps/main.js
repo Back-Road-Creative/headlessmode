@@ -20,6 +20,7 @@ import {
 import { contoursRequestFor, createContoursFetcher } from './source-contours.js';
 import { gaugeLayer, gaugeReader, areaReport as gaugeAreaReport } from './source-stream-gauges.js';
 import { railLayer, airportLayer, ntadReader, fetchRail, fetchAirports, railReport, airportReport } from './source-ntad-rail-airports.js';
+import { nrhpLayer, fetchNrhp, nrhpReport } from './source-nrhp.js';
 import { observationLayer, observationReader, loadCatalogue as loadStationCatalogue, areaReport as stationAreaReport } from './source-nws-observations.js';
 import { fetchRecSites } from './source-rec-sites.js';
 import { fetchBlmRecSites } from './source-blm-rec-sites.js';
@@ -208,6 +209,7 @@ let aqi, aqiReads = null;
  *  per station. `gaugesNewestMs` is the newest reading's own time, for the caption. */
 let gauges, gaugeReads = null, gaugesNewestMs = null;
 let railLines, railReads = null, airportPoints, airportReads = null;   // BTS rail lines and airports (screen only)
+let historicPoints, historicReads = null;   // National Register of Historic Places marks (screen only)
 /** Weather stations (E4): the same shape as the gauges, over a catalogue file read once (cached
  *  only on success, so turning the layer off and on retries a failed read). */
 let stations, stationReads = null, stationsNewestMs = null, stationCatalogue = null;
@@ -430,6 +432,10 @@ function attach(hostedMap) {
   map.on('moveend zoomend', renderAirports);
   renderRail();
   renderAirports();
+  historicPoints = nrhpLayer(L);
+  historicReads = ntadReader({ fetchFn: fetchNrhp });
+  map.on('moveend zoomend', renderHistoric);
+  renderHistoric();
   stations = observationLayer(L);
   stationReads = observationReader({});
   map.on('moveend zoomend', renderStations);
@@ -2223,6 +2229,11 @@ function renderRail() {
   return renderNtad(!!layers.railClass1, railLines, railReads,
     (got) => railLines.draw(Array.isArray(got) ? got : (got && got.lines) || []), railReport, 'qcm-layer-railClass1-report');
 }
+function renderHistoric() {
+  const layers = layersFromControls();
+  return renderNtad(!!layers.historicPlaces, historicPoints, historicReads,
+    (got) => historicPoints.draw((got && got.places) || []), nrhpReport, 'qcm-layer-historicPlaces-report');
+}
 function renderAirports() {
   const layers = layersFromControls();
   return renderNtad(!!layers.airports, airportPoints, airportReads,
@@ -2543,7 +2554,8 @@ const CAMERA_RENDER = Object.fromEntries(CAMERA_LAYER_IDS.map((id) => [id,
 /** QQA-05r-2: a screen-only row in the federal group (Road names) draws labels on the map and
  *  puts nothing on a printed sheet, so toggling it neither invalidates the recipe nor re-plans:
  *  it only asks the map to draw (or clear) its labels. */
-const SCREEN_RENDER = { roads: () => { renderRoads(); renderLegend(); }, railClass1: () => { renderRail(); renderLegend(); }, airports: () => { renderAirports(); renderLegend(); } };
+const SCREEN_RENDER = { roads: () => { renderRoads(); renderLegend(); }, railClass1: () => { renderRail(); renderLegend(); }, airports: () => { renderAirports(); renderLegend(); },
+  historicPlaces: () => { renderHistoric(); renderLegend(); } };
 /** The names row is a printable layer AND a per-view pass: the default invalidate + replan, then
  *  ask for the view (or clear, when it went off). */
 const NAMES_RENDER = { names: (event) => { invalidate({ layers: { names: event.target.checked } }); replan(); renderNamesPass(); } };

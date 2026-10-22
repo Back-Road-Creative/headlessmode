@@ -142,6 +142,7 @@
     "roads": {"scope":"Map overlay.","effect":"Shows or hides \"Road names\" on the map; the print recipe reads the same switch."},
     "railClass1": {"scope":"Map overlay, screen only.","effect":"Shows or hides \"Rail lines (Class I, BTS)\" on the map for a view small enough to ask about; it adds nothing to a printed sheet."},
     "airports": {"scope":"Map overlay, screen only.","effect":"Shows or hides \"Airports (public-use, FAA list via BTS)\" on the map for a view small enough to ask about; it adds nothing to a printed sheet."},
+    "historicPlaces": {"scope":"Map overlay, screen only.","effect":"Shows or hides \"Historic places (National Register, NPS)\" on the map for a view small enough to ask about; it adds nothing to a printed sheet."},
     "padusAccess": {"scope":"Map overlay.","effect":"Switches on the written reading \"Public access, as the land manager filed it (PAD-US)\" for the drawn area; it puts a sentence in the panel, not ink on the map."},
     "epaEcoregions": {"scope":"Map overlay.","effect":"Switches on the written reading \"What kind of country this is (EPA ecoregions)\" for the drawn area; it puts a sentence in the panel, not ink on the map."},
     "aerial": {"scope":"The print set.","effect":"Adds \"Aerial companion sheet\" to what Build prints.","family":"Print scale / paper / DPI / extras / build / download"},
