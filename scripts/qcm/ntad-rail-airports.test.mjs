@@ -17,6 +17,7 @@ import {
 import { SOURCES, cspDirectivesFor } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-registry.js';
 import { LAYER_BY_ID, LAYERS, drapeKindFor } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
 import { SYMBOL_BY_KEY } from '../../themes/headlessmode/static/js/quiet-corners-maps/legend.js';
+import { PRESET_BY_ID, presetCost, presetLeavesAlone, BUDGET } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-presets.js';
 
 const fx = (n) => JSON.parse(readFileSync(new URL(`fixtures/${n}`, import.meta.url), 'utf8'));
 const rail = fx('ntad-rail-2026-10-20.min.json');
@@ -59,6 +60,19 @@ test('the layers are screen-only checkboxes outside the context group, and the s
   assert.equal(SYMBOL_BY_KEY[RAIL_ROW.symbolKeys[0]].kind, 'line');
   assert.equal(SYMBOL_BY_KEY[AIRPORT_ROW.symbolKeys[0]].kind, 'point');
   assert.ok(LAYERS.includes(LAYER_BY_ID.railClass1) && LAYERS.includes(LAYER_BY_ID.airports));
+});
+
+test('the Loud or quiet preset: noise, rail, airports, names, with road names left on -- one surface, inside the budget', () => {
+  const p = PRESET_BY_ID.loudOrQuiet;
+  assert.ok(p, 'no loudOrQuiet preset');
+  assert.equal(p.label, 'Loud or quiet');
+  assert.deepEqual([...p.layers].sort(), ['airports', 'names', 'railClass1', 'transportNoise']);
+  // Road names open on and a preset leaves such a row alone unless it lists it, so they stay on.
+  assert.equal(presetLeavesAlone(LAYER_BY_ID.roads, p), true);
+  const cost = presetCost(p);
+  assert.equal(cost.rasterSurfaces, 1);
+  assert.ok(cost.fetchLayers <= BUDGET.fetchLayers, `fetchLayers ${cost.fetchLayers}`);
+  assert.ok(cost.symbolKeys <= BUDGET.symbolKeys, `symbolKeys ${cost.symbolKeys}`);
 });
 
 test('the area caps are the measured ones and a wide box is never requested', () => {

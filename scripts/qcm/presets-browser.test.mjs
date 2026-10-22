@@ -55,6 +55,35 @@ async function withPatchedFetch(fn) {
   } finally { page.close(); await site.close(); }
 }
 
+// Seven presets: Undo and Reset left the grid for the layer count line, so the presets still
+// fill two rows and the line does not grow past its own text at 1280px (main.js renderPresets).
+test('the presets fill two grid rows and Undo/Reset sit on the layer count line', { skip }, async () => {
+  await withPatchedFetch(async (page) => {
+    const seen = await page.evaluate(`(() => {
+      document.getElementById('qcm-layer-panel').open = true;
+      const grid = document.getElementById('qcm-presets');
+      const tops = [...grid.querySelectorAll('button')].map((b) => Math.round(b.getBoundingClientRect().top));
+      const row = document.querySelector('.qcm-layer-toolbar .qcm-layer-count-row');
+      const h = (el) => Math.round(el.getBoundingClientRect().height);
+      return {
+        gridIds: [...grid.querySelectorAll('button')].map((b) => b.id),
+        rows: new Set(tops).size,
+        undoIn: document.getElementById('qcm-preset-undo').parentElement.id,
+        resetIn: document.getElementById('qcm-preset-reset').parentElement.id,
+        rowInToolbar: !!row && row.contains(document.getElementById('qcm-preset-actions')),
+        rowH: row ? h(row) : 0, countH: h(document.getElementById('qcm-layer-count')),
+      };
+    })()`);
+    assert.equal(seen.gridIds.length, 7, `expected the seven presets alone in the grid, got: ${seen.gridIds}`);
+    assert.equal(seen.rows, 2, 'the seven presets should fill two rows of four');
+    assert.equal(seen.undoIn, 'qcm-preset-actions');
+    assert.equal(seen.resetIn, 'qcm-preset-actions');
+    assert.equal(seen.rowInToolbar, true, 'Undo/Reset should sit on the count line inside the layer toolbar');
+    assert.ok(seen.rowH <= seen.countH + 1,
+      `the count line grew to ${seen.rowH}px around Undo/Reset, past its own ${seen.countH}px text`);
+  });
+});
+
 test('Undo and Reset start disabled; pressing a preset enables both', { skip }, async () => {
   await withPatchedFetch(async (page) => {
     const before = await page.evaluate(`(() => ({

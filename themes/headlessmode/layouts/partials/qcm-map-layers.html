@@ -21,7 +21,7 @@
              a shortcut to a set of them, never a mode, and every one stays yours to move back.
              The explanation is the group's label, not a paragraph: layout.test.mjs holds the map
              key within 600px of the map at 390px, and a line of hint here spends 30 of them. */}}
-        <div id="qcm-presets" class="qcm-presets" role="group" aria-label="Starting sets, Undo and Reset — a preset moves the switches below, and you can change any of them after"></div>
+        <div id="qcm-presets" class="qcm-presets" role="group" aria-label="Starting sets — a preset moves the switches below, and you can change any of them after"></div>
         {{/* U0: find a layer among the growing list without scrolling past all of them, and
              see at a glance how many are on. Neither control ever changes a switch's checked
              state — main.js hides rows, it never re-renders them from these.
@@ -38,7 +38,10 @@
             <label for="qcm-layers-active-only">
                 <input type="checkbox" id="qcm-layers-active-only"> Only layers that are on
             </label>
-            <p id="qcm-layer-count" class="qcm-hint" role="status" aria-live="polite">No layers on</p>
+            <div class="qcm-layer-count-row">
+                <p id="qcm-layer-count" class="qcm-hint" role="status" aria-live="polite">No layers on</p>
+                <div id="qcm-preset-actions" class="qcm-preset-actions" role="group" aria-label="Undo or reset a starting set"></div>
+            </div>
         </div>
         {{/* Filled from layer-registry.js by main.js: a new layer is a
              registry entry, never an edit here. */}}
