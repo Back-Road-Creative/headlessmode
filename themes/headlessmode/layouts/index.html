@@ -21,8 +21,8 @@
     <div class="shop-row hero">
         <div class="hero-copy">
             <span class="hero-rule" aria-hidden="true"></span>
-            <h1 class="hero-title">The name means focus. So does the software.</h1>
-            <p class="hero-lede">Straightforward to use, and honest about what it can't do.</p>
+            <h1 class="hero-title">For the things we’re working on.</h1>
+            <p class="hero-lede">A collection of projects.</p>
         </div>
     </div>
 </section>
@@ -33,9 +33,10 @@
         {{- range $productsOrdered }}
         {{- $sys := . }}
         {{- /* One button: homepage_action when set, else Download for a
-               public product with a live download, else Request a demo.
+               public product with a live download, else "Ask about <name>" to Contact,
+               which promises no demo or terms that are not on record.
                Details always goes to the product page. */ -}}
-        {{- $label := "Request a demo" }}{{ $href := "/contact/" }}{{ $external := false }}
+        {{- $label := printf "Ask about %s" $sys.name }}{{ $href := "/contact/" }}{{ $external := false }}
         {{- with $sys.homepage_action }}{{ $label = .label }}{{ $href = .href }}
         {{- else }}{{ if and (eq $sys.access "public") $sys.download $sys.shipped }}{{ $label = "Download" }}{{ $href = $sys.download }}{{ $external = true }}{{ end }}{{ end }}
         <div class="product-stanza">

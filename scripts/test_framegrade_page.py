@@ -25,7 +25,7 @@ RELEASE = ROOT / "data" / "releases" / "framegrade.json"
 # data/systems.json's Waypost blurb, pinned: the Framegrade row must not edit it.
 WAYPOST_BLURB = (
     "A console on your own computer that runs a creator's video, photo and SEO "
-    "work and schedules posts to YouTube, TikTok, Instagram and Facebook, one tab per brand"
+    "work and queues posts for YouTube, Instagram and Facebook, one tab per brand"
 )
 
 
