@@ -185,6 +185,7 @@
     "nwsObservations": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Weather stations (temperature, wind and humidity now)\" as the surface; the surface caption names it and its data time."},
     "terrainContours": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Contour lines (25 m interval)\" as the surface; the surface caption names it and its data time."},
     "snowDepthModel": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Snow depth (modelled)\" as the surface; the surface caption names it and its data time."},
+    "avalancheDanger": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Avalanche danger (forecast centre ratings)\" as the surface; the surface caption names it, and the row lists the zones in view with each rating, its window and the centre's forecast link."},
     "none": {"scope":"The one continuous-colour surface laid over the base map.","effect":"No surface: removes the current one."}
    }
   },

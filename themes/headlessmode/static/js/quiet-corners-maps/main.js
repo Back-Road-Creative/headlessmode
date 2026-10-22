@@ -19,6 +19,7 @@ import {
 } from './source-hillshade.js';
 import { contoursRequestFor, createContoursFetcher } from './source-contours.js';
 import { snowDepthRequestFor, createSnowDepthFetcher, legendText as snowDepthLegend } from './source-snow-depth.js';
+import { avalancheLayer, avalancheReader, areaReport as avalancheReport } from './source-avalanche.js';
 import { gaugeLayer, gaugeReader, areaReport as gaugeAreaReport } from './source-stream-gauges.js';
 import { railLayer, airportLayer, ntadReader, fetchRail, fetchAirports, railReport, airportReport } from './source-ntad-rail-airports.js';
 import { nrhpLayer, fetchNrhp, nrhpReport } from './source-nrhp.js';
@@ -238,6 +239,8 @@ let drawing = false, dragStart = null;
  *  reader also answers the day-state question when the view came back empty: an empty analysis
  *  and an unanalysed day are different facts. */
 let smoke, smokeReads = null, fire, fireReads = null;
+// Avalanche danger: one national zone file, kept a while by the reader's store; the view picks the zones.
+let avalanche, avalancheReads = null;
 // D0/D1: the persistent (non-hover) display state every overlay shape is drawn from.
 // The Highlight shortcuts and the Advanced controls both go through nextDisplay(), so
 // hover, highlight, spotlight and clear can never compound (see display-controls.js).
@@ -470,6 +473,10 @@ function attach(hostedMap) {
   snowDepth = snowDepthContextLayer(L);
   map.on('moveend zoomend', renderSnowDepth);
   renderSnowDepth();
+  avalanche = avalancheLayer(L);
+  avalancheReads = avalancheReader({});
+  map.on('moveend zoomend', renderAvalanche);
+  renderAvalanche();
   // Two more per-view exports with no tile cache, each pinned to a year it states.
   landCover = landCoverLayer(L, { product: 'landCover' });
   treeCanopy = landCoverLayer(L, { product: 'canopy' });
@@ -1279,6 +1286,7 @@ const CONTEXT_RENDER = {
   hillshadeLight: renderHillshade,
   terrainContours: renderContours,
   snowDepthModel: renderSnowDepth,
+  avalancheDanger: renderAvalanche,
 };
 
 /** The dashboard's own county-comparison colour wash, wired into the same one-dominant-
@@ -2082,6 +2090,16 @@ function renderSmoke() {
     (got) => readPlumes(got && got.body),
     (rows) => { smokeObservedMs = smokeSummarise(rows).observedMs || null; },
     (got) => smokeAreaReport(got && got.body, got && got.latest).text);
+}
+
+/** Avalanche danger zones. No surface time is held: each zone has its own window, which the row
+ *  lists, so the caption says the source stated no single time rather than borrowing one. */
+function renderAvalanche() {
+  return renderBounded('avalancheDanger', avalanche, avalancheReads,
+    () => { const layers = layersFromControls(); return !!layers.avalancheDanger; },
+    (got) => (got && got.status === 'ok' ? got.zones : []),
+    () => {},
+    (got) => avalancheReport(got).text);
 }
 
 /** Mapped wildfire perimeters. What differs is the row's headline: an AGE, not a time, because the

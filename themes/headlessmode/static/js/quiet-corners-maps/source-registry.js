@@ -1217,6 +1217,48 @@ export const SOURCES = deepFreeze({
       + 'service omits is shown as not reported, and a zero depth is a measured zero.',
     measuredOn: '2026-10-20',
   },
+  // Avalanche danger ratings (E-P6). Not an agency host: avalanche.org is a partnership of the
+  // American Avalanche Association and the US Forest Service National Avalanche Center, which
+  // gathers the daily rating of every US forecast centre into one national GeoJSON of zones. A
+  // NINTH kind, `zone-feed`: one file for the whole country, fetched whole and kept a while,
+  // whose features are the forecast areas and carry their own issue and expiry times.
+  avalancheOrgZones: {
+    id: 'avalancheOrgZones',
+    name: 'avalanche.org danger ratings by forecast zone',
+    kind: 'zone-feed',
+    origin: 'https://api.avalanche.org',
+    serviceUrl: 'https://api.avalanche.org/v2/public',
+    metadataUrl: 'https://github.com/NationalAvalancheCenter/Avalanche.org-Public-API-Docs',
+    endpoints: { mapLayer: 'https://api.avalanche.org/v2/public/products/map-layer' },
+    spatialReference: { wkid: 4326 },
+    // Measured 2026-10-21 07:01 EDT: 200, 283,614 bytes, 84 zones (66 Polygon, 18 MultiPolygon),
+    // every one `no rating` (-1) in October, 27 of them off season. The service sends
+    // `cache-control: max-age=10`; ratings are issued once a morning, so ten minutes is plenty.
+    limits: { requiresKey: false, zonesObserved: 84, bytesObserved: 283614, reuseSeconds: 600,
+      maxZonesListed: 6 },
+    // `start_date`/`end_date` are ISO strings with NO offset, beside a `timezone` the guide calls
+    // the zone the centre uses -- without saying the dates are in it. Expiry reads them as UTC,
+    // which is the EARLIER instant for every US zone, so an unclear expiry ends a rating early,
+    // never late.
+    time: { startField: 'start_date', endField: 'end_date', format: 'ISO 8601 without offset',
+      zone: 'unstated', expiryReadAs: 'UTC' },
+    dangerScale: 'North American Avalanche Danger Scale, 1 low to 5 extreme; -1 no rating',
+    pagination: false,
+    cors: 'star',
+    attribution: 'Avalanche danger ratings from avalanche.org (American Avalanche Association and the '
+      + 'USDA Forest Service National Avalanche Center), issued by each US avalanche forecast centre',
+    termsUrl: 'https://github.com/NationalAvalancheCenter/Avalanche.org-Public-API-Docs',
+    permission: 'avalanche.org, by email to JP, 2026-10-20: "You are welcome to use it for your use case"',
+    dateBasis: 'feature-field',
+    claim: 'forecast',
+    coverageSemantics: 'Each forecast zone\'s danger rating as its avalanche centre issued it for the day, '
+      + 'gathered by avalanche.org -- a summary of the forecast, never the forecast itself, which lives on '
+      + 'the centre\'s own site. Zones cover only the mountains a centre serves (84 zones, in the West, Alaska, New Hampshire '
+      + 'and New York); outside them no forecast is issued, which says nothing about whether a '
+      + 'slope is safe. Out of season, and at centres that publish only a summary, a zone carries no '
+      + 'rating. A rating expires: past its end date it is no longer shown as a rating.',
+    measuredOn: '2026-10-21',
+  },
   // GBIF occurrence records, read as AGGREGATES and never as records. Four measured facts
   // shape every use of this source, all of them from 2026-09-15 probes.
   //

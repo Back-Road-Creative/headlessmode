@@ -23,6 +23,7 @@ import { LAYER_LABEL as RADAR_LABEL, LAYER_CAVEAT as RADAR_CAVEAT } from './sour
 import { CONTEXT_ROW as HILLSHADE_ROW } from './source-hillshade.js';
 import { CONTEXT_ROW as CONTOURS_ROW } from './source-contours.js';
 import { CONTEXT_ROW as SNOW_DEPTH_ROW } from './source-snow-depth.js';
+import { CONTEXT_ROW as AVALANCHE_ROW } from './source-avalanche.js';
 import { CONTEXT_ROW as GAUGES_ROW } from './source-stream-gauges.js';
 import { CONTEXT_ROW as STATIONS_ROW } from './source-nws-observations.js';
 // Screen-only CHECKBOXES in the federal group, not context rows: the context group is a radio of
@@ -717,6 +718,8 @@ export const LAYERS = Object.freeze([
   HILLSHADE_ROW,
   CONTOURS_ROW,
   SNOW_DEPTH_ROW,
+  // Avalanche danger: the publisher's coloured forecast zones (source-avalanche.js).
+  AVALANCHE_ROW,
   // The first context row that draws POINTS from a JSON feed (source-stream-gauges.js).
   GAUGES_ROW,
   // Weather stations: POINTS from the NWS observation feed (source-nws-observations.js).

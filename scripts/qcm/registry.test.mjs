@@ -35,8 +35,9 @@ test('every source carries the required keys and its kind-specific block', () =>
     // camera feed: a still (and sometimes a stream link) per record, never a tile and
     // never queried by geometry (QUX-08D) -- and an observation feed: a JSON point
     // feed asked by bounding box whose FEATURES carry their own reading times, with no
-    // ArcGIS layer behind it (the USGS stream gauges).
-    assert.ok(['raster-tiles', 'feature-query', 'raster-image', 'point-forecast', 'gridded-forecast', 'alert-feed', 'camera-feed', 'observation-feed'].includes(src.kind), `${key} kind=${src.kind}`);
+    // ArcGIS layer behind it (the USGS stream gauges) -- and a zone feed: one national GeoJSON of
+    // forecast zones, fetched whole (avalanche.org).
+    assert.ok(['raster-tiles', 'feature-query', 'raster-image', 'point-forecast', 'gridded-forecast', 'alert-feed', 'camera-feed', 'observation-feed', 'zone-feed'].includes(src.kind), `${key} kind=${src.kind}`);
     if (src.kind === 'raster-tiles') assert.ok(src.tile && src.tile.urlTemplate, `${key} lacks tile`);
     else if (src.kind === 'raster-image') assert.ok(src.serviceUrl && src.limits, `${key} lacks serviceUrl/limits`);
     else if (src.kind === 'point-forecast') assert.ok(src.endpoints && src.endpoints.point, `${key} lacks endpoints.point`);
@@ -61,6 +62,12 @@ test('every source carries the required keys and its kind-specific block', () =>
         assert.ok(src.endpoints && src.endpoints.latest && src.endpoints.latest.includes('{id}') && src.endpoints.catalogue, `${key} lacks endpoints.latest/catalogue`);
       }
       assert.ok(!('tile' in src) && !('layers' in src), `${key} is a point feed, not tiles or an ArcGIS layer`);
+    }
+    // One national GeoJSON of forecast zones fetched whole (avalanche.org): the map-layer URL and
+    // where its issue/expiry times live are what a caller needs before reading a zone.
+    else if (src.kind === 'zone-feed') {
+      assert.ok(src.endpoints && src.endpoints.mapLayer && src.time && src.time.endField, `${key} lacks endpoints.mapLayer/time`);
+      assert.ok(!('tile' in src) && !('layers' in src), `${key} is a zone feed, not tiles or an ArcGIS layer`);
     }
     else if (src.kind === 'camera-feed') {
       assert.ok(src.serviceUrl && src.coverageSemantics, `${key} lacks serviceUrl/coverageSemantics`);
