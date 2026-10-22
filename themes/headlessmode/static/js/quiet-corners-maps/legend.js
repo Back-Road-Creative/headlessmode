@@ -211,6 +211,8 @@ export const SYMBOLS = Object.freeze({
   // National Register of Historic Places (screen-only, source-nrhp.js): a diamond in a brown no
   // other mark carries, so a listed property is not read as a named landform (a black diamond).
   historicPlace: point('historic-place', 'Historic place (National Register of Historic Places)', 'diamond', '#8d4a1f'),
+  // SNOTEL snowpack sites (screen-only, source-snotel.js): a teal square no other mark carries.
+  snotelSite: point('snotel-site', 'SNOTEL snowpack site (USDA NRCS)', 'square', '#0f4c5c'),
   // Sheet chrome, not a feature: the grid is drawn by the page layout at its own
   // width, never handed to the worker as an overlay vector. `chrome` is what keeps
   // it out of STYLE — a prefix filter there is what kept real features OUT.

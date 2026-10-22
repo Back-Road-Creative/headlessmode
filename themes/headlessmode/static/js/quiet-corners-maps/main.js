@@ -21,6 +21,7 @@ import { contoursRequestFor, createContoursFetcher } from './source-contours.js'
 import { gaugeLayer, gaugeReader, areaReport as gaugeAreaReport } from './source-stream-gauges.js';
 import { railLayer, airportLayer, ntadReader, fetchRail, fetchAirports, railReport, airportReport } from './source-ntad-rail-airports.js';
 import { nrhpLayer, fetchNrhp, nrhpReport } from './source-nrhp.js';
+import { snotelLayer, fetchSnotel, loadCatalogue as loadSnotelCatalogue, snotelReport } from './source-snotel.js';
 import { observationLayer, observationReader, loadCatalogue as loadStationCatalogue, areaReport as stationAreaReport } from './source-nws-observations.js';
 import { fetchRecSites } from './source-rec-sites.js';
 import { fetchBlmRecSites } from './source-blm-rec-sites.js';
@@ -210,6 +211,7 @@ let aqi, aqiReads = null;
 let gauges, gaugeReads = null, gaugesNewestMs = null;
 let railLines, railReads = null, airportPoints, airportReads = null;   // BTS rail lines and airports (screen only)
 let historicPoints, historicReads = null;   // National Register of Historic Places marks (screen only)
+let snotelPoints, snotelReads = null, snotelCatalogue = null;   // SNOTEL snowpack marks (screen only); the site list is cached only on success
 /** Weather stations (E4): the same shape as the gauges, over a catalogue file read once (cached
  *  only on success, so turning the layer off and on retries a failed read). */
 let stations, stationReads = null, stationsNewestMs = null, stationCatalogue = null;
@@ -436,6 +438,10 @@ function attach(hostedMap) {
   historicReads = ntadReader({ fetchFn: fetchNrhp });
   map.on('moveend zoomend', renderHistoric);
   renderHistoric();
+  snotelPoints = snotelLayer(L);
+  snotelReads = ntadReader({ fetchFn: (bbox, o) => fetchSnotel(snotelCatalogue, bbox, o) });
+  map.on('moveend zoomend', renderSnotel);
+  renderSnotel();
   stations = observationLayer(L);
   stationReads = observationReader({});
   map.on('moveend zoomend', renderStations);
@@ -2234,6 +2240,24 @@ function renderHistoric() {
   return renderNtad(!!layers.historicPlaces, historicPoints, historicReads,
     (got) => historicPoints.draw((got && got.places) || []), nrhpReport, 'qcm-layer-historicPlaces-report');
 }
+async function renderSnotel() {
+  if (!snotelPoints || !map) return;
+  const layers = layersFromControls();
+  const on = !!layers.snotelSnowpack;
+  if (on && !snotelCatalogue) {
+    const got = await loadSnotelCatalogue();
+    if (!layersFromControls().snotelSnowpack) return;
+    if (got.status !== 'ready') {
+      snotelPoints.draw([]);
+      const el = $('qcm-layer-snotelSnowpack-report');
+      if (el) { el.textContent = snotelReport({ status: 'catalogue-unavailable' }).text; el.hidden = false; }
+      return;
+    }
+    snotelCatalogue = got.stations;
+  }
+  return renderNtad(on, snotelPoints, snotelReads,
+    (got) => snotelPoints.draw((got && got.sites) || [], got && got.fetchedMs), snotelReport, 'qcm-layer-snotelSnowpack-report');
+}
 function renderAirports() {
   const layers = layersFromControls();
   return renderNtad(!!layers.airports, airportPoints, airportReads,
@@ -2555,7 +2579,8 @@ const CAMERA_RENDER = Object.fromEntries(CAMERA_LAYER_IDS.map((id) => [id,
  *  puts nothing on a printed sheet, so toggling it neither invalidates the recipe nor re-plans:
  *  it only asks the map to draw (or clear) its labels. */
 const SCREEN_RENDER = { roads: () => { renderRoads(); renderLegend(); }, railClass1: () => { renderRail(); renderLegend(); }, airports: () => { renderAirports(); renderLegend(); },
-  historicPlaces: () => { renderHistoric(); renderLegend(); } };
+  historicPlaces: () => { renderHistoric(); renderLegend(); },
+  snotelSnowpack: () => { renderSnotel(); renderLegend(); } };
 /** The names row is a printable layer AND a per-view pass: the default invalidate + replan, then
  *  ask for the view (or clear, when it went off). */
 const NAMES_RENDER = { names: (event) => { invalidate({ layers: { names: event.target.checked } }); replan(); renderNamesPass(); } };

@@ -1139,6 +1139,42 @@ export const SOURCES = deepFreeze({
       + 'database). No point in view means none is listed there, not that nothing old is there.',
     measuredOn: '2026-10-20',
   },
+  // USDA NRCS SNOTEL snowpack: snow depth (SNWD) and snow water equivalent (WTEQ) from the AWDB REST
+  // service. Measured 2026-10-20, GET only, no key: /v1/stations?stationTriplets=*:*:SNTL&activeOnly=true
+  // answered 200, `access-control-allow-origin: *`, 407,574 bytes, 919 sites in AK AZ CA CO ID MT NM
+  // NV OR SD UT WA WY -- so the list is a build-time catalogue (scripts/qcm/build-snotel-stations.mjs,
+  // five fields a site, 46 KB). /v1/data answers many stations in ONE request (comma-separated
+  // triplets, percent-encoded colons accepted): daily values `{date, value}` in inches, each with its
+  // own date; an element a site does not report is omitted (957:AK had SNWD and no WTEQ), values are
+  // 0 in October at most sites, and the newest day can lag by two. The host is NEW to this map.
+  usdaSnotel: {
+    id: 'usdaSnotel',
+    name: 'USDA NRCS SNOTEL sites (snow depth and snow water equivalent, daily)',
+    kind: 'observation-feed',
+    origin: 'https://wcc.sc.egov.usda.gov',
+    serviceUrl: 'https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1',
+    metadataUrl: 'https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html',
+    endpoints: {
+      data: 'https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data',
+      catalogue: '/data/quiet-corners-maps/snotel-stations/stations.json',
+    },
+    elements: ['SNWD', 'WTEQ'],
+    spatialReference: { wkid: 4326 },
+    limits: { requiresKey: false, maxStationsPerView: 12, maxBboxSquareDegrees: 25, activeSitesObserved: 919 },
+    pagination: false,
+    cors: 'star',
+    attribution: 'USDA Natural Resources Conservation Service, SNOTEL',
+    termsUrl: 'https://www.nrcs.usda.gov/privacy-policy',
+    dateBasis: 'feature-field',   // each daily value carries its own `date`
+    claim: 'observation',
+    coverageSemantics: 'The newest daily snow depth and snow water equivalent each listed SNOTEL site has '
+      + 'published, with the day of its own reading. The sites are Western and alpine (919 active stations in '
+      + '13 states, mostly high mountain ground) and most Eastern counties have none, so no SNOTEL site in view '
+      + 'means none is listed there, not that there is no snow. At most 12 sites nearest the centre of the view '
+      + 'are read, in one request. A site is a point: snow a short way off can differ a lot. An element the '
+      + 'service omits is shown as not reported, and a zero depth is a measured zero.',
+    measuredOn: '2026-10-20',
+  },
   // GBIF occurrence records, read as AGGREGATES and never as records. Four measured facts
   // shape every use of this source, all of them from 2026-09-15 probes.
   //

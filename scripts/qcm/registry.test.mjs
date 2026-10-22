@@ -54,6 +54,9 @@ test('every source carries the required keys and its kind-specific block', () =>
       if (src.endpoints && src.endpoints.byBox) {
         assert.ok(src.endpoints.byBox.includes('{bbox}'), `${key} lacks endpoints.byBox`);
         assert.ok(Array.isArray(src.parameterCodes) && src.parameterCodes.length > 0, `${key} lacks parameterCodes`);
+      } else if (src.endpoints && src.endpoints.data) {
+        // Asked for many stations in one request from a build-time catalogue (SNOTEL: data + catalogue + elements).
+        assert.ok(src.endpoints.catalogue && Array.isArray(src.elements) && src.elements.length > 0, `${key} lacks endpoints.catalogue/elements`);
       } else {
         assert.ok(src.endpoints && src.endpoints.latest && src.endpoints.latest.includes('{id}') && src.endpoints.catalogue, `${key} lacks endpoints.latest/catalogue`);
       }

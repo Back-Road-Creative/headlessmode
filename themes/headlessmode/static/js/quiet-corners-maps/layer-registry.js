@@ -29,6 +29,8 @@ import { CONTEXT_ROW as STATIONS_ROW } from './source-nws-observations.js';
 import { RAIL_ROW, AIRPORT_ROW } from './source-ntad-rail-airports.js';
 // Historic places: a screen-only mark layer read live per view, beside them (source-nrhp.js).
 import { NRHP_ROW } from './source-nrhp.js';
+// SNOTEL snowpack: a screen-only mark layer read live per view, beside them (source-snotel.js).
+import { SNOTEL_ROW } from './source-snotel.js';
 import { LAYER_LABEL as AURORA_LABEL, LAYER_CAVEAT as AURORA_CAVEAT } from './source-aurora.js';
 import { LAYER_LABEL as FLOOD_LABEL, LAYER_CAVEAT as FLOOD_CAVEAT } from './source-flood-zones.js';
 import { LAYER_LABEL as AQI_LABEL, LAYER_CAVEAT as AQI_CAVEAT } from './source-aqi.js';
@@ -333,6 +335,7 @@ export const LAYERS = Object.freeze([
   RAIL_ROW,
   AIRPORT_ROW,
   NRHP_ROW,
+  SNOTEL_ROW,
   // A CONTINUOUS-COLOUR SURFACE: a third kind, neither ink on the map nor a page in the PDF
   // but a raster under the vectors on screen. main.js hands Leaflet the URL, so there is no
   // fetch of its own; `screenOnly` keeps it out of the overlay fetch as `extraPage` does a sheet.

@@ -58,7 +58,7 @@ REGISTRY = (
 ORG_BY_DOMAIN_SUFFIX = {
     "nationalmap.gov": "USGS",
     "usgs.gov": "USGS",
-    "usda.gov": "Forest Service",
+    "usda.gov": "Forest Service",  # also wcc.sc.egov.usda.gov (NRCS SNOTEL); privacy.md names NRCS in full
     "fema.gov": "FEMA",
     "blm.gov": "BLM",
     "noaa.gov": "NOAA",
