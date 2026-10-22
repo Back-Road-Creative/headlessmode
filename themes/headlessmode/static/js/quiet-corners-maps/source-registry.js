@@ -1248,7 +1248,7 @@ export const SOURCES = deepFreeze({
     attribution: 'Avalanche danger ratings from avalanche.org (American Avalanche Association and the '
       + 'USDA Forest Service National Avalanche Center), issued by each US avalanche forecast centre',
     termsUrl: 'https://github.com/NationalAvalancheCenter/Avalanche.org-Public-API-Docs',
-    permission: 'avalanche.org, by email to JP, 2026-10-20: "You are welcome to use it for your use case"',
+    permission: 'avalanche.org, by email, 2026-10-20: "You are welcome to use it for your use case"',
     dateBasis: 'feature-field',
     claim: 'forecast',
     coverageSemantics: 'Each forecast zone\'s danger rating as its avalanche centre issued it for the day, '

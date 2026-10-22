@@ -260,5 +260,49 @@ class TestFieldMapsDoc:
         assert len(re.findall(r"<h1[\s>]", self._built())) == 1
 
 
+
+class TestPublishedCopyRules:
+    """What the published site may say about who makes it.
+
+    The site never names its owner -- not "Joe", "Joseph", "Petrucelli" or
+    "JP" -- in any page, layout, data file, config or static asset Hugo copies
+    into the site (owner's instruction, 2026-10-22). static/data/ is left out:
+    it is third-party geodata whose place names ("Joe Wheeler State Park")
+    are not about the owner. Go Move Shift is shown only as what Waypost
+    makes; there are no clients, results or case studies to cite.
+    """
+
+    ROOT = Path(__file__).resolve().parent.parent
+    SOURCES = ["content", "layouts", "data", "i18n", "site-config", "themes", "static"]
+    SKIP = ("static/data/",)
+    SUFFIXES = {".md", ".html", ".toml", ".yaml", ".yml", ".json", ".txt", ".xml", ".js", ".mjs", ".css"}
+    # Word-bounded so "Joel" and "jpg" never match; "JP" is case-sensitive.
+    NAME = re.compile(r"\b(?:joe|joseph|petrucelli)\b", re.IGNORECASE)
+    INITIALS = re.compile(r"\bJP\b")
+
+    def _published_files(self):
+        for entry in self.SOURCES:
+            for f in sorted((self.ROOT / entry).rglob("*")):
+                rel = f.relative_to(self.ROOT).as_posix()
+                if f.is_file() and f.suffix.lower() in self.SUFFIXES and not rel.startswith(self.SKIP):
+                    yield f, rel
+
+    def test_no_published_file_names_the_owner(self):
+        hits = []
+        for f, rel in self._published_files():
+            for n, line in enumerate(f.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+                if self.NAME.search(line) or self.INITIALS.search(line):
+                    hits.append(f"{rel}:{n}: {line.strip()[:120]}")
+        assert not hits, "the site must not name its owner:\n" + "\n".join(hits)
+
+    def test_waypost_page_links_go_move_shift(self):
+        body = (self.ROOT / "content" / "waypost.md").read_text(encoding="utf-8")
+        assert "[Go Move Shift](https://gomoveshift.com/)" in body
+
+    def test_about_page_links_back_road_creative(self):
+        body = (self.ROOT / "content" / "about.md").read_text(encoding="utf-8")
+        assert "[Back Road Creative](https://backroadcreative.com)" in body
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

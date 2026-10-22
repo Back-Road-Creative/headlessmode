@@ -36,6 +36,12 @@ export — every advertised dimension (`stability`, `remoteness`,
 coverage once the page is non-draft (`test_quiet_corners_export_has_coverage_on_every_dimension`,
 `test_sprawl_factor_coverage_has_no_dead_factors`).
 
+The same file's `TestPublishedCopyRules` holds two copy rules. The site never
+names its owner ("Joe", "Joseph", "Petrucelli", "JP") in anything Hugo builds
+or copies, `static/data/` geodata excepted. Back Road Creative is linked from
+About, and Go Move Shift only from Waypost, as what Waypost makes. There are
+no clients, results or case studies, so none are claimed.
+
 `scripts/copy_metrics.py <content/page.md>` is a stdlib-only prose check: word count, Flesch
 reading ease, sentences over a word-count limit, body link count, and British spellings from the
 American-spelling rule below (proper nouns, paths and quoted text exempt; see the script's

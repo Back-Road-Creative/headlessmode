@@ -1,6 +1,6 @@
 // NAIP aerial imagery: a companion sheet, never an overlay.
 //
-// JP, 2026-09-06: yes, "as an optional extra sheet". That constraint is the whole
+// Decided 2026-09-06: yes, "as an optional extra sheet". That constraint is the whole
 // design. Aerial photography cannot sit on top of a topo raster legibly -- two
 // full-colour images fight, and the contours lose. So each aerial sheet is its
 // own page, at the SAME extent, scale and frame as the topo sheet it pairs with,
