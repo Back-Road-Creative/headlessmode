@@ -22,6 +22,17 @@ import { LAYER_LABEL as RADAR_LABEL, LAYER_CAVEAT as RADAR_CAVEAT } from './sour
 // header: "the unit that wires the reader appends this row" -- the layers-reach-paper guard).
 import { CONTEXT_ROW as HILLSHADE_ROW } from './source-hillshade.js';
 import { CONTEXT_ROW as CONTOURS_ROW } from './source-contours.js';
+import { CONTEXT_ROW as SNOW_DEPTH_ROW } from './source-snow-depth.js';
+import { CONTEXT_ROW as AVALANCHE_ROW } from './source-avalanche.js';
+import { CONTEXT_ROW as GAUGES_ROW } from './source-stream-gauges.js';
+import { CONTEXT_ROW as STATIONS_ROW } from './source-nws-observations.js';
+// Screen-only CHECKBOXES in the federal group, not context rows: the context group is a radio of
+// one, so a preset holding the noise surface beside rail and airports could not be built there.
+import { RAIL_ROW, AIRPORT_ROW } from './source-ntad-rail-airports.js';
+// Historic places: a screen-only mark layer read live per view, beside them (source-nrhp.js).
+import { NRHP_ROW } from './source-nrhp.js';
+// SNOTEL snowpack: a screen-only mark layer read live per view, beside them (source-snotel.js).
+import { SNOTEL_ROW } from './source-snotel.js';
 import { LAYER_LABEL as AURORA_LABEL, LAYER_CAVEAT as AURORA_CAVEAT } from './source-aurora.js';
 import { LAYER_LABEL as FLOOD_LABEL, LAYER_CAVEAT as FLOOD_CAVEAT } from './source-flood-zones.js';
 import { LAYER_LABEL as AQI_LABEL, LAYER_CAVEAT as AQI_CAVEAT } from './source-aqi.js';
@@ -321,6 +332,12 @@ export const LAYERS = Object.freeze([
     coverageCaveat: `Road names from USGS The National Map transportation data, screen only: they are not drawn on printed sheets. Highways start at zoom ${ROAD_FIRST_ZOOM}, and local roads appear from zoom ${ROAD_LOCAL_ZOOM}. ${SOURCES.usgsRoadNames.coverageCaveat}`,
     render: render('none'),
   }),
+  // BTS rail lines and public-use airports: where the sources of the noise surface below are.
+  // Their rows live with their words in source-ntad-rail-airports.js (screen-only, off by default).
+  RAIL_ROW,
+  AIRPORT_ROW,
+  NRHP_ROW,
+  SNOTEL_ROW,
   // A CONTINUOUS-COLOUR SURFACE: a third kind, neither ink on the map nor a page in the PDF
   // but a raster under the vectors on screen. main.js hands Leaflet the URL, so there is no
   // fetch of its own; `screenOnly` keeps it out of the overlay fetch as `extraPage` does a sheet.
@@ -700,6 +717,13 @@ export const LAYERS = Object.freeze([
   }),
   HILLSHADE_ROW,
   CONTOURS_ROW,
+  SNOW_DEPTH_ROW,
+  // Avalanche danger: the publisher's coloured forecast zones (source-avalanche.js).
+  AVALANCHE_ROW,
+  // The first context row that draws POINTS from a JSON feed (source-stream-gauges.js).
+  GAUGES_ROW,
+  // Weather stations: POINTS from the NWS observation feed (source-nws-observations.js).
+  STATIONS_ROW,
   // A camera pin marks a point, and its picture is fetched only when a reader opens
   // that pin's popup (main.js), never as part of the printable-vector fetch loop --
   // so it gets its own `cameras` group instead of joining `overlay` (QUX-08D C22).
@@ -885,6 +909,10 @@ export function drapeKindFor(layer) {
   if (layer.group === 'cameras') return 'point';
   if (layer.group === 'context' || layer.group === 'base' || layer.group === 'reading'
     || layer.extraPage) return false;
+  // Rail lines and airports are live screen-only reads (source-ntad-rail-airports.js): nothing in
+  // 3D drapes them, and a point row must not be given the 'line' drape. `notIn3d` is what makes
+  // terrain-overlays tell the reader so ("Available in 2D") rather than drop them silently.
+  if (layer.notIn3d) return false;
   return 'line';
 }
 export const LAYER_DRAPE = Object.freeze(Object.fromEntries(LAYERS.map((l) => [l.id, drapeKindFor(l)])));

@@ -98,6 +98,19 @@ const BLM_REC_SERVICE = 'https://gis.blm.gov/arcgis/rest/services/recreation/BLM
 // credential check is a substring match, and `taxonKey=`/`datasetKey=` contain `key=`.
 const GBIF_SEARCH_SERVICE = 'https://api.gbif.org/v1/occurrence/search';
 const GBIF_DATASET_SERVICE = 'https://api.gbif.org/v1/dataset';
+const NTAD_RAIL_SERVICE = 'https://geo.dot.gov/server/rest/services/Hosted/North_American_Class_1_Rail/FeatureServer/0';
+const NTAD_AIRPORTS_SERVICE = 'https://geo.dot.gov/server/rest/services/Hosted/Airports_/FeatureServer/0';
+// The rail layer's WHOLE field list, as measured; the airport list is the SELECTION this map asks
+// for (the service carries about a hundred more, among them airport, locid, ownership and elevation).
+const NTAD_RAIL_FIELDS = ['objectid', 'fraarcid', 'frfranode', 'tofranode', 'stfips', 'cntyfips', 'stcntyfips',
+  'stateab', 'country', 'fraregion', 'rrowner1', 'rrowner2', 'rrowner3', 'trkrghts1', 'trkrghts2', 'trkrghts3',
+  'trkrghts4', 'trkrghts5', 'trkrghts6', 'trkrghts7', 'trkrghts8', 'trkrghts9', 'subdiv', 'yardname', 'passngr',
+  'stracnet', 'tracks', 'direction', 'carddirect', 'net', 'miles', 'km', 'timezone', 'im_rt_type', 'ds',
+  'area_length_miles', 'SHAPE__Length'];
+const NTAD_AIRPORT_FIELDS = ['loc_id', 'fac_name', 'fac_type', 'fac_use', 'city', 'state_name', 'owner_type',
+  'status_code', 'atc_tower', 'icao_identifier', 'role', 'category', 'hub'];
+const NPS_NRHP_SERVICE = 'https://mapservices.nps.gov/arcgis/rest/services/cultural_resources/nrhp_locations/MapServer';
+const NPS_NRHP_FIELDS = ['RESNAME', 'NRIS_Refnum', 'CertDate', 'City', 'State', 'STATUS'];
 const AIRNOW_AQI_SERVICE = 'https://services.arcgis.com/cJ9YHowT8TU7DUyn/arcgis/rest/services/AirNowLatestContoursCombined/FeatureServer/0';
 // gridcode -> the label the service's own renderer gives that value, word for word.
 const AIRNOW_AQI_CATEGORIES = { 1: 'Good', 2: 'Moderate', 3: 'Unhealthy for Sensitive Groups', 4: 'Unhealthy', 5: 'Very Unhealthy', 6: 'Hazardous' };
@@ -900,6 +913,48 @@ export const SOURCES = deepFreeze({
       + 'birds. It is an observation of the last few minutes and never an outlook.',
     measuredOn: '2026-09-11',
   },
+  // NOAA NOHRSC's Snow Analysis, layer 3 (snow depth) of a two-layer MapServer; layer 7 is
+  // snow water equivalent and is never asked for. Same host as nwsRadar above, so the CSP
+  // costs nothing: the export is FETCHED as bytes (connect-src) and handed to the overlay as
+  // a blob: URL, which img-src already allows. Measured 2026-10-20 with an
+  // `Origin: https://headlessmode.com` header: ?f=json and export answered 200 with the Origin
+  // echoed; maxImageWidth/Height 4096; no tile cache and no time dimension. /legend lists 12
+  // bins for layer 3, "0 - 0.39" to "394 - 787", and NO unit appears in the service, layer or
+  // legend metadata -- so none is stated here. A view inside coverage with no snow (Great
+  // Smokies) and one outside it (Spain) answered the identical 2,231-byte transparent PNG,
+  // so modelled zero and no data cannot be told apart.
+  nohrscSnowDepth: {
+    id: 'nohrscSnowDepth',
+    name: 'NOAA NOHRSC modelled snow depth',
+    kind: 'raster-image',
+    origin: 'https://mapservices.weather.noaa.gov',
+    serviceUrl: 'https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer',
+    metadataUrl: 'https://mapservices.weather.noaa.gov/raster/rest/services/snow/NOHRSC_Snow_Analysis/MapServer?f=json',
+    spatialReference: { wkid: 4269 },   // the service's own; the export is requested in 3857
+    layers: { depth: 3, sweNotUsed: 7 },
+    // bboxSR is NOT optional (see usgs3depSurface); png32 keeps the empty ground transparent.
+    request: { bboxSR: 4326, imageSR: 3857, format: 'png32', transparent: true, f: 'image' },
+    limits: { requiresKey: false, maxImageSide: 1024, serviceMaxImageSide: 4096,
+      pixelSizeMeters: 1000, legendBins: 12, exportTilesAllowed: false },
+    pagination: false,
+    cors: 'reflects-origin',
+    attribution: 'NOAA National Weather Service, National Operational Hydrologic Remote Sensing '
+      + 'Center (NOHRSC), National Snow Analysis',
+    termsUrl: 'https://www.weather.gov/disclaimer',
+    dateBasis: 'unknown',   // the service states a cadence, not the valid time of the picture
+    // Its own description: a snow MODEL at 1 km that assimilates ground, air and satellite snow
+    // observations daily. An analysis, not a measurement at your location.
+    claim: 'model',
+    coverageSemantics: 'A MODELLED snow depth on a 1 km grid, from an energy-and-mass-balance snow '
+      + 'model that takes in ground, airborne and satellite snow observations once a day: an '
+      + 'analysis, not a measurement where you stand. A 1 km square averages out what a slope, a '
+      + 'tree line or a road cut does to snow, so it can miss local drifts and bare ridges. The '
+      + 'service states no unit for its 12 bins, so none is stated here. An empty (transparent) '
+      + 'area is either modelled zero or no data and the service does not let the two be told '
+      + 'apart; the coverage is the coterminous United States. SNOTEL sites report measured depth '
+      + 'in the West; this is the surface that fills in between sites, and in the East.',
+    measuredOn: '2026-10-20',
+  },
   // The USGS Protected Areas Database, read for its ACCESS field rather than its
   // boundaries — which usgsGovUnits already draws. Three measurements shape every use of
   // it and none of them is guessable from the documentation.
@@ -1029,6 +1084,180 @@ export const SOURCES = deepFreeze({
       + 'states (24-hour A-weighted equivalent level). BTS says it should not be used to evaluate noise at '
       + 'individual locations or specific times. Not a measurement, not a forecast, and silent about Alaska and Hawaii here.',
     measuredOn: '2026-10-20',
+  },
+  // BTS NTAD Class I rail lines and the FAA airport facility list, the two things the noise tiles
+  // above are made OF. Both are ArcGIS FeatureServers on the SAME host as the tiles, so neither
+  // adds an origin. Measured 2026-10-20 (GET only). CORS: a real /query echoed the request Origin
+  // (https://headlessmode.com, https://example.org and http://localhost:1313 each came back with
+  // allow-credentials true) and an OPTIONS preflight answered 200. Rail: layer 0 of
+  // North_American_Class_1_Rail, polylines, 82,892 segments nationally, maxRecordCount 2000; the
+  // 10 sq deg box -85,34.5,-81,37 returned 1,987 of that 2,000, so a box is held to 9 sq deg (the
+  // 3 x 3 degree box -84.5,34.5,-81.5,37.5 returned 1,948, uncapped), and maxAllowableOffset 0.001
+  // took that answer from 3,408,197 bytes to 383,482 for the same 1,948 segments.
+  btsRailClass1: {
+    id: 'btsRailClass1',
+    name: 'BTS NTAD North American Class I rail lines',
+    kind: 'feature-query',
+    origin: 'https://geo.dot.gov',
+    serviceUrl: NTAD_RAIL_SERVICE,
+    metadataUrl: `${NTAD_RAIL_SERVICE}?f=json`,
+    layers: [{ id: 0, name: 'North American Class 1 Rail', queryUrl: `${NTAD_RAIL_SERVICE}/query`,
+      geometryType: 'esriGeometryPolyline', fields: NTAD_RAIL_FIELDS }],
+    spatialReference: { wkid: 102100, latestWkid: 3857 },
+    limits: { requiresKey: false, maxRecordCount: 2000, partialPageFlag: 'exceededTransferLimit',
+      maxBboxSquareDegrees: 9, simplifyDegrees: 0.001 },
+    pagination: true,
+    cors: 'reflects-origin',
+    attribution: 'U.S. DOT Bureau of Transportation Statistics, National Transportation Atlas Database (North American Class I rail lines)',
+    termsUrl: 'https://geodata.bts.gov/',
+    dateBasis: 'unknown',   // the service states no date and copyright text is empty
+    claim: 'inventory',
+    coverageSemantics: 'Where Class I railroads run, as BTS publishes the line. Class I only: a short line, '
+      + 'a branch another operator runs or a spur is simply not in this layer, so absence here is not '
+      + 'absence of a railway. It says nothing about how many trains pass, at what hour, or how loud.',
+    measuredOn: '2026-10-20',
+  },
+  // The FAA facility list as BTS republishes it (Airports_, layer 0): 13,235 points, all fac_type
+  // AIRPORT, fac_use PU 4,931 and PR 8,304, status_code O 13,171. OZ_Airports_All was measured and
+  // refused: 511 opportunity-zone airports whose fields are obscure (the Knoxville box held 1).
+  // The plan guessed JSON-only; the service lists JSON, geoJSON and PBF. Public-use only is asked
+  // (fac_use='PU'): the -85,34.5,-81,37 box holds 190 facilities and 63 public-use, a private strip
+  // being a place nobody may land. role and category are FAA codes carried as published.
+  btsAirports: {
+    id: 'btsAirports',
+    name: 'BTS NTAD airports (FAA facility data, public-use)',
+    kind: 'feature-query',
+    origin: 'https://geo.dot.gov',
+    serviceUrl: NTAD_AIRPORTS_SERVICE,
+    metadataUrl: `${NTAD_AIRPORTS_SERVICE}?f=json`,
+    layers: [{ id: 0, name: 'Airports', queryUrl: `${NTAD_AIRPORTS_SERVICE}/query`,
+      geometryType: 'esriGeometryPoint', fields: NTAD_AIRPORT_FIELDS }],
+    spatialReference: null,   // the native wkid was not read; outSR 4326 is asked and answered
+    limits: { requiresKey: false, maxRecordCount: 2000, partialPageFlag: 'exceededTransferLimit',
+      maxBboxSquareDegrees: 50 },
+    pagination: true,
+    cors: 'reflects-origin',
+    attribution: 'U.S. DOT Bureau of Transportation Statistics, National Transportation Atlas Database (airports, FAA facility data)',
+    termsUrl: 'https://geodata.bts.gov/',
+    dateBasis: 'unknown',
+    claim: 'inventory',
+    coverageSemantics: 'Airports the FAA lists as open to the public, as BTS republishes them. It lists the '
+      + 'facility, not its traffic: a grass strip and a hub are both one point, and it says nothing about '
+      + 'how often aircraft use it. Private-use fields, heliports and military-only fields are not asked.',
+    measuredOn: '2026-10-20',
+  },
+  // The National Register of Historic Places as the National Park Service publishes it (layer 0 of
+  // cultural_resources/nrhp_locations: POINTS; layer 1 is the polygons and is not asked). Measured
+  // 2026-10-20, GET only, no key: 74,636 points nationally (STATUS Listed 73,928, Removed 648, blank
+  // 60), 114 in -84.2,35.8,-83.6,36.2 and 112 of them Listed; maxRecordCount 2000; formats JSON,
+  // geoJSON and PBF. CORS: a real /query echoed the request Origin with allow-credentials true. The
+  // host is NEW to this map (the NPS webcam row is www.nps.gov). CertDate is a string 'YYYY-MM-',
+  // empty on some records. The points are approximate: the sample record says its point is an
+  // unspecified coordinate from NPS NRIS, and the layer's constraint text says it is general
+  // reference, not Section 106 consultation. Density is why there is a view gate and a row budget:
+  // 993 Listed points sat in 0.09 sq deg of Boston.
+  npsNrhp: {
+    id: 'npsNrhp',
+    name: 'National Park Service National Register of Historic Places (points)',
+    kind: 'feature-query',
+    origin: 'https://mapservices.nps.gov',
+    serviceUrl: NPS_NRHP_SERVICE,
+    metadataUrl: `${NPS_NRHP_SERVICE}/0?f=pjson`,
+    layers: [{ id: 0, name: 'National Register Of Historic Places Points', queryUrl: `${NPS_NRHP_SERVICE}/0/query`,
+      geometryType: 'esriGeometryPoint', fields: NPS_NRHP_FIELDS }],
+    spatialReference: null,   // outSR 4326 is asked and answered
+    limits: { requiresKey: false, maxRecordCount: 2000, partialPageFlag: 'exceededTransferLimit',
+      maxBboxSquareDegrees: 0.25, recordBudgetPerExtent: 500 },
+    pagination: false,   // one page of the budget; a fuller view is told to zoom in
+    cors: 'reflects-origin',
+    attribution: 'National Park Service, National Register of Historic Places',
+    termsUrl: 'https://www.nps.gov/subjects/nationalregister/database-research.htm',
+    dateBasis: 'feature-field',   // CertDate, the month the NPS certified the listing
+    claim: 'inventory',
+    coverageSemantics: 'Properties on the National Register of Historic Places, as the National Park Service '
+      + 'lists them: a point per record, with its reference number and the month it was certified. A listing '
+      + 'is a record of significance, not a statement about access, condition or whether anything still stands, '
+      + 'and many are private. Positions are approximate (some are an unspecified coordinate from the register '
+      + 'database). No point in view means none is listed there, not that nothing old is there.',
+    measuredOn: '2026-10-20',
+  },
+  // USDA NRCS SNOTEL snowpack: snow depth (SNWD) and snow water equivalent (WTEQ) from the AWDB REST
+  // service. Measured 2026-10-20, GET only, no key: /v1/stations?stationTriplets=*:*:SNTL&activeOnly=true
+  // answered 200, `access-control-allow-origin: *`, 407,574 bytes, 919 sites in AK AZ CA CO ID MT NM
+  // NV OR SD UT WA WY -- so the list is a build-time catalogue (scripts/qcm/build-snotel-stations.mjs,
+  // five fields a site, 46 KB). /v1/data answers many stations in ONE request (comma-separated
+  // triplets, percent-encoded colons accepted): daily values `{date, value}` in inches, each with its
+  // own date; an element a site does not report is omitted (957:AK had SNWD and no WTEQ), values are
+  // 0 in October at most sites, and the newest day can lag by two. The host is NEW to this map.
+  usdaSnotel: {
+    id: 'usdaSnotel',
+    name: 'USDA NRCS SNOTEL sites (snow depth and snow water equivalent, daily)',
+    kind: 'observation-feed',
+    origin: 'https://wcc.sc.egov.usda.gov',
+    serviceUrl: 'https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1',
+    metadataUrl: 'https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html',
+    endpoints: {
+      data: 'https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data',
+      catalogue: '/data/quiet-corners-maps/snotel-stations/stations.json',
+    },
+    elements: ['SNWD', 'WTEQ'],
+    spatialReference: { wkid: 4326 },
+    limits: { requiresKey: false, maxStationsPerView: 12, maxBboxSquareDegrees: 25, activeSitesObserved: 919 },
+    pagination: false,
+    cors: 'star',
+    attribution: 'USDA Natural Resources Conservation Service, SNOTEL',
+    termsUrl: 'https://www.nrcs.usda.gov/privacy-policy',
+    dateBasis: 'feature-field',   // each daily value carries its own `date`
+    claim: 'observation',
+    coverageSemantics: 'The newest daily snow depth and snow water equivalent each listed SNOTEL site has '
+      + 'published, with the day of its own reading. The sites are Western and alpine (919 active stations in '
+      + '13 states, mostly high mountain ground) and most Eastern counties have none, so no SNOTEL site in view '
+      + 'means none is listed there, not that there is no snow. At most 12 sites nearest the centre of the view '
+      + 'are read, in one request. A site is a point: snow a short way off can differ a lot. An element the '
+      + 'service omits is shown as not reported, and a zero depth is a measured zero.',
+    measuredOn: '2026-10-20',
+  },
+  // Avalanche danger ratings (E-P6). Not an agency host: avalanche.org is a partnership of the
+  // American Avalanche Association and the US Forest Service National Avalanche Center, which
+  // gathers the daily rating of every US forecast centre into one national GeoJSON of zones. A
+  // NINTH kind, `zone-feed`: one file for the whole country, fetched whole and kept a while,
+  // whose features are the forecast areas and carry their own issue and expiry times.
+  avalancheOrgZones: {
+    id: 'avalancheOrgZones',
+    name: 'avalanche.org danger ratings by forecast zone',
+    kind: 'zone-feed',
+    origin: 'https://api.avalanche.org',
+    serviceUrl: 'https://api.avalanche.org/v2/public',
+    metadataUrl: 'https://github.com/NationalAvalancheCenter/Avalanche.org-Public-API-Docs',
+    endpoints: { mapLayer: 'https://api.avalanche.org/v2/public/products/map-layer' },
+    spatialReference: { wkid: 4326 },
+    // Measured 2026-10-21 07:01 EDT: 200, 283,614 bytes, 84 zones (66 Polygon, 18 MultiPolygon),
+    // every one `no rating` (-1) in October, 27 of them off season. The service sends
+    // `cache-control: max-age=10`; ratings are issued once a morning, so ten minutes is plenty.
+    limits: { requiresKey: false, zonesObserved: 84, bytesObserved: 283614, reuseSeconds: 600,
+      maxZonesListed: 6 },
+    // `start_date`/`end_date` are ISO strings with NO offset, beside a `timezone` the guide calls
+    // the zone the centre uses -- without saying the dates are in it. Expiry reads them as UTC,
+    // which is the EARLIER instant for every US zone, so an unclear expiry ends a rating early,
+    // never late.
+    time: { startField: 'start_date', endField: 'end_date', format: 'ISO 8601 without offset',
+      zone: 'unstated', expiryReadAs: 'UTC' },
+    dangerScale: 'North American Avalanche Danger Scale, 1 low to 5 extreme; -1 no rating',
+    pagination: false,
+    cors: 'star',
+    attribution: 'Avalanche danger ratings from avalanche.org (American Avalanche Association and the '
+      + 'USDA Forest Service National Avalanche Center), issued by each US avalanche forecast centre',
+    termsUrl: 'https://github.com/NationalAvalancheCenter/Avalanche.org-Public-API-Docs',
+    permission: 'avalanche.org, by email to JP, 2026-10-20: "You are welcome to use it for your use case"',
+    dateBasis: 'feature-field',
+    claim: 'forecast',
+    coverageSemantics: 'Each forecast zone\'s danger rating as its avalanche centre issued it for the day, '
+      + 'gathered by avalanche.org -- a summary of the forecast, never the forecast itself, which lives on '
+      + 'the centre\'s own site. Zones cover only the mountains a centre serves (84 zones, in the West, Alaska, New Hampshire '
+      + 'and New York); outside them no forecast is issued, which says nothing about whether a '
+      + 'slope is safe. Out of season, and at centres that publish only a summary, a zone carries no '
+      + 'rating. A rating expires: past its end date it is no longer shown as a rating.',
+    measuredOn: '2026-10-21',
   },
   // GBIF occurrence records, read as AGGREGATES and never as records. Four measured facts
   // shape every use of this source, all of them from 2026-09-15 probes.
@@ -1187,6 +1416,97 @@ export const SOURCES = deepFreeze({
       + 'alert’s own expiry unless the expiry is read; a cancelled product is withdrawn whatever '
       + 'its end time still says. United States and its territories only.',
     measuredOn: '2026-09-14',
+  },
+  // USGS stream gauges: the newest flow (00060) and gage-height (00065) reading each active
+  // station has published, from the USGS Water Data OGC API. Measured 2026-10-20: a GET with
+  // `bbox=-83.6,35.5,-83.0,35.9` answered 200 application/json, `access-control-allow-origin: *`,
+  // no key, 9 features / 7,546 bytes with the whole property list; `limit=1000` is the page
+  // ceiling asked for. A feature is one station + parameter with its OWN `time`, `value` (a
+  // STRING) and `unit_of_measure` (`ft^3/s`, `ft`); names live in a second collection
+  // (`monitoring-locations`, `id=` takes a comma list). One station's newest flow reading was
+  // dated 2009-10-01, so a reading's age is never assumed.
+  //
+  // WHY NOT THE LEGACY HOST. https://waterservices.usgs.gov/ (the NWIS `iv` service, which
+  // also answered 200 + CORS `*` + 12,715 B for the same box) carries on its landing page,
+  // checked 2026-10-20: "WaterServices will be permanently shut down on February 22nd, 2027 ...
+  // Users must migrate to https://api.waterdata.usgs.gov". A layer built on it would break
+  // four months after it shipped. The new API's bbox query answered a 100 square degree box
+  // as well (limit 10), so the 25 square degree ceiling below is the legacy documented cap
+  // kept on purpose, not a measured refusal. A new kind, `observation-feed`: a JSON
+  // point feed asked by bounding box, with no ArcGIS layer behind it, whose features carry
+  // their own reading times.
+  usgsWaterGauges: {
+    id: 'usgsWaterGauges',
+    name: 'USGS stream gauges (flow and gage height, latest reading)',
+    kind: 'observation-feed',
+    origin: 'https://api.waterdata.usgs.gov',
+    serviceUrl: 'https://api.waterdata.usgs.gov/ogcapi/v1',
+    metadataUrl: 'https://api.waterdata.usgs.gov/ogcapi/v1/collections/latest-continuous',
+    endpoints: {
+      byBox: 'https://api.waterdata.usgs.gov/ogcapi/v1/collections/latest-continuous/items?bbox={bbox}&parameter_code={codes}&limit={limit}&f=json',
+      names: 'https://api.waterdata.usgs.gov/ogcapi/v1/collections/monitoring-locations/items?id={ids}&properties=monitoring_location_name,id&limit={limit}&f=json',
+    },
+    parameterCodes: ['00060', '00065'],
+    spatialReference: { wkid: 4326 },
+    limits: { requiresKey: false, maxBboxSquareDegrees: 25, recordBudgetPerExtent: 1000,
+      boxObservedBytes: 7546, legacyBoxObservedBytes: 12715 },
+    pagination: false,
+    cors: 'star',
+    attribution: 'U.S. Geological Survey, National Water Information System',
+    termsUrl: 'https://www.usgs.gov/information-policies-and-instructions/acknowledging-or-crediting-usgs',
+    dateBasis: 'feature-field',   // each value carries its own `time`
+    claim: 'observation',
+    coverageSemantics: 'The newest value each active USGS station has published for streamflow and '
+      + 'gage height, each with its own reading time (one station\u2019s newest flow was from 2009). '
+      + 'Most values are provisional and subject to revision. It covers stations USGS operates, '
+      + 'not every stream, and no gauge in view means none reports here, not that the water is low or '
+      + 'quiet. It is a reading from a past moment: not a forecast, not a flood warning, and never a '
+      + 'statement that a crossing is safe. The legacy waterservices.usgs.gov host is announced for '
+      + 'decommission on 2027-02-22 and is not used.',
+    measuredOn: '2026-10-20',
+  },
+  // NWS weather stations: the newest temperature, wind and humidity observation a station has
+  // published. Measured 2026-10-20 with a User-Agent naming headlessmode.com: GET
+  // /stations?limit=500 answered 200 `application/geo+json`, `access-control-allow-origin: *`,
+  // 500 stations / 541,480 bytes with a `pagination.next` cursor ({"s":500}); the list ends
+  // between offset 48,000 and 49,000 (about 48,500 stations nationally, 98 pages). It has NO
+  // bounding-box filter -- `state=TN` is accepted, nothing spatial -- so the station list is a
+  // build-time catalogue (scripts/qcm/build-nws-stations.mjs, a reviewable diff, two stations to a line under
+  // static/data/quiet-corners-maps/nws-stations/) and only `/stations/{id}/observations/latest`
+  // is read live, for at most 12 stations per view. KTYS answered 200, CORS `*`, 1,800 bytes
+  // trimmed: `temperature` (wmoUnit:degC), `windSpeed`/`windGust` (wmoUnit:km_h-1),
+  // `windDirection` (degree_(angle)) and `relativeHumidity` (percent), each `{unitCode, value,
+  // qualityControl}`, with the observation's own `timestamp`. A value can be null (qualityControl
+  // `Z`) and `X` marks a reading that failed quality control. The origin is the one the forecast
+  // and alerts rows already approved, so connect-src is unchanged.
+  nwsObservations: {
+    id: 'nwsObservations',
+    name: 'NWS weather stations (temperature, wind and humidity, latest observation)',
+    kind: 'observation-feed',
+    origin: 'https://api.weather.gov',
+    serviceUrl: 'https://api.weather.gov',
+    metadataUrl: 'https://api.weather.gov/openapi.json',
+    endpoints: {
+      latest: 'https://api.weather.gov/stations/{id}/observations/latest',
+      catalogue: '/data/quiet-corners-maps/nws-stations/stations.json',
+    },
+    spatialReference: { wkid: 4326 },
+    limits: { requiresKey: false, maxStationsPerView: 12, maxBboxSquareDegrees: 25,
+      stationsPageLimit: 500, nationalStationsObserved: 48500 },
+    pagination: false,
+    cors: 'star',
+    attribution: 'NOAA National Weather Service, station observations',
+    termsUrl: 'https://www.weather.gov/disclaimer',
+    dateBasis: 'feature-field',   // each observation carries its own `timestamp`
+    claim: 'observation',
+    coverageSemantics: 'The newest observation each listed station has published, with its own '
+      + 'observation time. The list holds airport-style reporting stations from five states only '
+      + '(Tennessee, North Carolina, Georgia, South Carolina and Colorado: 332 stations), not every '
+      + 'instrument and not every state, and at most 12 stations '
+      + 'nearest the centre of the view are read. A station is a point: a valley a few miles '
+      + 'away can differ a lot. It is a reading from a past moment, not a forecast. A missing '
+      + 'value or one that failed quality control is left out and counted.',
+    measuredOn: '2026-10-20',
   },
   // NOAA's Hazard Mapping System smoke analysis. `Start` and `End_` are STRINGS in the HMS
   // wire format `YYYYDDD HHMM`, UTC day-of-year (`2026257 1200` is 2026-09-14 12:00Z): the

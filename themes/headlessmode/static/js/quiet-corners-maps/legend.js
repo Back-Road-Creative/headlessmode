@@ -203,6 +203,16 @@ export const SYMBOLS = Object.freeze({
   nameCreek: point('name-creek', 'Named creek (labelled on the reach in view)', 'wave', INK),
   nameStreamMouth: point('name-stream-mouth', 'Named stream or canal (labelled at its mouth)', 'dot', INK),
   nameOther: point('name-other', 'Other named feature', 'diamond', INK),
+  // BTS NTAD rail and airports (screen-only layers, source-ntad-rail-airports.js): the sources a
+  // noise map is made of. Rail is a SOLID dark line, the one hue the roads, trails and boundaries
+  // above do not use; an airport is a round dot in a blue none of the named-place marks carry.
+  railLine: onScreen(line('rail-class1', 'Class I rail line (BTS)', 'solid', 3 / 300, '#37474f'), { minPx: 2 }),
+  airport: point('airport-public', 'Public-use airport (FAA list)', 'dot', '#0b5394'),
+  // National Register of Historic Places (screen-only, source-nrhp.js): a diamond in a brown no
+  // other mark carries, so a listed property is not read as a named landform (a black diamond).
+  historicPlace: point('historic-place', 'Historic place (National Register of Historic Places)', 'diamond', '#8d4a1f'),
+  // SNOTEL snowpack sites (screen-only, source-snotel.js): a teal square no other mark carries.
+  snotelSite: point('snotel-site', 'SNOTEL snowpack site (USDA NRCS)', 'square', '#0f4c5c'),
   // Sheet chrome, not a feature: the grid is drawn by the page layout at its own
   // width, never handed to the worker as an overlay vector. `chrome` is what keeps
   // it out of STYLE — a prefix filter there is what kept real features OUT.

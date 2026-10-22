@@ -18,6 +18,13 @@ import {
   setSunNow, ruleForLightState, lightStateText, DEFAULT_MANUAL, LIGHT_COPY,
 } from './source-hillshade.js';
 import { contoursRequestFor, createContoursFetcher } from './source-contours.js';
+import { snowDepthRequestFor, createSnowDepthFetcher, legendText as snowDepthLegend } from './source-snow-depth.js';
+import { avalancheLayer, avalancheReader, areaReport as avalancheReport } from './source-avalanche.js';
+import { gaugeLayer, gaugeReader, areaReport as gaugeAreaReport } from './source-stream-gauges.js';
+import { railLayer, airportLayer, ntadReader, fetchRail, fetchAirports, railReport, airportReport } from './source-ntad-rail-airports.js';
+import { nrhpLayer, fetchNrhp, nrhpReport } from './source-nrhp.js';
+import { snotelLayer, fetchSnotel, loadCatalogue as loadSnotelCatalogue, snotelReport } from './source-snotel.js';
+import { observationLayer, observationReader, loadCatalogue as loadStationCatalogue, areaReport as stationAreaReport } from './source-nws-observations.js';
 import { fetchRecSites } from './source-rec-sites.js';
 import { fetchBlmRecSites } from './source-blm-rec-sites.js';
 import { fetchTrails } from './source-trails.js';
@@ -201,6 +208,15 @@ let flood, floodReads = null;
  *  so a pan asks something new rather than re-indexing what is held. The reader debounces
  *  and abandons the in-flight query, which is why it is a value and not a bare fetch. */
 let aqi, aqiReads = null;
+/** Stream gauges (E3): a bounded JSON question like the air quality above, drawn as one marker
+ *  per station. `gaugesNewestMs` is the newest reading's own time, for the caption. */
+let gauges, gaugeReads = null, gaugesNewestMs = null;
+let railLines, railReads = null, airportPoints, airportReads = null;   // BTS rail lines and airports (screen only)
+let historicPoints, historicReads = null;   // National Register of Historic Places marks (screen only)
+let snotelPoints, snotelReads = null, snotelCatalogue = null;   // SNOTEL snowpack marks (screen only); the site list is cached only on success
+/** Weather stations (E4): the same shape as the gauges, over a catalogue file read once (cached
+ *  only on success, so turning the layer off and on retries a failed read). */
+let stations, stationReads = null, stationsNewestMs = null, stationCatalogue = null;
 /** Wildlife records: the other bounded question, and the only surface that draws no picture
  *  at all -- three limit=0 counts per cell, shaded as one box, because 97% of GBIF records
  *  state no coordinate precision and a dot would claim one. */
@@ -223,6 +239,8 @@ let drawing = false, dragStart = null;
  *  reader also answers the day-state question when the view came back empty: an empty analysis
  *  and an unanalysed day are different facts. */
 let smoke, smokeReads = null, fire, fireReads = null;
+// Avalanche danger: one national zone file, kept a while by the reader's store; the view picks the zones.
+let avalanche, avalancheReads = null;
 // D0/D1: the persistent (non-hover) display state every overlay shape is drawn from.
 // The Highlight shortcuts and the Advanced controls both go through nextDisplay(), so
 // hover, highlight, spotlight and clear can never compound (see display-controls.js).
@@ -240,6 +258,9 @@ const hillshadeFetcher = createHillshadeFetcher();
 // Contours (E2): one more per-view export from the same 3DEP service, fetched as the hillshade is.
 let contours;
 const contoursFetcher = createContoursFetcher();
+// Modelled snow depth: the same per-view export shape from NOHRSC's MapServer.
+let snowDepth;
+const snowDepthFetcher = createSnowDepthFetcher();
 // E1: while the 3D terrain panel is open, Leaflet's own settle-triggered viewport
 // fetches (browseViewport, below) must not start -- the panel dispatches
 // qc:terrain-panel and this is the one flag check that consults it.
@@ -408,6 +429,30 @@ function attach(hostedMap) {
   aqiReads = aqiReader({});
   map.on('moveend zoomend', renderAqi);
   renderAqi();
+  gauges = gaugeLayer(L);
+  gaugeReads = gaugeReader({});
+  map.on('moveend zoomend', renderGauges);
+  renderGauges();
+  railLines = railLayer(L);
+  railReads = ntadReader({ fetchFn: fetchRail });
+  airportPoints = airportLayer(L);
+  airportReads = ntadReader({ fetchFn: fetchAirports });
+  map.on('moveend zoomend', renderRail);
+  map.on('moveend zoomend', renderAirports);
+  renderRail();
+  renderAirports();
+  historicPoints = nrhpLayer(L);
+  historicReads = ntadReader({ fetchFn: fetchNrhp });
+  map.on('moveend zoomend', renderHistoric);
+  renderHistoric();
+  snotelPoints = snotelLayer(L);
+  snotelReads = ntadReader({ fetchFn: (bbox, o) => fetchSnotel(snotelCatalogue, bbox, o) });
+  map.on('moveend zoomend', renderSnotel);
+  renderSnotel();
+  stations = observationLayer(L);
+  stationReads = observationReader({});
+  map.on('moveend zoomend', renderStations);
+  renderStations();
   wildlife = gbifLayer(L);
   wildlifeReads = gbifReader({});
   map.on('moveend zoomend', renderWildlife);
@@ -425,6 +470,13 @@ function attach(hostedMap) {
   contours = contoursContextLayer(L);
   map.on('moveend zoomend', renderContours);
   renderContours();
+  snowDepth = snowDepthContextLayer(L);
+  map.on('moveend zoomend', renderSnowDepth);
+  renderSnowDepth();
+  avalanche = avalancheLayer(L);
+  avalancheReads = avalancheReader({});
+  map.on('moveend zoomend', renderAvalanche);
+  renderAvalanche();
   // Two more per-view exports with no tile cache, each pinned to a year it states.
   landCover = landCoverLayer(L, { product: 'landCover' });
   treeCanopy = landCoverLayer(L, { product: 'canopy' });
@@ -871,6 +923,9 @@ const SURFACE_TIME = {
   // the screen, so the caption says the time is unknown and the panel RANGE goes in the
   // layer's own row, where it can say which panels it belongs to.
   epaAirNowAqi: () => ({ timeMs: aqiObservedMs }),
+  // The newest reading in view: each station states its own, and the row says so.
+  streamGauges: () => ({ timeMs: gaugesNewestMs }),
+  nwsObservations: () => ({ timeMs: stationsNewestMs }),
   // Nothing goes here for the terrain surface on purpose. It is a CALCULATION over a
   // national compilation that states no date for a given piece of ground, so there is no
   // honest moment to show -- and the caption says the time is unknown rather than
@@ -1043,7 +1098,7 @@ function renderLayerPanelExtras() {
     // reader chose, so it stays out of the "layers on" count: a fresh load reads "No layers
     // on", and the count moves only when the reader moves a switch.
     const badgeWord = l.screenOnly
-      ? (layersFromControls()[l.id] ? roadsBadge || 'on' : 'off')
+      ? (layersFromControls()[l.id] ? (l.id === 'roads' ? roadsBadge || 'on' : 'on') : 'off')
       : layerBadge({
         checked, required: !!l.required, zoomBlocked,
         state: state.states[l.id] ?? null, featureCount: state.counts[l.id] ?? null,
@@ -1219,6 +1274,8 @@ const CONTEXT_RENDER = {
   femaNfhl: renderFlood,
 
   epaAirNowAqi: renderAqi,
+  streamGauges: renderGauges,
+  nwsObservations: renderStations,
   gbifOccurrence: renderWildlife,
 
   terrainSlope: renderTerrain,
@@ -1228,6 +1285,8 @@ const CONTEXT_RENDER = {
   countyScore: renderCountyScore,
   hillshadeLight: renderHillshade,
   terrainContours: renderContours,
+  snowDepthModel: renderSnowDepth,
+  avalancheDanger: renderAvalanche,
 };
 
 /** The dashboard's own county-comparison colour wash, wired into the same one-dominant-
@@ -2033,6 +2092,16 @@ function renderSmoke() {
     (got) => smokeAreaReport(got && got.body, got && got.latest).text);
 }
 
+/** Avalanche danger zones. No surface time is held: each zone has its own window, which the row
+ *  lists, so the caption says the source stated no single time rather than borrowing one. */
+function renderAvalanche() {
+  return renderBounded('avalancheDanger', avalanche, avalancheReads,
+    () => { const layers = layersFromControls(); return !!layers.avalancheDanger; },
+    (got) => (got && got.status === 'ok' ? got.zones : []),
+    () => {},
+    (got) => avalancheReport(got).text);
+}
+
 /** Mapped wildfire perimeters. What differs is the row's headline: an AGE, not a time, because the
  *  median boundary measured three weeks old and a bare perimeter reads as a fire's edge now. */
 function renderFire() {
@@ -2131,6 +2200,132 @@ async function renderAqi() {
     if (!el) return;
     el.textContent = aqiAreaReport(got).text;
     el.hidden = false;
+  });
+}
+
+/** Stream gauges, on or off. A bounded question like renderAqi: a pan asks again, a drag does
+ *  not, and the answer about a view the reader left is dropped. A view over the area cap asks
+ *  nothing, and a failed request is a stated line -- the markers are cleared either way so the
+ *  last view's gauges never sit on ground this answer says nothing about. */
+async function renderGauges() {
+  if (!gauges || !map) return;
+  const layers = layersFromControls();
+  const on = !!layers.streamGauges;
+  const el = $('qcm-layer-streamGauges-report');
+  if (!on) {
+    gaugeReads.cancel();
+    if (map.hasLayer(gauges)) map.removeLayer(gauges);
+    gauges.draw([], null);
+    if (el) { el.textContent = ''; el.hidden = true; }
+    return;
+  }
+  const b = map.getBounds();
+  const bbox = { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() };
+  await gaugeReads.ask(bbox, (got) => {
+    const sites = got && got.status !== 'unavailable' ? got.sites : [];
+    const times = sites.flatMap((s) => s.readings.map((r) => r.timeMs));
+    gaugesNewestMs = times.length ? Math.max(...times) : null;
+    renderSurfaceCaption();
+    gauges.draw(sites, got && got.fetchedMs);
+    if (!map.hasLayer(gauges)) gauges.addTo(map);
+    if (!el) return;
+    el.textContent = gaugeAreaReport(got).text;
+    el.hidden = false;
+  });
+}
+
+/** One BTS rail/airport row, on or off. A bounded question like renderGauges: a pan asks again, a
+ *  drag does not, the answer about a view the reader left is dropped, a view over the area cap asks
+ *  nothing, and the markers are cleared either way so the last view's lines never sit on ground
+ *  this answer says nothing about. The row's own report line is where the answer is worded. */
+async function renderNtad(on, group, reads, draw, reportOf, reportId) {
+  if (!group || !map) return;
+  const el = $(reportId);
+  if (!on) {
+    reads.cancel();
+    if (map.hasLayer(group)) map.removeLayer(group);
+    draw([]);
+    if (el) { el.textContent = ''; el.hidden = true; }
+    return;
+  }
+  const b = map.getBounds();
+  const bbox = { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() };
+  await reads.ask(bbox, (got) => {
+    draw(got);
+    if (!map.hasLayer(group)) group.addTo(map);
+    if (el) { el.textContent = reportOf(got).text; el.hidden = false; }
+  });
+}
+function renderRail() {
+  const layers = layersFromControls();
+  return renderNtad(!!layers.railClass1, railLines, railReads,
+    (got) => railLines.draw(Array.isArray(got) ? got : (got && got.lines) || []), railReport, 'qcm-layer-railClass1-report');
+}
+function renderHistoric() {
+  const layers = layersFromControls();
+  return renderNtad(!!layers.historicPlaces, historicPoints, historicReads,
+    (got) => historicPoints.draw((got && got.places) || []), nrhpReport, 'qcm-layer-historicPlaces-report');
+}
+async function renderSnotel() {
+  if (!snotelPoints || !map) return;
+  const layers = layersFromControls();
+  const on = !!layers.snotelSnowpack;
+  if (on && !snotelCatalogue) {
+    const got = await loadSnotelCatalogue();
+    if (!layersFromControls().snotelSnowpack) return;
+    if (got.status !== 'ready') {
+      snotelPoints.draw([]);
+      const el = $('qcm-layer-snotelSnowpack-report');
+      if (el) { el.textContent = snotelReport({ status: 'catalogue-unavailable' }).text; el.hidden = false; }
+      return;
+    }
+    snotelCatalogue = got.stations;
+  }
+  return renderNtad(on, snotelPoints, snotelReads,
+    (got) => snotelPoints.draw((got && got.sites) || [], got && got.fetchedMs), snotelReport, 'qcm-layer-snotelSnowpack-report');
+}
+function renderAirports() {
+  const layers = layersFromControls();
+  return renderNtad(!!layers.airports, airportPoints, airportReads,
+    (got) => airportPoints.draw(Array.isArray(got) ? got : (got && got.airports) || []), airportReport, 'qcm-layer-airports-report');
+}
+
+/** Weather stations, on or off. Like renderGauges, with the station list read once from this
+ *  site first. A list that will not load is a stated line and is retried on the next turn-on. */
+async function renderStations() {
+  if (!stations || !map) return;
+  const layers = layersFromControls();
+  const on = !!layers.nwsObservations;
+  const el = $('qcm-layer-nwsObservations-report');
+  const say = (text) => { if (el) { el.textContent = text; el.hidden = false; } };
+  if (!on) {
+    stationReads.cancel();
+    if (map.hasLayer(stations)) map.removeLayer(stations);
+    stations.draw([], null);
+    if (el) { el.textContent = ''; el.hidden = true; }
+    return;
+  }
+  if (!stationCatalogue) {
+    const got = await loadStationCatalogue();
+    if (!layersFromControls().nwsObservations) return;
+    if (got.status !== 'ready') {
+      stations.draw([], null);
+      stationsNewestMs = null;
+      renderSurfaceCaption();
+      say(stationAreaReport({ status: 'catalogue-unavailable' }).text);
+      return;
+    }
+    stationCatalogue = got.stations;
+  }
+  const b = map.getBounds();
+  const bbox = { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() };
+  await stationReads.ask(bbox, stationCatalogue, (got) => {
+    const sites = got && got.status === 'ready' ? got.sites : [];
+    stationsNewestMs = sites.length ? Math.max(...sites.map((s) => s.timeMs)) : null;
+    renderSurfaceCaption();
+    stations.draw(sites, got && got.fetchedMs);
+    if (!map.hasLayer(stations)) stations.addTo(map);
+    say(stationAreaReport(got).text);
   });
 }
 
@@ -2334,6 +2529,57 @@ async function renderContours() {
   el.hidden = !el.textContent;
 }
 
+/** Modelled snow depth: a transparent PNG from NOHRSC's MapServer, handed to an ImageOverlay as an
+ *  object URL, the contours' shape with a different request. */
+function snowDepthContextLayer(mapL) {
+  const layer = mapL.imageOverlay('', [[0, 0], [0, 0]], { opacity: 0.7, interactive: false, alt: '' });
+  let objectUrl = null;
+  layer.refresh = async function refresh(mapRef) {
+    const b = mapRef.getBounds();
+    const size = mapRef.getSize();
+    const request = snowDepthRequestFor({
+      bboxLonLat: { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() },
+      width: size.x, height: size.y,
+    });
+    const result = await snowDepthFetcher.fetchImage(request);
+    if (result.status === 'ready') {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = URL.createObjectURL(result.blob);
+      layer.setBounds(b);
+      layer.setUrl(objectUrl);
+    }
+    return result;
+  };
+  return layer;
+}
+
+/** The snow depth row's render function, named for CONTEXT_RENDER. Off removes the overlay and asks
+ *  nothing; on, the report line carries the service's own key (no unit is claimed) or says the
+ *  service did not answer and nothing is drawn. */
+async function renderSnowDepth() {
+  if (!snowDepth || !map) return;
+  const layers = layersFromControls();
+  const el = $('qcm-layer-snowDepthModel-report');
+  if (!layers.snowDepthModel) {
+    if (map.hasLayer(snowDepth)) map.removeLayer(snowDepth);
+    if (el) { el.textContent = ''; el.hidden = true; }
+    return;
+  }
+  renderSurfaceCaption();
+  const result = await snowDepth.refresh(map);
+  if (!map) return;
+  if (result.status === 'ready') {
+    if (!map.hasLayer(snowDepth)) snowDepth.addTo(map);
+  } else if (result.status !== 'stale' && map.hasLayer(snowDepth)) {
+    map.removeLayer(snowDepth);
+  }
+  if (!el) return;
+  el.textContent = result.status === 'ready' || result.status === 'stale'
+    ? snowDepthLegend()
+    : `The snow depth service did not answer for this view (${result.status}), so nothing is drawn.`;
+  el.hidden = !el.textContent;
+}
+
 /** The hillshade context row's render function -- named, and referenced by name in
  *  CONTEXT_RENDER below, the same static shape layers-reach-paper.test.mjs checks every
  *  other context surface against. Honest light/time controls: the report line always
@@ -2409,7 +2655,9 @@ const CAMERA_RENDER = Object.fromEntries(CAMERA_LAYER_IDS.map((id) => [id,
 /** QQA-05r-2: a screen-only row in the federal group (Road names) draws labels on the map and
  *  puts nothing on a printed sheet, so toggling it neither invalidates the recipe nor re-plans:
  *  it only asks the map to draw (or clear) its labels. */
-const SCREEN_RENDER = { roads: () => { renderRoads(); renderLegend(); } };
+const SCREEN_RENDER = { roads: () => { renderRoads(); renderLegend(); }, railClass1: () => { renderRail(); renderLegend(); }, airports: () => { renderAirports(); renderLegend(); },
+  historicPlaces: () => { renderHistoric(); renderLegend(); },
+  snotelSnowpack: () => { renderSnotel(); renderLegend(); } };
 /** The names row is a printable layer AND a per-view pass: the default invalidate + replan, then
  *  ask for the view (or clear, when it went off). */
 const NAMES_RENDER = { names: (event) => { invalidate({ layers: { names: event.target.checked } }); replan(); renderNamesPass(); } };

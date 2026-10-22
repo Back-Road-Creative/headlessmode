@@ -111,9 +111,9 @@ Every other layer is off until you switch it on. The Layers panel is shared by
 the dashboard and the builder: switching on any other layer, or choosing another
 base map, on either page, requests map tiles or map data directly from that
 layer's own service, for the area on screen. Today those services are U.S.
-federal agencies (USGS, whose elevation service also draws contour lines, the
-Forest Service, FEMA, BLM and NOAA), NASA satellite
-imagery, the Bureau of Transportation Statistics (noise-map tiles), and the
+federal agencies (USGS, whose elevation service also draws contour lines and whose
+water service reports stream gauges, the Forest Service, FEMA, BLM and NOAA), NASA satellite
+imagery, the Bureau of Transportation Statistics (noise-map tiles, rail lines and airports), the National Park Service (historic places), the USDA Natural Resources Conservation Service (SNOTEL snowpack sites, from wcc.sc.egov.usda.gov), avalanche.org (avalanche danger ratings, from api.avalanche.org; not a government host, but a partnership of the American Avalanche Association and the US Forest Service National Avalanche Center), and the
 biodiversity data aggregator GBIF; several of those agencies'
 public services are hosted on Esri's commercial ArcGIS Online platform rather
 than the agency's own domain, and one imagery layer is served from Amazon S3.
@@ -122,6 +122,10 @@ the tiles or area a layer you turned on requests, under its own terms. The exact
 current list of origins is generated at build time from the map's own layer
 registry into the map page's Content-Security-Policy, so an added layer cannot
 quietly reach a host this policy has not been told about.
+Turning on the Weather stations layer asks the National Weather Service
+(`api.weather.gov`) for the latest observations of the stations in view, up to
+12 stations at a time, using station identifiers from this site's own list
+rather than your position.
 
 Drawing or picking a print area asks the USGS map index
 (`carto.nationalmap.gov`) which quadrangles the area covers. Building a print

@@ -58,7 +58,7 @@ REGISTRY = (
 ORG_BY_DOMAIN_SUFFIX = {
     "nationalmap.gov": "USGS",
     "usgs.gov": "USGS",
-    "usda.gov": "Forest Service",
+    "usda.gov": "Forest Service",  # also wcc.sc.egov.usda.gov (NRCS SNOTEL); privacy.md names NRCS in full
     "fema.gov": "FEMA",
     "blm.gov": "BLM",
     "noaa.gov": "NOAA",
@@ -69,6 +69,7 @@ ORG_BY_DOMAIN_SUFFIX = {
     "nasa.gov": "NASA",
     "dot.gov": "Bureau of Transportation Statistics",  # geo.dot.gov, the BTS noise-map tiles
     "gbif.org": "GBIF",
+    "avalanche.org": "avalanche.org",  # api.avalanche.org, the avalanche danger ratings (not a government host)
     "arcgis.com": "Esri",
     "amazonaws.com": "Amazon",
     "ca.gov": "Caltrans",  # cwwp2.dot.ca.gov, the Caltrans CCTV pictures (QUX-08D)

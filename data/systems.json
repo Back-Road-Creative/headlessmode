@@ -18,7 +18,7 @@
     "homepage": "Optional boolean. On tier=product, false keeps a product off the home page while its own page, its llms.txt entry and every link to it stay; omit the key otherwise. On tier=oss, true puts a free tool on the home page (its row is tagged Free and needs the same homepage_* keys as a product); omit it otherwise. An entry off the home page carries no homepage_rank, homepage_image or homepage_action.",
     "homepage_image": "Required on every product the home page shows: a path relative to /img/ (\"<slug>/home.jpg\") naming a file with a provenance entry in static/img/<slug>/manifest.json, plus homepage_image_alt (what the picture shows) and homepage_image_width/homepage_image_height matching that entry's viewport. A real screenshot where the product has a screen to show; otherwise a designed tile that claims nothing the product's page does not already say.",
     "homepage_area": "Required on every product the home page shows: one short category word (Music, Maps, Code, Media) printed small and uppercase under the product name.",
-    "homepage_action": "Optional {\"label\", \"href\"}, tier=product, or a tier=oss entry with \"homepage\": true: the home page row's one primary button. Without it the button is derived: public with download and shipped -> Download (the download URL); engagement -> Request a demo (/contact/). A public product with no download must set it. Every row also carries Details, to its link. A free tool on the home page must set it."
+    "homepage_action": "Optional {\"label\", \"href\"}, tier=product, or a tier=oss entry with \"homepage\": true: the home page row's one primary button. Without it the button is derived: public with download and shipped -> Download (the download URL); engagement -> Ask about <name> (/contact/). A public product with no download must set it. Every row also carries Details, to its link. A free tool on the home page must set it."
   },
   "systems": [
     {
@@ -32,13 +32,13 @@
       "homepage": true,
       "homepage_rank": 3,
       "homepage_image": "rigscore/home.svg",
-      "homepage_image_alt": "rigscore's terminal report: a failing MCP server check, a passing check, an advisory, then the Hygiene and Practice grades",
+      "homepage_image_alt": "Illustration of rigscore's report: a failing MCP check, a passing check, an advisory, then the Hygiene and Practice grades",
       "homepage_image_width": 800,
       "homepage_image_height": 500,
       "homepage_area": "Code",
       "homepage_action": {
-        "label": "Install",
-        "href": "/rigscore/"
+        "label": "Installation",
+        "href": "/rigscore/#install"
       }
     },
     {
@@ -115,7 +115,7 @@
       "homepage_image_height": 500,
       "homepage_area": "Code",
       "homepage_action": {
-        "label": "Install",
+        "label": "Installation",
         "href": "/bot-battle-station/"
       }
     },
@@ -190,13 +190,13 @@
       "name": "Waypost",
       "tier": "product",
       "access": "engagement",
-      "blurb": "A console on your own computer that runs a creator's video, photo and SEO work and schedules posts to YouTube, TikTok, Instagram and Facebook, one tab per brand",
+      "blurb": "A console on your own computer that runs a creator's video, photo and SEO work and queues posts for YouTube, Instagram and Facebook, one tab per brand",
       "link": "/waypost/",
       "shipped": null,
       "homepage_rank": 5,
       "homepage_image": "waypost/home.jpg",
       "homepage_action": {
-        "label": "Try the demo",
+        "label": "View demo",
         "href": "/demo/waypost/"
       },
       "homepage_image_alt": "The Waypost demo console's Jobs page: a table of video, SEO and comment runs with their status, and the upcoming schedules",
@@ -208,12 +208,12 @@
       "name": "Framegrade",
       "tier": "product",
       "access": "engagement",
-      "blurb": "The media engine under Waypost: it grades video and photos, checks every finished file before delivery, and builds route films from GPS tracks",
+      "blurb": "The media engine under Waypost: it grades video and photos, checks each finished file before delivery, and builds route films from GPS tracks",
       "link": "/framegrade/",
       "shipped": null,
       "homepage_rank": 6,
       "homepage_image": "framegrade/home.svg",
-      "homepage_image_alt": "Framegrade: one landscape frame, flat and gray on the left, graded with color on the right",
+      "homepage_image_alt": "Illustration of what Framegrade does: one landscape frame, flat and gray on the left, graded with color on the right",
       "homepage_image_width": 800,
       "homepage_image_height": 500,
       "homepage_area": "Media"

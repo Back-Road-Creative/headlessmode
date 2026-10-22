@@ -13,7 +13,7 @@ import { DEFAULT_BASE, baseLayer, BASES } from './quiet-corners-maps/source-base
 import { DEFAULT_VIEW, resolveInitialView, parseFragment, formatFragment, prefsFromView } from './quiet-corners-maps/view-state.js';
 import { createApplyGuard, createRoutineWriter, createPopstateHandler, applyView, resetView, createPrefsStore, PREFS_KEY } from './quiet-corners-maps/view-wiring.js';
 import { LAYER_IDS, CONTEXT_LAYER_IDS } from './quiet-corners-maps/layer-registry.js';
-import { groupFinderResults, rankFinderGroups, isExactNameStateMatch, looksLikeStreetAddress, ADDRESS_PROMPT_MESSAGE, ADDRESS_ESTIMATE_NOTE, addressStatusText } from './quiet-corners-maps/search-shell.js';
+import { groupFinderResults, rankFinderGroups, isExactNameStateMatch, looksLikeStreetAddress, ADDRESS_PROMPT_MESSAGE, ADDRESS_ESTIMATE_NOTE, addressStatusText, addressAnswerShown, CENSUS_NOTICE } from './quiet-corners-maps/search-shell.js';
 import { geocodeAddress } from './quiet-corners-maps/address-geocode.js';
 import { requestOnce } from './quiet-corners-maps/locate.js';
 import { searchByName, createSearchGuard, zoomForKind } from './quiet-corners-maps/source-terrain-names.js';
@@ -1005,6 +1005,8 @@ import { factorDisplay, freshness, availabilityState } from './quiet-corners-map
                 // owns ONE live region (finder-announcement.test.mjs), a second one
                 // beside it would have a reader hear two regions race for the same box.
                 + '<p id="qc-name-note" class="qc-finder-empty" hidden></p>'
+                // QQA-04c: the Census Bureau's notice, beside any answer from its geocoder.
+                + '<p id="qc-census-credit" class="qc-finder-empty qc-finder-credit" hidden></p>'
                 + '</div>';
             L.DomEvent.disableClickPropagation(wrap);
             L.DomEvent.disableScrollPropagation(wrap);
@@ -2756,6 +2758,14 @@ import { factorDisplay, freshness, availabilityState } from './quiet-corners-map
         if (note) { note.textContent = text; note.hidden = !text; }
         var region = document.getElementById('qc-finder-status');
         if (region && region.textContent !== text) region.textContent = text;
+        // The notice rides with the geocoder's answer and nothing else. Every path that
+        // leaves the address lookup sets addressStatus back to 'idle' first.
+        var credit = document.getElementById('qc-census-credit');
+        if (credit) {
+            var showCredit = addressAnswerShown(addressStatus);
+            credit.textContent = showCredit ? CENSUS_NOTICE : '';
+            credit.hidden = !showCredit;
+        }
     }
 
     /** Retyping, closing the box, or a fresh submission all invalidate whatever

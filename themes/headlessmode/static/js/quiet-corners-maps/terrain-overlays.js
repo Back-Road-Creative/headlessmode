@@ -230,7 +230,7 @@ export function capabilityNotices(registry = [], on = {}, statesById = {}) {
   for (const l of registry) {
     if (!on[l.id]) continue;
     if (l.drape === false) {
-      if (l.group === 'context') notices.push({ id: l.id, label: l.label, status: 'available-2d' });
+      if (l.group === 'context' || l.notIn3d) notices.push({ id: l.id, label: l.label, status: 'available-2d' });
       continue;
     }
     if (l.drape === 'label') { notices.push({ id: l.id, label: l.label, status: 'shown' }); continue; }

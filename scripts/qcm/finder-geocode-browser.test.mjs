@@ -11,7 +11,9 @@
 //   * the newest search wins: an older request is cancelled and a late answer to it
 //     is dropped;
 //   * the typed address never reaches the page address, the title, storage or a
-//     shared link.
+//     shared link;
+//   * QQA-04c: the Census Bureau's notice is shown, legibly, whenever address results
+//     or the geocoder's no-match / unavailable sentence are, and never for a town.
 //
 // Fixtures are synthetic: an invented road and the Census Bureau's public headquarters
 // street address. The owner's real address never appears in the repo (QQA-00).
@@ -20,6 +22,7 @@ import assert from 'node:assert/strict';
 import { findChromium, launch } from './helpers/browser.mjs';
 import { startSiteServer, siteIsBuilt } from './helpers/site-server.mjs';
 import { readyDashboard } from './helpers/waits.mjs';
+import { contrastRatio } from './helpers/contrast.mjs';
 
 const CHROMIUM = findChromium();
 const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this proof)'
@@ -80,9 +83,9 @@ const STUB = `(() => {
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: (t) => { window.__shared.push(t); return Promise.resolve(); } } });
 })()`;
 
-async function withFinder(fn) {
+async function withFinder(fn, viewport = { width: 1280, height: 900 }) {
   const site = await startSiteServer();
-  const page = await launch(CHROMIUM, 'about:blank', { viewport: { width: 1280, height: 900 }, args: ['--hide-scrollbars'] });
+  const page = await launch(CHROMIUM, 'about:blank', { viewport, args: ['--hide-scrollbars'] });
   try {
     await page.send('Page.addScriptToEvaluateOnNewDocument', { source: STUB });
     await page.navigate(`${site.origin}/quiet-corners/`);
@@ -290,3 +293,124 @@ test('the typed address never reaches the page address, title, storage or a shar
     assert.match(out.shared, /#map=/, 'the chosen point is shared as a view');
   });
 });
+
+// QQA-04c. GEOCODER.md quotes the Census Data API terms; whether they govern the geocoder is
+// unverified, so the page shows the notice beside every answer that came from it.
+const CENSUS_NOTICE = 'This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau.';
+
+/** What a reader sees of the notice: its text, whether it is on screen, its computed type and
+ *  its contrast against the finder box it sits in (the first opaque ancestor fill). */
+const readCredit = `(() => {
+  const e = document.getElementById('qc-census-credit');
+  if (!e) return { present: false };
+  const cs = getComputedStyle(e);
+  const rgb = (c) => (c.match(/[\\d.]+/g) || []).map(Number);
+  let bg = e, fill = null;
+  while (bg && !fill) {
+    const c = rgb(getComputedStyle(bg).backgroundColor);
+    if (c.length >= 3 && (c.length < 4 || c[3] === 1)) fill = c.slice(0, 3);
+    bg = bg.parentElement;
+  }
+  const r = e.getBoundingClientRect();
+  // Where it sits, not just that it has a size: a line the stage clips (overflow: clip) or the
+  // page cuts off still has a rect. Inside means inside the finder box and the map frame the
+  // box is re-homed on, with a pixel of rounding. Not the viewport: the page scrolls, and on a
+  // tall phone the frame itself runs past the fold (390x844: frame bottom 909, screen 844).
+  const within = (a, b) => a.top >= b.top - 1 && a.bottom <= b.bottom + 1 && a.left >= b.left - 1 && a.right <= b.right + 1;
+  const pane = e.closest('#qc-finder-box');
+  const box = pane && pane.getBoundingClientRect(), host = pane && pane.parentNode.getBoundingClientRect();
+  return {
+    present: true, hidden: e.hidden, text: e.textContent.trim(), shown: !e.hidden && r.width > 0 && r.height > 0,
+    inBox: !!box && within(r, box), inHost: !!host && within(r, host), boxInHost: !!box && within(box, host),
+    rect: [r.top, r.bottom], boxRect: box && [box.top, box.bottom], hostBottom: host && host.bottom,
+    fontSize: parseFloat(cs.fontSize), color: rgb(cs.color).slice(0, 3), fill,
+    findNote: getComputedStyle(document.getElementById('qc-name-note')).fontSize,
+    insideBox: !!e.closest('#qc-finder-box'),
+  };
+})()`;
+
+test('the Census notice is shown, at row size and legible, beside street matches', { skip }, async () => {
+  await withFinder(async (p) => {
+    await plan(p, { body: ok([HIT_A, HIT_B]) });
+    await p.evaluate(typeAndRead(EXAMPLE, true));
+    const c = await p.evaluate(readCredit);
+    assert.equal(c.present, true, 'no #qc-census-credit element in the finder');
+    assert.equal(c.shown, true, JSON.stringify(c));
+    assert.equal(c.text, CENSUS_NOTICE);
+    assert.equal(c.insideBox, true);
+    assert.ok(c.fontSize >= 12, `notice is ${c.fontSize}px`);
+    assert.equal(`${c.fontSize}px`, c.findNote, 'the notice is not on the finder note type size');
+    assert.ok(c.fill, 'no opaque fill found behind the notice');
+    const ratio = contrastRatio(c.color, c.fill);
+    assert.ok(ratio >= 4.5, `notice contrast ${ratio.toFixed(2)}:1`);
+  });
+});
+
+test('the Census notice is shown with the geocoder no-match and unavailable sentences', { skip }, async () => {
+  await withFinder(async (p) => {
+    for (const [name, f, re] of [
+      ['no match', { body: ok([]) }, /no street match/i],
+      ['429', { status: 429, body: { error: 'rate-limited' } }, /unavailable right now/i],
+      ['offline', { offline: true }, /unavailable right now/i],
+    ]) {
+      await plan(p, f);
+      const seen = await p.evaluate(typeAndRead(EXAMPLE, true));
+      assert.match(seen.nameNote, re, name);
+      const c = await p.evaluate(readCredit);
+      assert.equal(c.shown, true, `${name}: ${JSON.stringify(c)}`);
+      assert.equal(c.text, CENSUS_NOTICE, name);
+    }
+  });
+});
+
+test('the Census notice is absent for town-only results, name search, coordinates and a retyped box', { skip }, async () => {
+  await withFinder(async (p) => {
+    const gone = async (what) => {
+      const c = await p.evaluate(readCredit);
+      assert.equal(c.present, true, 'the notice element is missing, so absence proves nothing');
+      assert.equal(c.shown, false, `${what}: the notice is on screen`);
+    };
+    const town = await p.evaluate(typeAndRead('Amery', false));
+    assert.ok(town.options.length >= 1, JSON.stringify(town));
+    await gone('town rows');
+    await p.evaluate(typeAndRead('Amery', true));
+    await gone('a GNIS name search');
+    await p.evaluate(typeAndRead('35.55, -82.55', false));
+    await gone('coordinates');
+    await plan(p, { body: ok([HIT_A]) });
+    await p.evaluate(typeAndRead(EXAMPLE, true));
+    assert.equal((await p.evaluate(readCredit)).shown, true);
+    await p.evaluate(typeAndRead('Amery', false));
+    await gone('after retyping a town over an address answer');
+  });
+});
+
+// The open finder is no taller than the room the stage has left, and the stage clips
+// (CLAUDE.md), so a notice that sits below a fixed-height answer, button and field can fall
+// past the clip on a short stage: phone landscape lost it entirely, a small phone lost most
+// of it. On every phone shape the box scrolls to it and it sits inside the box and the frame.
+const PHONES = [{ width: 390, height: 844 }, { width: 360, height: 640 }, { width: 844, height: 390 }];
+const SHOWN_CASES = [
+  ['street matches', { body: ok([HIT_A, HIT_B]) }],
+  ['no match', { body: ok([]) }],
+  ['unavailable', { status: 502, body: { error: 'upstream' } }],
+];
+for (const vp of PHONES) {
+  test(`at ${vp.width}x${vp.height} the Census notice lies inside the finder box and the map frame`, { skip }, async () => {
+    await withFinder(async (p) => {
+      for (const [name, f] of SHOWN_CASES) {
+        await plan(p, f);
+        await p.evaluate(typeAndRead(EXAMPLE, true));
+        // A box capped to the room under its button scrolls what the cap leaves over; the
+        // reader reaches the notice by scrolling the box to its end, and nothing else.
+        await p.evaluate("(document.getElementById('qc-finder-box').scrollTop = 1e6, true)");
+        const c = await p.evaluate(readCredit);
+        const why = `${name}: ${JSON.stringify(c)}`;
+        assert.equal(c.shown, true, why);
+        assert.equal(c.boxInHost, true, `the box leaves the map frame; ${why}`);
+        assert.equal(c.inBox, true, `the notice is clipped by the box; ${why}`);
+        assert.equal(c.inHost, true, `the notice is clipped by the map frame; ${why}`);
+      }
+    }, vp);
+  });
+}
