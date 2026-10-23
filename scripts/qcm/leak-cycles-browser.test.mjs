@@ -7,9 +7,9 @@
 // terrain panel's map count. Equal, not "within a margin": a cycle that leaves one listener or
 // one node behind is a leak, and twenty cycles make it twenty.
 //
-// No heap-size assertion. No noise floor for JSHeapUsedSize has been measured on this box, so
-// any limit would be a guess; the heap numbers are printed as diagnostics for whoever records
-// that floor (scripts/qcm/README.md, "Leak cycles").
+// Heap size is bounded, not equal, and that bound lives in leak-heap-browser.test.mjs: it needs
+// its own 21 + 20 cycles, and CI caps each FILE at 600 s (pr-ci.yml), so it has a file of its own.
+// scripts/qcm/README.md, "Leak cycles", has the measured numbers.
 //
 // The other leak shapes are exact too: the document holds no more `keydown` listeners after a
 // close than before the first open (DOMDebugger.getEventListeners), a second press while the
@@ -21,91 +21,15 @@
 // tile and anything outside the local site is refused, so nothing leaves this box.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { findChromium } from './helpers/browser.mjs';
-import { connectSession } from './helpers/cdp-session.mjs';
-import { startSiteServer, siteIsBuilt } from './helpers/site-server.mjs';
-import { readyDashboard, waitInPage } from './helpers/waits.mjs';
 import { settlePaused } from './helpers/paused-request.mjs';
-import { SOURCES } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-registry.js';
-import { terrariumTilePng, greyBasePng } from './fixtures/relief-3d.mjs';
+import { waitInPage } from './helpers/waits.mjs';
+import { greyBasePng } from './fixtures/relief-3d.mjs';
+import {
+  skip, SLOW, png, freshPage, cycle, readOnce,
+  pressTwice, escapeKey, canvasPresent, canvasGone, dialogHidden, containers, mapCount,
+} from './helpers/leak-page.mjs';
 
-const CHROMIUM = findChromium();
-const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this proof)'
-  : !siteIsBuilt('quiet-corners') ? 'public/quiet-corners/ not built — run `bash scripts/build-site.sh --configDir site-config --minify` first'
-    : false;
-
-// Software WebGL on a busy box renders slowly; page-side waits get this long.
-const SLOW = 170000;
 const MORE_CYCLES = 20;
-const CORS = { name: 'access-control-allow-origin', value: '*' };
-const png = (buf) => ({ headers: [{ name: 'content-type', value: 'image/png' }, CORS], body: buf.toString('base64') });
-
-async function stubNetwork(session, { docUrl, siteOrigin, held = null }) {
-  session.on('Fetch.requestPaused', async (p) => {
-    const { requestId, request, responseStatusCode, responseHeaders } = p;
-    if (responseStatusCode !== undefined) {
-      const headers = (responseHeaders || []).filter((h) => h.name.toLowerCase() !== 'content-security-policy');
-      await settlePaused(session.send, 'Fetch.continueResponse', { requestId, responseCode: responseStatusCode, responseHeaders: headers });
-      return;
-    }
-    const url = request.url;
-    let answer = null;
-    if (url.startsWith(SOURCES.terrainDem.origin)) {
-      const m = /\/(\d+)\/(\d+)\/(\d+)\.png/.exec(url);
-      if (m) answer = png(terrariumTilePng(Number(m[1]), Number(m[2]), Number(m[3])));
-    } else if (url.startsWith(SOURCES.usgsTopo.origin)) answer = png(greyBasePng());
-    else if (held && url.startsWith(SOURCES.usgs3depHillshade.origin)) { held.push(requestId); return; }
-    if (answer) {
-      await settlePaused(session.send, 'Fetch.fulfillRequest', { requestId, responseCode: 200, responseHeaders: answer.headers, body: answer.body });
-    } else if (url.startsWith(siteOrigin) || url.startsWith('data:') || url.startsWith('blob:')) {
-      await settlePaused(session.send, 'Fetch.continueRequest', { requestId });
-    } else {
-      await settlePaused(session.send, 'Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' });
-    }
-  });
-  await session.send('Fetch.enable', {
-    patterns: [{ urlPattern: '*', requestStage: 'Request' }, { urlPattern: docUrl, requestStage: 'Response' }],
-  });
-}
-
-const press3d = `document.querySelector('.qc-terrain-open').click(); void 0;`;
-const pressTwice = `(() => { const b = document.querySelector('.qc-terrain-open'); b.click(); b.click(); })()`;
-const escapeKey = `document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })); void 0;`;
-const pressClose = `document.querySelector('.qc-terrain-controls .qc-terrain-close').click(); void 0;`;
-const canvasPresent = `Boolean(document.querySelector('.qc-terrain-dialog canvas'))`;
-const canvasGone = `!document.querySelector('.qc-terrain-dialog canvas')`;
-const dialogHidden = `(() => { const d = document.querySelector('.qc-terrain-dialog'); return !d || d.hidden; })()`;
-const containers = `document.querySelectorAll('.qc-terrain-canvas').length`;
-const mapCount = `window.qcTerrainView.debug().maps`;
-
-async function freshPage(t, { held = null } = {}) {
-  const site = await startSiteServer();
-  const docUrl = `${site.origin}/quiet-corners/`;
-  const session = await connectSession();
-  t.after(async () => { session.close(); await site.close(); });
-  await session.send('Page.enable');
-  await session.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
-  await stubNetwork(session, { docUrl, siteOrigin: site.origin, held });
-  await session.navigate(docUrl);
-  await readyDashboard(session, { ms: 60000 });
-  return session;
-}
-
-/** One 3D open and close, by Escape or by the panel's own Close button. */
-async function cycle(session, i) {
-  await session.evaluate(press3d);
-  await waitInPage(session, `cycle ${i}: a canvas in the terrain dialog`, canvasPresent, SLOW, null);
-  await session.evaluate(i % 2 ? pressClose : escapeKey);
-  await waitInPage(session, `cycle ${i}: the terrain dialog to hide`, dialogHidden, 15000, null);
-  await waitInPage(session, `cycle ${i}: the terrain canvas to be gone`, canvasGone, 15000, null);
-}
-
-/** One forced collection, then the browser's own counters. */
-async function readOnce(session) {
-  await session.send('HeapProfiler.collectGarbage');
-  const { metrics } = await session.send('Performance.getMetrics');
-  return Object.fromEntries(metrics.map((m) => [m.name, m.value]));
-}
 
 /** Collect garbage until the counters stop moving, then read the three numbers that must not
  *  differ (and the heap, for the record). One collection is not always enough: a listener on an
