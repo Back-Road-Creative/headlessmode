@@ -17,6 +17,7 @@
     "scripts/qcm/card-over-panels-browser.test.mjs",
     "scripts/qcm/check-built-html.test.mjs",
     "scripts/qcm/check-github-links.test.mjs",
+    "scripts/qcm/choose-example-area-wait-browser.test.mjs",
     "scripts/qcm/control-register.test.mjs",
     "scripts/qcm/county-fill-browser.test.mjs",
     "scripts/qcm/csp-headroom.test.mjs",
