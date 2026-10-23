@@ -1,6 +1,6 @@
 ---
-title: "Band Coach — an adaptive practice coach for 26 instruments"
-description: "A free practice coach for 26 instruments: pitch and timing feedback, ear training, theory, song practice and progress tracking in one downloadable file."
+title: "Band Coach — an adaptive practice coach for 27 instruments"
+description: "A free practice coach for 27 instruments: pitch and timing feedback, ear training, theory, song practice and progress tracking in one downloadable file."
 date: 2026-09-19
 draft: false
 tags: ["open-source", "music", "practice", "web-midi"]
@@ -22,19 +22,19 @@ Songs are practiced the same way. Open a tune and it is split into graded steps 
 2. Open the file in Chrome or Edge. The app's own MIDI message names those two browsers; without Web MIDI it still accepts screen keys and computer keys.
 3. Allow the microphone, or connect a MIDI keyboard. Keyboard uses MIDI, on-screen keys or computer keys; every other instrument listens through the microphone.
 
-Progress is saved in the browser's local storage, so a different browser or profile starts empty. Use "Save a backup" in the side rail's "More options" to download `band-coach-progress.json`, and "Restore a backup" to load it again. "Check for updates" in the same menu asks the Band Coach website for the latest version number and sends nothing about your playing; it is the only network request in the release I checked (v1.9.0).
+Progress is saved in the browser's local storage, so a different browser or profile starts empty. Use "Save a backup" in the side rail's "More options" to download `band-coach-progress.json`, and "Restore a backup" to load it again. "Check for updates" in the same menu asks the Band Coach website for the latest version number and sends nothing about your playing; it is the only network request in the release I checked (v1.10.0).
 
 ## Instruments
 
-Band Coach v1.9.0 has 26 instruments, each with its own graded levels:
+Band Coach v1.10.0 has 27 instruments, each with its own graded levels:
 
 - **Keys and voice:** Keyboard, Voice.
 - **Fretted:** Guitar, Bass, 5-string bass, Ukulele, Baritone ukulele, Low-G ukulele, Mandolin, 5-string banjo.
 - **Bowed:** Violin, Viola, Cello, Double bass.
 - **Wind and brass:** Trumpet (B flat), Trombone, French horn (F), Clarinet (B flat), Alto sax (E flat), Tenor sax (B flat), Flute, Oboe, Descant recorder, Tin whistle (D).
-- **Other:** Harmonica, Mallet percussion (bells).
+- **Other:** Harmonica, Mallet percussion (bells), Drum kit.
 
-Drums are not in Band Coach; the app points to a separate page, Kit Coach.
+Drum kit has its own trainer. It takes an electronic kit over MIDI, computer keys, a click on the drawn kit, or the microphone. The microphone can only tell kick, snare and hi-hat apart; a MIDI kit names every piece.
 
 <img src="/img/band-coach/instrument-picker.png" alt="Band Coach's instrument picker: one button per instrument family, with More tools and More ways to practise closed below" width="1440" height="900" loading="lazy">
 
