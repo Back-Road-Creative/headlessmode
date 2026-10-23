@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { findChromium, launch } from './helpers/browser.mjs';
 import { startSiteServer, siteIsBuilt } from './helpers/site-server.mjs';
-import { readyDashboard, waitInPage } from './helpers/waits.mjs';
+import { readyDashboard, waitInPage, watchTimers, timersIdle } from './helpers/waits.mjs';
 import { trustedClick } from './helpers/trusted-click.mjs';
 import { SOURCES } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-registry.js';
 import { VIEWPORT_FETCH } from '../../themes/headlessmode/static/js/quiet-corners-maps/app-state.js';
@@ -30,6 +30,9 @@ const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this p
     : false;
 
 const CEILING = 30000;
+// The pause between the mouse moves of a drag: it is the drag's speed, so the card is still
+// being carried when the button goes up and inertia takes over. A stimulus, not a wait.
+const DRAG_STEP_MS = 16;
 const ELEVATION_URL = 'elevation.nationalmap.gov';
 const CATALOG_URL = SOURCES.caltransCctv.serviceUrl;
 const CATALOG = JSON.parse(readFileSync(new URL('fixtures/caltrans-cctv-d05-2026-09-27.min.json', import.meta.url), 'utf8'));
@@ -154,6 +157,8 @@ async function dashboard(t, viewport, hash = '') {
   const page = await launch(CHROMIUM, 'about:blank', { viewport, args: ['--hide-scrollbars'] });
   t.after(() => page.close());
   await page.send('Page.addScriptToEvaluateOnNewDocument', { source: stubSource });
+  // From the first script on, so the browse debounce a move arms is a timer `still` can see.
+  await page.send('Page.addScriptToEvaluateOnNewDocument', { source: watchTimers(VIEWPORT_FETCH.settleMs) });
   await page.navigate(`${site.origin}/quiet-corners/${hash}`);
   await readyDashboard(page, { data: false, ms: CEILING });
   await page.evaluate('window.scrollTo(0, 0); void 0;');
@@ -169,7 +174,7 @@ async function openNameCard(page, below = null) {
     await page.evaluate(`(() => { const h = document.getElementById('qc-map').getBoundingClientRect().height;
       window.qcMap.panBy([0, Math.round(h / 2 - ${below})], { animate: false }); })(); void 0;`);
     await waitInPage(page, 'the pan to end', `window.__copMoves > ${moves}`, CEILING, null);
-    await page.evaluate(`new Promise((r) => setTimeout(r, ${VIEWPORT_FETCH.settleMs + 100}))`);
+    await debounceFired(page);
   }
   await page.evaluate(`window.qcSelectName(${JSON.stringify(HAYWOOD)}); void 0;`);
   await waitInPage(page, 'the name card with its elevation',
@@ -180,11 +185,13 @@ async function openNameCard(page, below = null) {
 
 // A move is not over at its moveend: VIEWPORT_FETCH.settleMs later the viewport browse
 // runs a source pass, whose renderSources redraws the names layer and re-opens the
-// selected card, fading it in again (main.js renderNames). So wait out that debounce,
-// as readyDashboard does (waits.mjs), then two polls in a row that agree -- on the
-// card's box and on how many times a card has opened -- with its fade-in finished.
+// selected card, fading it in again (main.js renderNames). So wait for that debounce's
+// timer to be gone (watchTimers, installed with the page), then two polls in a row that
+// agree -- on the card's box and on how many times a card has opened -- with its
+// fade-in finished.
+const debounceFired = (page) => waitInPage(page, 'the viewport browse debounce to fire', timersIdle(VIEWPORT_FETCH.settleMs), CEILING, null);
 const still = async (page, label) => {
-  await page.evaluate(`new Promise((r) => setTimeout(r, ${VIEWPORT_FETCH.settleMs + 100}))`);
+  await debounceFired(page);
   return waitInPage(page, label,
     `(() => { const w = document.querySelector('.leaflet-popup-content-wrapper'); if (!w) return false;
       if (getComputedStyle(w.closest('.leaflet-popup')).opacity !== '1') return false;
@@ -274,7 +281,7 @@ test('desktop: the card\'s tip stays on its pin through a pan, an animated pan, 
     await send('mousePressed', from.x, from.y);
     for (let k = 1; k <= 8; k++) {
       await send('mouseMoved', from.x + k * 12, from.y + k * 6);
-      await page.evaluate('new Promise((r) => setTimeout(r, 16))');
+      await page.evaluate(`new Promise((r) => setTimeout(r, ${DRAG_STEP_MS}))`);
     }
     await send('mouseReleased', from.x + 96, from.y + 48);
   }, 'a drag with inertia');

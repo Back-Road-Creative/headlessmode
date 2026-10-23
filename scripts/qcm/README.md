@@ -279,7 +279,9 @@ Unsupported geometry domains (each returns `unavailable` or `not applicable` wit
 
 ## Waits, not sleeps
 
-A fixed sleep in a browser proof is a bet on load: it fails on a busy box and spends its whole length on an idle one. `helpers/waits.mjs` has the named waits (`waitInPage`, `qcWait`, `qcMoves`, `qcMeasured`); a proof waits on what its next assertion reads. `chooseExampleArea` waits for the viewport browse debounce to have fired by watching the page's own timers of `VIEWPORT_FETCH.settleMs`, since `main.js` keeps that timer private and exposes no idle flag. `choose-example-area-wait-browser.test.mjs` holds that contract; `no-blind-sleeps.test.mjs` keeps `new Promise((r) => setTimeout(r, N))` out of `panel-shell-browser.test.mjs`, `a11y-dynamic-browser.test.mjs` and `chooseExampleArea`. A sleep that is the point of a proof (asserting something does NOT happen) is the exception: write it against the app's debounce constant, not a literal, and say why; the guard matches only a `=> setTimeout(cb, N)` sleep with a numeric literal delay, under any callback name.
+A fixed sleep in a browser proof is a bet on load: it fails on a busy box and spends its whole length on an idle one. `helpers/waits.mjs` has the named waits (`waitInPage`, `qcWait`, `qcMoves`, `qcMeasured`); a proof waits on what its next assertion reads. `chooseExampleArea` waits for the viewport browse debounce to have fired by watching the page's own timers of `VIEWPORT_FETCH.settleMs`, since `main.js` keeps that timer private and exposes no idle flag. The same watch is exported for any delay: `watchTimers(ms, ...)` (install it before the thing that arms the timer, at document start for a page that arms one while loading) and `timersIdle(ms)` (true when no watched timer of that length is pending; it throws for an unwatched delay, so a wait cannot pass for the wrong reason). `choose-example-area-wait-browser.test.mjs` holds that contract.
+
+`no-blind-sleeps.test.mjs` keeps numeric-literal sleeps (`=> setTimeout(cb, N)`, `sleep(N)`) and `settleMs + N` margins out of `panel-shell-browser.test.mjs`, `a11y-dynamic-browser.test.mjs`, `chooseExampleArea`, `browser-port.test.mjs`, `card-over-panels-browser.test.mjs`, `helpers/place-shards.mjs`, `phone-map-chrome-browser.test.mjs`, `print-clear-journeys-browser.test.mjs` and `road-labels-browser.test.mjs`. In those files every millisecond constant is a named `UPPER_CASE` value with a one-line reason. What remains is pacing, not waiting: `POLL_MS` (browser-port's poll interval), `DRAG_STEP_MS` (a drag's step gap), `BURST_GAP_MS` (the gap between the moves of a burst), `FRAGMENT_THROTTLE_MS` and `ROAD_DEBOUNCE_MS` (not pacing: copies of app constants that are the key a timer watch looks the app's timer up by; each file has a source-reading test that fails when the app's value moves, since `timersIdle` cannot tell a moved timer from an idle one). A sleep that is the point of a proof (asserting something does NOT happen) is the exception: write it against the app's debounce constant, not a literal, and say why.
 
 ## Helpers
 
@@ -298,7 +300,7 @@ A fixed sleep in a browser proof is a bet on load: it fails on a busy box and sp
 | `helpers/site-server.mjs` | Serves `public/` over http; `siteIsBuilt` and `PUBLIC_DIR`. |
 | `helpers/test-concurrency.mjs` | Picks `--test-concurrency` from free memory and load, capped at `slots - reserve` so no file queues on a slot it may not take (CI 4, local 2); `QCM_TEST_CONCURRENCY` overrides. |
 | `helpers/trusted-click.mjs` | One real CDP click on a target that is visible, uncovered and still. |
-| `helpers/waits.mjs` | Waits for named conditions (map ready, data in, example area settled) with a readable failure. |
+| `helpers/waits.mjs` | Waits for named conditions (map ready, data in, example area settled, a watched timer idle) with a readable failure. |
 
 ## Production smoke check
 
