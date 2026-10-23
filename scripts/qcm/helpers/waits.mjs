@@ -286,6 +286,22 @@ export function startupBudget(ms) {
   return Math.max(ms ?? WAIT_MS, WAIT_MS);
 }
 
+/** Page-side: the timers of the browse debounce's length (VIEWPORT_FETCH.settleMs)
+ *  that are set and not yet fired or cleared, as `window.qcDebounces`. Installed on
+ *  the first call per page; timers set before it are not seen, which is why it is
+ *  installed before the click that arms the one chooseExampleArea waits on. */
+const DEBOUNCE_WATCH = `if (!window.qcDebounces) {
+      const set = window.setTimeout, clear = window.clearTimeout;
+      window.qcDebounces = new Set();
+      window.setTimeout = function (fn, ms, ...rest) {
+        if (ms !== ${VIEWPORT_FETCH.settleMs}) return set.call(this, fn, ms, ...rest);
+        const h = set.call(this, (...a) => { window.qcDebounces.delete(h); return fn(...a); }, ms, ...rest);
+        window.qcDebounces.add(h);
+        return h;
+      };
+      window.clearTimeout = function (h) { window.qcDebounces.delete(h); return clear.call(this, h); };
+    }`;
+
 /** Choose the example area, then wait until a proof may tick a layer and press
  *  Check sources without a second fetch racing the first.
  *
@@ -302,17 +318,21 @@ export function startupBudget(ms) {
  *  the button's pass usually finished first there.
  *
  *  So: click, wait for the map to stop moving (qcMoves, so the "map never
- *  moved" checks downstream measure a settled view), then let the debounce
- *  fire before returning. The second wait is a page-side timer armed AFTER the
- *  map settled, with a longer delay than the debounce: one event loop, so it
- *  runs after the debounce did. That is an ordering, not a bet on load. With no
- *  layer on at that moment the browse plan is 'none-on' and fetches nothing. */
+ *  moved" checks downstream measure a settled view), then wait for the debounce
+ *  to have fired. main.js keeps that timer in a module variable and exposes no
+ *  idle flag, so DEBOUNCE_WATCH records every page timer of the debounce's own
+ *  length from the moment it is set until it fires or is cleared; the debounce
+ *  has fired once none is left. That is the condition itself, not a margin past
+ *  it: this used to sleep VIEWPORT_FETCH.settleMs + 100 after the map settled,
+ *  every call. With no layer on at that moment the browse plan is 'none-on' and
+ *  fetches nothing. */
 export async function chooseExampleArea(page) {
   await page.evaluate(`(async () => {
+    ${DEBOUNCE_WATCH}
     const settled = qcMoves();
     document.getElementById('qcm-use-example').click();
     await settled('the map stopped moving after choosing the example area');
-    await new Promise((r) => setTimeout(r, ${VIEWPORT_FETCH.settleMs + 100}));
+    await qcWait('the viewport browse debounce to fire', () => window.qcDebounces.size === 0);
     return true;
   })()`);
 }

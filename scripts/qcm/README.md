@@ -277,6 +277,10 @@ Unsupported geometry domains (each returns `unavailable` or `not applicable` wit
 
 `a11y-dynamic-browser.test.mjs` drives the built `/quiet-corners/` app (the Field Maps app; `/quiet-corners/maps/` is its documentation page, checked as one state) offline and holds it to zero axe-core WCAG 2.2 A/AA findings in each state a reader reaches: first load, the dock panels, the phone sheet at half and expanded, the place finder, a name card and the 3D dialog (skipped, said so, when the browser has no WebGL). "Needs review" counts as a finding. A waiver is a row in `EXCLUSIONS` naming the rule, a selector and a reason that is true today; where axe cannot read what is behind a label or glyph the row also carries `plate`, and the test measures that text against its own background itself. It also asserts the keyboard contract (Tab order, focus never hidden, Escape returns focus), 44 px touch targets at 390 px, 200% text without clipping or sideways scroll, reflow at 320 px, and the contrast and backplate opacity of the labels the app paints on the map. Not asserted yet: with the phone sheet expanded, five map controls stay in the Tab order under the sheet (Zoom in, Search places, Share view, Use my location, Map credits).
 
+## Waits, not sleeps
+
+A fixed sleep in a browser proof is a bet on load: it fails on a busy box and spends its whole length on an idle one. `helpers/waits.mjs` has the named waits (`waitInPage`, `qcWait`, `qcMoves`, `qcMeasured`); a proof waits on what its next assertion reads. `chooseExampleArea` waits for the viewport browse debounce to have fired by watching the page's own timers of `VIEWPORT_FETCH.settleMs`, since `main.js` keeps that timer private and exposes no idle flag. `choose-example-area-wait-browser.test.mjs` holds that contract; `no-blind-sleeps.test.mjs` keeps `new Promise((r) => setTimeout(r, N))` out of `panel-shell-browser.test.mjs`, `a11y-dynamic-browser.test.mjs` and `chooseExampleArea`. A sleep that is the point of a proof (asserting something does NOT happen) is the exception: write it against the app's debounce constant, not a literal, and say why; the guard matches only a `=> setTimeout(cb, N)` sleep with a numeric literal delay, under any callback name.
+
 ## Helpers
 
 | File | What it does |
@@ -294,7 +298,7 @@ Unsupported geometry domains (each returns `unavailable` or `not applicable` wit
 | `helpers/site-server.mjs` | Serves `public/` over http; `siteIsBuilt` and `PUBLIC_DIR`. |
 | `helpers/test-concurrency.mjs` | Picks `--test-concurrency` from free memory and load, capped at `slots - reserve` so no file queues on a slot it may not take (CI 4, local 2); `QCM_TEST_CONCURRENCY` overrides. |
 | `helpers/trusted-click.mjs` | One real CDP click on a target that is visible, uncovered and still. |
-| `helpers/waits.mjs` | Waits for named conditions (map ready, data in) with a readable failure. |
+| `helpers/waits.mjs` | Waits for named conditions (map ready, data in, example area settled) with a readable failure. |
 
 ## Production smoke check
 
