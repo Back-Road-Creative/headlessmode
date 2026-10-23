@@ -277,6 +277,22 @@ Unsupported geometry domains (each returns `unavailable` or `not applicable` wit
 
 `a11y-dynamic-browser.test.mjs` drives the built `/quiet-corners/` app (the Field Maps app; `/quiet-corners/maps/` is its documentation page, checked as one state) offline and holds it to zero axe-core WCAG 2.2 A/AA findings in each state a reader reaches: first load, the dock panels, the phone sheet at half and expanded, the place finder, a name card and the 3D dialog (skipped, said so, when the browser has no WebGL). "Needs review" counts as a finding. A waiver is a row in `EXCLUSIONS` naming the rule, a selector and a reason that is true today; where axe cannot read what is behind a label or glyph the row also carries `plate`, and the test measures that text against its own background itself. It also asserts the keyboard contract (Tab order, focus never hidden, Escape returns focus), 44 px touch targets at 390 px, 200% text without clipping or sideways scroll, reflow at 320 px, and the contrast and backplate opacity of the labels the app paints on the map. Not asserted yet: with the phone sheet expanded, five map controls stay in the Tab order under the sheet (Zoom in, Search places, Share view, Use my location, Map credits).
 
+## Leak cycles (QQA-13c)
+
+`leak-cycles-browser.test.mjs` opens and closes the 3D panel once, reads the browser's own counters after a forced garbage collection (`HeapProfiler.collectGarbage`, repeated until two reads agree), runs 20 more cycles (Escape on even ones, the panel's Close button on odd ones) and reads again. `JSEventListeners` and `Nodes` (`Performance.getMetrics`) and the terrain panel's map count must be **equal**, not close. It also holds, exactly: the document has no more `keydown` listeners after a close than before the first open (`DOMDebugger.getEventListeners`); a second press while the MapLibre import is in flight builds no second map; a close during that import builds none for the closed press; a second calibration or key-sheet download revokes the first blob URL once; and a hillshade picture that lands after its layer was switched off makes no blob URL, is not put back on the map and does not rewrite the report row (the slot hands out a `ticket()` before the fetch, and `release()` outdates it). The unit side is `leak-guards.test.mjs` (`createUrlSlot`, `createLru`, `ELEVATION_CACHE_LIMIT`, and a source contract that `main.js` uses them for the two download links, the elevation cache and the hillshade picture).
+
+There is **no heap-size assertion**: no noise floor has been recorded, so any limit would be a guess. The test prints both heap readings as diagnostics. Five runs on the dev container (Chromium headless, software GL, `--disable-gpu`), `JSHeapUsedSize` in bytes after the forced collection:
+
+| run | after 1 cycle | after 21 cycles | growth |
+| --- | --- | --- | --- |
+| 1 | 31,974,256 | 33,135,188 | 1,160,932 |
+| 2 | 31,960,420 | 33,122,260 | 1,161,840 |
+| 3 | 31,975,928 | 33,139,216 | 1,163,288 |
+| 4 | 31,973,240 | 33,135,408 | 1,162,168 |
+| 5 | 31,970,680 | 33,138,904 | 1,168,224 |
+
+Run to run the readings differ by at most about 15.5 KB after one cycle and 17 KB after 21; the growth differs by 7.3 KB. The heap does grow about 1.16 MB (about 58 KB a cycle) while listeners and nodes stay flat. That is JS-side state the counters cannot see; it is recorded here, not asserted, and not yet explained. Whoever sets a heap limit should start from these spreads and re-record them on the box that will enforce it.
+
 ## Helpers
 
 | File | What it does |
