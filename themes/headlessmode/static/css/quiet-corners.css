@@ -1132,6 +1132,24 @@ dialog::backdrop {
     #qc-sheet[data-sheet="expanded"] {
         height: 100%;
     }
+    /* On a tall phone a half sheet leaves the map at least 35% of the stage
+       whatever else sits in it (36% here: the stage's border and pixel rounding
+       take a point back; 35% is the floor the sheet's own header comment
+       cites). The print-area strip and the surface caption share the stage with
+       the map and the sheet, and the sheet's 45% did not give way to them: with
+       a print area chosen the map was left ~31% of the stage at 390x844. The
+       map's floor makes the flex split take the shortfall from the sheet, the
+       one box here that can shrink (`flex-shrink: 1`, `min-height: 0` above).
+       Half only: collapsed is a bar and expanded is a deliberate full-stage
+       read. Not on a short phone (320x568): the stage is ~400px, the sheet's
+       grip bar and four summaries alone need ~150px, and a floor there pushes
+       them out of the frame, which clips them. scripts/qcm/panel-shell-browser.test.mjs
+       holds both. */
+    @media (min-height: 700px) {
+        #qc-map-container:has(#qc-sheet[data-sheet="half"]) #qc-map {
+            min-height: 36%;
+        }
+    }
     /* The grip bar: starts `hidden` in the markup so a no-JS/pre-hydration
        load never shows a drag handle that does nothing -- quiet-corners.js's
        sheet wiring clears the attribute once it has attached the handle's
