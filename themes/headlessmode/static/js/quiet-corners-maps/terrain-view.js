@@ -742,7 +742,15 @@ export function attachTerrainControl(map, getArea, { L = window.L, doc = documen
     return dialog;
   }
 
+  // A press builds the panel only after an async import. `opening` holds a second press out
+  // until the first has built or given up; `openSeq` lets a close that lands mid-import cancel
+  // the open it interrupted, so a closed press never builds a map into a hidden dialog.
+  let opening = false, openSeq = 0;
+
   function closePanel() {
+    openSeq += 1;
+    opening = false;
+    doc.removeEventListener('keydown', onKeydown);
     panel?.close();
     if (dialog) dialog.hidden = true;
     opener?.focus();
@@ -751,6 +759,13 @@ export function attachTerrainControl(map, getArea, { L = window.L, doc = documen
   function onKeydown(e) { if (e.key === 'Escape') closePanel(); }
 
   async function openPanel() {
+    if (opening || panel?.isOpen()) return;
+    opening = true;
+    const mine = ++openSeq;
+    try { await buildPanel(mine); } finally { if (mine === openSeq) opening = false; }
+  }
+
+  async function buildPanel(mine) {
     if (!dialog) dialog = buildDialog();
     dialog.hidden = false;
     dialog.innerHTML = '';
@@ -771,6 +786,7 @@ export function attachTerrainControl(map, getArea, { L = window.L, doc = documen
       const load = importer || (() => import(/* webpackIgnore: true */ VENDOR_MODULE_URL));
       maplibregl = await load();
     } catch {
+      if (mine !== openSeq) return;
       const p = doc.createElement('p');
       p.className = 'qc-terrain-fallback';
       p.textContent = COPY.loadFailed;
@@ -778,6 +794,7 @@ export function attachTerrainControl(map, getArea, { L = window.L, doc = documen
       addCloseButton();
       return;
     }
+    if (mine !== openSeq) return;
     ensureCss(doc);
     const container = doc.createElement('div');
     container.className = 'qc-terrain-canvas';
