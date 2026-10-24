@@ -2,7 +2,7 @@
   "product": "waypost",
   "name": "Waypost",
   "release_source": "manual",
-  "source_repo": null,
+  "source_repo": "Back-Road-Creative/waypost",
   "version": null,
   "released_at": null,
   "release_url": null,
@@ -16,5 +16,5 @@
     "pages": 5
   },
   "media_source": null,
-  "notes": "waypost has no product repository to tag a release against. The demo bundle's manifest.json 'source' (62f9408) is honestly a SITE commit (PR #331) that built the bundle, not a product ref."
+  "notes": "Waypost's repository is public but has no release or tag to read. The demo bundle's manifest.json 'source' (62f9408) is honestly a SITE commit (PR #331) that built the bundle, not a product ref."
 }
