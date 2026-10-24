@@ -74,7 +74,7 @@ import { mountSavedPlaces, statusTextFor, CAMERA_NO_LOCATION } from './saved-pla
 // layerReport aliased: app-state.js already exports its own layerReport (the printable-vector
 // summary line); this is camera-layer.js's own, for the roadCameras report paragraph only.
 import { cameraList, cameraListStatus, cameraRowText, listPlace, listLoadState, reachBox, CAMERA_PURPOSES, NEAR_RADIUS_KM,
-  SEARCH_RADIUS_KM, SEARCH_MAX_FILES, SEARCH_HINT, SAVING_UNAVAILABLE, searchBox, searchFiles, searchStatus, filesHolding, savedCameraRows, savedRowText, savedListStatus,
+  SEARCH_RADIUS_KM, SEARCH_MAX_FILES, SEARCH_HINT, SAVING_UNAVAILABLE, searchBox, searchFiles, searchStatus, listAnnouncement, filesHolding, savedCameraRows, savedRowText, savedListStatus,
   camerasInView, layerReport as cameraLayerReport, cardLines as cameraCardLines, ageText as cameraAgeText, stillPlan as cameraStillPlan, PICTURE_TIMEOUT_MS, cameraRef, canonicalCameraRef, findCamera, viewTouchesCoverage, viewTouchesLayer, cameraStatus,
   MIN_PIN_ZOOM, padView, filesInView, failureProvider, pinsToDraw, unloadedFilesNear, nearestCoverage, providerRow as cameraProviderRow, aboutLinkText as cameraAboutLinkText } from './camera-layer.js';
 import { expandSnapshot } from './camera-snapshot.js';
@@ -1784,7 +1784,7 @@ function renderCameraEntry() {
 const CAMERA_LIST_DELAY_MS = 150;
 let cameraListHost = null, cameraListTimer = 0, cameraListRowsKey = '', cameraListScope = 'view', cameraNearPending = false;
 // QQA-16b: the latest "Search this area" ({ centre, pending | result }), and the Saved scope's reads.
-let cameraSearch = null, cameraSearchToken = 0, savedLoading = false, savedIndexFailed = false;
+let cameraSearch = null, cameraSearchToken = 0, savedLoading = false, savedIndexFailed = false, savedFailedCount = 0;
 const cameraListPurposes = new Set(CAMERA_PURPOSES.map((p) => p.id));
 
 function buildCameraList() {
@@ -1807,6 +1807,8 @@ function buildCameraList() {
     input.type = 'radio'; input.name = 'qcm-camera-scope'; input.id = `qcm-camera-scope-${value}`; input.value = value;
     input.checked = cameraListScope === value;
     input.addEventListener('change', () => { cameraListScope = value; savedIndexFailed = false; scheduleCameraList(); });
+    // QQA-16c: a later press of Saved, when it is already the chosen scope (no change event), retries what failed once.
+    if (value === 'saved') input.addEventListener('click', () => { retrySavedFailures(savedCameraPlaces(savedStore.read())); scheduleCameraList(); });
     label.append(input, ` ${text}`);
     scopes.append(label);
   }
@@ -1840,14 +1842,19 @@ function buildCameraList() {
   }
   const saving = document.createElement('p');
   saving.id = 'qcm-camera-list-saving'; saving.className = 'qcm-hint'; saving.hidden = true;
+  // QQA-16c: the status line is plain text (it is rewritten on every state, Loading included); the polite
+  // announcer beside it speaks only a settled answer, and only when that answer's words change.
   const status = document.createElement('p');
   status.id = 'qcm-camera-list-status'; status.className = 'qcm-camera-list-status';
-  status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+  const announce = document.createElement('p');
+  announce.id = 'qcm-camera-list-announce'; announce.className = 'qcm-camera-list-announce';
+  announce.setAttribute('role', 'status'); announce.setAttribute('aria-live', 'polite');
   const rows = document.createElement('ul');
   rows.id = 'qcm-camera-list-rows'; rows.className = 'qcm-camera-list-rows'; rows.setAttribute('aria-labelledby', 'qcm-camera-list-title');
+  rows.setAttribute('role', 'list');   // list-style: none drops the list role in some browsers; the rows are still one list
   const notes = document.createElement('p');
   notes.id = 'qcm-camera-list-notes'; notes.className = 'qcm-camera-list-notes'; notes.hidden = true;
-  host.append(title, scopes, search, radius, purposes, saving, status, rows, notes);
+  host.append(title, scopes, search, radius, purposes, saving, status, announce, rows, notes);
   cameraListHost = host; cameraListRowsKey = '';
   return host;
 }
@@ -1963,20 +1970,37 @@ async function searchCameraArea() {
   speak({ pending: true });
   let index;
   try { index = await loadCameraIndex(); } catch (err) { speak({ indexFailed: true }); return; }
-  const { rows, total } = searchFiles({ files: index.files, box: searchBox(view, centre), layers: onIds, centre, max: SEARCH_MAX_FILES });
-  for (const r of rows) cameraFileFailed.delete(r.file);
-  const wanted = rows.filter((r) => !cameraFiles.has(r.file));
-  const results = await Promise.allSettled(wanted.map(loadCameraFile));
-  results.forEach((r, i) => { if (r.status === 'rejected') cameraFileFailed.add(wanted[i].file); });
-  for (const id of onIds) syncCameraPins(id);
-  renderCameraEntry();
-  const failed = rows.filter((r) => cameraFileFailed.has(r.file)).length;
-  speak({ total, shown: rows.length, read: rows.length - failed, failed });
+  // QQA-16c: anything that throws after the index read ends the search honestly, never as Searching forever.
+  try {
+    const { rows, total } = searchFiles({ files: index.files, box: searchBox(view, centre), layers: onIds, centre, max: SEARCH_MAX_FILES });
+    for (const r of rows) cameraFileFailed.delete(r.file);
+    const wanted = rows.filter((r) => !cameraFiles.has(r.file));
+    const results = await Promise.allSettled(wanted.map(loadCameraFile));
+    results.forEach((r, i) => { if (r.status === 'rejected') cameraFileFailed.add(wanted[i].file); });
+    for (const id of onIds) syncCameraPins(id);
+    renderCameraEntry();
+    const failed = rows.filter((r) => cameraFileFailed.has(r.file)).length;
+    speak({ total, shown: rows.length, read: rows.length - failed, failed });
+  } catch (err) { speak({ searchFailed: true }); }
+}
+
+const savedCameraPlaces = (result) => (result.places || []).filter((p) => p.ref.startsWith('camera:'));
+const savedLayerOf = (p) => cameraLayerFor(p.ref.split(':')[1]);
+
+/** Forgets what failed for the saved cameras (the index, and the files that can hold them) so the next
+ *  read asks again, once. A press of Saved and a change in the saved count are the two ways to get here. */
+function retrySavedFailures(places) {
+  savedIndexFailed = false; savedFailedCount = 0;
+  const files = cameraIndex ? cameraIndex.files : [];
+  for (const p of places) {
+    const layer = savedLayerOf(p);
+    if (layer) for (const r of filesHolding(p, files, layer)) cameraFileFailed.delete(r.file);
+  }
 }
 
 /** The files that can hold the saved cameras, read once on the reader's choice of the Saved scope
- *  (whatever the layers' switches and the zoom). A file that failed is asked again only on a new choice
- *  of the scope's first press; the index is not asked again after a failure until then. */
+ *  (whatever the layers' switches and the zoom). A file or the index that failed is asked again only
+ *  by a later press of Saved or a change in the saved count (retrySavedFailures), once each. */
 async function loadSavedCameras(places, layerOf) {
   if (savedLoading || savedIndexFailed) return;
   const missing = () => {
@@ -1987,10 +2011,11 @@ async function loadSavedCameras(places, layerOf) {
   if (cameraIndex && !missing().length) return;
   savedLoading = true;
   try {
-    try { await loadCameraIndex(); } catch (err) { savedIndexFailed = true; return; }
+    try { await loadCameraIndex(); } catch (err) { savedIndexFailed = true; savedFailedCount = places.length; return; }
     const wanted = missing();
     const results = await Promise.allSettled(wanted.map(loadCameraFile));
     results.forEach((r, i) => { if (r.status === 'rejected') cameraFileFailed.add(wanted[i].file); });
+    if (results.some((r) => r.status === 'rejected')) savedFailedCount = places.length;   // the count a retry is measured against
   } finally { savedLoading = false; scheduleCameraList(); }
 }
 
@@ -2003,22 +2028,37 @@ function paintListStatus(host, status) {
   const notesEl = host.querySelector('#qcm-camera-list-notes');
   write(notesEl, status.notes.join(' '));
   notesEl.hidden = status.notes.length === 0;
+  const said = listAnnouncement(status, { searchPending: !!cameraSearch && !!cameraSearch.pending });
+  if (said !== null) write(host.querySelector('#qcm-camera-list-announce'), said);
 }
 
 /** Replaces the rows when `key` says what they show has changed, so a pan never drops a keyboard
- *  user's focus. `items` are built only then. */
+ *  user's focus. `items` are built only then. QQA-16c: when the replace takes the focus out from under a
+ *  keyboard user, it goes back to the same camera's row (its button, or Save if that is where it was);
+ *  a row that is gone sends it to the list itself, never to the page. */
 function paintListRows(host, key, items) {
   if (key === cameraListRowsKey) return;
   cameraListRowsKey = key;
-  host.querySelector('#qcm-camera-list-rows').replaceChildren(...items());
+  const list = host.querySelector('#qcm-camera-list-rows');
+  const active = document.activeElement;
+  const held = active && active !== list && list.contains(active)
+    ? { ref: active.closest('li')?.dataset.ref, save: active.classList.contains('qcm-camera-save') } : null;
+  list.replaceChildren(...items());
+  if (!held) return;
+  paintSaveButtons(host);
+  const item = held.ref ? [...list.children].find((li) => li.dataset.ref === held.ref) : null;
+  const target = item && (item.querySelector(held.save ? 'button.qcm-camera-save' : 'button.qcm-camera-list-row') || item.querySelector('button'));
+  if (target && !target.disabled) { target.focus(); return; }
+  list.tabIndex = -1; list.focus();
 }
 
 /** The Saved scope: the cameras this browser saved, each found, or said to be gone, unchecked or
  *  being checked. Nothing is dropped from view because the operator's list lost it. */
 function renderSavedScope(host) {
   const result = savedStore.read();
-  const places = (result.places || []).filter((p) => p.ref.startsWith('camera:'));
-  const layerOf = (p) => cameraLayerFor(p.ref.split(':')[1]);
+  const places = savedCameraPlaces(result);
+  const layerOf = savedLayerOf;
+  if (savedFailedCount && places.length !== savedFailedCount) retrySavedFailures(places);   // QQA-16c: a new count is worth one more try
   if (places.length) loadSavedCameras(places, layerOf);
   const rows = savedCameraRows({
     saved: places, layerOf, files: cameraIndex ? cameraIndex.files : [],
@@ -2037,6 +2077,7 @@ function renderSavedScope(host) {
   paintListStatus(host, status);
   paintListRows(host, JSON.stringify(['saved', rows.map((r) => [r.place.ref, r.state])]), () => rows.map((row) => {
     const item = document.createElement('li');
+    item.dataset.ref = row.place.ref;
     const text = savedRowText(row, cameraProviderRow(row.place.ref.split(':')[1]));
     const listed = row.state === 'listed';
     const body = document.createElement(listed ? 'button' : 'span');
@@ -2107,6 +2148,7 @@ function renderCameraList() {
   const rows = shown ? found.listed : [];
   paintListRows(host, JSON.stringify([scope, rows.map((r) => [cameraRef(r.camera), near ? Math.round(r.km * 10) : 0])]), () => rows.map((row) => {
     const item = document.createElement('li');
+    item.dataset.ref = cameraRef(row.camera);
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'qcm-camera-list-row';
     const text = cameraRowText(row, { near });

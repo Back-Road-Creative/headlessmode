@@ -199,6 +199,9 @@
 .qcm-camera-list-scopes label, .qcm-camera-list-purposes label { display: inline-block; margin: 0 0.7rem 0 0; }
 .qcm-camera-purpose-count { color: #a3a3a3; font-size: 0.72rem; }
 .qcm-camera-list-status { margin: 0 0 0.3rem; color: #d4d4d8; }
+/* QQA-16c: the list's polite announcer. It speaks a settled count once, apart from the status line (which is
+   rewritten on every state, Loading included), and takes no room: same hiding as .qcm-preset-preview. */
+.qcm-camera-list-announce { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }
 .qcm-camera-list-status[data-status="outside-coverage"], .qcm-camera-list-status[data-status="filtered-out"], .qcm-camera-list-status[data-status="partial"], .qcm-camera-list-status[data-status="saving-unavailable"] { color: #fde68a; }
 .qcm-camera-list-status[data-status="unavailable"] { color: #fca5a5; }
 .qcm-camera-list-rows { margin: 0 0 0.3rem; padding: 0; list-style: none; max-height: 14rem; overflow-y: auto; }

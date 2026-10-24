@@ -484,12 +484,36 @@ removal drops every stored ref that shares it. `main.js` tracks the open camera 
 and repaints its Save button when a row or the saved-places panel changes the store; the card's press
 reads the store, not its own label. Camera snapshot schema 1 and the five layer ids are unchanged.
 
+QQA-16c polishes how the list behaves for a keyboard and screen-reader user. **Focus**: when a repaint
+replaces the rows (`paintListRows`) while focus is on a row, it returns to the same camera's row, or its
+Save button if that is where it was (rows carry `data-ref`); if that camera is gone it falls to the list
+(`#qcm-camera-list-rows`, `role="list"`, tabindex -1), never to the page. **Announcements**: the status
+line `#qcm-camera-list-status` is plain text; a separate visually hidden polite announcer
+`#qcm-camera-list-announce` speaks `listAnnouncement(status, { searchPending })`, which is null for a
+Loading line and while a search is pending, so a settled count is read once and only when its words change,
+and one Search press is two announcements (the search status's Searching and its result) plus the list's
+settled text. **Near wording**: the near scope's "Listing the nearest N of M" note says to narrow by
+purpose, not to zoom in. **Search failure**: a throw after the index read ends the search as "the search
+did not finish. Press the button to try again." (`searchStatus` `searchFailed`), never as Searching.
+**Saved retry**: after the Saved scope's index load fails, or the index reads and a camera file that holds a
+saved camera fails, pressing Saved again, or a change in the saved count, retries once
+(`retrySavedFailures` clears `savedIndexFailed` and drops those files from `cameraFileFailed`;
+`savedFailedCount` is the count the failure was measured against, so a retry that fails again waits for the
+next press or count change); the failed note says so. Nothing in the request path changes: no request
+carries a camera, and the address, history, title and share link are the same after a save or a search
+(J10t). The privacy guard is `helpers/leak-check.mjs` (`findLeak`): the camera's ref, the older ref, the
+`d05:<n>` tail and its name, raw, encoded or `+`-encoded, in a URL or body, plus the bare id as a query
+value or body token (a path part is left out because tile coordinates are numbers too). The page-side
+recorder in `camera-find-browser.test.mjs` reads fetch (string, URL or Request, with the Request's own
+body), XHR and beacon bodies as text, FormData, URLSearchParams, Blob and bytes; a ReadableStream body is
+recorded as unreadable. J10x sends each form on purpose and fails if the guard misses one.
+
 | Proof | What it holds |
 | --- | --- |
 | `camera-list.test.mjs` | The purpose map (five layer ids, each under one purpose), distance and reach box, the view and near scopes, the filter and per-purpose counts, unlocated cameras, every status key, the 300-pin note appearing only past 300, the latest-pick place order and the near/view load states. |
-| `camera-list-browser.test.mjs` | Journey 10: a heading, count and real list; the view scope counting 350 cameras while the map draws 300 pins and the list says why; purpose filter and its filtered-out state; the near scope with its stated radius and nearest-first rows; J10d/J10d2: the near scope reads unavailable only when its own place's files failed, and a failure under the map elsewhere does not touch it; J10e: a name pin picked after a finder pick moves the near list to the pin; opening a camera from a row requests one picture; a quiet live status; zoomed-out, outside-coverage, none, unavailable, loading and images-unavailable states. Every camera request is stubbed. |
-| `camera-find.test.mjs` | Pure: the search box and file choice and its bound, the search status text, the cluster summary counts and note, saved-row states (listed, gone, failed, pending) and the saved-list status keys; a search reads only files within the radius (not the square's corner); `canonicalCameraRef`. |
-| `camera-find-browser.test.mjs` | Journey 10 f-i: save from a row and the card, reload, still saved; blocked storage (throwing accessor) shows the saving-unavailable state; Search this area fires one request set and states the radius; below zoom 7 the summary counts match the loaded records; J10j: an open card follows a save or removal made from the list, and its press reads the store; J10k: a camera saved under an old id reads Saved, is not saved twice and is removed whole. |
+| `camera-list-browser.test.mjs` | Journey 10: a heading, count and real list; the view scope counting 350 cameras while the map draws 300 pins and the list says why; purpose filter and its filtered-out state; the near scope with its stated radius and nearest-first rows; J10d/J10d2: the near scope reads unavailable only when its own place's files failed, and a failure under the map elsewhere does not touch it; J10e: a name pin picked after a finder pick moves the near list to the pin; opening a camera from a row requests one picture; a quiet status (the polite announcer speaks a settled count only); J10m: focus stays on the same row or Save button across a re-sort and falls to the list, never the page, when the row is gone; J10n: the rows are a `role=list` of plain buttons and a repaint of the same count says nothing; zoomed-out, outside-coverage, none, unavailable, loading and images-unavailable states. Every camera request is stubbed. |
+| `camera-find.test.mjs` | Pure: the privacy detector (`helpers/leak-check.mjs`) on every carrier form and on near misses; the search box and file choice and its bound, the search status text, the cluster summary counts and note, saved-row states (listed, gone, failed, pending) and the saved-list status keys; a search reads only files within the radius (not the square's corner); `canonicalCameraRef`. |
+| `camera-find-browser.test.mjs` | Journey 10 f-i: save from a row and the card, reload, still saved; blocked storage (throwing accessor) shows the saving-unavailable state; Search this area fires one request set and states the radius; below zoom 7 the summary counts match the loaded records; J10j: an open card follows a save or removal made from the list, and its press reads the store; J10k: a camera saved under an old id reads Saved, is not saved twice and is removed whole; J10p: one Search press makes two search announcements and the list says nothing until it has an answer; J10q: a throw after the index read says the search did not finish, clears the pending state and a new press works; J10r/J10s: a failed Saved index load retries once on a later Saved press and on a change in the saved count; J10u/J10v/J10w: the same when the index reads and the camera file fails, and a file that fails again is not read in a loop; J10x: the privacy guard flags a camera sent in a query, path, older ref, tail, name, bare id, or any kind of body; J10t: no recorded request (fetch, XHR, beacon, resource) carries a saved camera (ref, older ref, tail, name or id), and the address, history state, title and share link are unchanged after a save and after a search. |
 
 ## Physical print proof
 

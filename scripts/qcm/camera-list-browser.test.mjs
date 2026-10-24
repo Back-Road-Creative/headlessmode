@@ -116,9 +116,11 @@ test('J10: one Cameras list, scoped to the view and to a chosen place, filtered 
       const title = document.getElementById('qcm-camera-list-title');
       const rows = document.getElementById('qcm-camera-list-rows');
       const status = document.getElementById('qcm-camera-list-status');
+      const announce = document.getElementById('qcm-camera-list-announce');
       return { inGroup: !!host && group.contains(host), heading: title && title.tagName, titleText: title && title.textContent,
-        list: rows && rows.tagName, labelled: rows && rows.getAttribute('aria-labelledby'), live: status && status.getAttribute('aria-live'),
-        role: status && status.getAttribute('role'), scopes: [...host.querySelectorAll('input[name="qcm-camera-scope"]')].map((r) => r.value),
+        list: rows && rows.tagName, labelled: rows && rows.getAttribute('aria-labelledby'), rowsRole: rows && rows.getAttribute('role'),
+        statusLive: status && status.getAttribute('aria-live'), statusRole: status && status.getAttribute('role'),
+        live: announce && announce.getAttribute('aria-live'), role: announce && announce.getAttribute('role'), scopes: [...host.querySelectorAll('input[name="qcm-camera-scope"]')].map((r) => r.value),
         purposes: [...host.querySelectorAll('input[data-camera-purpose]')].map((r) => r.getAttribute('data-camera-purpose')),
         radius: host.textContent };
     })()`);
@@ -127,8 +129,13 @@ test('J10: one Cameras list, scoped to the view and to a chosen place, filtered 
     assert.equal(shape.titleText, 'Cameras in this view');
     assert.equal(shape.list, 'UL');
     assert.equal(shape.labelled, 'qcm-camera-list-title');
+    // QQA-16c: the live region is the list's own announcer, which speaks a count only when it changes; the
+    // status line it mirrors is plain text (2026-10-08: these two assertions moved from the status line to the announcer).
+    assert.equal(shape.rowsRole, 'list', 'the rows are not exposed as a list');
     assert.equal(shape.live, 'polite');
     assert.equal(shape.role, 'status');
+    assert.equal(shape.statusLive, null, 'the status line is still a live region, so every repaint of it is read out');
+    assert.equal(shape.statusRole, null);
     assert.deepEqual(shape.scopes, ['view', 'near', 'saved']); // 2026-10-08 QQA-16b adds the Saved scope; the two it had are unchanged
     assert.deepEqual(shape.purposes, ['roads', 'scenery', 'weather', 'wildlife']);
     assert.match(shape.radius, /within 25 km/, 'the radius is not stated in the UI');
@@ -337,4 +344,70 @@ test('J10e: a name pin picked after a finder pick moves the near list to the pin
     assert.equal(await title(), `Cameras near ${pinName}`);
     assert.deepEqual(await page.evaluate('window.__refused'), [], 'a request reached past the stand-in');
   } finally { page.close(); await site.close(); }
+});
+
+// QQA-16c: a keyboard user's place in the list survives a repaint.
+const rowRefs = (page) => page.evaluate("[...document.querySelectorAll('#qcm-camera-list-rows button.qcm-camera-save')].map((b) => b.dataset.ref)");
+const focusIn = (page) => page.evaluate(`(() => { const a = document.activeElement; const li = a && a.closest && a.closest('#qcm-camera-list-rows li');
+  const save = li && li.querySelector('button.qcm-camera-save');
+  return { ref: save ? save.dataset.ref : null, cls: a && a.className, id: a && a.id, tag: a && a.tagName }; })()`);
+
+test('J10m: after a repaint the focus stays on the same camera row, and falls to the list when the row is gone, never to the page', { skip }, async () => {
+  await withPage(GRID.slice(0, 40), async (page) => {
+    await goToRoad(page);
+    await press(page, '#qcm-layer-roadCameras');
+    await waitStatus(page, /^40 cameras in this view\./, 'the list to count 40 cameras');
+    // Focus the third row's button; a pan re-sorts the rows (nearest the new centre first).
+    const before = await rowRefs(page);
+    const target = await page.evaluate("(() => { const b = document.querySelectorAll('#qcm-camera-list-rows button.qcm-camera-list-row')[2]; b.focus(); return b.closest('li').querySelector('button.qcm-camera-save').dataset.ref; })()");
+    await page.evaluate("(() => { const c = window.qcMap.getCenter(); window.qcMap.setView([c.lat + 0.06, c.lng], 9, { animate: false }); })(); void 0;");
+    await waitInPage(page, 'the rows to re-sort', `(() => { const r = [...document.querySelectorAll('#qcm-camera-list-rows button.qcm-camera-save')].map((b) => b.dataset.ref); return r.length === ${before.length} && r.join() !== ${JSON.stringify(before.join())}; })()`, 10000, null);
+    const sorted = await rowRefs(page);
+    assert.ok(sorted.includes(target), 'the fixture should keep the focused camera in view');
+    const kept = await focusIn(page);
+    assert.equal(kept.ref, target, `focus left its row (now on ${JSON.stringify(kept)})`);
+    assert.match(kept.cls, /qcm-camera-list-row/, 'focus should stay on the row button, not move to another control');
+    // The same holds on a row's Save button.
+    await page.evaluate(`document.querySelector('#qcm-camera-list-rows button.qcm-camera-save[data-ref=${JSON.stringify(target)}]').focus(); void 0;`);
+    await page.evaluate("(() => { const c = window.qcMap.getCenter(); window.qcMap.setView([c.lat - 0.12, c.lng], 9, { animate: false }); })(); void 0;");
+    await waitInPage(page, 'the rows to re-sort again', `[...document.querySelectorAll('#qcm-camera-list-rows button.qcm-camera-save')].map((b) => b.dataset.ref).join() !== ${JSON.stringify(sorted.join())}`, 10000, null);
+    const saveKept = await focusIn(page);
+    assert.equal(saveKept.ref, target, `focus left its Save button (now on ${JSON.stringify(saveKept)})`);
+    assert.match(saveKept.cls, /qcm-camera-save/);
+    // The row goes (the map moves to a place with no cameras): focus goes to the list, not to the page.
+    await page.evaluate('window.qcMap.setView([35.0, -121.9], 9, { animate: false }); void 0;');
+    await waitStatus(page, /^No cameras in this view\./, 'the none state');
+    const gone = await focusIn(page);
+    assert.equal(gone.id, 'qcm-camera-list-rows', `focus fell to ${JSON.stringify(gone)}`);
+    assert.equal(await rowCount(page), 0);
+  });
+});
+
+test('J10n: rows read as a list while each row stays a plain button, and a repaint of the same count says nothing', { skip }, async () => {
+  await withPage(GRID.slice(0, 40), async (page) => {
+    await goToRoad(page);
+    await press(page, '#qcm-layer-roadCameras');
+    await waitStatus(page, /^40 cameras in this view\./, 'the list to count 40 cameras');
+    const shape = await page.evaluate(`(() => { const ul = document.getElementById('qcm-camera-list-rows');
+      const li = ul.querySelector('li'); const b = li.querySelector('button.qcm-camera-list-row');
+      return { role: ul.getAttribute('role'), items: ul.querySelectorAll(':scope > li').length, liRole: li.getAttribute('role'),
+        buttonRole: b.getAttribute('role'), buttonTag: b.tagName, saveRole: li.querySelector('button.qcm-camera-save').getAttribute('role') }; })()`);
+    assert.deepEqual(shape, { role: 'list', items: 40, liRole: null, buttonRole: null, buttonTag: 'BUTTON', saveRole: null });
+    // The announcer holds the count; a filter flipped off and on in one tick, and a nudge, speak nothing.
+    assert.equal(await text(page, '#qcm-camera-list-announce'), '40 cameras in this view.');
+    await page.evaluate(`window.__spoken = []; new MutationObserver((m) => { for (const r of m) { if (r.type === 'characterData') window.__spoken.push(r.target.data); else if (r.addedNodes.length) window.__spoken.push(r.addedNodes[0].textContent); } })
+      .observe(document.getElementById('qcm-camera-list-announce'), { childList: true, characterData: true, subtree: true }); void 0;`);
+    await page.evaluate(`(() => { const c = window.qcMap.getCenter(); window.qcMap.setView([c.lat + 0.0005, c.lng], 9, { animate: false }); })(); void 0;`);
+    await page.evaluate(`(() => { const b = document.querySelector('input[data-camera-purpose="roads"]'); b.click(); b.click(); })(); void 0;`);
+    await page.evaluate('new Promise((r) => setTimeout(r, 1200))');
+    assert.deepEqual(await page.evaluate('window.__spoken'), [], 'the count was announced again though it did not change');
+    // A count that does change is announced, once.
+    await press(page, 'input[data-camera-purpose="roads"]');
+    await waitStatus(page, /40 cameras in this view are hidden by the purpose filter/, 'the filtered-out state');
+    await press(page, 'input[data-camera-purpose="roads"]');
+    await waitStatus(page, /^40 cameras in this view\./, 'the list to return');
+    await page.evaluate('new Promise((r) => setTimeout(r, 300))');
+    assert.deepEqual(await page.evaluate('window.__spoken'),
+      ['40 cameras in this view are hidden by the purpose filter. Turn a purpose back on to list them.', '40 cameras in this view.']);
+  });
 });
