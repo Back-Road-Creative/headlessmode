@@ -6,9 +6,10 @@ draft: false
 tags: ["creator-tools", "video-pipeline", "photo-develop", "automation"]
 ---
 
-> **Access.** Framegrade is pre-release. The source is private and there is no installer or
-> versioned release. It is available through a studio engagement; [contact me](/contact/)
-> for setup.
+> **Access.** Framegrade is pre-release. The source is public under Apache-2.0 at
+> [Back-Road-Creative/framegrade](https://github.com/Back-Road-Creative/framegrade), and there is no
+> installer or versioned release. It is available through a studio engagement;
+> [contact me](/contact/) for setup.
 
 Framegrade is the engine that turns raw video and photos into finished files. It does the
 picture work only: it does not title, schedule or publish anything. [Waypost](/waypost/) runs it
@@ -43,4 +44,4 @@ holds no brand name of its own.
 
 ## Documentation
 
-The source and its documentation are private.
+{{< system-docs name="Framegrade" >}}

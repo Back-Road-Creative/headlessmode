@@ -2597,6 +2597,97 @@ test('volcview regions: a camera east of the dateline (lon > 0) goes to its own 
   assert.deepEqual(regions.map((r) => [r.region, r.records.map((x) => x.providerId)]), [['us', ['kanaga']], ['ak-west', ['amchitka', 'semi']]]);
 });
 
+// QQA-10c (2026-10-09): the Alaska / British Columbia cut-off follows the real boundary, not a
+// latitude floor. Town positions below are public gazetteer values, read 2026-10-09:
+//   Alaska: USGS GNIS (Geographic Names Information System), the National Map "geonames" service,
+//     feature ids Ketchikan 1423039, Metlakatla 1423661, Hyder 1422711, Sitka 1414736, Yakutat
+//     1415858, Craig 1421260, Hydaburg 1422709, Adak 1418109, Cape Muzon 1420865.
+//   Canada: Natural Resources Canada, Canadian Geographical Names Data Base (CGNDB), ids Prince
+//     Rupert JCNWW, Masset JCLGE, Queen Charlotte JCQPU, Langara Island JCKSV, Port Clements JCSNP,
+//     Victoria JBOBQ, Sidney JBWFW, Duncan JBBWA, Saanich JAXME.
+//   Washington: USGS GNIS, Port Angeles 1524581, Neah Bay 1512497, Friday Harbor 1505051, Point
+//     Roberts 1512573.
+const SCI_TOWN = Object.freeze({
+  ketchikan: [55.3422, -131.6461], metlakatla: [55.1292, -131.5722], hyder: [55.9169, -130.0247], sitka: [57.0531, -135.33],
+  yakutat: [59.5469, -139.7272], craig: [55.4764, -133.1484], hydaburg: [55.2081, -132.8267], adak: [51.88, -176.6581],
+  princeRupert: [54.312778, -130.325278], masset: [54.011111, -132.146667], queenCharlotte: [53.254722, -132.1025],
+  langara: [54.229722, -133.017778], portClements: [53.685556, -132.183611],
+  victoria: [48.428333, -123.364722], sidney: [48.650556, -123.398333], duncan: [48.778611, -123.708056], saanich: [48.456667, -123.373333],
+  portAngeles: [48.1182, -123.4308], neahBay: [48.3681, -124.625], fridayHarbor: [48.5343, -123.0171], pointRoberts: [48.9854, -123.078],
+});
+function sciKept(points) {
+  const cam = ([code, [lat, lon]]) => ({ webcamCode: code, webcamName: code, latitude: lat, longitude: lon, externalUrl: null,
+    currentImageUrl: `https://volcview.wr.usgs.gov/ashcam-api/images/webcams/${code}/current.jpg`,
+    lastImageTimestamp: Date.parse(SCI_AT) / 1000 - 60 });
+  const regions = volc().regions({ volcview: { webcams: Object.entries(points).map(cam) }, avo: { webcams: [] } }, { fetchedAt: SCI_AT });
+  return regions.flatMap((r) => r.records.map((x) => x.providerId)).sort();
+}
+const pick = (...names) => Object.fromEntries(names.map((n) => [n, SCI_TOWN[n]]));
+
+test('volcview regions (QQA-10c): Prince Rupert, Masset, Queen Charlotte, Langara and Port Clements (British Columbia, south of Dixon Entrance) are dropped', () => {
+  assert.deepEqual(sciKept(pick('princeRupert', 'masset', 'queenCharlotte', 'langara', 'portClements')), []);
+});
+
+test('volcview regions (QQA-10c): Ketchikan, Metlakatla, Hyder, Sitka, Yakutat, Craig, Hydaburg and an Aleutian point (Adak) stay', () => {
+  assert.deepEqual(sciKept(pick('ketchikan', 'metlakatla', 'hyder', 'sitka', 'yakutat', 'craig', 'hydaburg', 'adak')),
+    ['adak', 'craig', 'hydaburg', 'hyder', 'ketchikan', 'metlakatla', 'sitka', 'yakutat']);
+});
+
+// The A-B line: Cape Muzon (USGS GNIS 1420865, 54.6678 N 132.6889 W) to the south end of the Portland
+// Channel boundary (International Boundary Commission digital boundary v1.3, NAD83: 54.7074 N 130.6156 W).
+const AB_A = [54.6678, -132.6889];
+const AB_B = [54.7074, -130.6156];
+const abLat = (lon) => AB_A[0] + ((lon - AB_A[1]) / (AB_B[1] - AB_A[1])) * (AB_B[0] - AB_A[0]);
+
+test('volcview regions (QQA-10c): a grid of points east of -141 and south of the Dixon Entrance A-B line keeps nothing', () => {
+  const points = {};
+  for (let lon = -140.75; lon <= -130; lon += 0.25) {
+    // Every point 0.05 degrees (about 5 km) or more south of the line, down to the Alaska box floor (51.2).
+    const edge = lon < AB_A[1] ? AB_A[0] : lon <= AB_B[1] ? abLat(lon) : AB_B[0];
+    for (let lat = edge - 0.05; lat >= 51.2; lat -= 0.25) points[`p${lat.toFixed(2)}_${lon.toFixed(2)}`] = [lat, lon];
+  }
+  assert.ok(Object.keys(points).length > 200, 'the grid is not trivially small');
+  assert.deepEqual(sciKept(points), []);
+});
+
+test('volcview regions (QQA-10c): just north of the A-B line, Dixon Entrance and the Prince of Wales shore stay US', () => {
+  const north = {};
+  for (const lon of [-132.5, -132.0, -131.5, -131.0]) north[`n${lon}`] = [abLat(lon) + 0.05, lon];
+  assert.deepEqual(sciKept(north), Object.keys(north).sort());
+});
+
+test('volcview regions (QQA-10c): Victoria, Saanich, Sidney and Duncan (Vancouver Island, inside the rough Washington box) drop; Port Angeles, Neah Bay, Friday Harbor and Point Roberts stay', () => {
+  assert.deepEqual(sciKept(pick('victoria', 'saanich', 'sidney', 'duncan')), []);
+  assert.deepEqual(sciKept(pick('portAngeles', 'neahBay', 'fridayHarbor', 'pointRoberts')), ['fridayHarbor', 'neahBay', 'pointRoberts', 'portAngeles']);
+});
+
+test('volcview regions (QQA-10c): a grid of points south of 49.0 and west of -123.3 keeps nothing north of the Juan de Fuca boundary', () => {
+  // Boundary latitude in the Strait of Juan de Fuca at a few longitudes (IBC digital boundary v1.3):
+  // about 48.22 at -123.54, 48.30 at -124.01 and 48.49 at -124.73. 0.1 degrees north of those is Canadian water or land.
+  const strait = [[-123.5, 48.33], [-124.0, 48.40], [-124.5, 48.58]];
+  const points = {};
+  for (const [lon, lat] of strait) for (let la = lat; la < 49.0; la += 0.1) points[`s${lon}_${la.toFixed(2)}`] = [la, lon];
+  assert.ok(Object.keys(points).length > 15);
+  assert.deepEqual(sciKept(points), []);
+});
+
+test('NDBC contract (QQA-10c): no NDBC provider, source, origin or picture host is published', () => {
+  // NDBC buoy pictures (www.ndbc.noaa.gov/buoycam) answer 403 to this build's honest User-Agent, and the
+  // build never imitates a browser; see content/quiet-corners-maps.md ("NOAA NDBC buoy cameras - not
+  // included"). Until NOAA allows the build agent or offers a public API, nothing for NDBC may be added.
+  const text = JSON.stringify({ providers: PROVIDERS.map((p) => [p.id, p.layer, p.source, p.officialUrl]), sources: SOURCES });
+  assert.doesNotMatch(text, /ndbc/i);
+  assert.ok(!APPROVED_ORIGINS.some((o) => /ndbc\.noaa\.gov/i.test(o)));
+  assert.ok(!PROVIDERS.some((p) => /ndbc|buoy/i.test(p.id)));
+  // Every committed camera file: no NDBC id and no ndbc.noaa.gov picture or page.
+  const dir = new URL('../../static/data/quiet-corners-maps/cameras/', import.meta.url).pathname;
+  const files = [];
+  const walk = (d) => { for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) walk(p); else files.push(p); } };
+  walk(dir);
+  assert.ok(files.length > 3);
+  for (const f of files) assert.doesNotMatch(readFileSync(f, 'utf8'), /ndbc/i, f);
+});
+
 test('glerl refresh: the table page and a HEAD per still, plain GET and the build\'s own agent; at most 4 at a time', async () => {
   mock.method(Date, 'now', () => Date.parse(SCI_AT));
   try {

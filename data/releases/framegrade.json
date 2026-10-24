@@ -2,7 +2,7 @@
   "product": "framegrade",
   "name": "Framegrade",
   "release_source": "manual",
-  "source_repo": null,
+  "source_repo": "Back-Road-Creative/framegrade",
   "version": null,
   "released_at": null,
   "release_url": null,
@@ -10,5 +10,5 @@
   "assets": {},
   "demo": null,
   "media_source": null,
-  "notes": "Framegrade has no product repository or tag to release against, and no demo bundle. The page asserts no version, date or availability."
+  "notes": "Framegrade's repository is public but has no release or tag to read, and there is no demo bundle. The page asserts no version, date or availability."
 }

@@ -6,9 +6,10 @@ draft: false
 tags: ["creator-tools", "video-pipeline", "self-hosted", "automation"]
 ---
 
-> **Access.** Waypost is pre-release. The source is private and there is no installer or
-> versioned release. It is available through a studio engagement; [contact me](/contact/)
-> for setup.
+> **Access.** Waypost is pre-release. The source is public under MIT at
+> [Back-Road-Creative/waypost](https://github.com/Back-Road-Creative/waypost), and there is no
+> installer or versioned release. It is available through a studio engagement;
+> [contact me](/contact/) for setup.
 
 **[Open the read-only demo →](/demo/waypost/)** — a fixed fictional console for a made-up brand,
 frozen at 2026-09-01. The forms and buttons are removed, so it shows a saved example and
@@ -63,4 +64,4 @@ backup is a setup step. Console login by token is optional.
 
 ## Documentation
 
-The source and its documentation are private.
+{{< system-docs name="Waypost" >}}

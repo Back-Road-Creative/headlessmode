@@ -42,11 +42,14 @@ const ROOT = path.join(__dirname, '..');
 const SYSTEMS_FILE = path.join(ROOT, 'data', 'systems.json');
 const TOKEN = process.env.GITHUB_TOKEN || '';
 
-// Grounded 2026-09-01 by reading the page: it states Apache-2.0.
+// Grounded by reading each page: driftless states Apache-2.0 (2026-09-01); waypost
+// states MIT and framegrade states Apache-2.0, both matching the live repositories.
 // Grant Platform is deliberately absent: its repository is private, so there is no
 // public licence file to probe and its page makes no licence claim to re-verify.
 const LICENSE_CLAIMS = [
   { page: 'content/driftless.md', owner: 'Back-Road-Creative', repo: 'driftless', spdx: 'Apache-2.0' },
+  { page: 'content/waypost.md', owner: 'Back-Road-Creative', repo: 'waypost', spdx: 'MIT' },
+  { page: 'content/framegrade.md', owner: 'Back-Road-Creative', repo: 'framegrade', spdx: 'Apache-2.0' },
 ];
 
 const rows = [];
