@@ -464,4 +464,158 @@ export function nearestCoverage(view, areas = []) {
   return { inView, nearest };
 }
 
+// QQA-16a: the reader-facing Cameras list. Everything here works on LOADED camera records
+// ({ camera, layer } entries), never on the drawn pins, so the list does not inherit MAX_PINS.
+
+/** The radius of the "Near selected place" scope, in km. Stated in the UI beside the place. */
+export const NEAR_RADIUS_KM = 25;
+
+/** Rows drawn in the list at once. The count above them is the whole scope; this only bounds the DOM. */
+export const LIST_LIMIT = 50;
+
+/** The four reader purposes a camera layer is filed under (providers stay under Sources). */
+export const CAMERA_PURPOSES = Object.freeze([
+  Object.freeze({ id: 'roads', label: 'Roads' }),
+  Object.freeze({ id: 'scenery', label: 'Scenery & parks' }),
+  Object.freeze({ id: 'weather', label: 'Weather & aviation' }),
+  Object.freeze({ id: 'wildlife', label: 'Wildlife & seasons' }),
+]);
+
+/** Each camera layer id under exactly one purpose. linkCameras holds state road-camera links and
+ *  HPWREN/AlertWest fire-lookout links; most of its cameras are road links, so it sits under roads.
+ *  phenoCameras also holds the volcano and Great Lakes cameras, so its purpose is the one most of
+ *  it shares: seasons and the living landscape. */
+export const PURPOSE_OF_LAYER = Object.freeze({
+  roadCameras: 'roads', parkCameras: 'scenery', linkCameras: 'roads', phenoCameras: 'wildlife', airportCameras: 'weather',
+});
+
+/** Great-circle km between two lat/lon points. */
+export function kmBetween(aLat, aLon, bLat, bLon) {
+  const dLat = toRad(bLat - aLat), dLon = toRad(bLon - aLon);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(dLon / 2) ** 2;
+  return 2 * EARTH_KM * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+/** The plain bbox that holds every point within `km` of a point (a little more at its corners). */
+export function reachBox(lat, lon, km) {
+  const dLat = km / 111.19, dLon = km / (111.19 * Math.max(Math.cos(toRad(lat)), 0.01));
+  return { minLon: lon - dLon, minLat: lat - dLat, maxLon: lon + dLon, maxLat: lat + dLat };
+}
+
+/** The list for one scope. `entries` are { camera, layer } for the layers that are on, from the
+ *  files already loaded. scope 'view': located cameras inside `view`, nearest its centre first;
+ *  scope 'near': located cameras within `radiusKm` of `place` ({ lat, lon }), nearest first. Returns
+ *  { inScope, counts (per purpose, before the filter), matching (after it), listed (the first `limit`),
+ *  noPicture (of matching), unlocated }. */
+export function cameraList({ entries = [], scope = 'view', view, place = null, radiusKm = NEAR_RADIUS_KM, purposes = [], limit = LIST_LIMIT } = {}) {
+  const near = scope === 'near';
+  const counts = Object.fromEntries(CAMERA_PURPOSES.map((p) => [p.id, 0]));
+  const scoped = [];
+  let unlocatedCount = 0;
+  const from = near ? place : view && { lat: (view.minLat + view.maxLat) / 2, lon: (view.minLon + view.maxLon) / 2 };
+  for (const entry of entries) {
+    const c = entry.camera;
+    if (c.lat === null || c.lon === null) { unlocatedCount += 1; continue; }
+    if (!from || (!near && camerasInView([c], view).length === 0)) continue;
+    const km = kmBetween(from.lat, from.lon, c.lat, c.lon);
+    if (near && km > radiusKm) continue;
+    const purpose = PURPOSE_OF_LAYER[entry.layer];
+    counts[purpose] += 1;
+    scoped.push({ camera: c, layer: entry.layer, purpose, km });
+  }
+  scoped.sort((a, b) => a.km - b.km || (a.camera.providerId < b.camera.providerId ? -1 : 1));
+  const matching = scoped.filter((r) => purposes.includes(r.purpose));
+  return {
+    inScope: scoped.length, counts, matching, listed: matching.slice(0, limit),
+    noPicture: matching.filter((r) => stillPlan(r.camera) === 'link').length, unlocated: unlocatedCount,
+  };
+}
+
+/** The place "Near selected place" measures from, as { lat, lon, name }: the latest pick wins. The
+ *  finder's pick (`search`, anchor [lat, lon]) is held only until another pick replaces it; a name
+ *  pin, a recreation pin or a places-list row clears it and sets `nearby` ({ name, lonLat: [lon, lat] }).
+ *  With neither, the centre of the drawn area; null when there is no place at all. */
+export function listPlace({ search = null, nearby = null, bbox = null } = {}) {
+  if (search && Array.isArray(search.anchor) && search.anchor.length === 2 && search.anchor.every(Number.isFinite)) {
+    return { lat: search.anchor[0], lon: search.anchor[1], name: search.name };
+  }
+  if (nearby && Array.isArray(nearby.lonLat) && nearby.lonLat.length === 2 && nearby.lonLat.every(Number.isFinite)) {
+    return { lat: nearby.lonLat[1], lon: nearby.lonLat[0], name: nearby.name };
+  }
+  return bbox ? { lat: (bbox.minLat + bbox.maxLat) / 2, lon: (bbox.minLon + bbox.maxLon) / 2, name: 'the drawn area' } : null;
+}
+
+/** What failed, for the status line, judged from the files the SCOPE reaches. `rows` are the index rows
+ *  of the layers in `reaching` that the scope's box meets; `isLoaded` / `isFailed` say what became of a
+ *  file; `layerFailed` is the per-layer flag the map view sets. Near: only the place's own files decide
+ *  (unavailable when every one failed or the index could not be read; nothing-loaded only before any
+ *  was tried), so a district that failed under the map elsewhere neither hides nor taints this list.
+ *  View: the layer flags still decide, as they describe that very view. */
+export function listLoadState({ near = false, reaching = [], rows = [], isLoaded = () => false, isFailed = () => false, indexRead = false, layerFailed = {} } = {}) {
+  if (reaching.length === 0) return { unavailable: false, failedAreas: 0, nothingLoaded: false };
+  if (near) {
+    const failed = rows.filter((r) => isFailed(r.file)).length;
+    const unavailable = (!indexRead && reaching.every((id) => layerFailed[id])) || (rows.length > 0 && failed === rows.length);
+    return { unavailable, failedAreas: failed, nothingLoaded: !unavailable && (!indexRead || (rows.length > 0 && failed === 0 && !rows.some((r) => isLoaded(r.file)))) };
+  }
+  let failedAreas = 0;
+  for (const id of reaching) failedAreas += rows.filter((r) => r.layer === id && isFailed(r.file)).length || (layerFailed[id] ? 1 : 0);
+  return {
+    unavailable: reaching.every((id) => layerFailed[id]), failedAreas,
+    nothingLoaded: !indexRead || (rows.length > 0 && !rows.some((r) => isLoaded(r.file))),
+  };
+}
+
+const camerasWord = (n) => (n === 1 ? 'camera' : 'cameras');
+
+/** The one state the list is in, as { key, text, notes }. Keys read apart: layers-off, no-place, zoom-in,
+ *  loading, unavailable, outside-coverage, nothing-loaded, none, filtered-out, partial, images-unavailable,
+ *  in-scope. `notes` are the extra sentences a listed result owes the reader (a failed area, the list's
+ *  own limit and the pin cap, cameras with no picture or no position). */
+export function cameraListStatus({ scope = 'view', onLayers = 0, belowZoom = false, hasPlace = false, placeName = '', touches = true,
+  loading = false, unavailable = false, failedAreas = 0, nothingLoaded = false, inScope = 0, matching = 0, listed = 0, noPicture = 0,
+  unlocated = 0, radiusKm = NEAR_RADIUS_KM } = {}) {
+  const near = scope === 'near';
+  const phrase = near ? `near ${placeName}` : 'in this view';
+  const state = (key, text, notes = []) => ({ key, text, notes });
+  if (onLayers === 0) return state('layers-off', 'No camera layer is on. Switch one on above to list its cameras.');
+  if (near && !hasPlace) return state('no-place', `Choose a place with Search places, or draw an area, to list cameras within ${radiusKm} km of it.`);
+  if (!near && belowZoom) return state('zoom-in', `Zoom in to list cameras in this view (cameras load from zoom ${MIN_PIN_ZOOM}).`);
+  if (loading) return state('loading', 'Loading the camera list.');
+  if (unavailable) return state('unavailable', 'Camera list unavailable. Turn the layer off and on to retry.');
+  if (!touches) {
+    return state('outside-coverage', near
+      ? `Outside coverage: no camera layer that is on reaches within ${radiusKm} km of ${placeName}.`
+      : 'Outside coverage: no camera layer that is on reaches this view.');
+  }
+  if (nothingLoaded) return state('nothing-loaded', `No camera list has been read ${phrase} yet.`);
+  const notes = [];
+  if (failedAreas > 0) notes.push(`${plural(failedAreas, 'area')} did not load, so cameras may be missing. Turn the layer off and on to retry.`);
+  if (unlocated > 0) notes.push(`${unlocated} loaded ${camerasWord(unlocated)} ${unlocated === 1 ? 'has' : 'have'} no map position and ${unlocated === 1 ? 'is' : 'are'} not listed.`);
+  if (inScope === 0) return state('none', near ? `No cameras near ${placeName}, within ${radiusKm} km.` : 'No cameras in this view.', notes);
+  if (matching === 0) {
+    return state('filtered-out', `${inScope} ${camerasWord(inScope)} ${phrase} ${inScope === 1 ? 'is' : 'are'} hidden by the purpose filter. Turn a purpose back on to list ${inScope === 1 ? 'it' : 'them'}.`, notes);
+  }
+  if (listed < matching) notes.push(`Listing the nearest ${listed} of ${matching}; zoom in or narrow by purpose to see the rest.`);
+  if (inScope > MAX_PINS) notes.push(`The map draws at most ${MAX_PINS} pins at a time; this list counts every loaded camera ${phrase}, so it can hold more than the map shows.`);
+  const allBare = noPicture === matching;
+  if (noPicture > 0 && !allBare) notes.push(`${noPicture} of the ${matching} have no picture here and open the owner's page or say why.`);
+  if (allBare) notes.push("Each opens its owner's page or says why there is no picture.");
+  const base = `${matching} ${camerasWord(matching)} ${near ? `${phrase}, within ${radiusKm} km, nearest first` : phrase}.`;
+  if (failedAreas > 0) return state('partial', `${base} This list is partial.`, notes);
+  if (allBare) return state('images-unavailable', `${base} None has a picture here.`, notes);
+  return state('in-scope', base, notes);
+}
+
+/** A row's two lines: the camera's name, and its source, distance (near scope) and why it has no picture. */
+export function cameraRowText(row, { near = false } = {}) {
+  const c = row.camera;
+  const parts = [c.operator];
+  if (near) parts.push(`${row.km < 10 ? row.km.toFixed(1) : Math.round(row.km)} km`);
+  if (isLinkOnly(c)) parts.push('link only');
+  else if (c.health === 'inactive') parts.push('out of service');
+  else if (!c.media || !c.media.still) parts.push('no picture');
+  return { name: c.name, meta: parts.join(' · ') };
+}
+
 export { CALTRANS_OPERATOR, PROVIDERS };

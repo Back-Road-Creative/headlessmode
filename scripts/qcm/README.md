@@ -450,6 +450,28 @@ choice, not a Print options row) and which groups a cleared search closes again.
 | `layer-task-groups.test.mjs` | The ten headings in order; every registry id, base and the None row has exactly one home; Print options equals the extra-page rows. |
 | `layer-groups-browser.test.mjs` | Journey 11: groups collapsed, search by alias, purpose and provider with the expansion restored, activate across topics, find and remove an active layer after filtering, a print extra, an old `#map=v1` link restored by id. |
 
+## Cameras list
+
+The reader-facing Cameras list (QQA-16a) sits inside the collapsed Cameras group, so the closed
+panel's length budget is unchanged. Its logic is pure and lives in `camera-layer.js`
+(`cameraList`, `cameraListStatus`, `cameraRowText`, `listPlace`, `listLoadState`, `PURPOSE_OF_LAYER`); `main.js` builds the DOM
+(`buildCameraList`, `renderCameraList`) and opens a row through the pin's own card. It counts the
+camera records loaded for the scope, never the drawn pins, so the 300-pin cap (`MAX_PINS`) does not
+trim it; it lists the nearest `LIST_LIMIT` (50) and says how many it holds and why. The scopes are
+In this view and Near selected place (`NEAR_RADIUS_KM`, 25: the latest pick, via `listPlace` -- the
+finder's pick, else a name or recreation pin or places-list row (`state.nearbyFrom`), else the drawn
+area's centre). The near scope's failed, partial and nothing-loaded states come from the files around
+its own place (`listLoadState`), not from the map view's per-layer flags. Purposes, one per camera layer id: roadCameras and linkCameras are Roads (linkCameras is
+mostly state road-camera links, with HPWREN and AlertWest fire links among them), parkCameras is
+Scenery & parks, airportCameras is Weather & aviation, phenoCameras is Wildlife & seasons (it also
+holds the volcano and Great Lakes cameras). The list reads snapshot schema 1 only. Not here yet
+(slice b): saved cameras, a bounded Search this area, and a cluster summary at broad zoom.
+
+| Proof | What it holds |
+| --- | --- |
+| `camera-list.test.mjs` | The purpose map (five layer ids, each under one purpose), distance and reach box, the view and near scopes, the filter and per-purpose counts, unlocated cameras, every status key, the 300-pin note appearing only past 300, the latest-pick place order and the near/view load states. |
+| `camera-list-browser.test.mjs` | Journey 10: a heading, count and real list; the view scope counting 350 cameras while the map draws 300 pins and the list says why; purpose filter and its filtered-out state; the near scope with its stated radius and nearest-first rows; J10d/J10d2: the near scope reads unavailable only when its own place's files failed, and a failure under the map elsewhere does not touch it; J10e: a name pin picked after a finder pick moves the near list to the pin; opening a camera from a row requests one picture; a quiet live status; zoomed-out, outside-coverage, none, unavailable, loading and images-unavailable states. Every camera request is stubbed. |
+
 ## Physical print proof
 
 Layout is proven here without paper. Whether a printer honours it is a separate check:
