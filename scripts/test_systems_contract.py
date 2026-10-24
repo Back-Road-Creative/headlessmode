@@ -633,12 +633,74 @@ def test_llms_waypost_says_tiktok_is_a_manual_handoff():
 def test_llms_quiet_corners_links_its_public_repository():
     """github.com/Back-Road-Creative/quiet-corners is public, so llms.txt must
     link it the way the other open entries do ("Source: github.com/...") and
-    must not claim there is nothing to link. Grant Platform's and Waypost's
-    source stay private, and the Products paragraph must keep saying so."""
+    must not claim there is nothing to link. Grant Platform's source stays
+    private, and the Products paragraph must keep saying so."""
     text = LLMS.read_text()
     assert "Source: github.com/Back-Road-Creative/quiet-corners." in _llms_line("Quiet Corners")
     assert "no repository" not in text.lower()
-    assert "neither Grant Platform's source nor Waypost's is public" in text
+    assert "Grant Platform's source is private" in text
+
+
+PUBLIC_PRODUCTS = {
+    "Waypost": ("waypost", "MIT"),
+    "Framegrade": ("framegrade", "Apache-2.0"),
+}
+
+
+@pytest.mark.parametrize("name", sorted(PUBLIC_PRODUCTS))
+def test_llms_states_waypost_and_framegrade_source_is_public(name):
+    """Both repositories are public (MIT and Apache-2.0), so llms.txt must say
+    so with the repository URL and licence and must not call either private."""
+    repo, spdx = PUBLIC_PRODUCTS[name]
+    text = LLMS.read_text()
+    assert f"Source: github.com/Back-Road-Creative/{repo}." in _llms_line(name)
+    assert f"{name} is public under {spdx} at github.com/Back-Road-Creative/{repo}" in text
+    assert f"{name}'s is public" not in text
+    assert f"nor {name}'s" not in text
+
+
+@pytest.mark.parametrize("name", sorted(PUBLIC_PRODUCTS))
+def test_waypost_and_framegrade_entries_carry_their_public_repo(name):
+    """Like Driftless, a public engagement product names its repository in
+    data/systems.json (the system-docs shortcode and the sheet's source link
+    read it); the link stays the on-site page."""
+    repo, _ = PUBLIC_PRODUCTS[name]
+    entry = next(s for s in json.loads(SYSTEMS.read_text())["systems"] if s["name"] == name)
+    assert entry["repo"] == f"https://github.com/Back-Road-Creative/{repo}"
+    assert entry["link"] == f"/{repo}/"
+    assert entry["access"] == "engagement" and entry["shipped"] is None
+    rec = json.loads((ROOT / "data" / "releases" / f"{repo}.json").read_text())
+    assert rec["source_repo"] == f"Back-Road-Creative/{repo}"
+    assert "no product repository" not in rec["notes"]
+
+
+@pytest.mark.parametrize("name", sorted(PUBLIC_PRODUCTS))
+def test_waypost_and_framegrade_pages_state_public_source_and_licence(name):
+    """The Access note names the public source, URL and licence while keeping
+    the business facts (pre-release, no release, studio engagement); the
+    Documentation section points at the repository README."""
+    repo, spdx = PUBLIC_PRODUCTS[name]
+    text = (ROOT / "content" / f"{repo}.md").read_text()
+    access = text.split("> **Access.**", 1)[1].split("\n\n", 1)[0]
+    flat = re.sub(r"\s+(?:>\s*)?", " ", access)
+    assert f"The source is public under {spdx}" in flat
+    assert f"https://github.com/Back-Road-Creative/{repo}" in flat
+    assert "pre-release" in flat and "no installer or versioned release" in flat
+    assert "studio engagement" in flat
+    assert "source is private" not in text
+    assert "documentation are private" not in text
+    docs = text.split("\n## Documentation\n", 1)[1]
+    assert f'{{{{< system-docs name="{name}" >}}}}' in docs
+
+
+def test_verify_claims_re_verifies_waypost_and_framegrade_licences():
+    """The drift sentinel must re-check the licence each page now asserts."""
+    src = (ROOT / "scripts" / "verify-claims.js").read_text()
+    for name, (repo, spdx) in PUBLIC_PRODUCTS.items():
+        assert (
+            f"page: 'content/{repo}.md', owner: 'Back-Road-Creative', repo: '{repo}', spdx: '{spdx}'"
+            in src
+        )
 
 
 def _ledger_order(entries):
