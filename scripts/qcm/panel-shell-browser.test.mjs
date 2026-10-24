@@ -638,35 +638,56 @@ for (const vp of PHONE_VIEWPORTS) {
   });
 }
 
+/** The document's own horizontal overflow, absolute: `scrollWidth` is what the page
+ *  would scroll sideways by, and `clientWidth` is the width the reader can see. */
+const docOverflow = `(() => {
+  const de = document.documentElement;
+  return { scrollWidth: de.scrollWidth, clientWidth: de.clientWidth };
+})()`;
+
 test('sheet: no document-level horizontal overflow at 320/390/768, collapsed, half or expanded', { skip }, async () => {
-  // Measured against each width's OWN on-load scrollWidth, not zero tolerance:
-  // a 320px viewport already carries a pre-existing, sheet-independent overflow
-  // (an unwrapped <code> sample in the page's Documentation prose, ~29px over,
-  // present before any sheet interaction and unrelated to #qc-sheet/#qc-map --
-  // confirmed by walking every element wider than the viewport and excluding
-  // #qc-map-container's own subtree, scripts/qcm/../../.tmp diagnostics this
-  // session). This test's job is the SHEET introducing no *new* overflow, so it
-  // compares each state's scrollWidth to that width's own baseline rather than
-  // asserting a blanket scrollWidth <= innerWidth that a pre-existing,
-  // out-of-Owns-list prose issue would fail regardless of the sheet.
+  // Absolute (audit A02): the page never scrolls sideways at any width, in any
+  // sheet state. This used to compare each state to that width's own on-load
+  // scrollWidth, because a 320px page carried an overflow (an unwrapped <code>
+  // sample in the Documentation prose) that was there before any sheet
+  // interaction. That overflow is gone from the built page, so the baseline now
+  // only hides a regression: a later overflow that is already present on load
+  // would pass. Load itself is checked here too.
   const widths = [320, 390, 768];
   const bad = [];
   for (const w of widths) {
     const page = await freshPageAt({ w, h: 700 });
-    const baseline = await page.evaluate('document.documentElement.scrollWidth');
-    const grew = async (label) => {
-      const sw = await page.evaluate('document.documentElement.scrollWidth');
-      if (sw > baseline) bad.push(`${w}px ${label} (baseline ${baseline}, now ${sw})`);
+    const over = async (label) => {
+      const { scrollWidth, clientWidth } = await page.evaluate(docOverflow);
+      if (scrollWidth > clientWidth) bad.push(`${w}px ${label} (scrollWidth ${scrollWidth}, clientWidth ${clientWidth})`);
     };
+    await over('on load');
     await trustedClick(page, '#qcm-layer-panel summary'); // -> half
-    await grew('half');
+    await over('half');
     await trustedClick(page, '.qc-sheet-size'); // -> expanded
-    await grew('expanded');
+    await over('expanded');
     await trustedClick(page, '.qc-sheet-size'); // -> half
     await trustedClick(page, '#qcm-layer-panel .qcm-panel-close'); // -> collapsed
-    await grew('collapsed');
+    await over('collapsed');
   }
-  assert.deepEqual(bad, [], `sheet interaction added document-level horizontal overflow at: ${bad.join(', ')}`);
+  assert.deepEqual(bad, [], `the page scrolls sideways at: ${bad.join(', ')}`);
+});
+
+test('dock: no document-level horizontal overflow at 1440 on load or with each panel open', { skip }, async () => {
+  // The desktop half of A02: the same absolute rule where the panels are a dock
+  // beside the map instead of a sheet under it.
+  const page = await freshPageAt({ w: 1440, h: 900 });
+  const bad = [];
+  const over = async (label) => {
+    const { scrollWidth, clientWidth } = await page.evaluate(docOverflow);
+    if (scrollWidth > clientWidth) bad.push(`${label} (scrollWidth ${scrollWidth}, clientWidth ${clientWidth})`);
+  };
+  await over('on load');
+  for (const sel of SUMMARY_SELECTORS) {
+    await trustedClick(page, sel);
+    await over(`${sel} open`);
+  }
+  assert.deepEqual(bad, [], `the page scrolls sideways at 1440px: ${bad.join(', ')}`);
 });
 
 test('sheet: rotating 390x844 -> 844x390 keeps a half-open sheet at half with the map still usable', { skip }, async () => {
@@ -696,6 +717,46 @@ test('sheet: rotating 390x844 -> 844x390 keeps a half-open sheet at half with th
   assert.ok(zoomInMap.found, 'the Leaflet zoom control is missing after rotation');
   assert.ok(zoomInMap.inside, 'the Leaflet zoom control is no longer contained inside #qc-map after rotation');
 });
+
+// A04: the combined state. A print area chosen puts the area strip (Edit, Undo,
+// Clear, ~110px plus its margins) above the sheet in the same stage, and a half
+// sheet used to keep its 45% regardless, so the map was left ~190px of a 606px
+// stage at 390x844, ~120px of 478 at 375x667 and ~80px at 320x568. The sheet's own
+// comment (quiet-corners.css) puts the map's floor at 35% of the stage, and the
+// floor steps with the window because the sheet's grip bar and four summaries
+// need ~150px: a window 700px or taller is held to 35%; one of 640-699px
+// (375x667, 390x664, common with browser toolbars up) to 28%, the most that fits
+// there; a short one (320x568) cannot be, so it is held to an absolute map height:
+// today's ~80px, a floor that stops it getting worse, not a statement that 80px
+// is enough. The inside-the-frame tests below run the same windows with the
+// surface caption too, so a floor that pushes the controls past the edge fails.
+const A04_CUTOFF_H = 640;
+const A04_VIEWPORTS = [...PHONE_VIEWPORTS, { w: 375, h: 667 }, { w: 390, h: 664 }, { w: 412, h: 732 }, { w: 430, h: 932 }];
+const MIN_PANEL_ROOM = 88; // two touch goals: a summary row plus one row to act on
+const SHORT_PHONE_MIN_MAP = 72;
+
+for (const vp of A04_VIEWPORTS) {
+  const share = vp.h >= 700 ? 0.35 : vp.h >= A04_CUTOFF_H ? 0.28 : 0;
+  test(`sheet: with a print area chosen, a half sheet keeps the map usable (${vp.w}x${vp.h})`, { skip }, async () => {
+    await forgetSavedRecipe();
+    const page = await freshPageAt(vp);
+    await chooseExampleArea(page);
+    for (const sel of ['#qcm-layer-panel summary', '#qcm-app summary']) {
+      await trustedClick(page, sel);
+      const snap = await page.evaluate(sheetSnapshot);
+      assert.equal(snap.sheet, 'half', `data-sheet is "${snap.sheet}" after opening ${sel}, expected "half"`);
+      if (share) {
+        assert.ok(snap.mapHeight >= share * snap.containerHeight,
+          `with a print area chosen and ${sel} open, #qc-map is ${snap.mapHeight}px of a ${snap.containerHeight}px stage — under ${share * 100}%`);
+      } else {
+        assert.ok(snap.mapHeight >= SHORT_PHONE_MIN_MAP,
+          `with a print area chosen and ${sel} open, #qc-map is only ${snap.mapHeight}px tall — under ${SHORT_PHONE_MIN_MAP}px`);
+      }
+      assert.ok(snap.sheetHeight >= MIN_PANEL_ROOM,
+        `with a print area chosen and ${sel} open, the sheet is only ${snap.sheetHeight}px tall — under ${MIN_PANEL_ROOM}px`);
+    }
+  });
+}
 
 // --- the sheet stays inside the map frame -------------------------------------
 //
@@ -754,7 +815,7 @@ function assertInsideFrame(seen, sheets, shows) {
   assert.deepEqual(cut, [], `the map frame clips at its bottom edge, so this is cut off: ${cut.join('; ')}`);
 }
 
-for (const vp of PHONE_VIEWPORTS) {
+for (const vp of A04_VIEWPORTS) {
   test(`sheet: collapsed, half and expanded each end inside the map frame (${vp.w}x${vp.h})`, { skip }, async () => {
     await forgetSavedRecipe();
     const page = await freshPageAt(vp);
