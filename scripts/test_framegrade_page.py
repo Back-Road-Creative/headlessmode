@@ -5,9 +5,9 @@ Source-only (no Hugo build): data/systems.json, content/framegrade.md,
 content/waypost.md, data/releases/framegrade.json.
 
 Framegrade is the media engine Waypost runs underneath. It is a pre-release
-product with no repository and no dated release, so the page may describe what
-the engine does and must carry no price, count, date or availability promise
-(business facts come only from the owner).
+product with a public repository (Apache-2.0) and no dated release, so the page
+may describe what the engine does and must carry no price, count, date or
+availability promise (business facts come only from the owner).
 
 Run: pytest scripts/test_framegrade_page.py -v
 """
@@ -42,8 +42,9 @@ def test_framegrade_is_a_product_row_with_no_invented_facts() -> None:
     assert row["link"] == "/framegrade/"
     assert row["shipped"] is None
     assert not row["blurb"].endswith("."), "blurb carries no closing period"
-    for key in ("download", "install", "store", "repo"):
-        assert key not in row, f"no {key!r}: nothing public to point at"
+    for key in ("download", "install", "store"):
+        assert key not in row, f"no {key!r}: no installer or release exists"
+    assert row["repo"] == "https://github.com/Back-Road-Creative/framegrade"
 
 
 def test_framegrade_rank_is_unique_among_products() -> None:
@@ -80,6 +81,8 @@ def test_framegrade_release_record_is_honest() -> None:
     rec = json.loads(RELEASE.read_text(encoding="utf-8"))
     assert rec["product"] == "framegrade" and rec["name"] == "Framegrade"
     assert rec["release_source"] == "manual" and rec["notes"]
+    assert rec["source_repo"] == "Back-Road-Creative/framegrade"
+    assert "no product repository" not in rec["notes"]
     assert rec["version"] is None and rec["released_at"] is None
     assert rec["demo"] is None and rec["assets"] == {}
 
