@@ -10,16 +10,13 @@ import { join } from 'node:path';
 
 const DIR = new URL('../../themes/headlessmode/static/js/quiet-corners-maps/', import.meta.url);
 const HELPER = 'request.js';
-// PR-B2 moves main.js onto request.js and removes this entry (and the list). Until then the
-// page's own call sites (camera snapshot, the tile probe, the print adapters) are the only raw calls.
-//
-// The other seven entries are modules that reached master after QQA-13 was written (the E-P1..E-P6
-// field-map layers and the finder's street-address lookup). Each still owns a raw call and its own
-// signal, so none has a deadline from request.js yet. Moving them onto fetchWithDeadline is a
-// follow-up; until then they are listed so this test guards every other module, and the stale-entry
-// test below drops an entry the day its raw call goes.
+// main.js was the last module of the original set with raw calls and now goes through request.js
+// too. The seven entries below reached master after QQA-13 was written (the E-P1..E-P6 field-map
+// layers and the finder's street-address lookup). Each still owns a raw call and its own signal,
+// so none has a deadline from request.js yet. Moving them onto fetchWithDeadline is a follow-up;
+// until then they are listed so this test guards every other module. An entry is a debt with a
+// reason beside it, and the stale-entry test below fails once it is paid.
 const ALLOW = [
-  'main.js',
   'address-geocode.js',
   'source-avalanche.js', 'source-nrhp.js', 'source-ntad-rail-airports.js',
   'source-nws-observations.js', 'source-snotel.js', 'source-stream-gauges.js',

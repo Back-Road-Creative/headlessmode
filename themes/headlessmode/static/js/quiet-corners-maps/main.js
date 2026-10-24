@@ -36,7 +36,8 @@ import { fetchSurfaceOwnership } from './source-surface-ownership.js';
 import { LAYERS, LAYER_IDS, LAYER_BY_ID, GROUPS, layerControlSpecs, baseControlSpecs, contextControlSpecs,
   CONTEXT_LAYER_IDS, DEFAULT_CONTEXT, surfaceCaption, enabledLayers, LAYERS_WITH_DRAPE, groupHint } from './layer-registry.js';
 import { filterLayerSpecs, layerBadge, layerCountLine, selectedScreenRows, layerAboutText, rowSummaryLine, groupIsCollapsedByDefault } from './layer-panel.js';
-import { SOURCES } from './source-registry.js';
+import { SOURCES, DEFAULT_SOURCE_TIMEOUT_MS } from './source-registry.js';
+import { fetchWithDeadline, createLatest } from './request.js';
 import { floodZonesLayer, floodReader, readZones as readFloodZones, areaReport as floodAreaReport } from './source-flood-zones.js';
 import { PRESETS, presetApplied, presetPreviewText, presetLeavesAlone, opensOn } from './layer-presets.js';
 import { DEFAULT_BASE, baseLayer, zoomStatus as baseZoomStatus } from './source-basemaps.js';
@@ -135,7 +136,7 @@ let lastSave = Promise.resolve();
 const savedStore = createSavedPlacesStore({ storage: typeof localStorage === 'undefined' ? null : localStorage });
 let savedPanel = null;
 const CORNERS = { 'min-lat': 'minLat', 'max-lat': 'maxLat', 'min-lon': 'minLon', 'max-lon': 'maxLon' };
-const state = { routes: [], roadsPlaced: [], bbox: null, area: null, quadNames: new Map(), areaUndo: null, areaGeneration: 0, recipe: null, plan: null, states: { usgsTopo: 'unchecked', mvum: 'unchecked' }, counts: {}, reports: {}, areaStates: [], mvum: {}, roadQuality: {}, recSites: [], trails: null, land: [], fetchedFor: null, abort: null, names: null, namesFor: null, namesGeneration: 0, namesRetrievedAt: null, namesPlaced: [], selectedNameId: null, retrievedAt: {},
+const state = { routes: [], roadsPlaced: [], bbox: null, area: null, quadNames: new Map(), areaUndo: null, areaGeneration: 0, recipe: null, plan: null, states: { usgsTopo: 'unchecked', mvum: 'unchecked' }, counts: {}, reports: {}, areaStates: [], mvum: {}, roadQuality: {}, recSites: [], trails: null, land: [], fetchedFor: null, abort: null, names: null, namesFor: null, namesGeneration: 0, namesRetrievedAt: null, passAbort: null, namesPlaced: [], selectedNameId: null, retrievedAt: {},
   // QUX-05c: the full GNIS hit chosen through the "Search places" finder
   // (quiet-corners.js's selectNameHit -> window.qcSelectName), independent of
   // the toggleable "Named places & landmarks" layer -- see
@@ -229,7 +230,7 @@ let radarFrameMs = null;
 /** The Level III ecoregions, held from the one fetch that got them. 949,718 bytes for the
  *  whole country, so the export is asked for when the switch goes on and never again: a pan
  *  is not a new question when the answer is national. `null` until then. */
-let ecoregions = null;
+let ecoregions = null, ecoregionsPending = null;
 /** The SURFACE's own time, per surface, held so the caption can be rewritten without asking
  *  the service again. Each is the time that surface's `claim` says is the honest one: the
  *  aurora's forecast time, the air quality's observed hour. Null means the service did not
@@ -659,6 +660,7 @@ function setArea(area, { title, fit = false, recordUndo = true, announce } = {})
   state.area = area;
   state.bbox = areaEnvelope(area); // the envelope every existing reader (terrain getter, sourcePass, canBuild) keeps reading
   state.areaGeneration = (state.areaGeneration ?? 0) + 1;
+  state.passAbort?.abort();   // the source pass for the area just replaced stops asking
   if (title) $('qcm-title').value = title;
   const b = state.bbox;
   for (const [k, n] of Object.entries(CORNERS)) $(`qcm-${k}`).value = b[n].toFixed(4);
@@ -804,6 +806,7 @@ function clearArea() {
   state.area = null;
   state.bbox = null;
   state.areaGeneration = (state.areaGeneration ?? 0) + 1;
+  state.passAbort?.abort();
   selection.remove();
   for (const h of handles) h.remove();
   cells.clearLayers(); quadCells.clearLayers(); quadRing.clearLayers(); sheets.clearLayers();
@@ -1723,6 +1726,7 @@ async function renderRadar() {
   const el = $('qcm-layer-nwsRadar-report');
   if (!el) return;
   radarFrameMs = await fetchFrameTime({});
+  if (!layersFromControls().nwsRadar) return;   // switched off while the frame time was in flight
   renderSurfaceCaption();   // the frame's own time is what the caption shows, not when we asked
   const vintage = frameVintage(radarFrameMs);
   el.textContent = vintage.text;
@@ -1741,9 +1745,9 @@ function loadCameraIndex() {
   if (cameraIndex) return Promise.resolve(cameraIndex);
   if (!cameraIndexPending) {
     cameraIndexPending = (async () => {
-      const res = await fetch(`${CAMERA_DIR}index.json`, { cache: 'no-cache' });
-      if (!res.ok) throw new Error(`The camera index returned ${res.status}.`);
-      const body = await res.json();
+      const got = await fetchWithDeadline(`${CAMERA_DIR}index.json`, { init: { cache: 'no-cache' }, timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS });
+      if (!got.ok) throw new Error(got.httpStatus ? `The camera index returned ${got.httpStatus}.` : got.error);
+      const body = got.body;
       if (!body || !Array.isArray(body.files)) throw new Error('The camera index is not in the expected shape.');
       cameraIndex = body;
       return body;
@@ -1758,9 +1762,9 @@ function loadCameraFile(row) {
   if (hit) return Promise.resolve(hit);
   if (!cameraFilePending.has(row.file)) {
     cameraFilePending.set(row.file, (async () => {
-      const res = await fetch(`${CAMERA_DIR}${row.file}`, { cache: 'no-cache' });
-      if (!res.ok) throw new Error(`${row.file} returned ${res.status}.`);
-      const body = await res.json();
+      const got = await fetchWithDeadline(`${CAMERA_DIR}${row.file}`, { init: { cache: 'no-cache' }, timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS });
+      if (!got.ok) throw new Error(got.httpStatus ? `${row.file} returned ${got.httpStatus}.` : got.error);
+      const body = got.body;
       const entry = { row, cameras: expandSnapshot(body), generatedAt: body.generatedAt, group: null };
       cameraFiles.set(row.file, entry);
       return entry;
@@ -2030,12 +2034,14 @@ function wireCameraPin(pin, camera, meta = {}) {
     let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, PICTURE_TIMEOUT_MS);
     try {
-      const res = await fetch(camera.media.still, { cache: 'no-cache', signal: ctrl.signal });
-      if (ctrl.signal.aborted) return;
-      if (!res.ok) throw new Error(`${row.operator}'s server returned ${res.status}.`);
-      const lastModified = res.headers.get('Last-Modified');
-      const blob = await res.blob();
-      if (ctrl.signal.aborted) return;
+      // The still is read as a blob inside the card's own picture limit (the same 20 s as the timer above, not the 10 s a data source gets); Last-Modified rides along for the age line.
+      const got = await fetchWithDeadline(camera.media.still, {
+        init: { cache: 'no-cache' }, signal: ctrl.signal, timeoutMs: PICTURE_TIMEOUT_MS,
+        read: async (res) => ({ lastModified: res.headers.get('Last-Modified'), blob: await res.blob() }),
+      });
+      if (ctrl.signal.aborted && !timedOut) return;   // closed by the reader; the picture limit still reports below
+      if (!got.ok) throw new Error(got.httpStatus ? `${row.operator}'s server returned ${got.httpStatus}.` : got.error);
+      const { lastModified, blob } = got.body;
       cameraOpenUrl = URL.createObjectURL(blob);
       const img = document.createElement('img');
       img.src = cameraOpenUrl;
@@ -2129,6 +2135,9 @@ async function renderAurora() {
   }
   // Fetched only on the way in. A pan redraws what we already hold.
   if (!auroraBody) auroraBody = await fetchAurora({});
+  // The answer may land after the reader switched the layer off (or picked another surface):
+  // it is kept for the next time, but nothing is drawn for a row that is no longer on.
+  if (!layersFromControls().swpcAurora) return;
   // The forecast time, never the observation time 66 minutes behind it and never the
   // moment we fetched: this surface's claim is 'forecast', so that is the time it owns.
   auroraForecastMs = readForecast(auroraBody).forecastMs ?? null;
@@ -2699,7 +2708,11 @@ async function renderEcoregions() {
   const layers = layersFromControls();
   const el = readingRow('qcm-layer-epaEcoregions-report', !!layers.epaEcoregions);
   if (!el) return;
-  if (!ecoregions) ecoregions = await loadEcoregions({});
+  if (!ecoregions) {
+    // Two quick toggles share the one request instead of starting a second 950 KB read.
+    ecoregionsPending ??= loadEcoregions({}).finally(() => { ecoregionsPending = null; });
+    ecoregions = await ecoregionsPending;
+  }
   if (!layersFromControls().epaEcoregions || !state.bbox) return;
   const b = state.bbox;
   const at = { lat: (b.minLat + b.maxLat) / 2, lon: (b.minLon + b.maxLon) / 2 };
@@ -4053,6 +4066,10 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
   const { plan, recipe } = state;
   const box = bboxLonLat || recipe?.bboxLonLat;
   if (!box || (!browse && !plan)) return;
+  // One controller per pass: setArea/clearArea abort it, so the requests of a pass whose area has
+  // been replaced are cancelled at the network instead of finishing for nothing.
+  const ctrl = new AbortController(), signal = ctrl.signal;
+  state.passAbort = ctrl;
   const layers = bboxLonLat ? layersFromControls() : recipe.layers;
   // The base map's answer is a question about the SHEET — which tile level the
   // scale picks — so browsing must not throw it away and must not re-ask it. Read
@@ -4061,31 +4078,37 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
   let topo = state.states.usgsTopo;
   if (!browse) { $('qcm-check').disabled = true; say('Checking sources…'); resetSources(); } else clearFetched();
   if (!browse) {
-    let ok = false;
-    try { ok = (await fetch(tilePlan(plan).tiles.unique[0].url)).ok; } catch { /* unreachable is "unavailable" */ }
+    // An unreachable server, a timeout and an HTTP error all read as "unavailable". So does a
+    // plan with no tile to ask for: a throw here would leave Check sources disabled for good.
+    let url = null;
+    try { url = tilePlan(plan).tiles.unique[0].url; } catch { /* no tile is "unavailable" */ }
+    const ok = url !== null && (await fetchWithDeadline(url, {
+      signal, timeoutMs: SOURCES.usgsTopo.timeoutMs, read: async () => null,
+    })).ok;
+    if (stale()) return;
     topo = ok ? 'ready' : 'unavailable';
   }
   // Which states the area covers, from the quad index this page already uses.
   // A failure here costs the state land layers, never the base map.
-  try { state.areaStates = statesForCells((await fetchCellsForBbox({ bboxLonLat: box })).cells); }
-  catch { state.areaStates = []; }
+  try { state.areaStates = statesForCells((await fetchCellsForBbox({ bboxLonLat: box, signal })).cells); }
+  catch { if (stale()) return; state.areaStates = []; }
   if (stale()) return;
   renderLayerControls();
   state.states.usgsTopo = topo;
   state.counts.usgsTopo = null;   // a raster base has no feature count to report
   if (layers.mvum) {
     try {
-      const [roads, trails] = await Promise.all(['roads', 'trails'].map((layer) => fetchLayer({ layer, bboxLonLat: box })));
+      const [roads, trails] = await Promise.all(['roads', 'trails'].map((layer) => fetchLayer({ layer, bboxLonLat: box, signal })));
       if (stale()) return;
       state.mvum = { roads, trails };
       state.counts.mvum = roads.features.length + trails.features.length;
       // Road quality is detail, not a gate: if the inventory is down the roads still
       // print, at their plain width. Never let it fail the source check.
-      try { state.roadQuality = await fetchRoadQuality({ bboxLonLat: box }); }
-      catch { state.roadQuality = {}; }
+      try { state.roadQuality = await fetchRoadQuality({ bboxLonLat: box, signal }); }
+      catch { if (stale()) return; state.roadQuality = {}; }
       const cov = [roads.coverage, trails.coverage];
       state.states.mvum = cov.every((c) => c === 'complete') ? 'ready' : cov.includes('unavailable') ? 'unavailable' : cov.includes('unknown') ? 'unknown' : 'partial';
-    } catch (err) { state.states.mvum = 'unknown'; fail(err); }
+    } catch (err) { if (stale()) return; state.states.mvum = 'unknown'; fail(err); }
   }
   if (stale()) return;
   if (layers.recSites) {
@@ -4093,11 +4116,11 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
     // whenever the fetch did not throw, so a box past the transfer limit printed a
     // sheet missing sites while the source panel called the layer ready (F14).
     try {
-      const answer = await fetchRecSites({ bboxLonLat: box });
+      const answer = await fetchRecSites({ bboxLonLat: box, signal });
       if (stale()) return;
       state.recSites = answer.sites;
       state.states.recSites = answer.coverage === 'complete' ? 'ready' : 'partial';
-    } catch { state.recSites = []; state.states.recSites = 'unavailable'; }
+    } catch { if (stale()) return; state.recSites = []; state.states.recSites = 'unavailable'; }
     state.counts.recSites = state.recSites.length;
   }
   if (stale()) return;
@@ -4105,22 +4128,22 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
   // designation families share `state.land`: downstream both are a point with a symbol.
   if (layers.blmRecSites) {
     try {
-      const answer = await fetchBlmRecSites({ bboxLonLat: box });
+      const answer = await fetchBlmRecSites({ bboxLonLat: box, signal });
       if (stale()) return;
       state.recSites.push(...answer.sites);
       state.counts.blmRecSites = answer.sites.length;
       state.states.blmRecSites = answer.coverage === 'complete' ? 'ready' : 'partial';
-    } catch { state.counts.blmRecSites = 0; state.states.blmRecSites = 'unavailable'; }
+    } catch { if (stale()) return; state.counts.blmRecSites = 0; state.states.blmRecSites = 'unavailable'; }
   }
   if (stale()) return;
   if (layers.trails) {
     try {
-      const result = await fetchTrails({ bboxLonLat: box });
+      const result = await fetchTrails({ bboxLonLat: box, signal });
       if (stale()) return;
       state.trails = result;
       state.counts.trails = state.trails.features.length;
       state.states.trails = state.trails.coverage === 'complete' ? 'ready' : 'partial';
-    } catch (err) { state.states.trails = 'unavailable'; fail(err); }
+    } catch (err) { if (stale()) return; state.states.trails = 'unavailable'; fail(err); }
   }
   if (stale()) return;
   // Federal designations. One national service, so no per-state fan-out: the four
@@ -4130,7 +4153,7 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
   if (layers.federalLand) {
     let count = 0, worst = null;
     const answers = await Promise.allSettled(FEDERAL_IDS.map(
-      (family) => fetchFederalLand({ family, bboxLonLat: box })));
+      (family) => fetchFederalLand({ family, bboxLonLat: box, signal })));
     if (stale()) return;
     for (const a of answers) {
       if (a.status === 'rejected') { worst = 'unavailable'; fail(a.reason); continue; }
@@ -4148,12 +4171,12 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
   // registry says emptyMeans 'unknown' for exactly that reason.
   if (layers.countyLines) {
     try {
-      const answer = await fetchCountyLines({ bboxLonLat: box });
+      const answer = await fetchCountyLines({ bboxLonLat: box, signal });
       if (stale()) return;
       state.land.push(...answer.features);
       state.counts.countyLines = answer.features.length;
       state.states.countyLines = answer.coverage === 'complete' ? 'ready' : 'partial';
-    } catch (err) { state.states.countyLines = 'unavailable'; fail(err); }
+    } catch (err) { if (stale()) return; state.states.countyLines = 'unavailable'; fail(err); }
   }
   if (stale()) return;
   // Surface ownership rides the same channel: boundaries with a symbolKey, into
@@ -4161,12 +4184,12 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
   // never prints as though it were the whole forest.
   if (recipe.layers.surfaceOwnership) {
     try {
-      const answer = await fetchSurfaceOwnership({ bboxLonLat: recipe.bboxLonLat });
+      const answer = await fetchSurfaceOwnership({ bboxLonLat: recipe.bboxLonLat, signal });
       if (stale()) return;
       state.land.push(...answer.features);
       state.counts.surfaceOwnership = answer.features.length;
       state.states.surfaceOwnership = answer.coverage === 'complete' ? 'ready' : 'partial';
-    } catch (err) { state.states.surfaceOwnership = 'unavailable'; fail(err); }
+    } catch (err) { if (stale()) return; state.states.surfaceOwnership = 'unavailable'; fail(err); }
   }
   if (stale()) return;
   // Wetlands ride the same channel -- shapes with a symbolKey, into `state.land`.
@@ -4178,14 +4201,14 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
   // mapped") is kept for the layer's row.
   if (layers.wetlands) {
     try {
-      const answer = await fetchWetlands({ bboxLonLat: box });
+      const answer = await fetchWetlands({ bboxLonLat: box, signal });
       if (stale()) return;
       state.land.push(...answer.features);
       state.counts.wetlands = answer.features.length;
       state.reports.wetlands = answer.report.text;
       state.states.wetlands = answer.refused ? 'unavailable'
         : answer.coverage === 'complete' ? 'ready' : 'partial';
-    } catch (err) { state.states.wetlands = 'unavailable'; fail(err); }
+    } catch (err) { if (stale()) return; state.states.wetlands = 'unavailable'; fail(err); }
   }
   if (stale()) return;
   // Named terrain & places (GNIS). A browse pass skips them: runNames asks for the view on its own
@@ -4193,7 +4216,7 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
   if (layers.names && !browse) {
     const token = ++state.namesGeneration;
     try {
-      const result = await fetchNamesFor(box, PRINT_NAMES_ZOOM);
+      const result = await fetchNamesFor(box, PRINT_NAMES_ZOOM, signal);
       if (isStaleGeneration(token, state.namesGeneration) || stale()) { /* superseded; drop it */ } else {
         applyNamesResult(result, box);
         namesFetched = null;   // the held view answer is gone; the next move asks the view again
@@ -4213,7 +4236,7 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
     let count = 0, worst = null;
     for (const code of codes) {
       try {
-        const r = await fetchLandBoundaries({ state: code, family, bboxLonLat: box });
+        const r = await fetchLandBoundaries({ state: code, family, bboxLonLat: box, signal });
         if (stale()) return;
         state.land.push(...r.features);
         count += r.features.length;
@@ -4221,7 +4244,7 @@ async function sourcePass({ bboxLonLat = null, browse = false } = {}) {
         // and stopped. canBuild refuses it, so a truncated boundary set never prints.
         if (r.skipped) worst = 'unavailable';
         else if (r.coverage !== 'complete' && worst !== 'unavailable') worst = 'partial';
-      } catch (err) { worst = 'unavailable'; fail(err); }
+      } catch (err) { if (stale()) return; worst = 'unavailable'; fail(err); }
     }
     state.counts[family] = count;
     state.states[family] = worst || 'ready';
@@ -4283,7 +4306,7 @@ async function build() {
     const { pdfBytes, stats } = await runBuild({
       recipe: state.recipe, plan: state.plan, PDFLib, signal: ctrl.signal,
       adapters: {
-        fetchImpl: (u, o) => fetch(u, o), createImageBitmap: (b) => createImageBitmap(b),
+        fetchImpl: globalThis.fetch.bind(globalThis), createImageBitmap: (b) => createImageBitmap(b),
         mvum: state.mvum, roadQuality: state.roadQuality,
         trails: state.trails, land: state.land, sites: state.recSites,
         names: state.recipe.layers.names ? namesAdapterPayload(state.names, state.namesRetrievedAt) : null,
@@ -4298,9 +4321,15 @@ async function build() {
   } catch (err) { fail(err); } finally { busy(false); state.abort = null; renderSources(); }
 }
 
+// Latest wins: a slower answer to an earlier name must not replace the list for the name typed since.
+// The earlier request is cancelled the moment the next search begins, and the status says so at once.
+const quadSearch = createLatest();
 async function findQuad() {
   const ul = $('qcm-quad-results'); ul.replaceChildren(); ul.hidden = true;
-  const r = await searchByName({ name: $('qcm-quad-name').value });
+  say('Searching…');
+  const name = $('qcm-quad-name').value;
+  const { stale, value: r } = await quadSearch.run((signal) => searchByName({ name, signal }));
+  if (stale) return;
   if (!r.ok) { say(r.error); return; }
   if (!r.cells.length) { say('No quadrangle matches that name.'); return; }
   for (const c of r.cells) {
