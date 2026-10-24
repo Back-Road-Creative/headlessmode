@@ -18,6 +18,10 @@
 // not go further back; (3) Reset returns every switch, the base map, the
 // context surface and the two display overrides (highlight, hillshade light)
 // to how the page opened, without moving the drawn area or the map.
+//
+// QQA-18b (Journey 11) adds the Check conditions proofs at the bottom: exactly which layers
+// the preset turns on (and that the Active on map list names them), that Undo puts a prior,
+// different state back, and that a share link written before the preset existed restores.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { findChromium, launch } from './helpers/browser.mjs';
@@ -42,20 +46,31 @@ const PATCH_SOURCE = `(() => {
   };
 })()`;
 
-async function withPatchedFetch(fn) {
+/** For the Check conditions proofs, which switch on the fire, smoke and air-quality services:
+ *  an empty answer in each service's own shape (GeoJSON, or ArcGIS features), so a layer
+ *  that fetches settles as "nothing here" instead of failing on a body it cannot read. */
+const EMPTY_SERVICES_SOURCE = `(() => {
+  window.fetch = function() {
+    return Promise.resolve(new Response(JSON.stringify({ type: 'FeatureCollection', features: [] }), {
+      status: 200, headers: { 'content-type': 'application/json' },
+    }));
+  };
+})()`;
+
+async function withPatchedFetch(fn, { hash = '', source = PATCH_SOURCE } = {}) {
   const site = await startSiteServer();
   const page = await launch(CHROMIUM, 'about:blank', {
     viewport: { width: 1280, height: 900 }, args: ['--hide-scrollbars'],
   });
   try {
-    await page.send('Page.addScriptToEvaluateOnNewDocument', { source: PATCH_SOURCE });
-    await page.navigate(`${site.origin}/quiet-corners/`);
+    await page.send('Page.addScriptToEvaluateOnNewDocument', { source });
+    await page.navigate(`${site.origin}/quiet-corners/${hash}`);
     await readyDashboard(page, { data: false, ms: CEILING });
     return await fn(page);
   } finally { page.close(); await site.close(); }
 }
 
-// Seven presets: Undo and Reset left the grid for the layer count line, so the presets still
+// Eight presets: Undo and Reset left the grid for the layer count line, so the presets still
 // fill two rows and the line does not grow past its own text at 1280px (main.js renderPresets).
 test('the presets fill two grid rows and Undo/Reset sit on the layer count line', { skip }, async () => {
   await withPatchedFetch(async (page) => {
@@ -74,8 +89,8 @@ test('the presets fill two grid rows and Undo/Reset sit on the layer count line'
         rowH: row ? h(row) : 0, countH: h(document.getElementById('qcm-layer-count')),
       };
     })()`);
-    assert.equal(seen.gridIds.length, 7, `expected the seven presets alone in the grid, got: ${seen.gridIds}`);
-    assert.equal(seen.rows, 2, 'the seven presets should fill two rows of four');
+    assert.equal(seen.gridIds.length, 8, `expected the eight presets alone in the grid, got: ${seen.gridIds}`);
+    assert.equal(seen.rows, 2, 'the eight presets should fill two rows of four');
     assert.equal(seen.undoIn, 'qcm-preset-actions');
     assert.equal(seen.resetIn, 'qcm-preset-actions');
     assert.equal(seen.rowInToolbar, true, 'Undo/Reset should sit on the count line inside the layer toolbar');
@@ -203,4 +218,96 @@ test('Reset returns switches, base and display overrides to opening state, and l
     })()`);
     assert.deepEqual(mapAfter, mapBefore, 'Reset must never move the map or touch the drawn area');
   });
+});
+
+// ---- QQA-18b: Check conditions -------------------------------------------------------------
+const CONDITIONS = ['epaAirNowAqi', 'nifcFirePerimeters', 'noaaHmsSmoke', 'nwsRadar'];
+// Road names and Named places open ON (layer-presets.js opensOn) and are lettering, not
+// layers a reader switched on: the snapshot leaves them out, like the Active list does.
+const LETTERING = ['names', 'roads'];
+
+/** Every Layers-panel switch in one object, so "exactly which layers are on" is one deepEqual:
+ *  the on layers by id (a context radio counts under its layer id, "None" and the base radios
+ *  do not), plus the chosen base and context radio. */
+const SNAPSHOT = `(() => ({
+  on: [...document.querySelectorAll('#qcm-layers .qcm-layer-row input')]
+    .filter((i) => i.checked && i.name !== 'qcm-base' && i.id !== 'qcm-context-none'
+      && !${JSON.stringify(LETTERING)}.includes(i.value)).map((i) => i.value).sort(),
+  base: document.querySelector('input[name="qcm-base"]:checked').id,
+  context: document.querySelector('input[name="qcm-context"]:checked').id,
+  active: [...document.querySelectorAll('#qcm-active-layers [data-active-layer]')].map((li) => li.getAttribute('data-active-layer')).sort(),
+  undoDisabled: document.getElementById('qcm-preset-undo').disabled,
+}))()`;
+const activeIs = (ids) => `JSON.stringify([...document.querySelectorAll('#qcm-active-layers [data-active-layer]')]
+  .map((li) => li.getAttribute('data-active-layer')).sort()) === ${JSON.stringify(JSON.stringify([...ids].sort()))}`;
+
+test('Check conditions turns on exactly radar, air quality, smoke and fire perimeters, and the Active list names them', { skip }, async () => {
+  await withPatchedFetch(async (page) => {
+    const before = await page.evaluate(SNAPSHOT);
+    assert.deepEqual(before.on, [], 'a fresh page has nothing on');
+    assert.deepEqual(before.active, [], 'and an empty Active on map list');
+
+    await page.evaluate("document.getElementById('qcm-preset-checkConditions').click()");
+    await waitInPage(page, 'the Active on map list to name the preset\'s layers', activeIs(CONDITIONS), CEILING, null);
+    const after = await page.evaluate(SNAPSHOT);
+    assert.deepEqual(after.on, CONDITIONS, 'exactly the four weather layers are on -- not the flood zones, not another group');
+    assert.equal(after.context, 'qcm-context-nwsRadar', 'radar is the one view-filling surface');
+    assert.equal(after.base, 'qcm-base-usgsTopo');
+    assert.deepEqual(after.active, CONDITIONS);
+    assert.equal(after.undoDisabled, false);
+    // The one-surface rule held in the real panel: the three others are checkboxes, not radios.
+    const kinds = await page.evaluate(`['epaAirNowAqi', 'noaaHmsSmoke', 'nifcFirePerimeters'].map((id) => document.getElementById('qcm-layer-' + id).type)`);
+    assert.deepEqual(kinds, ['checkbox', 'checkbox', 'checkbox']);
+    assert.equal(await page.evaluate("document.getElementById('qcm-layer-femaNfhl').checked"), false);
+  }, { source: EMPTY_SERVICES_SOURCE });
+});
+
+test('Check conditions replaces a different prior state, and Undo puts that state back', { skip }, async () => {
+  await withPatchedFetch(async (page) => {
+    // A prior state the preset must overwrite on every axis: an overlay it turns off, a raster
+    // surface it swaps for radar, a base it changes, and one of its own overlays already on.
+    await page.evaluate(`['qcm-layer-trails', 'qcm-layer-noaaHmsSmoke', 'qcm-context-nightLights', 'qcm-base-none']
+      .forEach((id) => document.getElementById(id).click())`);
+    const prior = await page.evaluate(SNAPSHOT);
+    assert.deepEqual(prior.on, ['nightLights', 'noaaHmsSmoke', 'trails']);
+    assert.equal(prior.base, 'qcm-base-none');
+
+    await page.evaluate("document.getElementById('qcm-preset-checkConditions').click()");
+    await waitInPage(page, 'the Active on map list to follow the preset', activeIs(CONDITIONS), CEILING, null);
+    const applied = await page.evaluate(SNAPSHOT);
+    assert.deepEqual(applied.on, CONDITIONS, 'trails and night lights went off; the four weather layers are on');
+    assert.equal(applied.base, 'qcm-base-usgsTopo');
+
+    await page.evaluate("document.getElementById('qcm-preset-undo').click()");
+    await waitInPage(page, 'the Active on map list to follow Undo', activeIs(['nightLights', 'noaaHmsSmoke', 'trails']), CEILING, null);
+    const undone = await page.evaluate(SNAPSHOT);
+    assert.deepEqual({ ...undone, undoDisabled: prior.undoDisabled }, prior, 'Undo restores the prior layers, surface, base and Active list exactly');
+    assert.equal(undone.undoDisabled, true, 'and is spent');
+  }, { source: EMPTY_SERVICES_SOURCE });
+});
+
+test('a share link written before the weather preset existed still restores its layer set by id', { skip }, async () => {
+  // A set the Public land preset leaves behind (preset-era layers only), as an old link carries it.
+  const publicLand = ['blmRecSites', 'federalLand', 'mvum', 'recSites', 'surfaceOwnership', 'trails'];
+  await withPatchedFetch(async (page) => {
+    await waitInPage(page, 'the old link\'s layers on', `document.getElementById('qcm-layer-trails').checked && document.getElementById('qcm-layer-blmRecSites').checked`, CEILING, null);
+    const s = await page.evaluate(SNAPSHOT);
+    assert.deepEqual(s.on, publicLand);
+    assert.equal(s.base, 'qcm-base-usgsTopo');
+    assert.equal(s.undoDisabled, true, 'restoring a link is not a preset press, so there is nothing to Undo');
+  }, { hash: `#map=v1&z=9&c=44.5,-89.5&b=usgsTopo&o=${publicLand.join(',')}` });
+
+  // A weather set in the pre-QQA-06d shape: radar as `s=`, fire and air quality as `o=`.
+  await withPatchedFetch(async (page) => {
+    await waitInPage(page, 'the old weather link\'s layers on', `document.getElementById('qcm-context-nwsRadar').checked && document.getElementById('qcm-layer-nifcFirePerimeters').checked`, CEILING, null);
+    const s = await page.evaluate(SNAPSHOT);
+    assert.deepEqual(s.on, ['epaAirNowAqi', 'nifcFirePerimeters', 'nwsRadar']);
+    // Pressing the preset on top of it adds only what is missing, and Undo takes only that back.
+    await page.evaluate("document.getElementById('qcm-preset-checkConditions').click()");
+    await waitInPage(page, 'smoke added', "document.getElementById('qcm-layer-noaaHmsSmoke').checked", CEILING, null);
+    assert.deepEqual((await page.evaluate(SNAPSHOT)).on, CONDITIONS);
+    await page.evaluate("document.getElementById('qcm-preset-undo').click()");
+    await waitInPage(page, 'smoke removed again', "!document.getElementById('qcm-layer-noaaHmsSmoke').checked", CEILING, null);
+    assert.deepEqual((await page.evaluate(SNAPSHOT)).on, ['epaAirNowAqi', 'nifcFirePerimeters', 'nwsRadar']);
+  }, { hash: '#map=v1&z=9&c=44.5,-89.5&b=usgsTopo&s=nwsRadar&o=epaAirNowAqi,nifcFirePerimeters', source: EMPTY_SERVICES_SOURCE });
 });

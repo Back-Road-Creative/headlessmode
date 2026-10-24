@@ -193,6 +193,24 @@ export const PRESETS = Object.freeze([
     base: 'usgsTopo',
     layers: ['transportNoise', 'railClass1', 'airports', 'names'],
   }),
+  // QQA-18b, the plan's "Check conditions" task preset, built from the Weather & conditions
+  // group. Radar is the group's one view-filling surface; air quality, smoke and fire
+  // perimeters are vector overlays that sit beside it (QQA-06d), so the set obeys the
+  // one-surface rule by construction and costs no fetched layer (all four are screen-only).
+  // Flood zones are left out on purpose: a regulatory floodplain is not a condition, and
+  // laying it beside a weather alert is the misreading the registry warns about -- it is one
+  // switch away. Topo stays under it: radar is clear where nothing falls, unlike the lights.
+  // "Explore outdoors", the plan's other task preset, is not a button of its own: it is
+  // `publicLandDay` (where may I go, and what is there) and `trailsTerrain` (which trails,
+  // and what the ground does), and a third set over the same rows would be a near-duplicate.
+  // Ids never change -- saved and shared views restore a preset by id.
+  definePreset({
+    id: 'checkConditions',
+    label: 'Check conditions',
+    question: 'What are the rain, the air and any fires doing around here?',
+    base: 'usgsTopo',
+    layers: ['nwsRadar', 'epaAirNowAqi', 'noaaHmsSmoke', 'nifcFirePerimeters'],
+  }),
 ]);
 export const PRESET_BY_ID = Object.freeze(Object.fromEntries(PRESETS.map((p) => [p.id, p])));
 

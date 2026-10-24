@@ -1575,7 +1575,7 @@ function refreshPresetPreviews() {
  *  reader hears it as part of the button.
  *
  *  Undo and Reset go on the layer count line (`#qcm-preset-actions`), not into the
- *  4-column grid: with seven presets, nine buttons there needed a third row, past
+ *  4-column grid: with eight presets, ten buttons there needed a third row, past
  *  layout.test.mjs's 600px map-key-reach budget at 390px (a separate row for two more
  *  buttons had already measured 656px under U1). The grid falls back to holding them
  *  if the line is missing. Both start disabled -- there is nothing yet to undo or reset. */
