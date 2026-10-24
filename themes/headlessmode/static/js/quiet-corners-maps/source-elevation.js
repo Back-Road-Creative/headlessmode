@@ -24,6 +24,9 @@ const SERVICE = 'https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElev
 // a few calls rather than one enormous URL.
 export const MAX_POINTS_PER_CALL = 200;
 
+/** Settled point answers main.js keeps for its cards, least recently used dropped first. */
+export const ELEVATION_CACHE_LIMIT = 256;
+
 /** Evenly spaced points along a polyline, in [lon, lat]. Always includes both
  *  ends, so the climb to a summit at the far end is never missed. */
 export function samplePointsAlong(paths = [], maxPoints = 60) {

@@ -630,6 +630,17 @@ def test_llms_waypost_says_tiktok_is_a_manual_handoff():
     assert "published slot on YouTube, TikTok," not in line
 
 
+def test_llms_quiet_corners_links_its_public_repository():
+    """github.com/Back-Road-Creative/quiet-corners is public, so llms.txt must
+    link it the way the other open entries do ("Source: github.com/...") and
+    must not claim there is nothing to link. Grant Platform's and Waypost's
+    source stay private, and the Products paragraph must keep saying so."""
+    text = LLMS.read_text()
+    assert "Source: github.com/Back-Road-Creative/quiet-corners." in _llms_line("Quiet Corners")
+    assert "no repository" not in text.lower()
+    assert "neither Grant Platform's source nor Waypost's is public" in text
+
+
 def _ledger_order(entries):
     """The ledger's fallback sort, recomputed independently of the template:
     shipped entries first (newest month first, ties by name ascending

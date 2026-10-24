@@ -273,6 +273,17 @@ Unsupported geometry domains (each returns `unavailable` or `not applicable` wit
 - The 3DEP vertical datum and grid resolution: not recorded in this repo for the elevation samples (the service answers at whatever grid size is asked), so the card says
   so rather than naming one.
 
+## Terrain slope surface: late answers
+
+`terrainSlopeLayer` (`source-terrain-surface.js`) carries a generation number that `cancel()` and every new
+`refresh` bump. A terrain answer that lands after the surface was switched off, or after a newer view asked,
+is dropped, whether it is a failure or a picture, and including one that lands during the decode: it neither
+reports to the row (which would re-add the layer and un-hide the row) nor paints. A reply that will not
+decode is reported once as the failed answer, and only while its ask is still the current one. Hillshade
+does the same through its fetcher's generation (the late answer is `stale`).
+`terrain-surface.test.mjs` holds the cases: decode failure after switch-off, decode success after
+switch-off, an older decode landing after a newer ask, and an uninterrupted ask that still reports once.
+
 ## Accessibility checks
 
 `a11y-dynamic-browser.test.mjs` drives the built `/quiet-corners/` app (the Field Maps app; `/quiet-corners/maps/` is its documentation page, checked as one state) offline and holds it to zero axe-core WCAG 2.2 A/AA findings in each state a reader reaches: first load, the dock panels, the phone sheet at half and expanded, the place finder, a name card and the 3D dialog (skipped, said so, when the browser has no WebGL). "Needs review" counts as a finding. A waiver is a row in `EXCLUSIONS` naming the rule, a selector and a reason that is true today; where axe cannot read what is behind a label or glyph the row also carries `plate`, and the test measures that text against its own background itself. It also asserts the keyboard contract (Tab order, focus never hidden, Escape returns focus), 44 px touch targets at 390 px, 200% text without clipping or sideways scroll, reflow at 320 px, and the contrast and backplate opacity of the labels the app paints on the map. Not asserted yet: with the phone sheet expanded, five map controls stay in the Tab order under the sheet (Zoom in, Search places, Share view, Use my location, Map credits).
@@ -282,6 +293,34 @@ Unsupported geometry domains (each returns `unavailable` or `not applicable` wit
 A fixed sleep in a browser proof is a bet on load: it fails on a busy box and spends its whole length on an idle one. `helpers/waits.mjs` has the named waits (`waitInPage`, `qcWait`, `qcMoves`, `qcMeasured`); a proof waits on what its next assertion reads. `chooseExampleArea` waits for the viewport browse debounce to have fired by watching the page's own timers of `VIEWPORT_FETCH.settleMs`, since `main.js` keeps that timer private and exposes no idle flag. The same watch is exported for any delay: `watchTimers(ms, ...)` (install it before the thing that arms the timer, at document start for a page that arms one while loading) and `timersIdle(ms)` (true when no watched timer of that length is pending; it throws for an unwatched delay, so a wait cannot pass for the wrong reason). `choose-example-area-wait-browser.test.mjs` holds that contract.
 
 `no-blind-sleeps.test.mjs` keeps numeric-literal sleeps (`=> setTimeout(cb, N)`, `sleep(N)`) and `settleMs + N` margins out of `panel-shell-browser.test.mjs`, `a11y-dynamic-browser.test.mjs`, `chooseExampleArea`, `browser-port.test.mjs`, `card-over-panels-browser.test.mjs`, `helpers/place-shards.mjs`, `phone-map-chrome-browser.test.mjs`, `print-clear-journeys-browser.test.mjs` and `road-labels-browser.test.mjs`. In those files every millisecond constant is a named `UPPER_CASE` value with a one-line reason. What remains is pacing, not waiting: `POLL_MS` (browser-port's poll interval), `DRAG_STEP_MS` (a drag's step gap), `BURST_GAP_MS` (the gap between the moves of a burst), `FRAGMENT_THROTTLE_MS` and `ROAD_DEBOUNCE_MS` (not pacing: copies of app constants that are the key a timer watch looks the app's timer up by; each file has a source-reading test that fails when the app's value moves, since `timersIdle` cannot tell a moved timer from an idle one). A sleep that is the point of a proof (asserting something does NOT happen) is the exception: write it against the app's debounce constant, not a literal, and say why.
+
+## Leak cycles (QQA-13c)
+
+`leak-cycles-browser.test.mjs` opens and closes the 3D panel once, reads the browser's own counters after a forced garbage collection (`HeapProfiler.collectGarbage`, repeated until two reads agree), runs 20 more cycles (Escape on even ones, the panel's Close button on odd ones) and reads again. `JSEventListeners` and `Nodes` (`Performance.getMetrics`) and the terrain panel's map count must be **equal**, not close. It also holds, exactly: the document has no more `keydown` listeners after a close than before the first open (`DOMDebugger.getEventListeners`); a second press while the MapLibre import is in flight builds no second map; a close during that import builds none for the closed press; a second calibration or key-sheet download revokes the first blob URL once; and a hillshade picture that lands after its layer was switched off makes no blob URL, is not put back on the map and does not rewrite the report row (the slot hands out a `ticket()` before the fetch, and `release()` outdates it). The unit side is `leak-guards.test.mjs` (`createUrlSlot`, `createLru`, `ELEVATION_CACHE_LIMIT`, and a source contract that `main.js` uses them for the two download links, the elevation cache and the hillshade picture).
+
+**Heap, measured (QQA-13c2).** The 58 KB a cycle that QQA-13c recorded was a warm-up step read as a rate, not a leak. Method: the same 3D open/close cycle as the test (Escape on even cycles, Close on odd), Chromium headless on the dev container (software GL, `--disable-gpu`), and at each reading `HeapProfiler.collectGarbage` repeated until two `JSHeapUsedSize` reads in a row agree. One session per run, readings taken as the run went on (a throwaway probe, not kept in the repo). `JSHeapUsedSize` in bytes:
+
+| cycles done | run A | run B | run C (to 101) |
+| --- | --- | --- | --- |
+| 1 | 31,974,840 | 31,975,920 | 31,979,104 |
+| 2 | | | 32,203,492 |
+| 3 | | | 32,419,144 |
+| 5 | | | 32,643,912 |
+| 8 | | | 32,729,448 |
+| 10 | | | 33,064,480 |
+| 11 | 33,081,560 | 33,082,048 | 33,080,868 |
+| 21 | 33,139,212 | 33,141,920 | 33,143,260 |
+| 41 | 33,208,000 | 33,216,408 | 33,213,756 |
+| 61 | 33,241,768 | 33,244,952 | 33,247,804 |
+| 81 | | | 33,265,848 |
+| 91 | | | 33,096,216 |
+| 101 | | | 33,101,532 |
+
+Reading it: the heap climbs about 1.1 MB over the first ten cycles (1 to 11: +1.11 MB in all three runs), which is code, shapes and caches the 3D view builds the first few times it opens. After that it is flat: cycle 21 to 61 adds 102,556 / 103,032 / 104,544 bytes (about 2.6 KB a cycle, and falling: 51 to 61 adds 2.8 to 9.4 KB), and run C is 41,728 bytes **below** cycle 21 by cycle 101 (the collector freed about 170 KB between 81 and 91). Growth that is still rising with the cycle count would not fall back; this did. Listeners, nodes and maps were flat throughout (the test above). The Chrome heap-snapshot step the follow-up allowed for was not needed: with no growth after forced collection there is no retaining path to find.
+
+`leak-heap-browser.test.mjs` asserts the part the data supports. After a 21-cycle warm-up reading it runs 20 more cycles and requires the settled heap to grow by less than `HEAP_TAIL_LIMIT` = 256 KiB (262,144 bytes). Cycle 21 to 41 measured +68,788 / +74,488 / +70,496 bytes in the probe runs and +73,800, +74,772 and +84,988 in three runs of the test itself (the largest, 84,988, is about 32% of the limit; the spread across the six is about 16 KB). A leak of 13 KiB a cycle or more trips it: with a deliberate 16 KB-a-cycle leak added to the tail loop the test failed with `the settled heap grew 393804 bytes across 20 cycles after warm-up (limit 262144)`. The limit is not a tight leak detector for something under about 13 KiB a cycle; listeners, nodes and maps stay exact for those. Whoever enforces it on another box should re-record the 21 to 41 growth there.
+
+**CI time budget.** `pr-ci.yml` and `deploy-production.yml` cap each test **file** at `--test-timeout=600000`. The heap check has its own file, `leak-heap-browser.test.mjs`, so the 41 cycles it needs (21 warm-up and 20 more) do not share a budget with the 21 of `leak-cycles-browser.test.mjs` and the four import, download and hillshade tests. One run each on the dev container: `leak-heap-browser.test.mjs` 116 s (growth 68,776 bytes), `leak-cycles-browser.test.mjs` 166 s (its 21-cycle test 110 s). The two files' times add up to what the single combined file took before (186 to 301 s over three earlier runs), but each file now uses under 30% of its 600 s cap, so CI contention would have to slow the slower one by about 3.6x before the cap fires. With a deliberate leak of 16 KB a cycle added to `cycle()` the split file failed with `the settled heap grew 413436 bytes across 20 cycles after warm-up (limit 262144)`.
 
 ## Helpers
 
@@ -294,6 +333,7 @@ A fixed sleep in a browser proof is a bet on load: it fails on a busy box and sp
 | `helpers/css-class-tokens.mjs` | Pulls class names out of CSS and checks something writes them. |
 | `helpers/headers.mjs` | Parses Cloudflare `_headers` and the map CSP. |
 | `helpers/layouts.mjs` | Every theme layout and partial as one string, for "is this on the page" checks. |
+| `helpers/leak-page.mjs` | The offline network, fresh dashboard page, one 3D open/close `cycle` and the forced-collection heap reading that `leak-cycles-browser.test.mjs` and `leak-heap-browser.test.mjs` share. |
 | `helpers/load-pdf-lib.mjs` | Loads the vendored pdf-lib under Node. |
 | `helpers/module-server.mjs` | Local origin serving the map modules and synthetic tiles, for offline proofs. |
 | `helpers/paused-request.mjs` | Answers a paused CDP request without failing if the page cancelled it. |

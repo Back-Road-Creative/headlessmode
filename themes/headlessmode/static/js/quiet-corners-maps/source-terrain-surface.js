@@ -285,10 +285,15 @@ export function terrainSlopeLayer(L, { opacity = 0.7, fetchImpl = fetch, documen
     alt: '',
   });
   let live = null;
-  layer.cancel = () => { if (live) { live.abort(); live = null; } };
+  // Bumped by every cancel() and every new ask. An ask holds the number it began under and is stale the
+  // moment that is no longer the current one -- through the decode as well as the fetch, because a switch-off
+  // or a newer view can land while the picture is still decoding, after `live` has already been cleared.
+  let generation = 0;
+  layer.cancel = () => { generation += 1; if (live) { live.abort(); live = null; } };
   layer.refresh = async function refresh(map, report = () => {}) {
     if (!doc) return null;
     layer.cancel();
+    const mine = generation;
     const ctl = typeof AbortController === 'function' ? new AbortController() : null;
     live = ctl;
     const b = map.getBounds();
@@ -299,19 +304,27 @@ export function terrainSlopeLayer(L, { opacity = 0.7, fetchImpl = fetch, documen
       height: size.y,
     });
     const blob = await fetchSlopeImage(request, { fetchImpl, signal: ctl ? ctl.signal : undefined });
-    if (live !== ctl) return null;          // the reader moved on; this answer is about a view they left
-    live = null;
+    if (generation !== mine) return null;   // the reader moved on; this answer is about a view they left
+    if (live === ctl) live = null;
     if (!blob) { report(null); return null; }
-    const bitmap = await createImageBitmap(blob);
-    const canvas = doc.createElement('canvas');
-    canvas.width = bitmap.width; canvas.height = bitmap.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(bitmap, 0, 0);
-    const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const counts = paintSlope(image.data);
-    ctx.putImageData(image, 0, 0);
-    layer.setBounds(b);
-    layer.setUrl(canvas.toDataURL('image/png'));
+    let counts;
+    try {
+      const bitmap = await createImageBitmap(blob);
+      if (generation !== mine) return null;   // switched off, or a newer view asked, while this decoded
+      const canvas = doc.createElement('canvas');
+      canvas.width = bitmap.width; canvas.height = bitmap.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0);
+      const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      counts = paintSlope(image.data);
+      ctx.putImageData(image, 0, 0);
+      layer.setBounds(b);
+      layer.setUrl(canvas.toDataURL('image/png'));
+    } catch {
+      // A reply that will not decode is a failed answer, not a reason to leave the row on "Loading...".
+      if (generation === mine) report(null);
+      return null;
+    }
     report(counts);
     return counts;
   };

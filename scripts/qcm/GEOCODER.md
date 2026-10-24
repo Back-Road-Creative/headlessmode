@@ -37,7 +37,19 @@ Page: https://www.census.gov/data/developers/about/terms-of-service.html ("Page 
 (https://www.census.gov/programs-surveys/geography/technical-documentation/complete-technical-documentation/census-geocoder.html
 and https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html, "Last updated 02/2026") do not mention
 these terms, a rate limit, or a usage policy. Showing the attribution notice costs one line, so the safe course
-is to show it beside address results. That is a choice for you.
+is to show it beside address results, and the map now does (see "Shown" below).
+
+## Shown (QQA-04c)
+
+The attribution sentence above is shown verbatim: `CENSUS_NOTICE` in
+`themes/headlessmode/static/js/quiet-corners-maps/search-shell.js`, written into `#qc-census-credit` inside the
+finder box by `quiet-corners.js`. It appears with street-address matches, with the no-match sentence and with the
+unavailable sentences (429, 502, 504, slow, offline, endpoint missing). It never appears with a town, a named place
+or a coordinate result, because those do not come from the Census geocoder. The box is capped to the room the stage
+has left and scrolls the rest, so on a short stage the notice is reached by scrolling and not clipped.
+`finder-geocode-browser.test.mjs` checks all of this, including that the notice is at least 12px and 4.5:1.
+The wording of the Data API terms still stands as the only source for the sentence; whether they govern the
+geocoder stays unverified, so the line is kept as the cautious course and not as a finding.
 
 ## Privacy
 
