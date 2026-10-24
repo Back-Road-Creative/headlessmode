@@ -11,6 +11,7 @@
 // made of digits, so nothing from the feed is parsed as a URL or as markup.
 import { SOURCES } from './source-registry.js';
 import { SYMBOLS } from './legend.js';
+import { fetchWithDeadline, orThrow } from './request.js';
 import { bboxAreaSqDeg } from './source-ntad-rail-airports.js';
 
 const NRHP = SOURCES.npsNrhp;
@@ -74,9 +75,7 @@ export function readNrhp(json) {
 }
 
 async function getJson(url, fetchImpl, signal) {
-  const res = await fetchImpl(url, { signal });
-  if (!res || !res.ok) throw new Error(`HTTP ${res && res.status}`);
-  const json = await res.json();
+  const json = orThrow(await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs: NRHP.timeoutMs }));
   if (json && json.error) throw new Error('service refused the query');
   return json;
 }
