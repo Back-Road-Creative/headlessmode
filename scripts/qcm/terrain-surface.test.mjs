@@ -34,7 +34,7 @@ import {
   SERVICE, CREDIT, LAYER_LABEL, LAYER_CAVEAT, MAX_IMAGE_SIDE, POINT_CELL_METRES,
   SLOPE_BREAKS, slopeRequestFor, slopeImageUrl, pointRequestFor, readPointValue,
   percentFor, degreesFor, slopeText, bearingWords, terrainReading, paintSlope,
-  legendRows, readerStrings,
+  legendRows, readerStrings, terrainSlopeLayer,
 } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-terrain-surface.js';
 import { SOURCES, cspDirectivesFor } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-registry.js';
 import { LAYER_BY_ID, CONTEXT_LAYER_IDS } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
@@ -285,4 +285,104 @@ test('the layer is one of the context surfaces, screen only, and says what nothi
   assert.equal(l.emptyMeans, 'none');
   assert.equal(l.coverageCaveat, LAYER_CAVEAT);
   assert.equal(l.label, LAYER_LABEL);
+});
+
+// --- an answer that lands after the reader moved on stays unreported -----------------------------
+
+// A layer wired to fakes, with the decode held open so a test can act between "the bytes arrived"
+// and "the picture decoded". `decodes` holds one deferred per createImageBitmap call.
+function layerWithHeldDecode() {
+  const calls = { setUrl: [], setBounds: 0 };
+  const L = { imageOverlay: () => ({
+    setBounds() { calls.setBounds += 1; },
+    setUrl(u) { calls.setUrl.push(u); },
+  }) };
+  const doc = { createElement: () => ({
+    width: 0, height: 0,
+    getContext: () => ({
+      drawImage() {},
+      getImageData: () => ({ data: new Uint8ClampedArray([40, 40, 40, 255]) }),
+      putImageData() {},
+    }),
+    toDataURL: () => 'data:image/png;base64,AAAA',
+  }) };
+  const fetchImpl = async () => ({ ok: true, status: 200, blob: async () => ({ size: 4 }) });
+  const decodes = [];
+  const prior = globalThis.createImageBitmap;
+  globalThis.createImageBitmap = () => new Promise((resolve, reject) => { decodes.push({ resolve, reject }); });
+  const layer = terrainSlopeLayer(L, { documentRef: doc, fetchImpl });
+  const map = {
+    getBounds: () => ({ getWest: () => -83.55, getSouth: () => 35.53, getEast: () => -83.45, getNorth: () => 35.63 }),
+    getSize: () => ({ x: 256, y: 256 }),
+  };
+  const restore = () => { globalThis.createImageBitmap = prior; };
+  const untilDecodes = async (n) => { for (let i = 0; i < 50 && decodes.length < n; i += 1) await new Promise((r) => setTimeout(r, 0)); };
+  return { layer, map, calls, decodes, restore, untilDecodes };
+}
+
+test('a decode that fails after the layer was switched off reports nothing', async () => {
+  const h = layerWithHeldDecode();
+  try {
+    const reports = [];
+    const pending = h.layer.refresh(h.map, (c) => reports.push(c));
+    await h.untilDecodes(1);
+    assert.equal(h.decodes.length, 1, 'the ask reached its decode');
+    h.layer.cancel();                                   // what main.js renderTerrain does when the switch goes off
+    h.decodes[0].reject(new Error('cannot decode'));
+    assert.equal(await pending, null);
+    assert.deepEqual(reports, [], 'a late failure would re-add the layer and un-hide the row while the switch is off');
+  } finally { h.restore(); }
+});
+
+test('a decode that succeeds after the layer was switched off reports and draws nothing', async () => {
+  const h = layerWithHeldDecode();
+  try {
+    const reports = [];
+    const pending = h.layer.refresh(h.map, (c) => reports.push(c));
+    await h.untilDecodes(1);
+    h.layer.cancel();
+    h.decodes[0].resolve({ width: 1, height: 1 });
+    assert.equal(await pending, null);
+    assert.deepEqual(reports, [], 'a late success would re-add the layer and un-hide the row while the switch is off');
+    assert.deepEqual(h.calls.setUrl, [], 'and would paint a picture onto a layer that is off');
+  } finally { h.restore(); }
+});
+
+test('a decode for a view the reader left does not report or draw over the newer ask', async () => {
+  const h = layerWithHeldDecode();
+  try {
+    const first = [];
+    const second = [];
+    const p1 = h.layer.refresh(h.map, (c) => first.push(c));
+    await h.untilDecodes(1);
+    const p2 = h.layer.refresh(h.map, (c) => second.push(c));
+    await h.untilDecodes(2);
+    h.decodes[0].resolve({ width: 1, height: 1 });
+    assert.equal(await p1, null);
+    assert.deepEqual(first, [], 'the superseded ask is silent');
+    assert.deepEqual(h.calls.setUrl, [], 'and draws nothing');
+    h.decodes[1].resolve({ width: 1, height: 1 });
+    const got = await p2;
+    assert.deepEqual(second, [got], 'the newer ask reports once');
+    assert.equal(h.calls.setUrl.length, 1);
+  } finally { h.restore(); }
+});
+
+test('an ask nobody interrupted still reports once, on success and on a failed decode', async () => {
+  const h = layerWithHeldDecode();
+  try {
+    const ok = [];
+    const p1 = h.layer.refresh(h.map, (c) => ok.push(c));
+    await h.untilDecodes(1);
+    h.decodes[0].resolve({ width: 1, height: 1 });
+    await p1;
+    assert.equal(ok.length, 1);
+    assert.ok(ok[0] && ok[0].covered === 1, 'the counts, not the failure');
+    const bad = [];
+    const p2 = h.layer.refresh(h.map, (c) => bad.push(c));
+    await h.untilDecodes(2);
+    h.decodes[1].reject(new Error('cannot decode'));
+    await p2;
+    assert.deepEqual(bad, [null], 'a failed decode of the current view is the failed answer');
+  } finally { h.restore(); }
 });

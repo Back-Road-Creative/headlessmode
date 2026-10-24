@@ -78,7 +78,16 @@ const measure = (camera) => `(async () => {
   const style = map.getStyle();
   const drape = style.layers.filter((l) => l.id.startsWith('qc-drape-'));
   const setVisible = (pred) => { for (const l of drape) map.setLayoutProperty(l.id, 'visibility', pred(l) ? 'visible' : 'none'); };
-  const grab = () => new Promise((res) => { map.once('render', () => { ctx.drawImage(canvas, 0, 0); res(ctx.getImageData(0, 0, W, H)); }); map.triggerRepaint(); });
+  const frame = () => new Promise((res) => { map.once('render', () => { ctx.drawImage(canvas, 0, 0); res(ctx.getImageData(0, 0, W, H)); }); map.triggerRepaint(); });
+  const same = (a, b) => { const x = a.data, y = b.data; for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return false; return true; };
+  // A layer change reaches the canvas a frame or more later on a loaded machine (the terrain re-draws
+  // its drape textures lazily), so one 'render' can still show the previous state. A frame counts once
+  // the next one is pixel-identical; the pixels compared stay exactly as before.
+  const grab = async () => {
+    let prev = await frame();
+    for (let i = 0; i < 10; i++) { const cur = await frame(); if (same(prev, cur)) return cur; prev = cur; }
+    return prev;
+  };
   const lineIds = drape.filter((l) => l.type === 'line').map((l) => l.id);
 
   // Sample points: every vertex and every midpoint, projected through the 3D terrain.

@@ -273,6 +273,17 @@ Unsupported geometry domains (each returns `unavailable` or `not applicable` wit
 - The 3DEP vertical datum and grid resolution: not recorded in this repo for the elevation samples (the service answers at whatever grid size is asked), so the card says
   so rather than naming one.
 
+## Terrain slope surface: late answers
+
+`terrainSlopeLayer` (`source-terrain-surface.js`) carries a generation number that `cancel()` and every new
+`refresh` bump. A terrain answer that lands after the surface was switched off, or after a newer view asked,
+is dropped, whether it is a failure or a picture, and including one that lands during the decode: it neither
+reports to the row (which would re-add the layer and un-hide the row) nor paints. A reply that will not
+decode is reported once as the failed answer, and only while its ask is still the current one. Hillshade
+does the same through its fetcher's generation (the late answer is `stale`).
+`terrain-surface.test.mjs` holds the cases: decode failure after switch-off, decode success after
+switch-off, an older decode landing after a newer ask, and an uninterrupted ask that still reports once.
+
 ## Accessibility checks
 
 `a11y-dynamic-browser.test.mjs` drives the built `/quiet-corners/` app (the Field Maps app; `/quiet-corners/maps/` is its documentation page, checked as one state) offline and holds it to zero axe-core WCAG 2.2 A/AA findings in each state a reader reaches: first load, the dock panels, the phone sheet at half and expanded, the place finder, a name card and the 3D dialog (skipped, said so, when the browser has no WebGL). "Needs review" counts as a finding. A waiver is a row in `EXCLUSIONS` naming the rule, a selector and a reason that is true today; where axe cannot read what is behind a label or glyph the row also carries `plate`, and the test measures that text against its own background itself. It also asserts the keyboard contract (Tab order, focus never hidden, Escape returns focus), 44 px touch targets at 390 px, 200% text without clipping or sideways scroll, reflow at 320 px, and the contrast and backplate opacity of the labels the app paints on the map. Not asserted yet: with the phone sheet expanded, five map controls stay in the Tab order under the sheet (Zoom in, Search places, Share view, Use my location, Map credits).
