@@ -12,6 +12,7 @@
 // inventory, republished. 7 are `NST - Appalachian`. 6 of the 63 carry NO
 // allowed-use flags at all, which is the case the honesty rule below exists for.
 import { pageThrough, PAGE_CAP } from './arcgis-pager.js';
+import { DEFAULT_SOURCE_TIMEOUT_MS } from './source-registry.js';
 
 const SERVICE = 'https://carto.nationalmap.gov/arcgis/rest/services/transportation/MapServer/37';
 const USE_FIELDS = { hike: 'hikerpedestrian', bike: 'bicycle', horse: 'packsaddle', motor: 'motorcycle' };
@@ -92,6 +93,7 @@ export async function fetchTrails({ bboxLonLat, fetchImpl = fetch, signal, pageS
     normalize: (raw) => { const t = normalizeTrail(raw); return t.paths.length ? t : null; },
     fetchImpl,
     signal,
+    timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS,
     pageSize,
   });
   return {

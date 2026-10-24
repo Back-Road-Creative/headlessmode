@@ -22,7 +22,7 @@
 // product is in force -- never that the ground is free of hazards. Every reader-facing string
 // is built here so scripts/qcm/nws-alerts.test.mjs can scan the lot.
 import { SOURCES } from './source-registry.js';
-import { withDeadline } from './request.js';
+import { fetchWithDeadline } from './request.js';
 
 const SRC = SOURCES.nwsAlerts;
 export const SERVICE = SRC.serviceUrl;
@@ -170,15 +170,16 @@ export const UNREADABLE_TEXT = 'The National Weather Service alert feed answered
 /** One ask. A non-200 is a FAILURE, not an empty answer: the API answers 400 for a query
  *  parameter it does not recognise, and rendering that as "nothing in force" is the one lie
  *  this state is able to tell. */
-export async function fetchAlerts({ lat, lon, fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(alertsUrl(lat, lon), { headers: requestHeaders(), signal });
-    if (res.ok) return { status: 'ok', httpStatus: res.status, body: await res.json() };
-    const problem = await res.json().catch(() => ({}));
-    return { status: 'failed', httpStatus: res.status, detail: problem.detail || problem.title || '' };
-  } catch (e) {
-    return { status: 'failed', httpStatus: null, detail: String((e && e.message) || e) };
+export async function fetchAlerts({ lat, lon, fetchImpl = fetch, signal, timeoutMs = SRC.timeoutMs } = {}) {
+  const got = await fetchWithDeadline(alertsUrl(lat, lon), {
+    fetchImpl, signal, timeoutMs, init: { headers: requestHeaders() }, anyStatus: true,
+  });
+  if (got.ok) return { status: 'ok', httpStatus: got.httpStatus, body: got.body };
+  if (got.httpStatus !== undefined) {
+    const problem = (got.body && typeof got.body === 'object') ? got.body : {};
+    return { status: 'failed', httpStatus: got.httpStatus, detail: problem.detail || problem.title || '' };
   }
+  return { status: 'failed', httpStatus: null, detail: got.error };
 }
 
 // QUX-09b (D5): the registry's per-source deadline, as source-weather.js's loader carries -- a hung
@@ -189,12 +190,15 @@ export const DEFAULT_TIMEOUT_MS = SRC.timeoutMs;
  *  showing it puts A's warnings under B's name. The previous ask is aborted, and the page
  *  drops any answer for a place it has moved off. */
 let live = null;
-export async function alertsFor({ lat, lon, fetchImpl = fetch, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+export async function alertsFor({ lat, lon, fetchImpl = fetch, timeoutMs = DEFAULT_TIMEOUT_MS, signal } = {}) {
   if (live) live.abort();
   const ctl = (live = new AbortController());
-  const deadline = withDeadline(ctl.signal, timeoutMs);
+  const onAbort = () => ctl.abort();
+  if (signal) { if (signal.aborted) onAbort(); else signal.addEventListener('abort', onAbort, { once: true }); }
   let got;
-  try { got = await fetchAlerts({ lat, lon, fetchImpl, signal: deadline.signal }); } finally { deadline.dispose(); }
+  try { got = await fetchAlerts({ lat, lon, fetchImpl, signal: ctl.signal, timeoutMs }); } finally {
+    if (signal) signal.removeEventListener('abort', onAbort);
+  }
   if (live === ctl) live = null;
   return got;
 }

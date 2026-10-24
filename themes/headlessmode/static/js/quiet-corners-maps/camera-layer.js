@@ -8,6 +8,7 @@
 // page no longer calls it: the road list is the build-time snapshot (cameras/index.json plus one
 // file per area), read by map area with filesInView; the function stays exported and tested.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 import { normalizeCaltransCctv, isLinkOnly } from './source-camera.js';
 
 const CALTRANS_OPERATOR = 'Caltrans';
@@ -76,14 +77,13 @@ export function failureProvider(files, view, layer, fallback) {
 /** GETs the registry's own caltransCctv.serviceUrl and normalizes the result. Never throws --
  *  a network failure, a non-ok response or a JSON parse error all become { ok:false, reason }. */
 export async function fetchCaltransCctv({ fetchImpl = fetch, signal, fetchedAt } = {}) {
+  const got = await fetchWithDeadline(SOURCES.caltransCctv.serviceUrl, { fetchImpl, signal, timeoutMs: SOURCES.caltransCctv.timeoutMs });
+  if (!got.ok) {
+    if (got.httpStatus) return { ok: false, reason: `Caltrans's server returned ${got.httpStatus}.` };
+    return { ok: false, reason: got.error || 'The request to Caltrans failed.' };
+  }
   try {
-    const res = await fetchImpl(SOURCES.caltransCctv.serviceUrl, { signal });
-    if (!res || !res.ok) {
-      const status = res && res.status;
-      return { ok: false, reason: status ? `Caltrans's server returned ${status}.` : "Caltrans's server did not respond." };
-    }
-    const payload = await res.json();
-    return { ok: true, cameras: normalizeCaltransCctv(payload, { fetchedAt }) };
+    return { ok: true, cameras: normalizeCaltransCctv(got.body, { fetchedAt }) };
   } catch (err) {
     return { ok: false, reason: (err && err.message) || 'The request to Caltrans failed.' };
   }

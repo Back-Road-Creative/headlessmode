@@ -20,6 +20,9 @@
 // to domestic copyright protection under 17 U.S.C. § 105." Redistributing this artifact
 // from our own hosting is what that sentence permits; TERMS_URL is the page it is on.
 
+import { fetchWithDeadline } from './request.js';
+import { DEFAULT_SOURCE_TIMEOUT_MS } from './source-registry.js';
+
 export const LAYER_ID = 'epaEcoregions';
 /** Same-origin, so no host reaches the policy. Fetched once, when a reader asks. */
 export const EXPORT_URL = '/data/quiet-corners/ecoregions-l3.json';
@@ -124,11 +127,9 @@ export function areaReport(regions, point) {
 /** One national file, fetched when a reader asks and held. A pan is not a new question when
  *  the answer is the whole country. Never throws the map. */
 export async function loadEcoregions({ fetchImpl = fetch, url = EXPORT_URL, signal } = {}) {
-  try {
-    const res = await fetchImpl(url, { signal });
-    if (!res.ok) return null;
-    return readExport(await res.json());
-  } catch (e) { return null; }
+  const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS });
+  if (!got.ok) return null;
+  try { return readExport(got.body); } catch (e) { return null; }
 }
 
 /** Every string this source can put in front of a reader, in one place, for the test. */

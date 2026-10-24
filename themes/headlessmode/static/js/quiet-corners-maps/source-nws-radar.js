@@ -20,6 +20,7 @@
 // already answers "what will it do"; this answers "what is falling now".
 // `readerStrings()` exists so the test can scan the lot for that promise.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 const SRC = SOURCES.nwsRadar;
 
@@ -98,15 +99,10 @@ export function frameVintage(validEndMs, nowMs = Date.now()) {
 /** The service's own rolling window, read off its description. Never throws the map:
  *  an unknown age is a state the row can show, not a reason to lose the layer. */
 export async function fetchFrameTime({ fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(`${SERVICE}?f=json`, { signal });
-    if (!res.ok) return null;
-    const body = await res.json();
-    const extent = body && body.timeInfo && body.timeInfo.timeExtent;
-    return Array.isArray(extent) && extent.length === 2 ? Number(extent[1]) : null;
-  } catch (e) {
-    return null;
-  }
+  const got = await fetchWithDeadline(`${SERVICE}?f=json`, { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+  if (!got.ok) return null;
+  const extent = got.body && got.body.timeInfo && got.body.timeInfo.timeExtent;
+  return Array.isArray(extent) && extent.length === 2 ? Number(extent[1]) : null;
 }
 
 /** Every string this layer can put in front of a reader, in one place, so the test

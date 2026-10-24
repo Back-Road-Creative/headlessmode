@@ -24,6 +24,7 @@
 //    3,033,604. Nothing overlaps; the polygons run outside the box. Per unit, or not at all.
 //  * `UK` is a fourth answer, not a shade of `OA` and not silence.
 import { SOURCES, FAILURE } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 const SRC = SOURCES.padusPublicAccess;
 const LAYER = SRC.layers[0];
@@ -151,10 +152,9 @@ export function accessReport(body, retrievedOn = null) {
 /** Asked for only when a reader asks, and never throws the map. `res.ok` is deliberately
  *  not consulted: this service answers a bad request 200. `accessReport` reads the body. */
 export async function fetchAccess(bbox, { fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(padusQueryUrl(bbox), { signal });
-    return await res.json();
-  } catch (e) { return null; }
+  let url; try { url = padusQueryUrl(bbox); } catch { return null; }   // a bad area is "no answer" too
+  const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs: SRC.timeoutMs, anyStatus: true });
+  return got.body ?? null;
 }
 
 /** Every string this source can put in front of a reader, in one place, for the test. */

@@ -3,10 +3,10 @@
 // THE BINDING CONSTRAINT IS REQUEST TIME, NOT RECORD COUNT. Measured 2026-09-15:
 // merely SENDING resultOffset/resultRecordCount re-costs a query 20x, even at
 // offset 0 -- a Louisiana 1-degree extent took 8.71 s unpaged and 176.74 s with
-// paging params, against REQUEST_POLICY.timeoutMs of 20,000. Thirty pages of that
+// paging params, against this source's `timeoutMs` of 20,000. Thirty pages of that
 // is ninety minutes for one degree square. So this layer asks for a COUNT first and
 // REFUSES above `recordBudgetPerExtent`, and that refusal is the layer rather than a
-// polish item: it is the only thing keeping the requests inside their own policy.
+// polish item: it is the only thing keeping the requests inside their own deadline.
 // Adding `orderByFields` made it worse still -- that variant never returned inside a
 // 180 s cutoff -- and paging is stable without one (overlap 0, union exactly 1,759),
 // so no query here sorts.
@@ -27,6 +27,7 @@
 // empty answer honest. All 105 No_Data parts are Alaska and the Pacific territories.
 import { SOURCES } from './source-registry.js';
 import { pageThrough } from './arcgis-pager.js';
+import { fetchWithDeadline } from './request.js';
 import { WETLAND_SEMANTICS } from './legend.js';
 
 const SRC = SOURCES.fwsNwiWetlands;
@@ -210,10 +211,10 @@ export function normalizeWetland(raw) {
 }
 
 const post = async (q, fetchImpl, signal) => {
-  try {
-    const res = await fetchImpl(q.url, { method: 'POST', body: new URLSearchParams(q.params), signal });
-    return res.ok ? await res.json() : null;
-  } catch { return null; }
+  const got = await fetchWithDeadline(q.url, {
+    fetchImpl, signal, timeoutMs: SRC.timeoutMs, init: { method: 'POST', body: new URLSearchParams(q.params) },
+  });
+  return got.ok ? got.body : null;
 };
 
 /** Count, then decide, then fetch. The order is the design.
@@ -232,7 +233,7 @@ export async function fetchWetlands({ bboxLonLat, fetchImpl = fetch, signal } = 
   const q = featureQuery(bboxLonLat);
   const page = await pageThrough({
     url: q.url, label: 'The National Wetlands Inventory', params: q.params,
-    normalize: normalizeWetland, fetchImpl, signal, pageSize: PAGE_SIZE, maxPages: MAX_PAGES,
+    normalize: normalizeWetland, fetchImpl, signal, timeoutMs: SRC.timeoutMs, pageSize: PAGE_SIZE, maxPages: MAX_PAGES,
   });
   const partial = page.coverage !== 'complete';
   // Two point queries at the box's centre, asked TOGETHER and only after the budget

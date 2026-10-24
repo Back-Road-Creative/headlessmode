@@ -22,6 +22,7 @@
 // of its own. It also obliges no access notice -- it makes no claim about who may be
 // on the ground, only about which county records that ground.
 import { pageThrough, PAGE_CAP } from './arcgis-pager.js';
+import { SOURCES } from './source-registry.js';
 import { SERVICE } from './source-federal-land.js';
 
 export const LAYER_ID = 'countyLines';
@@ -83,6 +84,7 @@ export async function fetchCountyLines({ bboxLonLat, fetchImpl = fetch, signal, 
     },
     fetchImpl,
     signal,
+    timeoutMs: SOURCES.usgsGovUnits.timeoutMs,
     pageSize,
   });
   return { ...page, skipped: null };

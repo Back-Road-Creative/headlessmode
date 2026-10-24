@@ -10,7 +10,7 @@
 // Returns {status, features, omittedKinds} like source-terrain-names.js fetchBounded:
 //   ready   every name asked was answered       capped  more names (or reaches) than one answer carries
 //   empty   below the lowest zoom: no request    timeout / error / aborted  the fetchJson shapes
-import { SOURCES, REQUEST_POLICY } from './source-registry.js';
+import { SOURCES } from './source-registry.js';
 import { KINDS } from './terrain-names.js';
 import { fetchJson } from './source-terrain-names.js';
 import { envelope } from './arcgis-view.js';
@@ -150,7 +150,7 @@ const failure = (result, signal) => {
 
 /** Named rivers and creeks in a view at a zoom: the longest names per kind, one record each,
  *  anchored on the reach in view. */
-export async function fetchStreamNames(bounds, { zoom, fetch: fetchImpl = globalThis.fetch, signal, timeoutMs = REQUEST_POLICY.timeoutMs } = {}) {
+export async function fetchStreamNames(bounds, { zoom, fetch: fetchImpl = globalThis.fetch, signal, timeoutMs = SRC.timeoutMs } = {}) {
   checkBbox(bounds);
   const layer = nhdLayerForZoom(zoom);
   if (!layer) return { status: 'empty', features: [], omittedKinds: [] };

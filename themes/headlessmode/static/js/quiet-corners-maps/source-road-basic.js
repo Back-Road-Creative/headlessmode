@@ -6,7 +6,7 @@
 // keyed on route id. Measured 2026-09-06 over the Standing Indian quad: 30 of 31
 // MVUM roads matched (97%), levels 2-5 and four surface types present. An
 // unmatched road keeps its plain width -- drawn, never dropped.
-import { SOURCES } from './source-registry.js';
+import { SOURCES, DEFAULT_SOURCE_TIMEOUT_MS } from './source-registry.js';
 import { pageThrough, PAGE_CAP } from './arcgis-pager.js';
 
 const SERVICE = 'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RoadBasic_01/MapServer/0';
@@ -121,6 +121,7 @@ export async function fetchRoadQualityReport({ bboxLonLat, fetchImpl = fetch, si
     normalize: (one) => one,
     fetchImpl,
     signal,
+    timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS,
     pageSize,
   });
   const byId = normalizeRoadQuality(page.features);

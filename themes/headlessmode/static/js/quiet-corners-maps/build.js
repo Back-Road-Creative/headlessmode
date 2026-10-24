@@ -70,12 +70,14 @@ const labelTextFor = (features) => {
  *  sheet whose image fails is simply absent from the set: the map sheets are
  *  already built and must still print. One function, not one per companion kind --
  *  the only thing that differs is which service is called. */
-async function companionSheets(plan, recipe, fetchImpl, check, fetchOne) {
+async function companionSheets(plan, recipe, fetchImpl, check, fetchOne, signal) {
   const out = [];
   for (const sheet of plan.sheets) {
     check();
-    try { out.push(await fetchOne({ sheet, bboxLonLat: recipe.bboxLonLat, fetchImpl })); }
+    try { out.push(await fetchOne({ sheet, bboxLonLat: recipe.bboxLonLat, fetchImpl, signal })); }
     catch { /* an extra page, never the map */ }
+    // A cancel ends the request as an error like any other; it must not read as "this extra failed".
+    check();
   }
   return out;
 }
@@ -84,15 +86,16 @@ async function companionSheets(plan, recipe, fetchImpl, check, fetchOne) {
  *  Unnamed geometry is left out — a table of "unnamed" rows tells nobody anything.
  *  Elevation is sampled per route, so this is capped rather than unbounded. */
 const MAX_TRIP_ROUTES = 12;
-async function tripRows(features, plan, sheets, fetchImpl, { zone, hemisphere, scale }) {
+async function tripRows(features, plan, sheets, fetchImpl, { zone, hemisphere, scale, signal, check }) {
   const named = features.filter((f) => f.name && (f.paths || []).length).slice(0, MAX_TRIP_ROUTES);
   const rows = [];
   for (const f of named) {
     const on = plan.sheets.filter((sheet) => vectorsForSheet([f], sheet, { zone, hemisphere, scale }).vectors.length).map((s) => s.id);
     let profile = { lengthM: null, gainM: null, sampled: false };
     // Climb is detail: a 3DEP outage costs the column, not the row or the page.
-    try { profile = { ...(await profileFor(f, { fetchImpl })), sampled: true }; }
+    try { profile = { ...(await profileFor(f, { fetchImpl, signal })), sampled: true }; }
     catch { /* leave the climb blank rather than guess it */ }
+    check();
     rows.push({ id: f.id, name: f.name, useCode: f.useCode || null, sheets: on, ...profile });
   }
   return rows;
@@ -259,9 +262,9 @@ export async function runBuild({ recipe, plan, adapters, workerFactory, PDFLib, 
   // Both extras are built HERE rather than handed in: this is the only place that
   // knows the sheets and the clipped features. Both are wrapped so a failure costs
   // the extra page and never the map — that is what makes them extras.
-  const aerials = recipe.layers?.aerial ? await companionSheets(plan, recipe, fetchImpl, check, fetchAerial) : [];
-  const companions = recipe.layers?.terrain ? await companionSheets(plan, recipe, fetchImpl, check, fetchTerrain) : [];
-  const trips = recipe.layers?.tripPage ? await tripRows(features, plan, sheets, fetchImpl, { zone, hemisphere, scale: recipe.scale }) : [];
+  const aerials = recipe.layers?.aerial ? await companionSheets(plan, recipe, fetchImpl, check, fetchAerial, signal) : [];
+  const companions = recipe.layers?.terrain ? await companionSheets(plan, recipe, fetchImpl, check, fetchTerrain, signal) : [];
+  const trips = recipe.layers?.tripPage ? await tripRows(features, plan, sheets, fetchImpl, { zone, hemisphere, scale: recipe.scale, signal, check }) : [];
   const pdfBytes = await createPdfImpl({ PDFLib, plan, sheets, meta, legend, manifest, trips, aerials, companions });
   progress(PHASES.ASSEMBLE, pages, pages);
   return { pdfBytes, manifest, stats: { level, tileCount: tiles.count, sheets: sheets.length, ms: Date.now() - started, bytes: pdfBytes.byteLength } };

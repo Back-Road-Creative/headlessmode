@@ -13,8 +13,8 @@
 // logged, stored, or returned in a status; the caller keeps it out of the share URL,
 // saved views, the title and analytics. The request carries no cookies and no referrer.
 //
-// There is no shared request helper on this base (no request.js / fetchWithDeadline),
-// so the deadline is kept here, in this one function.
+// request.js (fetchWithDeadline) is the shared helper now. This function still keeps its own
+// deadline and cancel handling, so no-raw-fetch.test.mjs lists it until it moves onto it.
 
 export const GEOCODE_PATH = '/api/geocode';
 /** Client-side deadline; the function's own upstream deadline is 8 s. */

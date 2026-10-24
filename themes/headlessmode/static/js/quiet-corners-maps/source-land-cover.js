@@ -41,6 +41,7 @@
 // Wisconsin; its colour is measured off the legend swatch, its NUMBER is read off the
 // legend's order, and it says so rather than passing as known.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 export const PRODUCTS = Object.freeze({ landCover: SOURCES.nlcdLandCover, canopy: SOURCES.nlcdTreeCanopy });
 export const PRODUCT_IDS = Object.freeze(Object.keys(PRODUCTS));
@@ -91,6 +92,7 @@ export const LAND_COVER_CLASSES = Object.freeze({
 /** The service echoes the request Origin and sets `access-control-allow-credentials: true`
  *  rather than `*`. It is keyless and anonymous and nothing here has an account with it, so
  *  every request says so explicitly instead of relying on a default. */
+const timeoutFor = (request) => (PRODUCTS[request && request.product] || PRODUCTS.landCover).timeoutMs;
 export const FETCH_OPTIONS = Object.freeze({ credentials: 'omit' });
 
 /** The year, or a throw. Nothing in this file can build a request without going through it. */
@@ -323,19 +325,19 @@ export function readerStrings() {
  *  URL: `img-src` already allows blob:, so the whole pair costs the policy one connect-src
  *  host -- 24 characters -- instead of 48. Never throws the map. */
 export async function fetchSurface(request, { fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(surfaceImageUrl(request), { ...FETCH_OPTIONS, signal });
-    return res && res.ok ? await res.blob() : null;
-  } catch (e) { return null; }
+  const got = await fetchWithDeadline(surfaceImageUrl(request), {
+    fetchImpl, signal, timeoutMs: timeoutFor(request), init: FETCH_OPTIONS, read: (res) => res.blob(),
+  });
+  return got.ok ? got.body : null;
 }
 
 /** A point read, as JSON. `res.ok` is deliberately not the test for success -- the caller
  *  reads the body, because this service states its errors inside a 200. */
 export async function fetchPoint(request, { fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(pointUrl(request), { ...FETCH_OPTIONS, signal });
-    return await res.json();
-  } catch (e) { return null; }
+  const got = await fetchWithDeadline(pointUrl(request), {
+    fetchImpl, signal, timeoutMs: timeoutFor(request), init: FETCH_OPTIONS, anyStatus: true,
+  });
+  return got.body ?? null;
 }
 
 /** A Leaflet image overlay re-exported for the view it is asked about, the same shape as the

@@ -18,6 +18,7 @@
 // the day has not been analysed, NOT that the sky is clear -- and the two are told apart by a
 // 1 KB `max(Start)` statistics query rather than by assumption.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 import { serviceError, envelope, viewReader } from './arcgis-view.js';
 
 const SRC = SOURCES.noaaHmsSmoke;
@@ -196,13 +197,13 @@ export function smokeLayer(L) {
 
 /** Asked for only when a reader asks, and never throws the map. */
 async function getJson(url, fetchImpl, signal) {
-  try {
-    const res = await fetchImpl(url, { signal });
-    return res.ok ? await res.json() : null;
-  } catch { return null; }
+  const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+  return got.ok ? got.body : null;
 }
-export const fetchSmoke = (bbox, { fetchImpl = fetch, signal } = {}) =>
-  getJson(smokeQueryUrl(bbox), fetchImpl, signal);
+export const fetchSmoke = async (bbox, { fetchImpl = fetch, signal } = {}) => {
+  let url; try { url = smokeQueryUrl(bbox); } catch { return null; }   // a bad area is "no answer" too
+  return getJson(url, fetchImpl, signal);
+};
 
 /** One bbox question at a time, waiting out a drag. The day-state question rides with it, and only
  *  when the view was empty, so the row never mixes one view's plumes with another's day-state. */

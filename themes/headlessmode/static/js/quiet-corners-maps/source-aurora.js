@@ -17,6 +17,7 @@
 // 65N. So nothing fetches it on first render, and "nothing to show" is the normal
 // answer rather than a failure to report.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 export const AURORA_SOURCE = SOURCES.swpcAurora;
 export const SERVICE = AURORA_SOURCE.serviceUrl;
@@ -95,13 +96,8 @@ export function quietText() {
 /** Fetched only when a reader asks for it -- ~900 KB for the whole globe. Never throws
  *  the map: a service that will not answer leaves the rest of the page alone. */
 export async function fetchAurora({ fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(SERVICE, { signal });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (e) {
-    return null;
-  }
+  const got = await fetchWithDeadline(SERVICE, { fetchImpl, signal, timeoutMs: AURORA_SOURCE.timeoutMs });
+  return got.ok ? got.body : null;
 }
 
 /** Every string this layer can put in front of a reader, in one place, so a test can

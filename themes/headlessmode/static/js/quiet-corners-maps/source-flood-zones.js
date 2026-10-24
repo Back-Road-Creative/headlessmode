@@ -21,6 +21,7 @@
 // `features` is simply absent, so an adapter that trusts `res.ok` reports a flood plain as
 // empty ground. Every body goes through readError first.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 const SRC = SOURCES.femaNfhl;
 const LAYER = (id) => SRC.layers.find((l) => l.id === id);
@@ -252,10 +253,8 @@ export function floodZonesLayer(L) {
 }
 
 const getJson = async (req, fetchImpl, signal) => {
-  try {
-    const res = await fetchImpl(queryUrl(req), { signal });
-    return res.ok ? await res.json() : null;
-  } catch (e) { return null; }
+  const got = await fetchWithDeadline(queryUrl(req), { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+  return got.ok ? got.body : null;
 };
 
 /** One view's worth of questions, in the order that makes the expensive one conditional:

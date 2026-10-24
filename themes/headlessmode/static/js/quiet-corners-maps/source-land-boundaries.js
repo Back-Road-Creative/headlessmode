@@ -18,6 +18,7 @@
 // catalogue, which was measured against the live services.
 import { layerFor, whereFor, outFieldsFor, isBrowserFetchable, isSemanticallyUniform, isDrawable } from './state-sources.js';
 import { pageThrough, PAGE_CAP } from './arcgis-pager.js';
+import { DEFAULT_SOURCE_TIMEOUT_MS } from './source-registry.js';
 // The notice a drawn boundary obliges lives with the symbols it attaches to.
 export { LAND_COVERAGE_SEMANTICS } from './legend.js';
 
@@ -165,6 +166,7 @@ export async function fetchLandBoundaries({ state, family, bboxLonLat, fetchImpl
     },
     fetchImpl,
     signal,
+    timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS,
     pageSize: Math.min(pageSize, layer.maxRecordCount || PAGE_CAP),
   });
   return { ...page, skipped: null };

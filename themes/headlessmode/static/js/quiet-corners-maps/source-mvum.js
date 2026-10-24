@@ -1,7 +1,8 @@
 /* Quiet Corners Field Maps — USFS Motor Vehicle Use Map adapter. Pure: bounded envelope queries, paging while
  * the service flags `exceededTransferLimit`, a count cross-check, vehicle/date normalization, honest coverage
- * (complete / partial / unavailable / unknown). Imports the registry only; network, clock and sleep are injected. */
+ * (complete / partial / unavailable / unknown). Imports the registry and request.js only; network, clock and sleep are injected. */
 import { SOURCES, REQUEST_POLICY, FAILURE } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 export const LAYERS = Object.freeze({ roads: 1, trails: 2 });
 export const OUT_FIELDS = Object.freeze([
@@ -88,25 +89,22 @@ async function requestJson(url, { fetchImpl, signal, timeoutMs, retries, sleep }
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     if (signal && signal.aborted) return { ok: false, error: 'aborted' };
     if (attempt > 0) await sleep(REQUEST_POLICY.retryBackoffMs[Math.min(attempt - 1, REQUEST_POLICY.retryBackoffMs.length - 1)]);
-    const ctl = new AbortController(); const onAbort = () => ctl.abort();
-    if (signal) signal.addEventListener('abort', onAbort, { once: true });
-    const timer = setTimeout(onAbort, timeoutMs);
-    try {
-      const res = await fetchImpl(url, { signal: ctl.signal });
-      if (!res.ok) { last = `HTTP ${res.status}`; if (res.status === 429 || res.status >= 500) continue; return { ok: false, error: last }; }
-      let body; try { body = await res.json(); } catch { return { ok: false, error: 'malformed JSON' }; }
-      if (body && body.error) return { ok: false, error: `service error ${body.error.code ?? ''}`.trim() };
-      return { ok: true, body: body || {} };
-    } catch (e) {
-      if (signal && signal.aborted) return { ok: false, error: 'aborted' };
-      last = ctl.signal.aborted ? `timeout after ${timeoutMs} ms` : `network error: ${e && e.message}`;
-    } finally { clearTimeout(timer); if (signal) signal.removeEventListener('abort', onAbort); }
+    const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs });
+    if (got.status === 'aborted') return { ok: false, error: 'aborted' };
+    if (!got.ok) {
+      if (got.httpStatus) { last = `HTTP ${got.httpStatus}`; if (got.httpStatus === 429 || got.httpStatus >= 500) continue; return { ok: false, error: last }; }
+      if (got.malformed) return { ok: false, error: 'malformed JSON' };
+      last = got.status === 'timeout' ? `timeout after ${timeoutMs} ms` : `network error: ${got.error}`;
+      continue;
+    }
+    if (got.body && got.body.error) return { ok: false, error: `service error ${got.body.error.code ?? ''}`.trim() };
+    return { ok: true, body: got.body || {} };
   }
   return { ok: false, error: `${last} after ${retries + 1} attempts` };
 }
 
 export async function fetchLayer({ layer, bboxLonLat, fetchImpl = globalThis.fetch, signal, pageSize = 1000,
-  timeoutMs = REQUEST_POLICY.timeoutMs, retries = REQUEST_POLICY.retries, onProgress, now = () => new Date().toISOString(), sleep = defaultSleep }) {
+  timeoutMs = SOURCES.usfsMvum.timeoutMs, retries = REQUEST_POLICY.retries, onProgress, now = () => new Date().toISOString(), sleep = defaultSleep }) {
   const layerId = LAYERS[layer] ?? layer; const layerKey = LAYER_KEY[layerId];
   const opts = { fetchImpl, signal, timeoutMs, retries, sleep };
   const warnings = []; const features = [];

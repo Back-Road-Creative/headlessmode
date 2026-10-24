@@ -4,7 +4,7 @@
 // content/quiet-corners-maps.md. TWO STEPS: `/points/{lat},{lon}` maps a lat/lon to an office and grid cell and hands back the
 // forecast URL, used AS GIVEN -- hand-building `/gridpoints/BMX/96,76/...` hard-codes a grid the office may renumber.
 import { SOURCES } from './source-registry.js';
-import { withDeadline } from './request.js';
+import { withDeadline, fetchWithDeadline, orThrow } from './request.js';
 
 const API = SOURCES.nwsForecast.origin;
 // The refresh intervals are the service's own cache-control, not taste: `max-age=3600` on the hourly product, `max-age=85988` on /points -- a grid cell never moves.
@@ -77,11 +77,15 @@ export function normalizeHourly(json = {}) {
 // A 404 `application/problem+json` is the API holding nothing for this point: a state to
 // show, not an error to throw. Every other status is a fault, and loud.
 async function getJson(url, { fetchImpl, signal }) {
-  const res = await fetchImpl(url, { headers: requestHeaders(), signal });
-  if (res.ok) return { json: await res.json() };
-  if (res.status !== 404) throw new Error(`NWS answered ${res.status} for ${url}.`);
-  const problem = await res.json().catch(() => ({}));
-  return { status: NO_FORECAST, detail: problem.detail || problem.title || '', coverage: COVERAGE };
+  const got = await fetchWithDeadline(url, {
+    fetchImpl, signal, timeoutMs: SOURCES.nwsForecast.timeoutMs, init: { headers: requestHeaders() }, anyStatus: true,
+  });
+  if (got.ok) return { json: got.body };
+  if (got.httpStatus === 404) {
+    const problem = (got.body && typeof got.body === 'object') ? got.body : {};
+    return { status: NO_FORECAST, detail: problem.detail || problem.title || '', coverage: COVERAGE };
+  }
+  return orThrow(got, got.httpStatus ? `NWS answered ${got.httpStatus} for ${url}.` : undefined);
 }
 
 // The gridpoints product, the OTHER shape on this origin -- `/gridpoints/{office}/{x},{y}`, named by

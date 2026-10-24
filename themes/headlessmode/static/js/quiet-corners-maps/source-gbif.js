@@ -19,6 +19,7 @@
 //
 // Every reader-facing string is built here so gbif.test.mjs can scan the lot.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 const SRC = SOURCES.gbifOccurrence;
 export const SERVICE = SRC.serviceUrl;
@@ -239,10 +240,8 @@ export function gbifLayer(L) {
 }
 
 export async function fetchJson(url, { fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(url, { signal });
-    return res.ok ? await res.json() : null;
-  } catch (e) { return null; }
+  const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+  return got.ok ? got.body : null;
 }
 
 /** One cell at a time, and only for the view the reader stopped on. The same shape as the AQI

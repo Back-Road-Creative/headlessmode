@@ -16,6 +16,7 @@
 // National AQI Forecast Updated Nightly", boilerplate from another service, and matching it
 // would be the aurora layer's mistake run backwards.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 const SRC = SOURCES.epaAirNowAqi;
 export const SERVICE = SRC.serviceUrl;
@@ -106,10 +107,9 @@ export function quietText() {
 
 /** Asked for only when a reader asks, and never throws the map. */
 export async function fetchAqi(bbox, { fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(aqiQueryUrl(bbox), { signal });
-    return res.ok ? await res.json() : null;
-  } catch (e) { return null; }
+  let url; try { url = aqiQueryUrl(bbox); } catch { return null; }   // a bad area is "no answer" too
+  const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+  return got.ok ? got.body : null;
 }
 
 /** Every string this source can put in front of a reader, in one place, for the test. */
