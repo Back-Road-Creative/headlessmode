@@ -17,6 +17,7 @@
 // requested, nor is `comments`, nor the tax fields. What is asked for is the
 // record id, the owner class, the record status and the forest's name.
 import { pageThrough, PAGE_CAP } from './arcgis-pager.js';
+import { SOURCES } from './source-registry.js';
 
 export const SERVICE = 'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_SurfaceOwnership_01/MapServer';
 export const LAYER_NUMBER = 0;
@@ -72,6 +73,7 @@ export async function fetchSurfaceOwnership({ bboxLonLat, fetchImpl = fetch, sig
     },
     fetchImpl,
     signal,
+    timeoutMs: SOURCES.usfsSurfaceOwnership.timeoutMs,
     pageSize,
   });
   return { ...page, skipped: null };

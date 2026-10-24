@@ -4,6 +4,7 @@
 // top-left — the service's {z}/{y}/{x} addressing is the standard XYZ grid with y and x swapped in the path.
 import { inverse } from './geometry.js';
 import { SOURCES, REQUEST_POLICY, FAILURE } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 import { mercatorPixel, TILE_SIZE, EARTH_RADIUS } from './raster-placement.js';
 
 export { TILE_SIZE, EARTH_RADIUS };
@@ -89,22 +90,16 @@ const ABORTED = { ok: false, status: null, bytes: null, error: 'aborted' };
 
 /** Fetch unique tiles with bounded concurrency, per-request timeout, retries on network/5xx/429 only, and cancel via `signal`. */
 export async function fetchTiles(tiles, {
-  fetchImpl = globalThis.fetch, signal, concurrency = REQUEST_POLICY.maxConcurrent, timeoutMs = REQUEST_POLICY.timeoutMs,
+  fetchImpl = globalThis.fetch, signal, concurrency = REQUEST_POLICY.maxConcurrent, timeoutMs = TOPO.timeoutMs,
   retries = REQUEST_POLICY.retries, backoffMs = REQUEST_POLICY.retryBackoffMs, onProgress,
 } = {}) {
   const queue = [...new Map(tiles.map((t) => [t.key, t])).values()], results = new Map(), requested = queue.length;
   let received = 0, retriedCount = 0, next = 0;
   const attempt = async (tile) => {
-    const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(new Error(`timeout after ${timeoutMs} ms`)), timeoutMs);
-    const onAbort = () => ctrl.abort(signal.reason);
-    signal?.addEventListener('abort', onAbort, { once: true });
-    try {
-      const res = await fetchImpl(tile.url, { signal: ctrl.signal });
-      if (!res.ok) return { ok: false, status: res.status, bytes: null, error: `HTTP ${res.status}` };
-      return { ok: true, status: res.status, bytes: await res.arrayBuffer(), error: null };
-    } catch (err) {
-      return { ok: false, status: null, bytes: null, error: String(err?.message ?? err) };
-    } finally { clearTimeout(timer); signal?.removeEventListener('abort', onAbort); }
+    const got = await fetchWithDeadline(tile.url, { fetchImpl, signal, timeoutMs, read: (res) => res.arrayBuffer() });
+    if (got.ok) return { ok: true, status: got.httpStatus, bytes: got.body, error: null };
+    if (got.httpStatus) return { ok: false, status: got.httpStatus, bytes: null, error: `HTTP ${got.httpStatus}` };
+    return { ok: false, status: null, bytes: null, error: got.status === 'timeout' ? `timeout after ${timeoutMs} ms` : got.error };
   };
   const retryable = (r) => r.status === null || r.status === 429 || r.status >= 500;
   const worker = async () => {

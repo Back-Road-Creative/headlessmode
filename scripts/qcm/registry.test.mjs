@@ -270,6 +270,9 @@ test('every source carries a timeoutMs of 10000 or less unless it cites a measur
     }
   }
   assert.equal(SOURCES.gnisNames.timeoutMs, 20000);
+  // The paged reads were measured against a 20 s page, so they keep it rather than the 10 s default.
+  assert.equal(SOURCES.fwsNwiWetlands.timeoutMs, 20000);
+  assert.equal(SOURCES.usgsGovUnits.timeoutMs, 20000);
   assert.equal(SOURCES.nwsForecast.timeoutMs, 10000);
   assert.equal(SOURCES.nwsAlerts.timeoutMs, 10000);
   assert.equal(SOURCES.usgsQuadIndex.timeoutMs, 10000);

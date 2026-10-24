@@ -62,12 +62,12 @@ function stubWorker() {
 }
 
 /** runBuild with every seam stubbed; returns the worker requests and what createPdf was handed. */
-async function build({ mvum = {}, roadQuality, layers, trails, land, sites, fetchImpl, names } = {}) {
+async function build({ mvum = {}, roadQuality, layers, trails, land, sites, fetchImpl, names, signal } = {}) {
   const worker = stubWorker();
   const seen = {};
   const result = await runBuild({
     recipe: layers ? { ...recipe, layers: { ...recipe.layers, ...layers } } : recipe,
-    plan, workerFactory: () => worker, PDFLib: {},
+    plan, workerFactory: () => worker, PDFLib: {}, signal,
     adapters: {
       fetchImpl: fetchImpl || (async () => ({ ok: true, status: 200, arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer })),
       createImageBitmap: async () => ({ width: 256, height: 256, close() {} }),
@@ -235,6 +235,39 @@ test('the aerial companion is built only when asked, and never fails the map', a
   });
   assert.deepEqual(broken.seen.aerials, [], 'the aerial dropped out');
   assert.ok(broken.seen.sheets.length > 0, 'and the map still printed');
+});
+
+// A cancel must reach the extras' own requests, and end the build instead of being read as
+// "this extra failed" and carried on to the next one.
+test('the build cancel reaches the aerial and elevation requests and ends the build', async () => {
+  const first = plan.sheets[0];
+  const named = { ...featureOn(first, 'T-1', 'trail', 'yearlong'), symbolKey: 'trail-nst', name: 'Appalachian Trail' };
+  const bytes = { ok: true, status: 200, arrayBuffer: async () => new Uint8Array([1, 2, 3]).buffer, json: async () => ({ samples: [] }) };
+  // Cancel while one request is in flight, and record whether THAT request's signal followed.
+  const cancelDuring = async (needle, layers) => {
+    const cancel = new AbortController();
+    const seen = { requestAborted: null, elevationAsked: 0 };
+    await assert.rejects(build({
+      layers, trails: { features: [named] }, signal: cancel.signal,
+      fetchImpl: async (url, init) => {
+        if (String(url).includes('getSamples')) seen.elevationAsked += 1;
+        if (String(url).includes(needle) && seen.requestAborted === null) {
+          cancel.abort();
+          seen.requestAborted = init.signal.aborted;
+          throw new Error('cancelled mid-request');
+        }
+        return bytes;
+      },
+    }), { name: 'AbortError' });
+    return seen;
+  };
+  const aerial = await cancelDuring('imagery', { aerial: true, tripPage: true, trails: true });
+  assert.equal(aerial.requestAborted, true, 'the aerial request never heard the cancel');
+  assert.equal(aerial.elevationAsked, 0, 'a cancelled aerial sheet rolled on to the trip page');
+  const relief = await cancelDuring('elevation.nationalmap.gov', { terrain: true, tripPage: true, trails: true });
+  assert.equal(relief.requestAborted, true, 'the relief request never heard the cancel');
+  const profile = await cancelDuring('getSamples', { tripPage: true, trails: true });
+  assert.equal(profile.requestAborted, true, 'the elevation profile never heard the cancel');
 });
 
 // The two newest layers, at the seam the parity invariant actually broke at once:

@@ -199,8 +199,9 @@ const CALTRANS_COVERAGE_AREAS = Object.freeze([
 
 /** The deadline for one request to a source that has not cited a slower measurement.
  *  Per source, not one number for the app: the GNIS names path is measured at 31 s.
- *  Only the modules moved onto request.js read it so far (GNIS names, quad index, the NWS
- *  forecast and alerts loaders); the rest still run at REQUEST_POLICY.timeoutMs until PR-B. */
+ *  Every module in this directory except main.js reads its own source's value through
+ *  request.js (scripts/qcm/no-raw-fetch.test.mjs holds that); main.js joins them in PR-B2.
+ *  `REQUEST_POLICY.timeoutMs` is no longer a request deadline. */
 export const DEFAULT_SOURCE_TIMEOUT_MS = 10000;
 const withTimeouts = (sources) => Object.fromEntries(Object.entries(sources)
   .map(([key, src]) => [key, { timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS, ...src }]));
@@ -424,6 +425,10 @@ export const SOURCES = deepFreeze(withTimeouts({
     ],
     spatialReference: null,
     limits: { maxRecordCount: 2000, partialPageFlag: 'exceededTransferLimit' },
+    // Keeps the 20 s every page of these layers was read against before the deadline moved
+    // per source; a flat 10 s would end a federal-land or county page that has always answered.
+    timeoutMs: 20000,
+    timeoutMeasured: '20 s per page (the shared pager default the federal-land measurements were taken against)',
     pagination: true,
     cors: 'star',
     attribution: 'U. S. Geological Survey - National Geospatial Program, Government Units.',
@@ -1705,13 +1710,17 @@ export const SOURCES = deepFreeze(withTimeouts({
       maxAllowableOffsetDegrees: 0.0001,
       // Refuse rather than page. 1,759 records measured in ONE desktop view over
       // Horicon, and 29,608 in a degree square -- ~90 minutes of wall clock against
-      // a 20 s timeout. Four pages is what fits REQUEST_POLICY.
+      // a 20 s timeout. Four pages is what fits this source's own `timeoutMs`.
       recordBudgetPerExtent: 4000,
       // The PAINTED route returns a fully transparent PNG, HTTP 200, no error, above
       // 1:100,000 -- blank at Leaflet z12, paints at z13. Recorded so nobody adds
       // `export` to img-src and ships a blank picture that reads as "no wetlands".
       paintedMinZoom: 13,
     },
+    // 20 s, not the 10 s default: paging params re-cost a query 20x (source-wetlands.js), so a
+    // budget-sized page runs past 10 s. Not re-measured here; this is the value the budget was sized to.
+    timeoutMs: 20000,
+    timeoutMeasured: '8.71 s unpaged, 20x that with paging params (2026-09-15, source-wetlands.js)',
     pagination: true,
     cors: 'reflects-origin',
     attribution: 'U.S. Fish and Wildlife Service, National Wetlands Inventory, '

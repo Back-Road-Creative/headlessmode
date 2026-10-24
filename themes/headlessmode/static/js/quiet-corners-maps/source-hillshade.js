@@ -14,8 +14,7 @@
 //
 // Cancellation/staleness follows source-terrain-surface.js's `live` closure pattern (an
 // in-flight request for a view/light the reader has left is dropped, never drawn); the request
-// timeout follows source-terrain-names.js's `fetchJson` 20s AbortController pattern
-// (REQUEST_POLICY.timeoutMs). No automatic retry loop: a slow/failed request reports its
+// timeout is request.js's deadline at the source's registry `timeoutMs`. No automatic retry loop: a slow/failed request reports its
 // status and stops.
 //
 // "Sun now" is a pure function of lat/lon/date -- quiet-corners-sky/sun-moon.js exports
@@ -26,7 +25,8 @@
 //
 // The one sentence this layer must never be read as contradicting: hillshade is not a
 // cast-shadow, visibility, or passability calculation.
-import { SOURCES, REQUEST_POLICY } from './source-registry.js';
+import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 import { SYMBOLS } from './legend.js';
 
 const SRC = SOURCES.usgs3depHillshade;
@@ -93,32 +93,19 @@ export function hillshadeImageUrl(request) {
 
 /** A generation-guarded, timeout-guarded image fetcher: a response for a bounds/light the
  *  reader has already left is reported `stale`, never drawn, and a request past `timeoutMs`
- *  (default `REQUEST_POLICY.timeoutMs`, the same 20s used across this directory) aborts and
- *  reports `timeout`. No automatic retry -- a caller that wants another attempt asks again. */
-export function createHillshadeFetcher({ fetchImpl = fetch, timeoutMs = REQUEST_POLICY.timeoutMs } = {}) {
+ *  (default the source's registry `timeoutMs`) aborts and reports `timeout`. No automatic
+ *  retry -- a caller that wants another attempt asks again. */
+export function createHillshadeFetcher({ fetchImpl = fetch, timeoutMs = SRC.timeoutMs } = {}) {
   let generation = 0;
   async function fetchImage(request, { signal } = {}) {
     generation += 1;
     const myGeneration = generation;
-    const controller = new AbortController();
-    const onAbort = () => controller.abort();
-    if (signal) { if (signal.aborted) onAbort(); else signal.addEventListener('abort', onAbort); }
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const res = await fetchImpl(hillshadeImageUrl(request), { signal: controller.signal });
-      if (generation !== myGeneration) return { status: 'stale' };
-      if (!res.ok) return { status: 'error', error: `HTTP ${res.status}` };
-      const blob = await res.blob();
-      if (generation !== myGeneration) return { status: 'stale' };
-      return { status: 'ready', blob };
-    } catch (err) {
-      if (generation !== myGeneration) return { status: 'stale' };
-      const timedOut = err?.name === 'AbortError' && !(signal && signal.aborted);
-      return { status: timedOut ? 'timeout' : 'error', error: err?.message || String(err) };
-    } finally {
-      clearTimeout(timer);
-      if (signal) signal.removeEventListener('abort', onAbort);
-    }
+    const got = await fetchWithDeadline(hillshadeImageUrl(request), {
+      fetchImpl, signal, timeoutMs, read: (res) => res.blob(),
+    });
+    if (generation !== myGeneration) return { status: 'stale' };
+    if (got.ok) return { status: 'ready', blob: got.body };
+    return { status: got.status === 'timeout' ? 'timeout' : 'error', error: got.error };
   }
   return { fetchImage };
 }

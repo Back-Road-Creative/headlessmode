@@ -17,6 +17,8 @@
 // built on that would have printed nothing while appearing to work. The tint is
 // blocked on a spike, not shipped broken. See the plan's §4 note.
 import { measureLength } from './measure.js';
+import { fetchWithDeadline, orThrow } from './request.js';
+import { SOURCES } from './source-registry.js';
 
 const SERVICE = 'https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer';
 
@@ -82,9 +84,10 @@ export async function fetchElevations({ points, fetchImpl = fetch, signal } = {}
       returnFirstValueOnly: 'true',
       f: 'json',
     });
-    const res = await fetchImpl(`${SERVICE}/getSamples`, { method: 'POST', body, signal });
-    if (!res.ok) throw new Error(`Elevation: the service answered ${res.status}.`);
-    const json = await res.json();
+    const got = await fetchWithDeadline(`${SERVICE}/getSamples`, {
+      fetchImpl, signal, timeoutMs: SOURCES.usgs3dep.timeoutMs, init: { method: 'POST', body },
+    });
+    const json = orThrow(got, got.httpStatus ? `Elevation: the service answered ${got.httpStatus}.` : undefined);
     if (json.error) throw new Error(`Elevation: ${json.error.message || 'the service refused the query.'}`);
     // getSamples may return fewer samples than points asked for (NoData is
     // omitted, not nulled), so place each by its own index rather than by order.

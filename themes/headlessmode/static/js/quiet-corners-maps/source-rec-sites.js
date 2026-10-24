@@ -17,6 +17,7 @@
 // nothing at all and the layer silently disappears. Verified against the
 // service's own schema, not from memory.
 import { pageThrough, PAGE_CAP } from './arcgis-pager.js';
+import { DEFAULT_SOURCE_TIMEOUT_MS } from './source-registry.js';
 
 const SERVICE = 'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_RecInfraRecreationSites_02/MapServer/0';
 const FIELDS = ['site_name', 'site_type', 'fee_charged', 'seasonal_operational_status', 'open_season', 'total_capacity'];
@@ -128,6 +129,7 @@ export async function fetchRecSites({ bboxLonLat, fetchImpl = fetch, signal, pag
     normalize: normalizeSite,
     fetchImpl,
     signal,
+    timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS,
     pageSize,
   });
   const { features, ...rest } = page;

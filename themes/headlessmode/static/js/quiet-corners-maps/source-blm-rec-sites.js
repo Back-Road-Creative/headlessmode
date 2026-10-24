@@ -117,7 +117,7 @@ export async function fetchBlmRecSites({ bboxLonLat, fetchImpl = fetch, signal, 
       inSR: '4326', outSR: '4326', spatialRel: 'esriSpatialRelIntersects',
       outFields: FIELDS.join(','), returnGeometry: 'true',
     },
-    normalize: normalizeBlmSite, fetchImpl, signal, pageSize,
+    normalize: normalizeBlmSite, fetchImpl, signal, timeoutMs: SOURCES.blmRecSites.timeoutMs, pageSize,
   });
   const { features, ...rest } = page;
   return { sites: features, ...rest };

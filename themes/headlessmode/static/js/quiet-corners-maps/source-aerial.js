@@ -11,6 +11,9 @@
 // hashes -- real, distinct imagery. That check exists because 3DEP's exportImage
 // returned a BYTE-IDENTICAL image for two different states, and a source that
 // answers every request with the same picture is worse than one that errors.
+import { fetchWithDeadline, orThrow } from './request.js';
+import { SOURCES } from './source-registry.js';
+
 const SERVICE = 'https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPPlus/ImageServer';
 
 // A sheet's raster at 300 dpi is 2400x2850, which NAIP will happily render but
@@ -45,9 +48,10 @@ export function aerialRequestFor(sheet, bboxLonLat) {
  *  sheet is an extra, so a failure loses the companion page, not the map. */
 export async function fetchAerial({ sheet, bboxLonLat, fetchImpl = fetch, signal } = {}) {
   const req = aerialRequestFor(sheet, bboxLonLat);
-  const res = await fetchImpl(`${req.url}?${new URLSearchParams(req.params)}`, { signal });
-  if (!res.ok) throw new Error(`Aerial imagery: the service answered ${res.status}.`);
-  const bytes = new Uint8Array(await res.arrayBuffer());
+  const got = await fetchWithDeadline(`${req.url}?${new URLSearchParams(req.params)}`, {
+    fetchImpl, signal, timeoutMs: SOURCES.usdaNaip.timeoutMs, read: (res) => res.arrayBuffer(),
+  });
+  const bytes = new Uint8Array(orThrow(got, got.httpStatus ? `Aerial imagery: the service answered ${got.httpStatus}.` : undefined));
   if (!bytes.length) throw new Error('Aerial imagery: the service returned an empty image.');
   return { id: sheet.id, bytes, width: req.width, height: req.height, format: 'jpg' };
 }

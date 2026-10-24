@@ -21,6 +21,7 @@
 // contained -- yet 56 of 188 measured 100 per cent and 38 carried null.
 // `attr_ContainmentDateTime` was null on ALL 188 and is never read.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 import { serviceError, envelope, viewReader } from './arcgis-view.js';
 
 const SRC = SOURCES.nifcFirePerimeters;
@@ -184,10 +185,9 @@ export function fireLayer(L) {
 
 /** Asked for only when a reader asks, and never throws the map. */
 export async function fetchFire(bbox, { fetchImpl = fetch, signal, widthPx } = {}) {
-  try {
-    const res = await fetchImpl(fireQueryUrl(bbox, widthPx), { signal });
-    return res.ok ? await res.json() : null;
-  } catch { return null; }
+  let url; try { url = fireQueryUrl(bbox, widthPx); } catch { return null; }   // a bad area is "no answer" too
+  const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+  return got.ok ? got.body : null;
 }
 
 /** One bbox question at a time, waiting out a drag — the same protocol as the other bounded surfaces,

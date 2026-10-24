@@ -40,8 +40,11 @@ const readJson = (res) => res.json();
  *  - `{ ok: false, status: 'aborted', error }`   -- the caller's own `signal` ended it.
  *  - `{ ok: false, status: 'error', error }`     -- network failure, a non-2xx (`httpStatus`
  *    is set), or a body that is not JSON (`malformed: true`).
- *  `init` is passed to fetch beside the deadline signal; `read` swaps the body reader. */
-export async function fetchWithDeadline(url, { fetchImpl = globalThis.fetch, signal, timeoutMs, init, read = readJson } = {}) {
+ *  `init` is passed to fetch beside the deadline signal; `read` swaps the body reader.
+ *  `anyStatus: true` is for a service whose error answer carries a reason worth showing: the
+ *  body is read whatever the status, `ok` is the response's own, and a body that cannot be
+ *  read on a non-2xx is `undefined` rather than malformed. */
+export async function fetchWithDeadline(url, { fetchImpl = globalThis.fetch, signal, timeoutMs, init, read = readJson, anyStatus = false } = {}) {
   if (signal && signal.aborted) return { ok: false, status: 'aborted', error: 'aborted' };
   // A missing or bad deadline is a caller bug, but this call promises never to throw, so it
   // comes back as an error the panel can show instead of an exception that kills the panel.
@@ -58,12 +61,14 @@ export async function fetchWithDeadline(url, { fetchImpl = globalThis.fetch, sig
   });
   const work = (async () => {
     const res = await fetchImpl(url, { ...init, signal: deadline.signal });
-    if (!res.ok) return { ok: false, status: 'error', httpStatus: res.status, error: `HTTP ${res.status}` };
+    if (!res.ok && !anyStatus) return { ok: false, status: 'error', httpStatus: res.status, error: `HTTP ${res.status}` };
     let body;
     try { body = await read(res); } catch (err) {
       if (deadline.signal.aborted) throw err;
-      return { ok: false, status: 'error', malformed: true, error: 'Malformed JSON response.' };
+      if (!res.ok) return { ok: false, status: 'error', httpStatus: res.status, error: `HTTP ${res.status}` };
+      return { ok: false, status: 'error', malformed: true, error: read === readJson ? 'Malformed JSON response.' : 'Unreadable response body.' };
     }
+    if (!res.ok) return { ok: false, status: 'error', httpStatus: res.status, error: `HTTP ${res.status}`, body };
     return { ok: true, status: 'ok', httpStatus: res.status, body };
   })();
   try {
@@ -78,6 +83,18 @@ export async function fetchWithDeadline(url, { fetchImpl = globalThis.fetch, sig
     clearTimeout(grace);
     deadline.dispose();
   }
+}
+
+/** For a caller that throws on failure: the body of an ok result, else an Error carrying the
+ *  result's `status` and `httpStatus`, with `message` (default: the result's own error). A
+ *  caller's cancel keeps the name `AbortError`, so it is never reported as a failure. */
+export function orThrow(result, message) {
+  if (result.ok) return result.body;
+  const err = new Error(message || result.error);
+  err.status = result.status;
+  if (result.httpStatus !== undefined) err.httpStatus = result.httpStatus;
+  if (result.status === 'aborted') err.name = 'AbortError';
+  throw err;
 }
 
 /** Latest wins. `begin()` aborts whatever the previous call was doing and hands out a

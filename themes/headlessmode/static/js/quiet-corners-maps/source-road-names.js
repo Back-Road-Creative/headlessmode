@@ -14,6 +14,7 @@
 // the caller ignores it (the same convention source-hillshade.js uses).
 import { SOURCES } from './source-registry.js';
 import { serviceError, envelope } from './arcgis-view.js';
+import { fetchWithDeadline } from './request.js';
 import { layersForZoom, groupRoads, roadLabelOrder, ROAD_CLASSES } from './road-names.js';
 
 const SRC = SOURCES.usgsRoadNames;
@@ -62,17 +63,14 @@ const cacheKey = (b, zoom) => `${round(b.minLon)},${round(b.minLat)},${round(b.m
 
 /** One layer's answer: {features, exceeded} or {failed}. Never throws, except to say aborted. */
 async function askLayer({ layer, bbox, zoom, fetchImpl, signal }) {
-  try {
-    const res = await fetchImpl(buildRoadQuery({ layer, bbox, zoom }), { signal });
-    if (!res.ok) return { failed: `HTTP ${res.status}` };
-    const body = await res.json();
-    const refused = serviceError(body);
-    if (refused) return { failed: refused };
-    if (!Array.isArray(body?.features)) return { failed: 'the service answered without a feature list.' };
-    return { features: body.features.map((f) => ({ ...f, layer })), exceeded: body.exceededTransferLimit === true };
-  } catch (err) {
-    return signal.aborted ? { aborted: true } : { failed: err?.message || String(err) };
-  }
+  const got = await fetchWithDeadline(buildRoadQuery({ layer, bbox, zoom }), { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+  if (got.status === 'aborted') return { aborted: true };
+  if (!got.ok) return { failed: got.httpStatus ? `HTTP ${got.httpStatus}` : got.error };
+  const body = got.body;
+  const refused = serviceError(body);
+  if (refused) return { failed: refused };
+  if (!Array.isArray(body?.features)) return { failed: 'the service answered without a feature list.' };
+  return { features: body.features.map((f) => ({ ...f, layer })), exceeded: body.exceededTransferLimit === true };
 }
 
 /** A fetcher with its own in-flight slot and cache. The module's `fetchRoadNames` is one shared

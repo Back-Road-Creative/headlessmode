@@ -16,6 +16,9 @@
 // That check is not ceremony -- 3DEP's exportImage once returned a BYTE-IDENTICAL
 // image for two different states, and a source that answers every request with the
 // same picture is worse than one that errors.
+import { fetchWithDeadline, orThrow } from './request.js';
+import { SOURCES } from './source-registry.js';
+
 const SERVICE = 'https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer';
 
 /** The named raster function. Not a chain: the service renders it server-side. */
@@ -54,9 +57,10 @@ export function terrainRequestFor(sheet, bboxLonLat) {
  *  sheet is an extra, so a failure loses the companion page, not the map. */
 export async function fetchTerrain({ sheet, bboxLonLat, fetchImpl = fetch, signal } = {}) {
   const req = terrainRequestFor(sheet, bboxLonLat);
-  const res = await fetchImpl(`${req.url}?${new URLSearchParams(req.params)}`, { signal });
-  if (!res.ok) throw new Error(`Shaded relief: the service answered ${res.status}.`);
-  const bytes = new Uint8Array(await res.arrayBuffer());
+  const got = await fetchWithDeadline(`${req.url}?${new URLSearchParams(req.params)}`, {
+    fetchImpl, signal, timeoutMs: SOURCES.usgs3dep.timeoutMs, read: (res) => res.arrayBuffer(),
+  });
+  const bytes = new Uint8Array(orThrow(got, got.httpStatus ? `Shaded relief: the service answered ${got.httpStatus}.` : undefined));
   if (!bytes.length) throw new Error('Shaded relief: the service returned an empty image.');
   return { id: sheet.id, bytes, width: req.width, height: req.height, format: 'png' };
 }

@@ -17,6 +17,7 @@
 // lines too — a National Forest proclamation boundary in particular encloses
 // private inholdings that were never federal.
 import { pageThrough, PAGE_CAP } from './arcgis-pager.js';
+import { SOURCES } from './source-registry.js';
 
 export const SERVICE = 'https://carto.nationalmap.gov/arcgis/rest/services/govunits/MapServer';
 
@@ -108,6 +109,7 @@ export async function fetchFederalLand({ family, bboxLonLat, fetchImpl = fetch, 
     },
     fetchImpl,
     signal,
+    timeoutMs: SOURCES.usgsGovUnits.timeoutMs,
     pageSize,
   });
   return { ...page, skipped: null };

@@ -4,7 +4,7 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  fetchWithDeadline, withDeadline, createLatest, createSearchGuard,
+  fetchWithDeadline, withDeadline, createLatest, createSearchGuard, orThrow,
 } from '../../themes/headlessmode/static/js/quiet-corners-maps/request.js';
 import { createForecastLoader } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-weather.js';
 import { SOURCES } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-registry.js';
@@ -188,4 +188,45 @@ test('fetchWithDeadline with no timeoutMs returns an error rather than throwing'
   assert.equal(result.status, 'error');
   assert.match(result.error, /timeoutMs/);
   assert.equal(called, false);
+});
+
+test('anyStatus reads the body of a non-2xx answer; without it the body is never read', async () => {
+  const problem = { detail: 'No forecast for this point.' };
+  let reads = 0;
+  const notFound = { ok: false, status: 404, json: async () => { reads += 1; return problem; } };
+  const plain = await fetchWithDeadline('https://x.invalid/a', { fetchImpl: async () => notFound, timeoutMs: 1000 });
+  assert.equal(plain.ok, false);
+  assert.equal(plain.httpStatus, 404);
+  assert.equal(plain.body, undefined);
+  assert.equal(reads, 0);
+  const any = await fetchWithDeadline('https://x.invalid/a', { fetchImpl: async () => notFound, timeoutMs: 1000, anyStatus: true });
+  assert.equal(any.ok, false);
+  assert.equal(any.status, 'error');
+  assert.equal(any.httpStatus, 404);
+  assert.deepEqual(any.body, problem);
+  const unreadable = { ok: false, status: 502, json: async () => { throw new SyntaxError('<html>'); } };
+  const bad = await fetchWithDeadline('https://x.invalid/a', { fetchImpl: async () => unreadable, timeoutMs: 1000, anyStatus: true });
+  assert.equal(bad.httpStatus, 502);
+  assert.equal(bad.body, undefined);
+  assert.equal(bad.malformed, undefined, 'a bad body on an error status is the error, not a malformed answer');
+  const okBad = { ok: true, status: 200, json: async () => { throw new SyntaxError('<html>'); } };
+  const malformed = await fetchWithDeadline('https://x.invalid/a', { fetchImpl: async () => okBad, timeoutMs: 1000, anyStatus: true });
+  assert.equal(malformed.malformed, true);
+});
+
+test('a custom reader that fails is not reported as bad JSON', async () => {
+  const res = { ok: true, status: 200, arrayBuffer: async () => { throw new Error('stream cut'); } };
+  const got = await fetchWithDeadline('https://x.invalid/a', { fetchImpl: async () => res, timeoutMs: 1000, read: (r) => r.arrayBuffer() });
+  assert.equal(got.malformed, true);
+  assert.doesNotMatch(got.error, /JSON/);
+});
+
+test('orThrow hands back an ok body and throws everything else with its status', async () => {
+  assert.deepEqual(orThrow({ ok: true, status: 'ok', body: { a: 1 } }), { a: 1 });
+  assert.throws(() => orThrow({ ok: false, status: 'error', httpStatus: 503, error: 'HTTP 503' }),
+    (err) => err.message === 'HTTP 503' && err.status === 'error' && err.httpStatus === 503);
+  assert.throws(() => orThrow({ ok: false, status: 'timeout', error: 'No answer within 5 ms.' }, 'Elevation: slow.'),
+    (err) => err.message === 'Elevation: slow.' && err.status === 'timeout' && err.httpStatus === undefined);
+  assert.throws(() => orThrow({ ok: false, status: 'aborted', error: 'aborted' }),
+    (err) => err.name === 'AbortError' && err.status === 'aborted');
 });

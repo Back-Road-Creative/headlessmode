@@ -36,6 +36,7 @@
 // tan(degrees) x 100 -- 45 degrees is 100 per cent -- so the two are never interchangeable
 // and every number here carries its unit in the same string.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 
 const SRC = SOURCES.usgs3depSurface;
 
@@ -253,17 +254,13 @@ export function coverageText({ covered, missing }) {
  *  layer costs the CSP nothing -- and it is the only route that can read the alpha channel
  *  the coverage answer lives in. Never throws the map. */
 export async function fetchSlopeImage(request, { fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(slopeImageUrl(request), { signal });
-    return res.ok ? await res.blob() : null;
-  } catch (e) { return null; }
+  const got = await fetchWithDeadline(slopeImageUrl(request), { fetchImpl, signal, timeoutMs: SRC.timeoutMs, read: (res) => res.blob() });
+  return got.ok ? got.body : null;
 }
 
 export async function fetchPoint(lonLat, surface, { fetchImpl = fetch, signal } = {}) {
-  try {
-    const res = await fetchImpl(pointUrl(pointRequestFor(lonLat, surface)), { signal });
-    return res.ok ? await res.json() : null;
-  } catch (e) { return null; }
+  const got = await fetchWithDeadline(pointUrl(pointRequestFor(lonLat, surface)), { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+  return got.ok ? got.body : null;
 }
 
 /** A Leaflet image overlay whose picture is re-exported for the view it is asked about, the
