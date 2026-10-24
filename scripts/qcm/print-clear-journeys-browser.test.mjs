@@ -13,6 +13,7 @@
 // page state is read only for assertions, and IndexedDB is held by a stand-in installed
 // before any page script runs (the technique late-restore-browser.test.mjs uses).
 import { test, after } from 'node:test';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { recipeFromControls, EXAMPLE_AREA } from '../../themes/headlessmode/static/js/quiet-corners-maps/app-state.js';
 import { quadsCoveringBox } from '../../themes/headlessmode/static/js/quiet-corners-maps/geometry.js';
@@ -21,12 +22,22 @@ import { DB_NAME, STORE, KEY, VERSION } from '../../themes/headlessmode/static/j
 import { findChromium, launch } from './helpers/browser.mjs';
 import { trustedClick } from './helpers/trusted-click.mjs';
 import { startSiteServer, siteIsBuilt } from './helpers/site-server.mjs';
-import { readyDashboard, waitInPage } from './helpers/waits.mjs';
+import { readyDashboard, waitInPage, watchTimers, timersIdle } from './helpers/waits.mjs';
 
 const CHROMIUM = findChromium();
 const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this proof)'
   : !siteIsBuilt() ? 'public/quiet-corners/ not built -- run `bash scripts/build-site.sh --configDir site-config --minify` first'
     : false;
+
+// view-wiring's routine writer: a trailing throttle of this length writes the map fragment
+// (quiet-corners.js createRoutineWriter, waitMs).
+const FRAGMENT_THROTTLE_MS = 400;
+
+test('the fragment throttle the J02b wait watches is the one quiet-corners.js arms', () => {
+  const app = readFileSync(new URL('../../themes/headlessmode/static/js/quiet-corners.js', import.meta.url), 'utf8');
+  const armed = /createRoutineWriter\(\{[\s\S]*?waitMs:\s*(\d+)/.exec(app)?.[1];
+  assert.equal(Number(armed), FRAGMENT_THROTTLE_MS, 'quiet-corners.js routine writer waitMs moved: update FRAGMENT_THROTTLE_MS here');
+});
 
 const COVERING = quadsCoveringBox(EXAMPLE_AREA.bboxLonLat);
 
@@ -101,7 +112,7 @@ async function freshLoad({ path = '/quiet-corners/', seed = null, held = false }
   await page.navigate(`${site.origin}/quiet-corners/`);
   await readyDashboard(page, { data: false });
   await page.evaluate(seed === null ? dropStored : putStored(seed));
-  const { identifier } = await page.send('Page.addScriptToEvaluateOnNewDocument', { source: holdScript(held) });
+  const { identifier } = await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `${holdScript(held)}; ${watchTimers(FRAGMENT_THROTTLE_MS)}` });
   try {
     await page.navigate(`${site.origin}${path}`);
   } finally {
@@ -247,10 +258,12 @@ test('J02b: Clear on an area restored from a shared URL, with the delete still w
   // further change, so the fragment Clear is held to is the settled one, not the link's.
   await waitInPage(page, 'the map to settle on the shared area and rewrite its fragment',
     `location.hash.startsWith('#map=') && location.hash !== ${JSON.stringify(FRAGMENT)}`);
-  await waitInPage(page, 'the map fragment to hold still for a full throttle window', `(async () => {
-    const first = location.hash;
-    await new Promise((r) => setTimeout(r, 600));
-    return location.hash === first;
+  // The condition is the writer's own timer: none pending, and the fragment the same on two
+  // polls running, so a move that arms another write is waited out instead of raced.
+  await waitInPage(page, 'the map fragment to hold still, the throttled writer idle', `(() => {
+    const same = window.__fragmentSeen === location.hash;
+    window.__fragmentSeen = location.hash;
+    return same && ${timersIdle(FRAGMENT_THROTTLE_MS)};
   })()`);
   const fragment = await page.evaluate('location.hash');
   assert.ok(fragment.startsWith('#map='), `setup: the shared link's map fragment should still be there, got "${fragment}"`);

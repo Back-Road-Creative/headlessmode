@@ -589,7 +589,7 @@ def test_homepage_blurbs_are_the_canonical_plain_language_copy():
         "sun-track": "Calculates solar elevation and golden-hour windows, and matches capture times to positions in GPX tracks",
         "rigscore": "Checks an AI development setup's configuration for security, consistency and governance problems",
         "push-guard": "A client-side hook that blocks direct pushes to protected branches so changes go through pull requests",
-        "Band Coach": "A practice coach for 26 instruments that listens through your microphone or MIDI keyboard, checks pitch and timing, and picks what to practice next",
+        "Band Coach": "A practice coach for 27 instruments that listens through your microphone or MIDI keyboard, checks pitch and timing, and picks what to practice next",
         "Waypost": "A console on your own computer that runs a creator's video, photo and SEO work and queues posts for YouTube, Instagram and Facebook, one tab per brand",
         "Framegrade": "The media engine under Waypost: it grades video and photos, checks each finished file before delivery, and builds route films from GPS tracks",
     }
