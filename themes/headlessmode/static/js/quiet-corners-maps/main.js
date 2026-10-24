@@ -33,9 +33,10 @@ import { fetchFederalLand, FAMILY_IDS as FEDERAL_IDS } from './source-federal-la
 import { fetchWetlands } from './source-wetlands.js';
 import { fetchCountyLines } from './source-county-lines.js';
 import { fetchSurfaceOwnership } from './source-surface-ownership.js';
-import { LAYERS, LAYER_IDS, LAYER_BY_ID, GROUPS, layerControlSpecs, baseControlSpecs, contextControlSpecs,
+import { LAYERS, LAYER_IDS, LAYER_BY_ID, TASK_GROUPS, NO_CONTEXT_ROW_ID, layerControlSpecs, baseControlSpecs, contextControlSpecs,
   CONTEXT_SURFACE_IDS, CONTEXT_OVERLAY_IDS, DEFAULT_CONTEXT, surfaceCaption, enabledLayers, LAYERS_WITH_DRAPE, groupHint } from './layer-registry.js';
-import { filterLayerSpecs, layerBadge, layerCountLine, selectedScreenRows, layerAboutText, rowSummaryLine, groupIsCollapsedByDefault } from './layer-panel.js';
+import { filterLayerSpecs, layerBadge, layerCountLine, selectedScreenRows, layerAboutText, rowSummaryLine, groupIsCollapsedByDefault,
+  activeOnMapRows, groupsToCollapse } from './layer-panel.js';
 import { SOURCES, DEFAULT_SOURCE_TIMEOUT_MS } from './source-registry.js';
 import { fetchWithDeadline, createLatest } from './request.js';
 import { floodZonesLayer, floodReader, readZones as readFloodZones, areaReport as floodAreaReport } from './source-flood-zones.js';
@@ -1034,6 +1035,7 @@ function layerRow(spec, onChange = null, { layer = null } = {}) {
   input.type = spec.type || 'checkbox'; input.id = spec.inputId; input.name = spec.name || spec.inputId; input.value = spec.id;
   input.checked = spec.checked; input.disabled = spec.disabled;
   if (spec.noteId) input.setAttribute('aria-describedby', spec.noteId);
+  input.dataset.layerLabel = spec.label;   // the Active list names a row without parsing its markup
   // ONE listener per element, same as before U1: `handler` is the caller's own onChange
   // (setBase/setContext) or the default invalidate+replan, and refreshPresetPreviews /
   // refreshPresetButtons run after it rather than as a second listener -- every switch,
@@ -1113,8 +1115,9 @@ function isZoomBlocked(layerId) {
  *  filter change all keep them current. Also writes the panel's status-role
  *  count line, over every optional selected layer (`layerCountLine` only
  *  counts what it is handed, so a hidden row still counts as "on"): the badged
- *  federal and state rows plus `selectedScreenRows` for context, reading, camera and
- *  extra-sheet rows. The base-map choice is not a layer and is not counted. */
+ *  federal and state rows plus `selectedScreenRows` for context, reading and camera
+ *  rows. A print extra (Print options) is a page in the PDF and is not counted. The base-map
+ *  choice is not a layer and is not counted. */
 function renderLayerPanelExtras() {
   const layers = state.recipe ? state.recipe.layers : layersFromControls();
   const countRows = [];
@@ -1153,6 +1156,73 @@ function renderLayerPanelExtras() {
   countRows.push(...selectedScreenRows(LAYERS, layersFromControls()));
   const countEl = $('qcm-layer-count');
   if (countEl) countEl.textContent = layerCountLine(countRows);
+  renderActiveLayers();
+}
+
+let activeListSignature = null;
+/** QQA-18: the compact "Active on map" list, read straight off the switches in the panel (the
+ *  same read layersFromControls makes), so it can never disagree with a row. It sits above the
+ *  groups and ignores the search and active-only filters: a layer you switched on and then
+ *  filtered out of sight is still one press from off. Remove presses the row's own control --
+ *  a context surface goes through "No context surface" -- so every handler a click on the row
+ *  would run still runs. Retry appears only while the row's own Retry is showing; a print extra
+ *  is a page in the PDF, not something on the map, and is never listed. The list is rebuilt only
+ *  when what it says changes (see the signature below), so a button handler finds its control by
+ *  id when pressed, never by holding the node: renderLayerControls can replace every input. */
+function renderActiveLayers() {
+  const host = $('qcm-active-layers'); if (!host) return;
+  const list = host.querySelector('ul');
+  const rows = [...document.querySelectorAll('#qcm-layers .qcm-layer-group input')].map((input) => ({
+    id: input.value, label: input.dataset.layerLabel || input.value, checked: input.checked, input,
+    group: input.closest('.qcm-layer-group').dataset.taskGroup,
+    base: input.name === 'qcm-base' || input.id === 'qcm-context-none',
+    lettering: opensOn(LAYER_BY_ID[input.value] || {}),
+  }));
+  const active = activeOnMapRows(rows).map((r) => {
+    const badge = $(`${r.input.id}-badge`), retry = $(`${r.input.id}-retry`);
+    return { ...r, word: badge && !badge.hidden ? badge.textContent : '', canRetry: !!(retry && !retry.hidden) };
+  });
+  host.hidden = !active.length;
+  // renderSources runs on every fetch completion, name pick and pin click: rebuilding the list
+  // each time would drop keyboard focus from a Remove or Retry button and can swallow a press that
+  // straddles the rebuild. Only a change in what the list SAYS touches the DOM.
+  const signature = JSON.stringify(active.map((r) => [r.id, r.label, r.word, r.canRetry]));
+  if (signature === activeListSignature) return;
+  activeListSignature = signature;
+  const held = list.contains(document.activeElement)
+    ? { id: document.activeElement.closest('[data-active-layer]')?.getAttribute('data-active-layer'), cls: document.activeElement.className } : null;
+  list.replaceChildren(...active.map((r) => {
+    const item = document.createElement('li');
+    item.setAttribute('data-active-layer', r.id);
+    const name = document.createElement('span');
+    name.className = 'qcm-active-name'; name.textContent = r.label;
+    item.append(name);
+    if (r.word) {
+      const word = document.createElement('span');
+      word.className = 'qcm-active-state'; word.textContent = r.word;
+      item.append(word);
+    }
+    if (r.canRetry) {
+      const again = document.createElement('button');
+      again.type = 'button'; again.className = 'qcm-active-retry'; again.textContent = 'Retry';
+      again.setAttribute('aria-label', `Retry ${r.label}`);
+      again.addEventListener('click', () => retryLayer(r.id));
+      item.append(again);
+    }
+    const remove = document.createElement('button');
+    remove.type = 'button'; remove.className = 'qcm-active-remove'; remove.textContent = 'Remove';
+    remove.setAttribute('aria-label', `Remove ${r.label} from the map`);
+    remove.addEventListener('click', () => {
+      document.getElementById(CONTEXT_SURFACE_IDS.includes(r.id) ? 'qcm-context-none' : r.input.id)?.click();
+      // The list was rebuilt under the focused button: put focus somewhere that still exists.
+      (host.hidden ? $('qcm-layer-search') : host.querySelector('.qcm-active-title'))?.focus();
+    });
+    item.append(remove);
+    return item;
+  }));
+  // A rebuild that had to happen (another row's badge changed) still hands focus back to the
+  // same button on the same layer, when both are still there.
+  if (held) list.querySelector(`[data-active-layer="${CSS.escape(held.id || '')}"] button.${held.cls.split(' ')[0]}`)?.focus();
 }
 
 /** Re-fetches ONE overlay layer — the same adapter call `checkSources` makes for
@@ -1237,55 +1307,69 @@ async function retryPass(id) {
   }
 }
 
+/** Groups a search or active-only match opened (they were closed), and groups the reader toggled
+ *  by hand while that filter was on. Clearing the filter closes the first set minus the second, so
+ *  the panel returns to what it was before the search (QQA-18). */
+const openedByFilter = new Set();
+const touchedWhileFiltering = new Set();
+const layerFilterActive = () => !!($('qcm-layer-search')?.value || '').trim() || !!$('qcm-layers-active-only')?.checked;
+
 /** The search box and the "only layers that are on" toggle, together: which rows
  *  and which group headings stay visible, without touching any switch's checked
- *  state. Base and context radios always carry `alwaysShow` (their CURRENT
- *  choice), so a group never reads empty under active-only; a context overlay is
- *  an ordinary checkbox and is hidden there while off. */
+ *  state. The base radios and "No context surface" always carry `alwaysShow`, so Map style
+ *  never reads empty under active-only; every other context radio is a layer like the rest
+ *  and is hidden there while it is not the chosen one. A search matches a row's label, note,
+ *  keywords and provider, and its group's heading and purpose words. */
 function applyLayerFilter() {
   const host = $('qcm-layers'); if (!host) return;
   const query = $('qcm-layer-search')?.value || '';
   const activeOnly = !!$('qcm-layers-active-only')?.checked;
   const rows = [];
-  for (const group of GROUPS) {
+  for (const group of TASK_GROUPS) {
     const box = host.querySelector(`.qcm-layer-group[aria-label="${group.label}"]`);
     if (!box) continue;
     for (const row of box.querySelectorAll('.qcm-layer-row')) {
       const input = row.querySelector('input');
       if (!input) continue;
+      const layer = LAYER_BY_ID[input.value];
+      const source = layer?.sourceId ? SOURCES[layer.sourceId] : null;
       rows.push({
         id: input.id, group: group.id,
         label: row.querySelector('label')?.textContent || '',
         note: row.querySelector('.qcm-hint')?.textContent || '',
-        keywords: LAYER_BY_ID[input.value]?.searchTerms || '',
+        keywords: `${layer?.searchTerms || ''} ${source ? `${source.name} ${source.origin}` : ''}`,
         checked: input.checked,
-        alwaysShow: group.id === 'base' || (group.id === 'context' && input.type === 'radio'),
+        alwaysShow: input.name === 'qcm-base' || input.id === 'qcm-context-none',
         el: row,
         groupBox: box,
       });
     }
   }
-  const { visibleIds, visibleGroupIds } = filterLayerSpecs(rows, GROUPS, { query, activeOnly });
+  const { visibleIds, visibleGroupIds } = filterLayerSpecs(rows, TASK_GROUPS, { query, activeOnly });
   const groupBoxes = new Map();
   for (const r of rows) {
     r.el.hidden = !visibleIds.has(r.id);
     groupBoxes.set(r.group, r.groupBox);
   }
-  // QUX-04a: a group collapses by default (renderLayerControls), so a search
-  // or active-only match sitting inside a still-closed <details> would be
-  // hidden twice over — filtered-in but invisible. Force a matching group
-  // open whenever the reader is actually filtering; leave it alone (whatever
-  // the reader last set it to) once the query and active-only toggle both
-  // clear, so clearing search doesn't also re-collapse a group someone opened
-  // by hand.
   // UX-03b: the Cameras entry above the groups goes with its rows when a search is for something
   // else. "Only layers that are on" alone never hides it: the coverage note matters most then.
   if (cameraEntry) cameraEntry.hidden = !!query.trim() && !visibleGroupIds.has('cameras');
-  const filtering = !!query.trim() || activeOnly;
+  // QUX-04a: groups start collapsed, so a match inside a still-closed <details> would be
+  // filtered in but invisible. Open it while the reader is filtering, remember that WE opened
+  // it, and close it again when the filter clears (QQA-18). A group that was already open, or
+  // that the reader toggled themselves meanwhile, is left as they have it.
+  const filtering = layerFilterActive();
   for (const [groupId, box] of groupBoxes) {
     const visible = visibleGroupIds.has(groupId);
     box.hidden = !visible;
-    if (filtering && visible) box.open = true;
+    if (filtering && visible && !box.open) { box.open = true; openedByFilter.add(groupId); }
+  }
+  if (!filtering) {
+    for (const groupId of groupsToCollapse({ openedByFilter, touched: touchedWhileFiltering })) {
+      const box = groupBoxes.get(groupId);
+      if (box) box.open = false;
+    }
+    openedByFilter.clear(); touchedWhileFiltering.clear();
   }
 }
 
@@ -1531,42 +1615,49 @@ function renderLayerControls() {
   // nothing the reader was looking at. Rebuilt on every area change, so it re-reads the
   // choice rather than resetting it.
   const base = currentBase();
-  host.replaceChildren(buildCameraEntry(), ...GROUPS.flatMap((group) => {
-    const rows = group.id === 'base'
-      ? baseControlSpecs(base).map((s) => layerRow(s, setBase))
-      // The context group's raster surfaces are the base group's twin: radios and an explicit
-      // None, so only one view-filling picture is ever laid over the map. Its vector overlays
-      // follow as ordinary checkboxes, independent of that choice (layer-registry.js).
-      : group.id === 'context'
-        ? [...contextControlSpecs(currentContext()).map((s) => layerRow(s, setContext)),
-          ...specs.filter((s) => CONTEXT_OVERLAY_IDS.includes(s.id)).map((s) => layerRow(s, setOverlay))]
-        : specs.filter((s) => s.group === group.id).map((s) => layerRow(s, READING_RENDER[s.id] || CAMERA_RENDER[s.id] || SCREEN_RENDER[s.id] || NAMES_RENDER[s.id],
-          group.id === 'federal' || group.id === 'state' ? { layer: LAYER_BY_ID[s.id] } : {}));
-    if (!rows.length) return [];            // a group with no layers draws no heading
-    // QUX-04a: a <details>, not a bare <div> — thirty-odd rows read as six
-    // headings first, collapsed by default (groupIsCollapsedByDefault,
-    // layer-panel.js), rather than a wall of switches under one flat scroll.
-    // aria-label/role="group" stay on the element applyLayerFilter() already
-    // finds by `.qcm-layer-group[aria-label="…"]"` — a <details> answers that
-    // selector exactly as the old <div> did.
+  const baseSpecs = new Map(baseControlSpecs(base).map((s) => [s.id, s]));
+  // The context group's raster surfaces are the base group's twin: radios and an explicit
+  // None, so only one view-filling picture is ever laid over the map -- whichever heading each
+  // radio sits under (QQA-18 homes them by task; the choice is still the one `qcm-context`
+  // name). Its vector overlays are ordinary checkboxes, independent of that choice.
+  const contextSpecs = new Map(contextControlSpecs(currentContext()).map((s) => [s.id, s]));
+  const specById = new Map(specs.map((s) => [s.id, s]));
+  const rowFor = (id) => {
+    if (id === NO_CONTEXT_ROW_ID) return layerRow(contextSpecs.get('none'), setContext);
+    if (baseSpecs.has(id)) return layerRow(baseSpecs.get(id), setBase);
+    if (contextSpecs.has(id)) return layerRow(contextSpecs.get(id), setContext);
+    const spec = specById.get(id);
+    if (CONTEXT_OVERLAY_IDS.includes(id)) return layerRow(spec, setOverlay);
+    const role = LAYER_BY_ID[id].group;
+    return layerRow(spec, READING_RENDER[id] || CAMERA_RENDER[id] || SCREEN_RENDER[id] || NAMES_RENDER[id], role === 'federal' || role === 'state' ? { layer: LAYER_BY_ID[id] } : {});
+  };
+  host.replaceChildren(buildCameraEntry(), ...TASK_GROUPS.map((group) => {
+    // QUX-04a: a <details>, not a bare <div> -- ten headings first, collapsed by default
+    // (groupIsCollapsedByDefault, layer-panel.js), rather than a wall of switches under one
+    // flat scroll. aria-label/role="group" stay on the element applyLayerFilter() finds by
+    // `.qcm-layer-group[aria-label="..."]`.
     const box = document.createElement('details');
     box.className = 'qcm-layer-group';
     box.setAttribute('role', 'group');
     box.setAttribute('aria-label', group.label);
+    box.dataset.taskGroup = group.id;
     box.open = !groupIsCollapsedByDefault(group);
     const title = document.createElement('summary');
     title.className = 'qcm-group-title'; title.textContent = group.label;
+    // A press on the heading while a filter is on is the reader's own call about this group.
+    title.addEventListener('click', () => { if (layerFilterActive()) touchedWhileFiltering.add(group.id); });
     box.append(title);
     if (group.hint) {
       const hint = document.createElement('p');
       hint.className = 'qcm-hint'; hint.textContent = groupHint(group);
       box.append(hint);
     }
-    box.append(...rows);
-    return [box];
+    box.append(...group.ids.map(rowFor));
+    return box;
   }));
   renderCameraEntry();
   applyLayerFilter();
+  renderActiveLayers();
 }
 
 /** UX-03b (audit A05/A07): Cameras was one collapsed group low in the list, and nothing said it

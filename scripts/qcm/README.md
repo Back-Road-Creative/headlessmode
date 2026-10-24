@@ -410,11 +410,12 @@ scripts. `QCM_SMOKE_NO_BROWSER=1` makes the CLI behave as if there were no Chrom
 
 ## The context group: surfaces and overlays
 
-**Land, sky & light context** holds two kinds of row, and which kind a row is follows how it
-renders, not what it is about. A row that fills the view as a raster (`rasterSurface` in
+The context rows have no heading of their own since QQA-18: each sits under its task group
+(`TASK_GROUPS` in `layer-registry.js`, see below), and they are two kinds of row, which kind
+following how a row renders, not what it is about. A row that fills the view as a raster (`rasterSurface` in
 `layer-registry.js`: night lights, radar, slope, land cover, tree canopy, the county wash,
 the hillshade) hides what is under it, so those stay one radio group (`qcm-context`) with an
-explicit **No context surface**. A row that draws vector ink on top (NIFC fire perimeters,
+explicit **No context surface** (`qcm-context-none`, homed under Map style as the `noContextSurface` pseudo-id; the radios share one `name`, so the choice stays exclusive across headings). A row that draws vector ink on top (NIFC fire perimeters,
 air quality, smoke, flood zones, aurora, wildlife) is an ordinary checkbox
 (`qcm-layer-<id>`) and coexists with whichever surface is chosen. Ids never change, so an old
 share link or saved state that names fire or air quality as its surface (`s=`) still turns
@@ -431,6 +432,23 @@ a height ceiling (7.5rem) that scrolls. With a surface and every overlay on it s
 | `layer-presets.test.mjs` | A preset may name one raster surface plus overlays, never two surfaces. |
 | `surface-choice.test.mjs` | The radio group in a browser: None at rest, one surface at a time. |
 | `context-overlays-browser.test.mjs` | Fire and air quality are drawn together, with or without a surface; old links restore by id; the caption is one line per entry within its height budget. |
+
+## Layer panel task groups
+
+The Layers panel headings are the plan 4.7 task groups, one primary home per layer id:
+`TASK_GROUPS` and `TASK_GROUP_OF` in `layer-registry.js` (a presentation map, separate from the
+registry `group`, which stays the rendering role: base, federal, state, context, reading, cameras,
+extras). A new provider adds a row to an existing task group, never a new top-level group, and
+`layer-task-groups.test.mjs` fails when a registry id has no home. `main.js` renders rows by id,
+so no layer id, input id, exclusivity or render path moves. `activeOnMapRows` and
+`groupsToCollapse` (`layer-panel.js`) decide the **Active on map** list (checked, not a base
+choice, not a Print options row) and which groups a cleared search closes again. The count line agrees with that list: `COUNTED_SCREEN_GROUPS` leaves `extras` out, so a print extra never reads as "1 layer on". The list is rebuilt only when its content changes, so a focused Remove or Retry button keeps focus through a fetch re-render. Task presets
+(Explore outdoors, Check conditions, Night sky) are not built yet.
+
+| Proof | What it holds |
+| --- | --- |
+| `layer-task-groups.test.mjs` | The ten headings in order; every registry id, base and the None row has exactly one home; Print options equals the extra-page rows. |
+| `layer-groups-browser.test.mjs` | Journey 11: groups collapsed, search by alias, purpose and provider with the expansion restored, activate across topics, find and remove an active layer after filtering, a print extra, an old `#map=v1` link restored by id. |
 
 ## Physical print proof
 

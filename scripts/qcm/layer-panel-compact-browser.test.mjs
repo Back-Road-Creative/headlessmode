@@ -112,7 +112,7 @@ test('a trusted click on a group summary opens it, revealing its rows', { skip }
   assert.equal(before.groupOpen, false, 'the federal group should start closed');
   assert.equal(before.rowVisible, false, 'a row inside a closed group must not be visible');
 
-  await trustedClick(page, '.qcm-layer-group[aria-label="Federal overlays"] summary');
+  await trustedClick(page, '.qcm-layer-group[aria-label="Land & access"] summary');
   const after = await page.evaluate(`(() => {
     const isVisible = ${IS_VISIBLE};
     const row = document.getElementById('qcm-layer-federalLand').closest('.qcm-layer-row');
@@ -125,7 +125,7 @@ test('a trusted click on a group summary opens it, revealing its rows', { skip }
 test('an off federal-group row (with an About fallback) shows no visible note; checking it reveals the note', { skip }, async () => {
   const page = await freshPage();
   await openLayerPanel(page);
-  await trustedClick(page, '.qcm-layer-group[aria-label="Federal overlays"] summary');
+  await trustedClick(page, '.qcm-layer-group[aria-label="Land & access"] summary');
 
   const noteEl = "document.getElementById('qcm-layer-federalLand').closest('.qcm-layer-row').querySelector('.qcm-hint')";
   const hasAbout = await page.evaluate(
@@ -166,7 +166,7 @@ async function rowNoteSeen(page, group, inputId) {
 test('an unchosen context row keeps its caveat visible — it has no About disclosure to hide into', { skip }, async () => {
   const page = await freshPage();
   await openLayerPanel(page);
-  const r = await rowNoteSeen(page, 'Land, sky & light context', 'qcm-context-nwsRadar');
+  const r = await rowNoteSeen(page, 'Weather & conditions', 'qcm-context-nwsRadar');
   assert.ok(r, 'the radar context row lost its .qcm-hint caveat');
   assert.equal(r.checked, false, 'radar should be unchosen on first load (the default is No context surface)');
   assert.equal(r.hasAbout, false, 'a context row carries no About disclosure');
@@ -178,7 +178,7 @@ test('an unchosen context row keeps its caveat visible — it has no About discl
 test('a disabled state row keeps its reason visible while off', { skip }, async () => {
   const page = await freshPage();
   await openLayerPanel(page);
-  const r = await rowNoteSeen(page, 'State land', 'qcm-layer-gameLands');
+  const r = await rowNoteSeen(page, 'Land & access', 'qcm-layer-gameLands');
   assert.ok(r, 'the game-lands row lost its .qcm-hint reason');
   assert.equal(r.disabled, true, 'with no area drawn the game-lands row should be disabled');
   assert.equal(r.hasAbout, true, 'a state row carries an About disclosure — the case where an off note is hidden');
@@ -222,14 +222,14 @@ test('searching opens a matching group so the match is actually visible, not mer
 test('the active-only toggle also opens a matching still-closed group', { skip }, async () => {
   const page = await freshPage();
   await openLayerPanel(page);
-  await trustedClick(page, '.qcm-layer-group[aria-label="Federal overlays"] summary');
+  await trustedClick(page, '.qcm-layer-group[aria-label="Land & access"] summary');
   await page.evaluate(`(() => {
     const cb = document.getElementById('qcm-layer-federalLand');
     cb.checked = true;
     cb.dispatchEvent(new Event('change', { bubbles: true }));
   })()`);
   // Close the group again by hand so the toggle below has to reopen it.
-  await trustedClick(page, '.qcm-layer-group[aria-label="Federal overlays"] summary');
+  await trustedClick(page, '.qcm-layer-group[aria-label="Land & access"] summary');
   const closed = await page.evaluate(
     '!document.getElementById(\'qcm-layer-federalLand\').closest(\'.qcm-layer-group\').open');
   assert.equal(closed, true, 'the federal group should be closed again after the second click');
@@ -257,7 +257,7 @@ test('the active count line still tracks a switch inside an opened group', { ski
   // layer-panel-browser.test.mjs does before exercising any fetch-driven row —
   // otherwise this is proving the precondition message, not the count line.
   await chooseExampleArea(page);
-  await trustedClick(page, '.qcm-layer-group[aria-label="Federal overlays"] summary');
+  await trustedClick(page, '.qcm-layer-group[aria-label="Land & access"] summary');
   await page.evaluate(`(() => {
     const cb = document.getElementById('qcm-layer-federalLand');
     cb.checked = true;
@@ -284,7 +284,15 @@ test('the active count line still tracks a switch inside an opened group', { ski
 // its status (32px). So the cap is per part instead: the title, and EACH region row, has its own
 // ceiling, and the entry may be no taller than those ceilings summed for the rows it really has.
 // Measured at 1280 with Go to in its own column and the status inline: title 36, rows 32/32/49/49/49.
-const COLLAPSED_PANEL_BUDGET = 1055 + 40;
+// QQA-18 (2026-10-08): the task groups are ten headings where the technical ones were seven, and
+// every heading is a line the collapsed panel has to carry. Re-measured at 1440: scrollHeight=1345
+// less the Cameras entry's 192 = 1153, so the budget moves to 1153 + 40 and is again a ceiling on
+// growth from there, not a fit.
+// Port onto the shipped catalogue (2026-10-24): the registry has since gained eleven layers, so the
+// same panel measures scrollHeight=1401 less the Cameras entry's 192 = 1209 at 1440 (the Active list
+// is empty and hidden on a fresh page: road and place names are lettering, not listed). The budget
+// is 1209 + 40, again a ceiling on growth.
+const COLLAPSED_PANEL_BUDGET = 1209 + 40;
 const CAMERA_ENTRY_TITLE_MAX = 40;
 const CAMERA_ROW_MAX = 52;
 test('the Named places fieldset is off screen until the names layer has answered for this view', { skip }, async () => {

@@ -103,6 +103,9 @@ const literals = (src) => [...src.matchAll(/'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|
 test('no string a reader sees claims a darkness rating, or a sky at all', () => {
   const fromRecords = CAPTURE.features.flatMap((f) => siteLines(normalizeBlmSite(f)));
   for (const s of [...readerStrings(), ...fromRecords, ...literals(MODULE), ...literals(REGISTRY)]) {
+    // QQA-18: the registry now names the layer panel's Night sky task group (the plan's own heading);
+    // that exact heading is a place to find night lights and aurora, not a claim about a BLM site.
+    if (s === 'Night sky') continue;
     for (const rx of FORBIDDEN) assert.ok(!rx.test(s), `${rx} matches a reader-facing string: ${JSON.stringify(s)}`);
   }
   const l = LAYER_BY_ID.blmRecSites;

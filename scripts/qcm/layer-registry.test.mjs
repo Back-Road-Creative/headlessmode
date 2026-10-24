@@ -77,7 +77,7 @@ test('the screen base is a choice: four radios, topo checked by default, and the
   assert.deepEqual(enabledLayers({}).map((l) => l.id), ['usgsTopo'], 'the PDF still prints topo');
   assert.match(GROUPS.find((g) => g.id === 'base').hint, /on screen/i);
   for (const id of ['aerial', 'terrain']) {
-    assert.match(layerControlSpecs({}).find((s) => s.id === id).note, /under Base map/, `${id} points at the screen choice`);
+    assert.match(layerControlSpecs({}).find((s) => s.id === id).note, /under Map style/, `${id} points at the screen choice`);
   }
 });
 
