@@ -6,10 +6,14 @@
 // (measured 2026-09-25) -- every `where` this module builds passes reader text
 // through escapeLiteral first and always wraps it in a single quoted literal, so
 // there is nothing for a caller to concatenate raw.
-import { SOURCES, REQUEST_POLICY } from './source-registry.js';
+import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 import { normalizeFeature, kindsForZoom, KINDS } from './terrain-names.js';
 
+export { createSearchGuard } from './request.js';
+
 const SOURCE = SOURCES.gnisNames;
+const TIMEOUT_MS = SOURCE.timeoutMs;
 const LAYERS_BY_ID = Object.fromEntries(SOURCE.layers.map((l) => [l.id, l]));
 const DEFAULT_CAP = SOURCE.limits.recordBudgetPerExtent;
 const PAGE_SIZE_CAP = SOURCE.limits.maxRecordCount;
@@ -136,33 +140,17 @@ function readCount(body) {
   return Number.isFinite(Number(body.count)) ? Number(body.count) : null;
 }
 
-/** One request, capped at REQUEST_POLICY.timeoutMs (measured latency up to 31s;
- *  no automatic retry loop here -- a single slow/failed request fails the whole
- *  bounded fetch to `error`/`timeout` rather than masking it). */
+/** One request, capped at `timeoutMs` (default: the registry's per-source value for GNIS,
+ *  20 s -- measured latency up to 31 s, so a flat 10 s would time out routinely; no
+ *  automatic retry loop here -- a single slow/failed request fails the whole bounded
+ *  fetch to `error`/`timeout` rather than masking it). The deadline, the caller-abort
+ *  rule and the cleanup live in request.js; this adds the ArcGIS `error` body check. */
 export async function fetchJson(url, { fetchImpl, signal, timeoutMs }) {
-  const controller = new AbortController();
-  const onAbort = () => controller.abort();
-  if (signal) { if (signal.aborted) onAbort(); else signal.addEventListener('abort', onAbort); }
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetchImpl(url, { signal: controller.signal });
-    if (!res.ok) return { ok: false, timedOut: false, error: `HTTP ${res.status}` };
-    let body;
-    try { body = await res.json(); } catch { return { ok: false, timedOut: false, error: 'Malformed JSON response.' }; }
-    const err = readError(body);
-    if (err) return { ok: false, timedOut: false, error: err };
-    return { ok: true, body };
-  } catch (err) {
-    // A fetch abandoned via AbortController rejects with an AbortError -- either
-    // this module's own 20s deadline firing, or the underlying request giving up.
-    // An externally passed `signal` aborting is the caller's cancellation, not a
-    // service timeout, so it is excluded here.
-    const timedOut = err?.name === 'AbortError' && !(signal && signal.aborted);
-    return { ok: false, timedOut, error: err?.message || String(err) };
-  } finally {
-    clearTimeout(timer);
-    if (signal) signal.removeEventListener('abort', onAbort);
-  }
+  const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs });
+  if (!got.ok) return { ok: false, timedOut: got.status === 'timeout', error: got.error };
+  const err = readError(got.body);
+  if (err) return { ok: false, timedOut: false, error: err };
+  return { ok: true, body: got.body };
 }
 
 /** A submission longer than this never reaches the network -- the caller shows a
@@ -180,7 +168,7 @@ export const MAX_QUERY_LEN = 80;
  *  - `{ status: 'too-long', max }`       -- longer than MAX_QUERY_LEN; no request sent.
  *  - `{ status: 'aborted' }`             -- the caller's own `signal` cancelled this
  *                                           request (a newer submission superseded it).
- *  - `{ status: 'timeout' }`             -- exceeded `timeoutMs` (default REQUEST_POLICY).
+ *  - `{ status: 'timeout' }`             -- exceeded `timeoutMs` (default: GNIS's registry timeoutMs).
  *  - `{ status: 'error', error }`        -- malformed where clause, HTTP failure, or
  *                                           unparseable JSON.
  *  - `{ status: 'ready', features, capped }` -- normalized, deduped by gaz_id;
@@ -189,7 +177,7 @@ export const MAX_QUERY_LEN = 80;
  */
 export async function searchByName(text, {
   state = null, kinds = null, limit = 20,
-  fetch: fetchImpl = globalThis.fetch, signal, timeoutMs = REQUEST_POLICY.timeoutMs,
+  fetch: fetchImpl = globalThis.fetch, signal, timeoutMs = TIMEOUT_MS,
 } = {}) {
   const trimmed = typeof text === 'string' ? text.trim() : '';
   if (!trimmed) return { status: 'empty' };
@@ -236,19 +224,6 @@ export function zoomForKind(kind) {
   return Object.prototype.hasOwnProperty.call(ZOOM_BY_KIND, kind) ? ZOOM_BY_KIND[kind] : FALLBACK_ZOOM;
 }
 
-/** A late response for a query the reader has already replaced must never
- *  overwrite what is on screen. `bump()` on every new submission, hand the
- *  returned token to the in-flight call, and check `isCurrent(token)` once it
- *  resolves before rendering -- an older token means a newer search has since
- *  started and this result is stale. Pure counter: carries no fetch, no timers. */
-export function createSearchGuard() {
-  let generation = 0;
-  return {
-    bump() { return ++generation; },
-    isCurrent(token) { return token === generation; },
-  };
-}
-
 /** Rung order the budget is spent in: places, then summits/gaps/ridges/landforms,
  *  then water, then stream mouths (the priority ladder in terrain-names.js). */
 const RUNG_ORDER = [3, 5, 7, 6];
@@ -284,7 +259,7 @@ export async function fetchBounded(bounds, kinds, { fetch: fetchImpl = globalThi
     wanted = kinds.filter((c) => allowed.has(c));
   }
   const groups = groupByLayer(wanted);
-  const timeoutMs = REQUEST_POLICY.timeoutMs;
+  const timeoutMs = TIMEOUT_MS;
   const ordered = RUNG_ORDER.filter((l) => groups.has(l)).map((l) => [l, groups.get(l)]);
 
   // Count and decide, rung by rung, what the budget buys.

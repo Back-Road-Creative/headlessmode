@@ -40,3 +40,19 @@ test('the page cap is honoured and an HTTP error names the layer', async () => {
       fetchImpl: async () => ({ ok: false, status: 503 }) }),
     /Designated Wilderness: the service answered 503/);
 });
+
+test('pageThrough ends by its own timeoutMs on a fetch that never answers, and a caller abort is not a timeout', async () => {
+  const never = () => new Promise(() => {});
+  const t0 = Date.now();
+  await assert.rejects(
+    pageThrough({ url: 'x', params: {}, label: 'Designated Wilderness', normalize: norm, fetchImpl: never, timeoutMs: 50 }),
+    /Designated Wilderness: .*did not answer/,
+  );
+  assert.ok(Date.now() - t0 < 50 + 250, `took ${Date.now() - t0} ms`);
+  const caller = new AbortController();
+  setTimeout(() => caller.abort(), 20);
+  await assert.rejects(
+    pageThrough({ url: 'x', params: {}, normalize: norm, fetchImpl: never, signal: caller.signal, timeoutMs: 5000 }),
+    (err) => err.name === 'AbortError',
+  );
+});

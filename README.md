@@ -516,7 +516,8 @@ side, and a badge read whichever finished last (2026-09-26, #567 and #571).
 `layer-panel-browser.test.mjs` holds each govunits answer back so the browse always
 comes due mid-pass, and fails if more than one pass's requests are out together.
 An ArcGIS `/query` answers one page at a time and says so in
-`exceededTransferLimit`; `arcgis-pager.js` loops until it stops saying so and
+`exceededTransferLimit`; `arcgis-pager.js` loops until it stops saying so (each page
+under `request.js`'s deadline, so a service that never answers ends as an error) and
 reports `coverage`, 'complete' only when the service ran out of more. Every
 adapter returns that word and `main.js` reads it — except that the recreation-site
 and trail blocks used to write `state.states.<layer> = 'ready'` whenever the fetch

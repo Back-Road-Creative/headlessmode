@@ -22,6 +22,7 @@
 // product is in force -- never that the ground is free of hazards. Every reader-facing string
 // is built here so scripts/qcm/nws-alerts.test.mjs can scan the lot.
 import { SOURCES } from './source-registry.js';
+import { withDeadline } from './request.js';
 
 const SRC = SOURCES.nwsAlerts;
 export const SERVICE = SRC.serviceUrl;
@@ -180,9 +181,9 @@ export async function fetchAlerts({ lat, lon, fetchImpl = fetch, signal } = {}) 
   }
 }
 
-// QUX-09b (D5): the same 20 s ceiling source-weather.js's loader carries -- a hung request must
-// still land in FAILED_TEXT above, not hold this card's pending note up forever.
-export const DEFAULT_TIMEOUT_MS = 20000;
+// QUX-09b (D5): the registry's per-source deadline, as source-weather.js's loader carries -- a hung
+// request must still land in FAILED_TEXT above, not hold this card's pending note up forever.
+export const DEFAULT_TIMEOUT_MS = SRC.timeoutMs;
 
 /** One place at a time. Move the map from A to B and A's slower answer can land second;
  *  showing it puts A's warnings under B's name. The previous ask is aborted, and the page
@@ -191,10 +192,9 @@ let live = null;
 export async function alertsFor({ lat, lon, fetchImpl = fetch, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   if (live) live.abort();
   const ctl = (live = new AbortController());
-  const signal = typeof AbortSignal.any === 'function'
-    ? AbortSignal.any([ctl.signal, AbortSignal.timeout(timeoutMs)])
-    : ctl.signal;
-  const got = await fetchAlerts({ lat, lon, fetchImpl, signal });
+  const deadline = withDeadline(ctl.signal, timeoutMs);
+  let got;
+  try { got = await fetchAlerts({ lat, lon, fetchImpl, signal: deadline.signal }); } finally { deadline.dispose(); }
   if (live === ctl) live = null;
   return got;
 }

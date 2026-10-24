@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import {
   OUT_FIELDS, buildBboxQueryUrl, buildNameQueryUrl, normalizeCell, neighborsOf,
-  fetchCellsForBbox, searchByName,
+  fetchCellsForBbox, searchByName, MAX_PAGES,
 } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-map-index.js';
 import { SOURCES } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-registry.js';
 
@@ -154,4 +154,54 @@ test('searchByName: ok with cells on success, ok:false with error text on throw'
   assert.equal(fail.ok, false);
   assert.match(fail.error, /network down/);
   assert.deepEqual(OUT_FIELDS, ['CELL_ID', 'CELL_NAME', 'PRIMARY_STATE', 'STATE_ALPHA', 'CELL_MAPCODE']);
+});
+
+test('fetchCellsForBbox: a service flagging more forever with no features stops inside MAX_PAGES as partial', async () => {
+  let calls = 0;
+  const fetchImpl = async () => { calls += 1; return jsonResponse({ features: [], exceededTransferLimit: true }); };
+  const result = await fetchCellsForBbox({ bboxLonLat: BBOX, fetchImpl });
+  assert.equal(result.coverage, 'partial');
+  assert.ok(calls <= MAX_PAGES, `${calls} fetches`);
+  assert.equal(calls, 1, 'a page that adds nothing ends the loop at once');
+  assert.deepEqual(result.cells, []);
+});
+
+test('fetchCellsForBbox: a service repeating the same page is cut as partial, and MAX_PAGES caps a service that keeps adding', async () => {
+  let calls = 0;
+  const same = async () => { calls += 1; return jsonResponse({ features: cloneFixture().features.slice(0, 2), exceededTransferLimit: true }); };
+  const repeat = await fetchCellsForBbox({ bboxLonLat: BBOX, fetchImpl: same });
+  assert.equal(repeat.coverage, 'partial');
+  assert.equal(calls, 2, 'one real page, then one that added nothing new');
+  assert.equal(repeat.cells.length, 2);
+
+  calls = 0;
+  const forever = async () => {
+    calls += 1;
+    const f = cloneFixture().features[0];
+    f.attributes = { ...f.attributes, CELL_ID: `cell-${calls}` };
+    return jsonResponse({ features: [f], exceededTransferLimit: true });
+  };
+  const capped = await fetchCellsForBbox({ bboxLonLat: BBOX, fetchImpl: forever });
+  assert.equal(capped.coverage, 'partial');
+  assert.equal(calls, MAX_PAGES);
+  assert.equal(capped.pages, MAX_PAGES);
+});
+
+test('fetchCellsForBbox and searchByName end by their own timeoutMs on a fetch that never answers', async () => {
+  const never = () => new Promise(() => {});
+  const t0 = Date.now();
+  const cells = await fetchCellsForBbox({ bboxLonLat: BBOX, fetchImpl: never, timeoutMs: 50, retries: 2 });
+  assert.equal(cells.coverage, 'unavailable');
+  assert.equal(cells.timedOut, true);
+  assert.ok(Date.now() - t0 < 50 + 250, `took ${Date.now() - t0} ms: a timeout is not retried`);
+
+  const t1 = Date.now();
+  const named = await searchByName({ name: 'rainbow springs', fetchImpl: never, timeoutMs: 50 });
+  assert.equal(named.ok, false);
+  assert.equal(named.timedOut, true);
+  assert.ok(Date.now() - t1 < 50 + 250);
+});
+
+test('the quad index asks the registry for its timeout', () => {
+  assert.equal(typeof SOURCES.usgsQuadIndex.timeoutMs, 'number');
 });

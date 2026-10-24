@@ -4,6 +4,7 @@
 // content/quiet-corners-maps.md. TWO STEPS: `/points/{lat},{lon}` maps a lat/lon to an office and grid cell and hands back the
 // forecast URL, used AS GIVEN -- hand-building `/gridpoints/BMX/96,76/...` hard-codes a grid the office may renumber.
 import { SOURCES } from './source-registry.js';
+import { withDeadline } from './request.js';
 
 const API = SOURCES.nwsForecast.origin;
 // The refresh intervals are the service's own cache-control, not taste: `max-age=3600` on the hourly product, `max-age=85988` on /points -- a grid cell never moves.
@@ -156,11 +157,11 @@ export async function fetchHourly({ lat, lon, fetchImpl = fetch, signal, onPoint
 /** One forecast at a time for one selected place. Move the map from A to B and A's slower answer can land second; showing it
  *  puts A's weather under B's name, which is worse than showing nothing. Each request takes a ticket; an answer whose ticket is
  *  no longer the latest comes back `superseded`, never becomes `current`, and is aborted. The memo enforces REFRESH_MS. */
-// QUX-09b (D5): a request must not hold a pending note up forever -- 20 s, combined with the
-// caller's own abort so a superseded pick still cancels immediately. `AbortSignal.any` is Node 20+
-// and every evergreen browser; the plain controller signal is the fallback for a test double that
-// does not implement it.
-export const DEFAULT_TIMEOUT_MS = 20000;
+// QUX-09b (D5): a request must not hold a pending note up forever -- the registry's per-source
+// deadline, combined with the caller's own abort so a superseded pick still cancels immediately.
+// The deadline comes from request.js's withDeadline, which needs no `AbortSignal.any`: a browser
+// or test double without it used to lose the timeout altogether.
+export const DEFAULT_TIMEOUT_MS = SOURCES.nwsForecast.timeoutMs;
 
 export function createForecastLoader({ load = fetchHourly, fetchImpl, now = () => Date.now(), timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   let seq = 0, inFlight = null, memo = null;
@@ -175,12 +176,11 @@ export function createForecastLoader({ load = fetchHourly, fetchImpl, now = () =
       const ticket = ++seq;
       if (inFlight) inFlight.abort();
       inFlight = new AbortController();
-      const signal = typeof AbortSignal.any === 'function'
-        ? AbortSignal.any([inFlight.signal, AbortSignal.timeout(timeoutMs)])
-        : inFlight.signal;
+      const deadline = withDeadline(inFlight.signal, timeoutMs);
       // A superseded request's early `onPoint` would stamp the abandoned place's zone on the card.
       const opts = rest.onPoint ? { ...rest, onPoint: (p) => { if (ticket === seq) rest.onPoint(p); } } : rest;
-      const result = await load({ lat, lon, fetchImpl, signal, ...opts });
+      let result;
+      try { result = await load({ lat, lon, fetchImpl, signal: deadline.signal, ...opts }); } finally { deadline.dispose(); }
       if (ticket !== seq) return { status: 'superseded', key };
       memo = { key, at: now(), result };
       return (loader.current = result);
