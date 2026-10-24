@@ -11,6 +11,7 @@
 // no shading when no information is available. A view with no zone in it is outside every
 // forecast area -- not a statement about the snow.
 import { SOURCES } from './source-registry.js';
+import { fetchWithDeadline } from './request.js';
 import { SYMBOLS } from './legend.js';
 import { viewReader } from './arcgis-view.js';
 
@@ -143,7 +144,7 @@ export function areaReport(got, nowMs = Date.now()) {
 
 /** The national file, asked for once and kept `reuseSeconds`. Only a success is kept, so a
  *  failure is asked again on the next view. Concurrent callers share one request. */
-export function createZoneStore({ fetchImpl = (...a) => fetch(...a), now = () => Date.now() } = {}) {
+export function createZoneStore({ fetchImpl = fetch, now = () => Date.now() } = {}) {
   let held = null, heldAt = 0, pending = null;
   return {
     async get(signal) {
@@ -151,9 +152,8 @@ export function createZoneStore({ fetchImpl = (...a) => fetch(...a), now = () =>
       if (!pending) {
         pending = (async () => {
           try {
-            const res = await fetchImpl(MAP_LAYER_URL, { signal });
-            if (!res.ok) return { status: 'failed' };
-            const body = await res.json();
+            const got = await fetchWithDeadline(MAP_LAYER_URL, { fetchImpl, signal, timeoutMs: SRC.timeoutMs });
+            const body = got.ok ? got.body : null;
             if (!body || !Array.isArray(body.features)) return { status: 'failed' };
             held = readZones(body); heldAt = now();
             return { status: 'ok', zones: held };

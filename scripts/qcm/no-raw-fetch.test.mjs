@@ -10,17 +10,11 @@ import { join } from 'node:path';
 
 const DIR = new URL('../../themes/headlessmode/static/js/quiet-corners-maps/', import.meta.url);
 const HELPER = 'request.js';
-// main.js was the last module of the original set with raw calls and now goes through request.js
-// too. The seven entries below reached master after QQA-13 was written (the E-P1..E-P6 field-map
-// layers and the finder's street-address lookup). Each still owns a raw call and its own signal,
-// so none has a deadline from request.js yet. Moving them onto fetchWithDeadline is a follow-up;
-// until then they are listed so this test guards every other module. An entry is a debt with a
-// reason beside it, and the stale-entry test below fails once it is paid.
-const ALLOW = [
-  'address-geocode.js',
-  'source-avalanche.js', 'source-nrhp.js', 'source-ntad-rail-airports.js',
-  'source-nws-observations.js', 'source-snotel.js', 'source-stream-gauges.js',
-];
+// No module is allowed a raw call any more: address-geocode.js and the six source-* modules that
+// reached master after QQA-13 are on fetchWithDeadline too. The list stays so a module that cannot
+// route through the helper has one place to say why, with a reason beside it; the stale-entry test
+// below fails once an entry stops holding a raw call.
+const ALLOW = [];
 
 // A call to fetch/fetchImpl that is not a method of something else (`x.fetch(` is not it)
 // -- except the global spellings, which are the same call.

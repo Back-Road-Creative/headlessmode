@@ -12,6 +12,7 @@
 // dropped and counted, never drawn. And a failed request is a stated line, never a blank.
 import { SOURCES } from './source-registry.js';
 import { SYMBOLS } from './legend.js';
+import { fetchWithDeadline } from './request.js';
 
 const SRC = SOURCES.nwsObservations;
 
@@ -107,9 +108,9 @@ export async function fetchObservations(stations, bbox, { fetchImpl = fetch, sig
   if (!chosen.length) return { ...base, status: 'empty', inView };
   const answers = await Promise.all(chosen.map(async (s) => {
     try {
-      const res = await fetchImpl(observationUrl(s.id), { signal, headers: requestHeaders() });
-      if (!res || !res.ok) return null;
-      const o = readObservation(await res.json());
+      const got = await fetchWithDeadline(observationUrl(s.id), { fetchImpl, signal, timeoutMs: SRC.timeoutMs, init: { headers: requestHeaders() } });
+      if (!got.ok) return null;
+      const o = readObservation(got.body);
       if (!o) return null;
       return { ...o, id: o.id || s.id, name: o.name || s.name,
         lat: Number.isFinite(o.lat) ? o.lat : s.lat, lon: Number.isFinite(o.lon) ? o.lon : s.lon };
@@ -123,9 +124,9 @@ export async function fetchObservations(stations, bbox, { fetchImpl = fetch, sig
 /** The catalogue, read once by the page. Never throws. */
 export async function loadCatalogue(fetchImpl = fetch) {
   try {
-    const res = await fetchImpl(CATALOGUE_URL);
-    if (!res || !res.ok) throw new Error('catalogue');
-    return { status: 'ready', ...readCatalogue(await res.json()) };
+    const got = await fetchWithDeadline(CATALOGUE_URL, { fetchImpl, timeoutMs: SRC.timeoutMs });
+    if (!got.ok) throw new Error('catalogue');
+    return { status: 'ready', ...readCatalogue(got.body) };
   } catch (e) { return { status: 'unavailable', stations: [], dropped: 0 }; }
 }
 
