@@ -129,7 +129,7 @@ test('J10: one Cameras list, scoped to the view and to a chosen place, filtered 
     assert.equal(shape.labelled, 'qcm-camera-list-title');
     assert.equal(shape.live, 'polite');
     assert.equal(shape.role, 'status');
-    assert.deepEqual(shape.scopes, ['view', 'near']);
+    assert.deepEqual(shape.scopes, ['view', 'near', 'saved']); // 2026-10-08 QQA-16b adds the Saved scope; the two it had are unchanged
     assert.deepEqual(shape.purposes, ['roads', 'scenery', 'weather', 'wildlife']);
     assert.match(shape.radius, /within 25 km/, 'the radius is not stated in the UI');
     assert.match(await listStatus(page), /no camera layer is on/i);

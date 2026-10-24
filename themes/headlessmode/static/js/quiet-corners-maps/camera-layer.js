@@ -421,6 +421,12 @@ function legacyRef(ref) {
   return null;
 }
 
+/** The ref a camera now carries for a saved `ref`: the ref itself, or what LEGACY_REF_ALIASES says it became.
+ *  Two refs naming one camera share a canonical ref, so a list can tell a saved camera under an old id. */
+export function canonicalCameraRef(ref) {
+  return legacyRef(ref) || ref;
+}
+
 /** The camera a saved ref names, or null. An exact match wins; otherwise the ref is tried once
  *  through LEGACY_REF_ALIASES, so a place saved under an old id keeps opening its camera. */
 export function findCamera(cameras = [], ref) {
@@ -568,19 +574,34 @@ export function listLoadState({ near = false, reaching = [], rows = [], isLoaded
 
 const camerasWord = (n) => (n === 1 ? 'camera' : 'cameras');
 
+/** The cluster summary below MIN_PIN_ZOOM: loaded cameras in the view, counted per purpose. */
+function clusterStatus({ counts, inScope, failedAreas, unlocated }) {
+  const parts = CAMERA_PURPOSES.filter((p) => counts[p.id] > 0).map((p) => `${counts[p.id]} ${p.label}`);
+  const notes = ['Only cameras already loaded are counted; Search this area loads more.'];
+  if (failedAreas > 0) notes.push(`${plural(failedAreas, 'area')} did not load, so cameras may be missing.`);
+  if (unlocated > 0) notes.push(`${unlocated} loaded ${camerasWord(unlocated)} ${unlocated === 1 ? 'has' : 'have'} no map position and ${unlocated === 1 ? 'is' : 'are'} not counted.`);
+  return { key: 'cluster', text: `${plural(inScope, 'camera')} loaded in this view at this zoom: ${parts.join(', ')}. Zoom in to list cameras (they are listed from zoom ${MIN_PIN_ZOOM}).`, notes };
+}
+
 /** The one state the list is in, as { key, text, notes }. Keys read apart: layers-off, no-place, zoom-in,
- *  loading, unavailable, outside-coverage, nothing-loaded, none, filtered-out, partial, images-unavailable,
+ *  cluster (broad zoom, loaded cameras counted per purpose), loading, unavailable, outside-coverage, nothing-loaded, none, filtered-out, partial, images-unavailable,
  *  in-scope. `notes` are the extra sentences a listed result owes the reader (a failed area, the list's
  *  own limit and the pin cap, cameras with no picture or no position). */
 export function cameraListStatus({ scope = 'view', onLayers = 0, belowZoom = false, hasPlace = false, placeName = '', touches = true,
   loading = false, unavailable = false, failedAreas = 0, nothingLoaded = false, inScope = 0, matching = 0, listed = 0, noPicture = 0,
-  unlocated = 0, radiusKm = NEAR_RADIUS_KM } = {}) {
+  unlocated = 0, radiusKm = NEAR_RADIUS_KM, counts = null, searching = false } = {}) {
   const near = scope === 'near';
   const phrase = near ? `near ${placeName}` : 'in this view';
   const state = (key, text, notes = []) => ({ key, text, notes });
   if (onLayers === 0) return state('layers-off', 'No camera layer is on. Switch one on above to list its cameras.');
   if (near && !hasPlace) return state('no-place', `Choose a place with Search places, or draw an area, to list cameras within ${radiusKm} km of it.`);
-  if (!near && belowZoom) return state('zoom-in', `Zoom in to list cameras in this view (cameras load from zoom ${MIN_PIN_ZOOM}).`);
+  if (!near && belowZoom) {
+    if (searching) return state('loading', 'Loading the camera list.');
+    // QQA-16b: with records already loaded (a search read them) the broad view is counted per purpose,
+    // from those records, never from drawn pins; with none, the old zoom-in state stands.
+    if (counts && inScope > 0) return clusterStatus({ counts, inScope, failedAreas, unlocated });
+    return state('zoom-in', `Zoom in to list cameras in this view (cameras load from zoom ${MIN_PIN_ZOOM}).`);
+  }
   if (loading) return state('loading', 'Loading the camera list.');
   if (unavailable) return state('unavailable', 'Camera list unavailable. Turn the layer off and on to retry.');
   if (!touches) {
@@ -605,6 +626,101 @@ export function cameraListStatus({ scope = 'view', onLayers = 0, belowZoom = fal
   if (failedAreas > 0) return state('partial', `${base} This list is partial.`, notes);
   if (allBare) return state('images-unavailable', `${base} None has a picture here.`, notes);
   return state('in-scope', base, notes);
+}
+
+// QQA-16b: finding cameras. "Search this area" reads the camera files for the view on request, bounded
+// by a radius and a file count that the page states; the Saved scope lists the cameras this browser
+// saved and says so when one is no longer in the operator's list.
+
+/** The most a "Search this area" reaches from the view's centre, in km. */
+export const SEARCH_RADIUS_KM = 100;
+
+/** The most camera files one search reads. */
+export const SEARCH_MAX_FILES = 20;
+
+export const SEARCH_HINT = `Search this area reads the camera files within ${SEARCH_RADIUS_KM} km of its centre, at most ${SEARCH_MAX_FILES} files, `
+  + 'only when you press the button. Moving the map never searches.';
+
+/** Said wherever saving is off. Nothing is written when this browser blocks site storage. */
+export const SAVING_UNAVAILABLE = 'Saving unavailable: this browser is blocking site storage, so nothing saved here would survive a reload.';
+
+/** The box a search reads: the view, trimmed to SEARCH_RADIUS_KM around its centre when wider. `centre`
+ *  is the map's own centre ({ lat, lon }); without it, the middle of the box (which a broad view's
+ *  projection puts off the map's centre). */
+export function searchBox(view, centre = { lat: (view.minLat + view.maxLat) / 2, lon: (view.minLon + view.maxLon) / 2 }) {
+  const reach = reachBox(centre.lat, centre.lon, SEARCH_RADIUS_KM);
+  return { minLon: Math.max(view.minLon, reach.minLon), minLat: Math.max(view.minLat, reach.minLat), maxLon: Math.min(view.maxLon, reach.maxLon), maxLat: Math.min(view.maxLat, reach.maxLat) };
+}
+
+/** The index rows a search reads: those of `layers` meeting `box`, nearest `centre` first, at most `max`.
+ *  A row counts only when its area comes within SEARCH_RADIUS_KM of `centre` (the box is a square, whose
+ *  corners lie further out). `total` is every row met, so a status can say when the bound cut the search short. */
+export function searchFiles({ files, box, layers = [], centre, max = SEARCH_MAX_FILES } = {}) {
+  if (!Array.isArray(files)) return { rows: [], total: 0 };
+  const met = files.filter((f) => layers.includes(f.layer) && viewTouchesCoverage(box, f.bbox))
+    .map((f) => [kmToBox(centre.lat, centre.lon, f.bbox), f]).filter((x) => x[0] <= SEARCH_RADIUS_KM).sort((a, b) => a[0] - b[0] || (a[1].file < b[1].file ? -1 : 1));
+  return { rows: met.slice(0, max).map((x) => x[1]), total: met.length };
+}
+
+/** The search's one status sentence, always naming its radius and centre. `pending` while it runs. */
+export function searchStatus({ radiusKm = SEARCH_RADIUS_KM, centre, pending = false, indexFailed = false, idle = false, total = 0, shown = 0, read = 0, failed = 0 } = {}) {
+  if (idle) return '';
+  const where = `within ${radiusKm} km of ${centre.lat.toFixed(2)}, ${centre.lon.toFixed(2)}`;
+  if (pending) return `Searching ${where}.`;
+  if (indexFailed) return `Searched ${where}: the camera index did not load. Press the button to try again.`;
+  if (total === 0) return `Searched ${where}: no camera list covers that area.`;
+  let text = `Searched ${where}: ${read} of ${shown} camera files read.`;
+  if (failed > 0) text += ` ${failed} did not load.`;
+  if (total > shown) text += ` Only the nearest ${shown} of ${total} files were read; search closer in for the rest.`;
+  return text;
+}
+
+/** The index rows of a layer that could hold a camera saved at `place`: those whose area holds its
+ *  position, else (no position, or none holds it) every row of the layer. */
+export function filesHolding(place, files, layer) {
+  const ofLayer = (files || []).filter((f) => f.layer === layer);
+  const at = Number.isFinite(place.lat) && Number.isFinite(place.lon)
+    ? ofLayer.filter((f) => place.lon >= f.bbox.minLon && place.lon <= f.bbox.maxLon && place.lat >= f.bbox.minLat && place.lat <= f.bbox.maxLat) : [];
+  return at.length ? at : ofLayer;
+}
+
+/** One row per saved camera: { place, state, camera, layer }. listed: found in a loaded file; gone: the
+ *  files that could hold it are read and it is not there (or no list of its source exists); failed: it
+ *  cannot be told because a file or the index did not load; pending: not read yet. Keyed by source and id
+ *  (findCamera), so the same id from another source is another camera. */
+export function savedCameraRows({ saved = [], entries = [], layerOf, files = [], indexState = 'read', isLoaded = () => false, isFailed = () => false } = {}) {
+  const cameras = entries.map((e) => e.camera);
+  return saved.map((place) => {
+    const camera = findCamera(cameras, place.ref);
+    if (camera) return { place, state: 'listed', camera, layer: entries.find((e) => e.camera === camera).layer };
+    const row = (state) => ({ place, state, camera: null, layer: null });
+    if (indexState !== 'read') return row(indexState);
+    const layer = layerOf(place);
+    const holding = layer ? filesHolding(place, files, layer) : [];
+    if (holding.length === 0 || holding.every((f) => isLoaded(f.file))) return row('gone');
+    return row(holding.some((f) => isFailed(f.file)) ? 'failed' : 'pending');
+  });
+}
+
+/** A saved row's two lines. A camera that is not listed keeps its saved name and says why. */
+export function savedRowText(row, provider) {
+  if (row.state === 'listed') return cameraRowText({ camera: row.camera, km: 0 });
+  const why = { gone: 'no longer in the camera list', failed: 'not checked: the camera list did not load', pending: 'checking the camera list' }[row.state];
+  return { name: row.place.name, meta: `${provider.operator} · ${why}` };
+}
+
+/** The Saved scope's one state, as { key, text, notes }. `readState` is the store's read state;
+ *  `readMessage` its own sentence when it is read-only (newer, unreadable). */
+export function savedListStatus({ readState = 'ok', readMessage = '', total = 0, listed = 0, gone = 0, failed = 0, pending = 0 } = {}) {
+  const state = (key, text, notes = []) => ({ key, text, notes });
+  if (readState === 'unavailable') return state('saving-unavailable', SAVING_UNAVAILABLE);
+  if (readState === 'newer' || readState === 'unreadable') return state('saved-readonly', readMessage);
+  if (total === 0) return state('none-saved', 'No cameras saved yet. Save one from its row or its card.');
+  if (pending > 0) return state('loading', `Checking ${plural(total, 'saved camera')} against the camera list.`);
+  const notes = [];
+  if (gone > 0) notes.push(`${gone} ${gone === 1 ? 'is' : 'are'} no longer in the camera list. ${gone === 1 ? 'It stays' : 'They stay'} saved until you remove ${gone === 1 ? 'it' : 'them'}.`);
+  if (failed > 0) notes.push(`${failed} could not be checked because the camera list did not load.`);
+  return state('saved', `${plural(total, 'saved camera')}, stored only in this browser.`, notes);
 }
 
 /** A row's two lines: the camera's name, and its source, distance (near scope) and why it has no picture. */
