@@ -75,6 +75,7 @@
     "scripts/qcm/print-clear-journeys-browser.test.mjs",
     "scripts/qcm/print-options.test.mjs",
     "scripts/qcm/redactcam-fallback.test.mjs",
+    "scripts/qcm/request-races-browser.test.mjs",
     "scripts/qcm/road-labels-browser.test.mjs",
     "scripts/qcm/route-measure-browser.test.mjs",
     "scripts/qcm/saved-places-browser.test.mjs",

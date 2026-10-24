@@ -2034,12 +2034,12 @@ function wireCameraPin(pin, camera, meta = {}) {
     let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, PICTURE_TIMEOUT_MS);
     try {
-      // The still is read as a blob inside the deadline; Last-Modified rides along for the age line.
+      // The still is read as a blob inside the card's own picture limit (the same 20 s as the timer above, not the 10 s a data source gets); Last-Modified rides along for the age line.
       const got = await fetchWithDeadline(camera.media.still, {
-        init: { cache: 'no-cache' }, signal: ctrl.signal, timeoutMs: SOURCES.caltransCctv.timeoutMs,
+        init: { cache: 'no-cache' }, signal: ctrl.signal, timeoutMs: PICTURE_TIMEOUT_MS,
         read: async (res) => ({ lastModified: res.headers.get('Last-Modified'), blob: await res.blob() }),
       });
-      if (ctrl.signal.aborted) return;
+      if (ctrl.signal.aborted && !timedOut) return;   // closed by the reader; the picture limit still reports below
       if (!got.ok) throw new Error(got.httpStatus ? `${row.operator}'s server returned ${got.httpStatus}.` : got.error);
       const { lastModified, blob } = got.body;
       cameraOpenUrl = URL.createObjectURL(blob);
