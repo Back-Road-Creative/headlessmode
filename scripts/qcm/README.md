@@ -178,6 +178,12 @@ A report moves one way:
    `unknown`. Still no `closedAt`.
 3. `fixed`: re-checked on a named build after the fix. Same `buildSha` and empty `unknown` rules.
 
+## Usability lane
+
+`usability/` holds the advisory usability lane (QA-04): one plain-words task per acceptance
+journey J01 to J10, a bounded runner, an independent verifier and a calibration score, run today
+on recorded answers with no model and no network. See `usability/README.md`.
+
 ## Camera seed refresh log
 
 `node scripts/qcm/build-camera-snapshot.mjs --refresh-seeds` (the only run that asks camera operators
