@@ -106,7 +106,7 @@ test('Escape closes the open panel and returns focus to the summary that opened 
   await page.send('Input.dispatchKeyEvent', {
     type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27,
   });
-  await page.evaluate('new Promise(r => setTimeout(r, 150))');
+  await waitInPage(page, 'Escape to close the Layers panel', "!document.getElementById('qcm-layer-panel').open");
 
   const after = await page.evaluate(`(() => ({
     layers: document.getElementById('qcm-layer-panel').open,
@@ -262,8 +262,9 @@ test('the Explore summary reflects the number of active filters', { skip }, asyn
     el.value = 40;
     el.dispatchEvent(new Event('input', { bubbles: true }));
   })()`);
-  // Clears applyFiltersDebounced's 100ms trailing debounce.
-  await page.evaluate('new Promise(r => setTimeout(r, 250))');
+  // applyFiltersDebounced's 100ms trailing debounce lands the new summary text.
+  await waitInPage(page, 'the Explore summary text to change',
+    `document.getElementById('qc-explore-summary').textContent !== ${JSON.stringify(before)}`);
   const after = await page.evaluate("document.getElementById('qc-explore-summary').textContent");
   assert.notEqual(after, before,
     'the Explore summary text did not change once a filter became active');
@@ -414,8 +415,9 @@ async function freshPageAt(vp) {
  *  up negative) over several intermediate steps, then release — so a `pointerup`
  *  handler measuring total displacement sees a real gesture, not one teleporting
  *  mouseMoved. Same CDP technique as trustedClick above, extended with the move
- *  steps a drag (as opposed to a click) needs. */
-async function trustedDrag(page, selector, dy) {
+ *  steps a drag (as opposed to a click) needs. Returns once the sheet reads
+ *  `sheetAfter`, the state the release snaps it to. */
+async function trustedDrag(page, selector, dy, sheetAfter) {
   const at = await page.evaluate(`(() => {
     const el = document.querySelector(${JSON.stringify(selector)});
     el.scrollIntoView({ block: 'center' });
@@ -430,7 +432,8 @@ async function trustedDrag(page, selector, dy) {
     await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x, y, button: 'left', buttons: 1 });
   }
   await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: at.x, y: at.y + dy, button: 'left', clickCount: 1 });
-  await page.evaluate('new Promise(r => setTimeout(r, 150))');
+  await waitInPage(page, `the sheet to snap to ${sheetAfter} after the drag`,
+    `document.getElementById('qc-sheet').getAttribute('data-sheet') === '${sheetAfter}'`);
 }
 
 const sheetSnapshot = `(() => {
@@ -565,15 +568,15 @@ for (const vp of PHONE_VIEWPORTS) {
     await trustedClick(page, '#qcm-layer-panel summary');
     assert.equal((await page.evaluate(sheetSnapshot)).sheet, 'half');
 
-    await trustedDrag(page, '.qc-sheet-handle', -200);
+    await trustedDrag(page, '.qc-sheet-handle', -200, 'expanded');
     assert.equal((await page.evaluate(sheetSnapshot)).sheet, 'expanded',
       'dragging the handle up 200px from half did not expand the sheet');
 
-    await trustedDrag(page, '.qc-sheet-handle', 200);
+    await trustedDrag(page, '.qc-sheet-handle', 200, 'half');
     assert.equal((await page.evaluate(sheetSnapshot)).sheet, 'half',
       'dragging the handle down 200px from expanded did not settle on half');
 
-    await trustedDrag(page, '.qc-sheet-handle', 200);
+    await trustedDrag(page, '.qc-sheet-handle', 200, 'collapsed');
     const after = await page.evaluate(`(() => ({
       sheet: document.getElementById('qc-sheet').getAttribute('data-sheet'),
       layersOpen: document.getElementById('qcm-layer-panel').open,
@@ -622,7 +625,7 @@ for (const vp of PHONE_VIEWPORTS) {
 
     await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
     await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
-    await page.evaluate('new Promise(r => setTimeout(r, 150))');
+    await waitInPage(page, 'Escape to collapse the sheet', "document.getElementById('qc-sheet').getAttribute('data-sheet') === 'collapsed'");
 
     const after = await page.evaluate(`(() => ({
       sheet: document.getElementById('qc-sheet').getAttribute('data-sheet'),
@@ -672,7 +675,7 @@ test('sheet: rotating 390x844 -> 844x390 keeps a half-open sheet at half with th
   assert.equal((await page.evaluate(sheetSnapshot)).sheet, 'half');
 
   await page.setViewport({ width: 844, height: 390 });
-  await page.evaluate('new Promise(r => setTimeout(r, 200))');
+  await page.evaluate("window.qcMeasured('the map to catch up with the rotated viewport')");
 
   const snap = await page.evaluate(sheetSnapshot);
   assert.equal(snap.sheet, 'half', `data-sheet is "${snap.sheet}" after rotating, expected it to stay "half"`);

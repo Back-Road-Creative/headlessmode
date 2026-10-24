@@ -10,10 +10,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { findChromium, launch } from './helpers/browser.mjs';
 import { startSiteServer, siteIsBuilt } from './helpers/site-server.mjs';
-import { readyDashboard, waitInPage, chooseExampleArea } from './helpers/waits.mjs';
+import { readyDashboard, waitInPage, chooseExampleArea, watchTimers, timersIdle } from './helpers/waits.mjs';
 import { PLACE_FEATURES } from './fixtures/gnis-names-declutter.mjs';
 import { groupRoads } from '../../themes/headlessmode/static/js/quiet-corners-maps/road-names.js';
 import { ROAD_DENSITY_CAP } from '../../themes/headlessmode/static/js/quiet-corners-maps/road-names.js';
+import { VIEWPORT_FETCH } from '../../themes/headlessmode/static/js/quiet-corners-maps/app-state.js';
 
 const CHROMIUM = findChromium();
 const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this proof)'
@@ -21,6 +22,11 @@ const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this p
     : false;
 
 const CEILING = 20000;
+// main.js ROAD_DEBOUNCE_MS: the trailing wait before a pan asks the road service. Every
+// idle wait below watches timers of exactly this length, so the first test reads main.js
+// for it: a changed constant fails there instead of leaving those waits true of any page.
+const ROAD_DEBOUNCE_MS = 400;
+const BURST_GAP_MS = 60;   // the gap between the pans of a burst: each lands inside the debounce of the last, which is the stimulus
 const FIX = JSON.parse(readFileSync(new URL('./fixtures/road-names-sylva.json', import.meta.url), 'utf8'));
 /** Every label the fixture could produce at zoom 13, from the same grouping the page uses. */
 const KNOWN = new Set(groupRoads(Object.entries(FIX.layers).flatMap(([layer, body]) => body.features.map((f) => ({ ...f, layer: Number(layer) })))).map((e) => e.label));
@@ -72,6 +78,8 @@ async function withDashboard(fn) {
   const page = await launch(CHROMIUM, 'about:blank', { viewport: { width: 1440, height: 1000 }, args: ['--hide-scrollbars'] });
   try {
     await page.send('Page.addScriptToEvaluateOnNewDocument', { source: PATCH_SOURCE });
+    // From the first script on, so a debounce a move arms is a timer the idle waits can see.
+    await page.send('Page.addScriptToEvaluateOnNewDocument', { source: watchTimers(ROAD_DEBOUNCE_MS, VIEWPORT_FETCH.settleMs) });
     await page.navigate(`${site.origin}/quiet-corners/`);
     await readyDashboard(page, { ms: CEILING });
     return await fn(page);
@@ -88,7 +96,15 @@ const mode = (page, m) => page.evaluate(`(window.__roadMode = ${JSON.stringify(m
 const labelCount = (page) => page.evaluate("document.querySelectorAll('.qcm-road-label').length");
 const waitLabels = (page, what, cond) => waitInPage(page, what, `(() => { const n = document.querySelectorAll('.qcm-road-label').length; return ${cond}; })()`, CEILING, null);
 const note = (page) => page.evaluate(`(() => { const e = document.getElementById('qcm-layer-roads-report'); return e && !e.hidden ? e.textContent : ''; })()`);
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// The road pass is idle once its debounce has run (its request, if any, is then made) or was
+// never armed (the view gave it nothing to ask).
+const roadsIdle = (page, what = 'the road debounce to have run or never to have been armed') => waitInPage(page, what, timersIdle(ROAD_DEBOUNCE_MS), CEILING, null);
+const namesIdle = (page) => waitInPage(page, 'the names debounce to have run', timersIdle(VIEWPORT_FETCH.settleMs), CEILING, null);
+
+test('the road debounce the idle waits watch is the one main.js arms', () => {
+  const main = readFileSync(new URL('../../themes/headlessmode/static/js/quiet-corners-maps/main.js', import.meta.url), 'utf8');
+  assert.equal(Number(/const ROAD_DEBOUNCE_MS = (\d+);/.exec(main)?.[1]), ROAD_DEBOUNCE_MS, 'main.js ROAD_DEBOUNCE_MS moved: update ROAD_DEBOUNCE_MS here');
+});
 
 const READ = `(() => [...document.querySelectorAll('.qcm-road-label')].map((e) => {
   const r = e.getBoundingClientRect(), cs = getComputedStyle(e);
@@ -109,7 +125,7 @@ test('the row is registered on by default, and does not make the layer count lie
 test('below zoom 10: no request at all and no labels', { skip }, async () => {
   await withDashboard(async (page) => {
     await goTo(page, [SYLVA[0], SYLVA[1], 9]);
-    await sleep(900);   // longer than the 400 ms debounce: a request, if one were coming, would be in by now
+    await roadsIdle(page);   // a request, if one were coming, is made when the debounce runs
     assert.equal(await page.evaluate('window.__roadReqs.length'), 0, 'zoom 9 asks the road service for nothing');
     assert.equal(await labelCount(page), 0);
   });
@@ -144,6 +160,8 @@ test('a town name, a GNIS name or a camera pin in the DOM keeps road labels off 
     // A camera pin dropped exactly on the first label, as a real pin would sit on a road. The
     // labels are re-placed from the held answer, which is what a size change does.
     await page.evaluate(`(() => {
+      // Marked so the wait below can tell the labels re-placed from the held answer from these.
+      document.querySelectorAll('.qcm-road-label').forEach((e) => e.setAttribute('data-stale', ''));
       const host = window.qcMap.getContainer(), origin = host.getBoundingClientRect();
       const pin = document.createElement('div'); pin.className = 'qcm-camera-pin'; pin.id = 'probe-pin';
       pin.style.cssText = 'position:absolute;z-index:700;left:${first.x - 4}px;top:${first.y - 4}px;width:${first.w + 8}px;height:${first.h + 8}px;';
@@ -151,7 +169,7 @@ test('a town name, a GNIS name or a camera pin in the DOM keeps road labels off 
       host.append(pin);
       document.dispatchEvent(new CustomEvent('qc:label-prefs-changed', { detail: {} }));
     })()`);
-    await sleep(300);
+    await waitLabels(page, 'the labels to be re-placed around the pin', "n > 0 && !document.querySelector('.qcm-road-label[data-stale]')");
     const pin = await page.evaluate("(() => { const r = document.getElementById('probe-pin').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })()");
     const after = await page.evaluate(READ);
     assert.ok(after.length > 0, 'the other roads are still lettered');
@@ -171,9 +189,10 @@ test('a burst of pans asks once, for the last view; an older request is aborted'
     const firstBatch = await page.evaluate('window.__roadReqs.length');
     // Five quick moves, each inside the 400 ms debounce of the last.
     await page.evaluate(`(async () => {
-      for (let i = 1; i <= 5; i += 1) { window.qcMap.setView([${SYLVA[0]} + i * 0.002, ${SYLVA[1]}], ${SYLVA[2]}, { animate: false }); await new Promise((r) => setTimeout(r, 60)); }
+      for (let i = 1; i <= 5; i += 1) { window.qcMap.setView([${SYLVA[0]} + i * 0.002, ${SYLVA[1]}], ${SYLVA[2]}, { animate: false }); await new Promise((r) => setTimeout(r, ${BURST_GAP_MS})); }
     })()`);
-    await sleep(900);
+    await waitInPage(page, 'the one batch of requests for the burst', `window.__roadReqs.length >= ${firstBatch + 5}`, CEILING, null);
+    await roadsIdle(page);   // and no second batch is armed behind it
     const reqs = await page.evaluate('window.__roadReqs.map((r) => ({ layer: r.layer, geometry: r.geometry, aborted: r.signal.aborted }))');
     const after = reqs.slice(firstBatch);
     assert.equal(after.length, 5, `one batch (5 layers at zoom 13) for the whole burst, got ${after.length}`);
@@ -189,7 +208,7 @@ test('a small pan inside the fetched margin asks for nothing and keeps drawing',
     const before = await page.evaluate('window.__roadReqs.length');
     // A quarter of the view's height is inside the 30% margin the fetch added on every side.
     await page.evaluate(`(() => { const m = window.qcMap; m.panBy([0, -Math.round(m.getSize().y / 4)], { animate: false }); })()`);
-    await sleep(900);
+    await roadsIdle(page);
     assert.equal(await page.evaluate('window.__roadReqs.length'), before, 'a pan inside the fetched box made a request');
     await waitLabels(page, 'labels after the pan', 'n > 0');
   });
@@ -238,7 +257,7 @@ test('the source credit is on the map while the row is on, and gone when it is o
     // Off means off: a further pan asks the service for nothing.
     const asked = await page.evaluate('window.__roadReqs.length');
     await goTo(page, [SYLVA[0] + 0.05, SYLVA[1], SYLVA[2]]);
-    await sleep(900);
+    await roadsIdle(page);
     assert.equal(await page.evaluate('window.__roadReqs.length'), asked, 'a pan with the row off asks nothing');
   });
 });
@@ -277,7 +296,8 @@ test('GNIS names drawn AFTER the roads (zoom 14) push road labels off them', { s
     await page.evaluate("document.getElementById('qcm-check').click()");
     await waitInPage(page, 'GNIS name labels', "document.querySelectorAll('.qcm-name-label').length > 0", CEILING, null);
     // The roads are re-placed from the held answer once the names are on screen: poll until no
-    // road label box meets a name label or a name glyph, then hold that for a beat.
+    // road label box meets a name label or a name glyph, then until both debounces have run, so
+    // the state read below is the settled one and not a gap between two passes.
     const CLASH = `(() => {
       const box = (e) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; };
       const hit = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -286,7 +306,8 @@ test('GNIS names drawn AFTER the roads (zoom 14) push road labels off them', { s
         clashes: [...document.querySelectorAll('.qcm-road-label')].map(box).filter((r) => names.some((n) => hit(r, n))).length };
     })()`;
     await waitInPage(page, 'no road label over a GNIS name', `(() => { const c = ${CLASH}; return c.names > 0 && c.roads > 0 && c.clashes === 0; })()`, CEILING, null);
-    await sleep(700);
+    await roadsIdle(page);
+    await namesIdle(page);
     const after = await page.evaluate(CLASH);
     assert.equal(after.clashes, 0, `${after.clashes} road labels sit on a GNIS name (${after.roads} roads, ${after.names} name boxes)`);
     assert.ok(after.roads > 0 && before > 0, 'roads are still lettered where there is room');
@@ -301,8 +322,9 @@ test('a preset leaves Road names alone: it stays on, and no preview says it turn
     assert.ok(previews.length >= 6, 'every preset carries a preview line');
     for (const t of previews) assert.ok(!/Road names/.test(t), `a preview names Road names: ${t}`);
     await page.evaluate("document.getElementById('qcm-preset-mapOnly').click()");
-    await sleep(300);
+    await roadsIdle(page);
     assert.equal(await page.evaluate("document.getElementById('qcm-layer-roads').checked"), true, 'a preset switched Road names off');
+    await waitLabels(page, 'the road labels to be on the map after the preset', 'n > 0');
     assert.ok((await labelCount(page)) > 0, 'and the labels are still on the map');
   });
 });

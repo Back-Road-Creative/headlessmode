@@ -286,6 +286,43 @@ export function startupBudget(ms) {
   return Math.max(ms ?? WAIT_MS, WAIT_MS);
 }
 
+/** Page-side: which timers of a given delay are set and not yet fired or cleared.
+ *
+ *  A debounce keeps its timer in a module variable and exposes no idle flag, so a proof
+ *  that must know "the debounce has run" (or "it was never armed") reads the page's own
+ *  timers instead of sleeping the debounce's length plus a margin. watchTimers(ms...)
+ *  installs the wrapper (once per page) and starts watching those delays; after it,
+ *  `window.qcTimersIdle(ms)` is true when none of that length is pending. Timers set
+ *  before it is installed are not seen, so install it before the thing that arms them:
+ *  as the first call of a proof, or with Page.addScriptToEvaluateOnNewDocument when the
+ *  page arms one while it loads. qcTimersIdle throws for a delay nobody asked to watch,
+ *  because "nothing pending" would then be true of every page and prove nothing. */
+const TIMER_WATCH = `(() => {
+  if (window.qcWatchTimers) return true;
+  const set = window.setTimeout, clear = window.clearTimeout;
+  const watched = new Map();
+  window.setTimeout = function (fn, ms, ...rest) {
+    const live = watched.get(ms);
+    if (!live) return set.call(this, fn, ms, ...rest);
+    const h = set.call(this, (...a) => { live.delete(h); return fn(...a); }, ms, ...rest);
+    live.add(h);
+    return h;
+  };
+  window.clearTimeout = function (h) { for (const live of watched.values()) live.delete(h); return clear.call(this, h); };
+  window.qcWatchTimers = (ms) => { if (!watched.has(ms)) watched.set(ms, new Set()); return watched.get(ms); };
+  window.qcTimersIdle = (ms) => {
+    if (!watched.has(ms)) throw new Error('timers of ' + ms + ' ms are not watched: call watchTimers(' + ms + ') before the thing that arms them');
+    return watched.get(ms).size === 0;
+  };
+  return true;
+})()`;
+
+/** Page-side source that installs the timer watch and watches `delays` (ms). */
+export const watchTimers = (...delays) => `${TIMER_WATCH}; ${delays.map((ms) => `window.qcWatchTimers(${ms});`).join(' ')} true`;
+
+/** Page-side expression: true once no watched timer of `ms` is pending. */
+export const timersIdle = (ms) => `window.qcTimersIdle(${ms})`;
+
 /** Choose the example area, then wait until a proof may tick a layer and press
  *  Check sources without a second fetch racing the first.
  *
@@ -302,17 +339,21 @@ export function startupBudget(ms) {
  *  the button's pass usually finished first there.
  *
  *  So: click, wait for the map to stop moving (qcMoves, so the "map never
- *  moved" checks downstream measure a settled view), then let the debounce
- *  fire before returning. The second wait is a page-side timer armed AFTER the
- *  map settled, with a longer delay than the debounce: one event loop, so it
- *  runs after the debounce did. That is an ordering, not a bet on load. With no
- *  layer on at that moment the browse plan is 'none-on' and fetches nothing. */
+ *  moved" checks downstream measure a settled view), then wait for the debounce
+ *  to have fired. main.js keeps that timer in a module variable and exposes no
+ *  idle flag, so watchTimers records every page timer of the debounce's own
+ *  length from the moment it is set until it fires or is cleared; the debounce
+ *  has fired once none is left. That is the condition itself, not a margin past
+ *  it: this used to sleep VIEWPORT_FETCH.settleMs + 100 after the map settled,
+ *  every call. With no layer on at that moment the browse plan is 'none-on' and
+ *  fetches nothing. */
 export async function chooseExampleArea(page) {
   await page.evaluate(`(async () => {
+    ${watchTimers(VIEWPORT_FETCH.settleMs)}
     const settled = qcMoves();
     document.getElementById('qcm-use-example').click();
     await settled('the map stopped moving after choosing the example area');
-    await new Promise((r) => setTimeout(r, ${VIEWPORT_FETCH.settleMs + 100}));
+    await qcWait('the viewport browse debounce to fire', () => ${timersIdle(VIEWPORT_FETCH.settleMs)});
     return true;
   })()`);
 }

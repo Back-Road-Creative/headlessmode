@@ -20,7 +20,18 @@ async function onScreen(w, h, body) {
   try {
     await page.navigate(`${site.origin}/quiet-corners/`);
     await readyDashboard(page, { data: false });
-    await page.evaluate('new Promise(r => setTimeout(r, 400))');
+    // Measure a settled page: fonts in, the map matching its box (a ResizeObserver
+    // catches it up a frame after layout), and the credit and key drawn.
+    await page.evaluate(`(async () => {
+      await document.fonts.ready;
+      await qcMeasured('the map to match its box');
+      await qcWait('the credit and the key to be drawn', () => {
+        const credit = document.querySelector('#qc-map .leaflet-control-attribution');
+        const body = document.querySelector('#qc-map .qc-legend-body');
+        return credit && credit.textContent.includes('USGS') && body && body.textContent.includes('Candidate town');
+      });
+      return true;
+    })()`);
     return await body(page);
   } finally { page.close(); await site.close(); }
 }
@@ -75,20 +86,22 @@ test('on a phone the map chrome covers at most 35% of the map', { skip }, async 
 test('tapping Credits and Key opens them, tapping again folds them', { skip }, async () => {
   const m = await onScreen(390, 844, (page) => page.evaluate(`(async () => {
     const shown = ${SHOWN};
-    const wait = () => new Promise((r) => setTimeout(r, 100));
+    // Folding is a class toggle (quiet-corners.css has no transition on it): what each tap
+    // is waited for is the shown state the next line reads.
+    const until = (what, ok) => window.qcWait(what, ok);
     const credit = document.querySelector('#qc-map .leaflet-control-attribution');
     const toggle = document.querySelector('#qc-map .qc-credit-toggle');
     const legend = document.querySelector('#qc-map .qc-legend');
     const key = legend.querySelector('.qc-legend-toggle');
     const out = { keyName: key.textContent.trim(), keyBefore: key.getAttribute('aria-expanded') };
-    toggle.click(); await wait();
+    toggle.click(); await until('the credit to open', () => shown(credit));
     out.creditOpen = shown(credit) && credit.textContent.includes('USGS'); out.creditExp = toggle.getAttribute('aria-expanded');
-    toggle.click(); await wait();
+    toggle.click(); await until('the credit to fold', () => !shown(credit));
     out.creditShut = !shown(credit);
-    key.click(); await wait();
     const body = legend.querySelector('.qc-legend-body');
+    key.click(); await until('the key to open', () => shown(body));
     out.keyOpen = shown(body) && body.textContent.includes('Candidate town'); out.keyExp = key.getAttribute('aria-expanded');
-    key.click(); await wait();
+    key.click(); await until('the key to fold', () => !shown(body));
     out.keyShut = !shown(body);
     return out;
   })()`));

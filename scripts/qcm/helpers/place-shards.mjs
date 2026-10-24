@@ -47,18 +47,32 @@ export function patchSource({ shardStatus = 200, shards = { NC: MACON, MT: STEVE
   const status = ${shardStatus};
   const real = window.fetch.bind(window);
   window.__placeUrls = [];
-  const json = (body, st = 200) => Promise.resolve(new Response(JSON.stringify(body), {
-    status: st, headers: { 'content-type': 'application/json' } }));
+  // Place requests the page has asked for and not yet read the answer of (and, a task later,
+  // drawn it: its callback runs in the microtasks after the read, and any request that
+  // callback makes counts before this one is taken off). labelsAt waits for it to be 0.
+  window.__placePending = 0;
+  const counted = (res) => {
+    window.__placePending++;
+    const done = () => setTimeout(() => { window.__placePending--; }, 0);
+    if (!res.ok) { done(); return res; }
+    const read = res.json.bind(res);
+    res.json = () => read().then((v) => { done(); return v; }, (e) => { done(); throw e; });
+    return res;
+  };
+  const json = (body, st = 200, place = false) => {
+    const res = new Response(JSON.stringify(body), { status: st, headers: { 'content-type': 'application/json' } });
+    return Promise.resolve(place ? counted(res) : res);
+  };
   window.fetch = function(input, init) {
     const url = String(input && input.url ? input.url : input);
     if (url.endsWith('/data/quiet-corners/candidates.json')) return json(candidates);
     const m = url.match(/\\/data\\/quiet-corners\\/places-([A-Za-z]+)\\.json$/);
     if (m) {
       window.__placeUrls.push(m[1]);
-      if (status !== 200) return Promise.resolve(new Response('boom', { status }));
-      if (m[1] === 'index') return json(index);
-      if (m[1] === 'national') return json(national);
-      return shards[m[1]] ? json(shards[m[1]]) : Promise.resolve(new Response('', { status: 404 }));
+      if (status !== 200) return Promise.resolve(counted(new Response('boom', { status })));
+      if (m[1] === 'index') return json(index, 200, true);
+      if (m[1] === 'national') return json(national, 200, true);
+      return shards[m[1]] ? json(shards[m[1]], 200, true) : Promise.resolve(counted(new Response('', { status: 404 })));
     }
     return real(input, init);
   };
@@ -88,8 +102,9 @@ export const labelsAt = (lat, lon, z) => `(async () => {
   const settled = qcMoves();
   window.qcMap.setView([${lat}, ${lon}], ${z}, { animate: false });
   await settled('the map settled at zoom ${z}');
-  // A shard fetch is un-awaited by the map; give the network and the redraw it triggers a beat.
-  await new Promise((r) => setTimeout(r, 400));
+  // A shard fetch is un-awaited by the map: wait until every place request the move began has
+  // been answered and its labels drawn, not for a number of milliseconds.
+  await qcWait('the place requests the move began to be answered and drawn', () => window.__placePending === 0);
   const els = [...document.querySelectorAll('.qc-place-label')];
   return {
     texts: els.map((e) => e.textContent.trim()),

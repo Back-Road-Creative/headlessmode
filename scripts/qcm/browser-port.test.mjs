@@ -36,6 +36,8 @@ const skip = CHROMIUM ? false : 'no Chromium on this box (set CHROME_PATH to run
  *  exactly what the losing `launch()` did. */
 const DECOY_UA = 'QCM-DECOY-BROWSER';
 
+const POLL_MS = 100;   // how often the decoy is asked whether it is listening yet: a poll interval, not a wait
+
 async function startDecoy(port) {
   const profile = mkdtempSync(path.join(tmpdir(), 'qcm-decoy-'));
   const child = spawn(CHROMIUM, [
@@ -50,7 +52,7 @@ async function startDecoy(port) {
   const end = Date.now() + 30000;
   while (Date.now() < end) {
     try { if ((await (await fetch(`http://127.0.0.1:${port}/json`)).json()).length) return close; } catch { /* not up yet */ }
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, POLL_MS));
   }
   close();
   throw new Error(`the decoy never listened on ${port}`);

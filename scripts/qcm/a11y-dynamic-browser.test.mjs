@@ -131,7 +131,9 @@ async function openApp(vp, { area = false } = {}) {
 const tick = (id) => session.evaluate(`(() => { const cb = document.getElementById('${id}'); cb.checked = true; cb.dispatchEvent(new Event('change', { bubbles: true })); true; })()`);
 const openPanel = async (summarySel) => {
   await session.evaluate(`document.querySelector(${JSON.stringify(summarySel)}).click(); true`);
-  await session.evaluate(`new Promise((r) => setTimeout(r, 400))`);
+  // The <details> opens at once; the sheet follows on its toggle event, and the map box on the ResizeObserver after that.
+  await waitInPage(session, `the panel behind ${summarySel} to open and the sheet to follow`, `document.querySelector(${JSON.stringify(summarySel)}).closest('details').open && document.getElementById('qc-sheet').dataset.sheet !== 'collapsed'`, 15000, null);
+  await session.evaluate(`window.qcMeasured('the map to catch up with the open panel')`);
 };
 const PANELS = [
   ['Explore', '#qc-explore-summary', '#qc-explore-panel'],
@@ -210,7 +212,8 @@ test('axe: phone 390x844 with the bottom sheet at half and expanded', { skip }, 
   assert.equal(await session.evaluate(`document.getElementById('qc-sheet').dataset.sheet`), 'half');
   await assertClean('phone, sheet half');
   await session.evaluate(`document.querySelector('.qc-sheet-size').click(); true`);
-  await session.evaluate(`new Promise((r) => setTimeout(r, 400))`);
+  await waitInPage(session, 'the sheet to expand', `document.getElementById('qc-sheet').dataset.sheet === 'expanded'`, 15000, null);
+  await session.evaluate(`window.qcMeasured('the map to catch up with the expanded sheet')`);
   assert.equal(await session.evaluate(`document.getElementById('qc-sheet').dataset.sheet`), 'expanded');
   await assertClean('phone, sheet expanded');
 });
@@ -382,18 +385,16 @@ const WIDE = `[...document.body.querySelectorAll('*')].filter((el) => {
   return r.width && cs.visibility !== 'hidden' && r.right > document.documentElement.clientWidth + 1;
 }).slice(0, 8).map((el) => (el.parentElement ? (el.parentElement.id ? '#' + el.parentElement.id : el.parentElement.tagName.toLowerCase() + '.' + String(el.parentElement.className.baseVal ?? el.parentElement.className).trim().split(/\\s+/)[0]) + ' > ' : '') + (el.id ? '#' + el.id : el.tagName.toLowerCase() + '.' + String(el.className.baseVal ?? el.className).trim().split(/\\s+/)[0]) + ' right=' + Math.round(el.getBoundingClientRect().right))`;
 
-/** Offenders present in two reads 400 ms apart: a row mid-scroll as a panel opens is not an overflow. */
+/** Offenders once two reads, a poll apart, agree: a row mid-scroll as a panel opens is not an overflow. */
 async function stableWide() {
-  const first = await session.evaluate(WIDE);
-  await session.evaluate(`new Promise((r) => setTimeout(r, 400))`);
-  const second = await session.evaluate(WIDE);
-  return first.filter((x) => second.includes(x));
+  await session.evaluate(`window.qcWait('the offenders past the right edge to stop changing', (() => { let last = null; return () => { const now = JSON.stringify(${WIDE}); const still = now === last; last = now; return still; }; })())`);
+  return session.evaluate(WIDE);
 }
 
 test('text scaling: at 200% text nothing labelled is clipped and the page does not scroll sideways at 390px', { skip }, async () => {
   await openApp(PHONE);
   await session.evaluate(`document.documentElement.style.fontSize = '200%'; true`);
-  await session.evaluate(`new Promise((r) => setTimeout(r, 400))`);
+  await session.evaluate(`window.qcMeasured('the map to catch up with the 200% text size')`);
   assert.deepEqual(await session.evaluate(CLIPPED), [], '200%, panels closed: clipped text');
   const closed = await session.evaluate(OVERFLOW);
   assert.ok(closed.doc <= closed.view + 1, `200%, panels closed: the page is ${closed.doc}px wide in a ${closed.view}px viewport: ${(await session.evaluate(WIDE)).join('; ')}`);
