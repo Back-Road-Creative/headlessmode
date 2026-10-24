@@ -944,19 +944,40 @@ export const PROVIDERS = Object.freeze([
 // (the Aleutians, lon 172 to 180) and the territories (PR, VI, GU, AS, MP), as the unit spec counts them.
 const VOLCVIEW_EXTRA_BOXES = Object.freeze([[51.0, 53.6, 172.0, 180.0], ...['pr', 'vi', 'gu', 'as', 'mp'].map((c) => STATE_BBOX[c])]);
 // The rough Alaska box spills into British Columbia and Yukon (east of -141) and the rough Washington
-// box into British Columbia (north of 49.0); those corners are not US territory. East of -141 a point
-// in the Alaska box stays only southwest of the panhandle border (a polyline, closed to the south).
-const PANHANDLE_BORDER = [[-141, 60.3], [-135.5, 59.8], [-133.4, 58.9], [-130.0, 56.1], [-130.0, 55.0], [-130.6, 54.7], [-130.6, 40], [-141, 40]];
-function insidePanhandle(lat, lon) {
+// box into British Columbia (north of 49.0) and onto southern Vancouver Island; those corners are not
+// US territory. East of -141 a point in the Alaska box stays only inside the panhandle polygon below,
+// and everything south of the polygon (Prince Rupert, Haida Gwaii) is Canada.
+//
+// Sources, read 2026-10-09 (public geography, nothing invented):
+//  - Point A, Cape Muzon: USGS GNIS feature 1420865, 54.6678 N 132.6889 W. Point B, the south end of
+//    the Portland Channel boundary: International Boundary Commission digital boundary v1.3 (NAD83),
+//    54.7074 N 130.6156 W. The straight A-B line is the Dixon Entrance line of the 1903 Alaska
+//    Boundary Tribunal award (about 54 40 N); Canada reads it as the maritime boundary, the US as
+//    only dividing the land. This filter treats it as the cut-off: a camera south of it is not US.
+//  - The Portland Channel vertices between B and the 56th parallel, and the Juan de Fuca / Haro Strait
+//    / Boundary Pass chain below, are vertices of the same IBC shapefile, thinned to about 500 m.
+//  - The north and west edges are the older rough hull, unchanged.
+const PANHANDLE_BORDER = [[-141, 60.3], [-135.5, 59.8], [-133.4, 58.9], [-130.0, 56.1], [-130.0, 55.3],
+  [-130.1752, 55.0979], [-130.3369, 54.9248], [-130.5803, 54.7903], [-130.6156, 54.7074], [-132.6889, 54.6678], [-141, 54.6678]];
+// Canada west of the Juan de Fuca / Haro Strait / Boundary Pass line (IBC v1.3) and north of it, up to 49.05
+// (the 49.0 to 49.4 band is the other clause of inCanadianCorner). Victoria, Saanich, Sidney, Duncan and
+// the Gulf Islands sit inside the rough Washington box (lat up to 49.1, lon from -124.9).
+const SW_BC_BORDER = [[-124.9, 48.4934], [-124.7272, 48.4934], [-124.0121, 48.2967], [-123.6791, 48.24], [-123.5412, 48.2246],
+  [-123.2484, 48.284], [-123.1151, 48.4228], [-123.1599, 48.4535], [-123.2189, 48.5487], [-123.2679, 48.694],
+  [-123.0085, 48.7671], [-123.0085, 48.8312], [-123.3222, 49.0021], [-123.3222, 49.05], [-124.9, 49.05]];
+function insidePolygon(poly, lat, lon) {
   let inside = false;
-  for (let i = 0, j = PANHANDLE_BORDER.length - 1; i < PANHANDLE_BORDER.length; j = i++) {
-    const [xi, yi] = PANHANDLE_BORDER[i];
-    const [xj, yj] = PANHANDLE_BORDER[j];
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i];
+    const [xj, yj] = poly[j];
     if ((yi > lat) !== (yj > lat) && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) inside = !inside;
   }
   return inside;
 }
-const inCanadianCorner = (lat, lon) => (lon > -141 && lon <= -129.9 && lat >= 54.5 && lat <= 71.5 && !insidePanhandle(lat, lon)) || (lat > 49.0 && lat <= 49.4 && lon >= -124.9 && lon <= -117.0);
+const insidePanhandle = (lat, lon) => insidePolygon(PANHANDLE_BORDER, lat, lon);
+const inCanadianCorner = (lat, lon) => (lon > -141 && lon <= -129.9 && lat <= 71.5 && !insidePanhandle(lat, lon))
+  || (lat > 49.0 && lat <= 49.4 && lon >= -124.9 && lon <= -117.0)
+  || insidePolygon(SW_BC_BORDER, lat, lon);
 function inVolcviewCoverage(lat, lon) {
   if (inCanadianCorner(lat, lon)) return false;
   return inUnitedStates(lat, lon) || VOLCVIEW_EXTRA_BOXES.some((b) => lat >= b[0] && lat <= b[1] && lon >= b[2] && lon <= b[3]);
