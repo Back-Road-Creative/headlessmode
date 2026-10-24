@@ -20,7 +20,7 @@ Songs are practiced the same way. Open a tune and it is split into graded steps 
 
 1. Download `band-coach.html` from the link above or the Get panel at the top of this page.
 2. Open the file in Chrome or Edge. The app's own MIDI message names those two browsers; without Web MIDI it still accepts screen keys and computer keys.
-3. Allow the microphone, or connect a MIDI keyboard. Keyboard uses MIDI, on-screen keys or computer keys; every other instrument listens through the microphone.
+3. Allow the microphone, or connect a MIDI keyboard. Keyboard uses MIDI, on-screen keys or computer keys; Drum kit uses an electronic kit over MIDI, computer keys, clicks on the drawn kit or the microphone; every other instrument listens through the microphone.
 
 Progress is saved in the browser's local storage, so a different browser or profile starts empty. Use "Save a backup" in the side rail's "More options" to download `band-coach-progress.json`, and "Restore a backup" to load it again. "Check for updates" in the same menu asks the Band Coach website for the latest version number and sends nothing about your playing; it is the only network request in the release I checked (v1.10.0).
 
