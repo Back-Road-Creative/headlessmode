@@ -34,7 +34,7 @@ import { fetchWetlands } from './source-wetlands.js';
 import { fetchCountyLines } from './source-county-lines.js';
 import { fetchSurfaceOwnership } from './source-surface-ownership.js';
 import { LAYERS, LAYER_IDS, LAYER_BY_ID, GROUPS, layerControlSpecs, baseControlSpecs, contextControlSpecs,
-  CONTEXT_LAYER_IDS, DEFAULT_CONTEXT, surfaceCaption, enabledLayers, LAYERS_WITH_DRAPE, groupHint } from './layer-registry.js';
+  CONTEXT_SURFACE_IDS, CONTEXT_OVERLAY_IDS, DEFAULT_CONTEXT, surfaceCaption, enabledLayers, LAYERS_WITH_DRAPE, groupHint } from './layer-registry.js';
 import { filterLayerSpecs, layerBadge, layerCountLine, selectedScreenRows, layerAboutText, rowSummaryLine, groupIsCollapsedByDefault } from './layer-panel.js';
 import { SOURCES, DEFAULT_SOURCE_TIMEOUT_MS } from './source-registry.js';
 import { fetchWithDeadline, createLatest } from './request.js';
@@ -862,13 +862,14 @@ function controls() {
     grid: checked('qcm-grid') === 'none' ? 'none' : 'utm-1km', layers: layersFromControls() };
 }
 
-/** Reads every registry layer's own checkbox; a required layer is always on. The context
- *  group has no checkboxes at all -- it is one radio group, so at most one of its surfaces
- *  can be on and the reader's single choice answers for all four. */
+/** Reads every registry layer's own checkbox; a required layer is always on. The raster
+ *  context surfaces have no checkboxes -- they are one radio group, so at most one can be on
+ *  and the reader's single choice answers for all of them. The vector context overlays (fire,
+ *  air quality, ...) are ordinary checkboxes and are read like any other layer. */
 function layersFromControls() {
   const surface = currentContext();
   return Object.fromEntries(LAYERS.map((l) => {
-    if (CONTEXT_LAYER_IDS.includes(l.id)) return [l.id, l.id === surface];
+    if (CONTEXT_SURFACE_IDS.includes(l.id)) return [l.id, l.id === surface];
     const el = $(`qcm-layer-${l.id}`);
     return [l.id, l.required || (el ? el.checked : !!l.defaultOn)];
   }));
@@ -888,13 +889,25 @@ function setBase() {
  *  ticked, it is 'none', so a reader who never opens the panel has a clear map. */
 const currentContext = () => checked('qcm-context') || DEFAULT_CONTEXT;
 
-/** One radio moved, so EVERY context surface redraws -- not only the one that came on. The
+/** One radio moved, so EVERY raster surface redraws -- not only the one that came on. The
  *  one that went off has to take itself off the map, and with four checkboxes each redrew
- *  only itself. `CONTEXT_RENDER` is the same table the checkboxes used; all of it runs. */
+ *  only itself. `CONTEXT_RENDER` is the same table the checkboxes used; every surface in it
+ *  runs. The vector overlays are not touched: they are not in this choice (setOverlay). */
 function setContext() {
-  invalidate({ layers: Object.fromEntries(CONTEXT_LAYER_IDS.map((id) => [id, id === currentContext()])) });
-  for (const redraw of Object.values(CONTEXT_RENDER)) redraw();
+  invalidate({ layers: Object.fromEntries(CONTEXT_SURFACE_IDS.map((id) => [id, id === currentContext()])) });
+  for (const id of CONTEXT_SURFACE_IDS) CONTEXT_RENDER[id]();
   renderSurfaceCaption(); replan(); renderLegend(); syncHillshadeLightVisibility();
+}
+
+/** One vector context overlay (fire perimeters, air quality, ...) switched on or off. Its own
+ *  checkbox, so it moves nothing else: the raster surface and every other overlay stay as
+ *  they were, which is how fire and air quality are drawn together. Redraws itself through
+ *  the same `CONTEXT_RENDER` table the surfaces use. */
+function setOverlay(event) {
+  const input = event.target;
+  invalidate({ layers: { [input.value]: input.checked } });
+  CONTEXT_RENDER[input.value]();
+  renderSurfaceCaption(); replan(); renderLegend();
 }
 
 /** QUX-04b: the manual light knobs are only meaningful once hillshadeLight is the chosen
@@ -942,15 +955,28 @@ const SURFACE_TIME = {
   nlcdTreeCanopy: () => ({ vintage: String(treeCanopy ? treeCanopy.year : defaultYearFor('canopy')) }),
 };
 
-/** The one line the map itself carries while a surface is drawn: which surface, and the time
- *  its data refers to. On the map rather than inside the Layers panel, because a panel a
+/** The one line the map itself carries while a surface or context overlay is drawn: which, and
+ *  the time its data refers to. On the map rather than inside the Layers panel, because a panel a
  *  reader has closed is not where "you are looking at a picture of an hour ago" belongs. */
 function renderSurfaceCaption() {
   const el = $('qcm-surface-caption'); if (!el) return;
-  const id = currentContext();
-  const caption = surfaceCaption(id, SURFACE_TIME[id] ? SURFACE_TIME[id]() : {});
-  el.textContent = caption ? caption.text : '';
-  el.hidden = !caption;
+  // The chosen raster surface, then each context overlay that is on: all of them can be
+  // drawn at once, so each names itself and the time its own data refers to.
+  const on = layersFromControls();
+  const ids = [currentContext(), ...CONTEXT_OVERLAY_IDS.filter((id) => on[id])];
+  const lines = ids.map((id) => surfaceCaption(id, SURFACE_TIME[id] ? SURFACE_TIME[id]() : {})).filter(Boolean);
+  // One block per layer, kept by id, so a toggle adds or removes only its own line and the
+  // live region announces that line rather than the whole stack read out again.
+  const have = new Map([...el.children].map((c) => [c.dataset.layer, c]));
+  lines.forEach((c, i) => {
+    let line = have.get(c.layerId);
+    if (!line) { line = document.createElement('span'); line.className = 'qcm-surface-caption-line'; line.dataset.layer = c.layerId; }
+    if (line.textContent !== c.text) line.textContent = c.text;
+    if (el.children[i] !== line) el.insertBefore(line, el.children[i] || null);
+    have.delete(c.layerId);
+  });
+  for (const stale of have.values()) stale.remove();
+  el.hidden = !lines.length;
 }
 
 /** The one status a base row can need: the relief cache ends before the map does. */
@@ -1214,7 +1240,8 @@ async function retryPass(id) {
 /** The search box and the "only layers that are on" toggle, together: which rows
  *  and which group headings stay visible, without touching any switch's checked
  *  state. Base and context radios always carry `alwaysShow` (their CURRENT
- *  choice), so a group never reads empty under active-only. */
+ *  choice), so a group never reads empty under active-only; a context overlay is
+ *  an ordinary checkbox and is hidden there while off. */
 function applyLayerFilter() {
   const host = $('qcm-layers'); if (!host) return;
   const query = $('qcm-layer-search')?.value || '';
@@ -1232,7 +1259,7 @@ function applyLayerFilter() {
         note: row.querySelector('.qcm-hint')?.textContent || '',
         keywords: LAYER_BY_ID[input.value]?.searchTerms || '',
         checked: input.checked,
-        alwaysShow: group.id === 'base' || group.id === 'context',
+        alwaysShow: group.id === 'base' || (group.id === 'context' && input.type === 'radio'),
         el: row,
         groupBox: box,
       });
@@ -1331,14 +1358,15 @@ function applyPreset(p, { silent = false } = {}) {
     el.dispatchEvent(new Event('change'));
     if (el.checked) moved.push(l.label);
   }
-  // The context surface is one radio, not a row per surface: a preset naming none of them
-  // means None, which is a move like any other. definePreset refuses a preset naming two.
-  const surface = $(`qcm-context-${p.layers.find((id) => CONTEXT_LAYER_IDS.includes(id)) || 'none'}`);
+  // The raster context surface is one radio, not a row per surface: a preset naming none of
+  // them means None, which is a move like any other. definePreset refuses a preset naming two.
+  // A context overlay (fire, air quality) is a checkbox and was moved by the loop above.
+  const surface = $(`qcm-context-${p.layers.find((id) => CONTEXT_SURFACE_IDS.includes(id)) || 'none'}`);
   if (surface && !surface.checked) {
     const prevSurface = document.querySelector('input[name="qcm-context"]:checked');
     if (prevSurface) undo.push({ id: prevSurface.id, checked: true });
     surface.checked = true; surface.dispatchEvent(new Event('change'));
-    moved.push(...p.layers.filter((id) => CONTEXT_LAYER_IDS.includes(id)).map((id) => LAYER_BY_ID[id].label));
+    moved.push(...p.layers.filter((id) => CONTEXT_SURFACE_IDS.includes(id)).map((id) => LAYER_BY_ID[id].label));
   }
   const base = $(`qcm-base-${p.base}`);
   if (base && !base.checked) {
@@ -1506,10 +1534,12 @@ function renderLayerControls() {
   host.replaceChildren(buildCameraEntry(), ...GROUPS.flatMap((group) => {
     const rows = group.id === 'base'
       ? baseControlSpecs(base).map((s) => layerRow(s, setBase))
-      // The context group is the base group's twin: radios and an explicit None, so the
-      // hint's "One continuous-colour surface" is enforced rather than merely promised.
+      // The context group's raster surfaces are the base group's twin: radios and an explicit
+      // None, so only one view-filling picture is ever laid over the map. Its vector overlays
+      // follow as ordinary checkboxes, independent of that choice (layer-registry.js).
       : group.id === 'context'
-        ? contextControlSpecs(currentContext()).map((s) => layerRow(s, setContext))
+        ? [...contextControlSpecs(currentContext()).map((s) => layerRow(s, setContext)),
+          ...specs.filter((s) => CONTEXT_OVERLAY_IDS.includes(s.id)).map((s) => layerRow(s, setOverlay))]
         : specs.filter((s) => s.group === group.id).map((s) => layerRow(s, READING_RENDER[s.id] || CAMERA_RENDER[s.id] || SCREEN_RENDER[s.id] || NAMES_RENDER[s.id],
           group.id === 'federal' || group.id === 'state' ? { layer: LAYER_BY_ID[s.id] } : {}));
     if (!rows.length) return [];            // a group with no layers draws no heading

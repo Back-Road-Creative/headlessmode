@@ -129,9 +129,14 @@ test('main.js applies a preset through the controls the reader already has', () 
   // CHANGED with the context radio group: the surfaces used to be four checkboxes, each
   // redrawing itself through CONTEXT_RENDER[spec.id]. One radio moving means the surface
   // that went OFF has to be redrawn too, so the handler runs the whole table.
-  const ctx = MAIN.slice(MAIN.indexOf('function setContext'), MAIN.indexOf('function renderSurfaceCaption'));
-  assert.ok(ctx.includes('Object.values(CONTEXT_RENDER)'),
+  // The slice ends at setOverlay, not renderSurfaceCaption: `CONTEXT_SURFACE_IDS` alone also
+  // appears in the invalidate() line, so only the loop itself proves the redraw.
+  const ctx = MAIN.slice(MAIN.indexOf('function setContext'), MAIN.indexOf('function setOverlay'));
+  assert.match(ctx, /for \(const id of CONTEXT_SURFACE_IDS\)\s*CONTEXT_RENDER\[id\]\(\)/,
     'the surface that was switched off must be redrawn, not only the one switched on');
+  // A vector overlay is its own checkbox: toggling it redraws that one row.
+  const ov = MAIN.slice(MAIN.indexOf('function setOverlay'), MAIN.indexOf('function renderSurfaceCaption'));
+  assert.ok(ov.includes('CONTEXT_RENDER[input.value]'), 'an overlay checkbox must redraw its own row');
 });
 
 // A preset names a SET of switches, and the context group now holds at most one of them.
@@ -139,10 +144,13 @@ test('main.js applies a preset through the controls the reader already has', () 
 // silently drop one on the floor.
 test('a preset cannot name two context surfaces, because only one can ever be drawn', () => {
   assert.doesNotThrow(() => build({ layers: ['nightLights'] }));
-  assert.throws(() => build({ layers: ['nightLights', 'swpcAurora'] }), /one context surface/);
-  assert.throws(() => build({ layers: ['swpcAurora', 'epaAirNowAqi'] }), /one context surface/);
+  assert.throws(() => build({ layers: ['nightLights', 'nwsRadar'] }), /one context surface/);
+  // QQA-06d: vector overlays (fire, air quality, aurora) are independent of the surface choice,
+  // so a preset may name them beside one raster surface; the budget counts only rasters.
+  assert.doesNotThrow(() => build({ layers: ['nightLights', 'swpcAurora', 'epaAirNowAqi', 'nifcFirePerimeters'] }));
+  assert.doesNotThrow(() => build({ layers: ['swpcAurora', 'epaAirNowAqi'] }));
   for (const p of PRESETS) {
-    assert.ok(p.layers.filter((id) => LAYER_BY_ID[id].group === 'context').length <= 1,
+    assert.ok(p.layers.filter((id) => LAYER_BY_ID[id].group === 'context' && LAYER_BY_ID[id].rasterSurface).length <= 1,
       `${p.id} asks for more surfaces than the map can draw`);
   }
 });

@@ -116,7 +116,7 @@ export const GROUPS = Object.freeze([
   Object.freeze({ id: 'federal', label: 'Federal overlays', hint: 'Drawn on the map anywhere in the lower 48, and on printed sheets.' }),
   // 'Land, sky & light' rather than 'Sky & light': the group holds a surface about the
   // GROUND now, and the old label would have sent a reader looking for terrain past it.
-  Object.freeze({ id: 'context', label: 'Land, sky & light context', hint: 'One continuous-colour surface laid over the map. Screen only \u2014 a context surface is not drawn on a printed sheet.' }),
+  Object.freeze({ id: 'context', label: 'Land, sky & light context', hint: 'Pick one continuous-colour surface to lay over the map, and tick any outlines or shading to draw on top of it. Screen only \u2014 context is not drawn on a printed sheet.' }),
   // A FOURTH kind of switch, after ink on the map, a page in the PDF and a colour surface
   // over it: an answer in words about the area you drew. Both rows here come from sources
   // whose subject is not where a line runs — usgsGovUnits already draws the boundaries —
@@ -961,25 +961,38 @@ export function availableStateLayers(states = null) {
   return usableFamilies(states);
 }
 
-/** The context group is a choice of ONE, exactly like the base group above and for a
- *  sharper reason. Its hint has always read "One continuous-colour surface laid over the
- *  map", and it was four independent checkboxes: night lights at 0.8 and radar at 0.55
- *  composite to under a tenth of whatever is beneath them, and nothing in the code stopped a
- *  reader stacking all four. Radios make the sentence true instead of aspirational.
+/** The context group's EXCLUSIVITY FOLLOWS HOW A ROW RENDERS, not what it is about (QQA-06d).
  *
- *  `none` is the default AND a row of its own, because a reader who turned one on must be
- *  able to turn them all off again; with radios alone there is no way back.
+ *  A row that fills the view as a picture -- `rasterSurface`: night lights at 0.8 and radar
+ *  at 0.55 composite to under a tenth of whatever is beneath them, and NLCD, slope, the
+ *  county wash and the hillshade fill the same way -- hides what is under it everywhere, so
+ *  two of them stacked leave no base readable. Those are a choice of ONE, exactly like the
+ *  base group above: radios, plus an explicit None (a reader who turned one on must be able
+ *  to turn it off again; with radios alone there is no way back).
+ *
+ *  A row that draws vector ink on top -- NIFC fire perimeters (`L.geoJSON`), the AQI shaded
+ *  box, smoke, flood zones, aurora, wildlife points -- hides nothing beneath it, so nothing
+ *  makes it exclusive. Those are ordinary independent checkboxes in the same group, and they
+ *  coexist with whichever surface is chosen: fire and air quality are visible together.
+ *
+ *  Both lists come from the one flag the surface budget (layer-presets.js) already counts, so
+ *  there is no second table to drift. `CONTEXT_LAYER_IDS` stays every context row, because
+ *  an old link or saved state naming fire as its surface (`s=nifcFirePerimeters`) must still
+ *  parse and turn fire on: ids never change, only the control that carries them.
  *
  *  Each surface keeps the caveat it already carried and the report line it already writes
- *  into (`reportId`), so nothing about WHAT one draws changes here — only which can be on
- *  together. */
+ *  into (`reportId`), so nothing about WHAT one draws changes here. */
 export const CONTEXT_LAYERS = Object.freeze(LAYERS.filter((l) => l.group === 'context'));
 export const CONTEXT_LAYER_IDS = Object.freeze(CONTEXT_LAYERS.map((l) => l.id));
+export const CONTEXT_SURFACE_LAYERS = Object.freeze(CONTEXT_LAYERS.filter((l) => l.rasterSurface));
+export const CONTEXT_SURFACE_IDS = Object.freeze(CONTEXT_SURFACE_LAYERS.map((l) => l.id));
+export const CONTEXT_OVERLAY_LAYERS = Object.freeze(CONTEXT_LAYERS.filter((l) => !l.rasterSurface));
+export const CONTEXT_OVERLAY_IDS = Object.freeze(CONTEXT_OVERLAY_LAYERS.map((l) => l.id));
 export const DEFAULT_CONTEXT = 'none';
 export const NO_CONTEXT_LABEL = 'No context surface';
 
 export function contextControlSpecs(current = DEFAULT_CONTEXT) {
-  const chosen = CONTEXT_LAYER_IDS.includes(current) ? current : DEFAULT_CONTEXT;
+  const chosen = CONTEXT_SURFACE_IDS.includes(current) ? current : DEFAULT_CONTEXT;
   const row = (id, label, note) => ({
     id, group: 'context', type: 'radio', name: 'qcm-context', inputId: `qcm-context-${id}`,
     // The status line each surface already writes its age into. Keeping the id means
@@ -988,7 +1001,7 @@ export function contextControlSpecs(current = DEFAULT_CONTEXT) {
     label, checked: id === chosen, disabled: false,
     note: note || null, noteId: note ? `qcm-context-${id}-note` : null,
   });
-  return [...CONTEXT_LAYERS.map((l) => row(l.id, l.label, l.coverageCaveat)),
+  return [...CONTEXT_SURFACE_LAYERS.map((l) => row(l.id, l.label, l.coverageCaveat)),
     row('none', NO_CONTEXT_LABEL, null)];
 }
 
