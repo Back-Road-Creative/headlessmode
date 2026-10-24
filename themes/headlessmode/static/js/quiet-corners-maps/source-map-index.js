@@ -3,8 +3,13 @@
 // arithmetic cell geometry.js already computes from lon/lat alone.
 import { SOURCES, REQUEST_POLICY } from './source-registry.js';
 import { cellForPoint, cellNeighbors, cellsForBbox } from './geometry.js';
+import { fetchWithDeadline } from './request.js';
+import { MAX_PAGES } from './arcgis-pager.js';
+
+export { MAX_PAGES };
 
 const LAYER = SOURCES.usgsQuadIndex.layers[0];
+const TIMEOUT_MS = SOURCES.usgsQuadIndex.timeoutMs;
 export const OUT_FIELDS = LAYER.fields;
 const MAX_BBOX_DEG = 2;
 const TOLERANCE_DEG = 1e-3;
@@ -75,53 +80,60 @@ const isRetryableStatus = (status) => status === 429 || status >= 500;
 
 // Retries like REQUEST_POLICY: 429/5xx or a network throw; never another 4xx. A JSON
 // `error` object or malformed JSON fails the page immediately (a data problem, not transient).
-async function fetchJsonPage(url, { fetchImpl, signal, retries }) {
+// Each attempt has its own `timeoutMs`, and a timeout is NOT retried: a service that did not
+// answer in time is the failure, and three more waits would triple what the reader sits through.
+async function fetchJsonPage(url, { fetchImpl, signal, retries, timeoutMs }) {
   const backoff = REQUEST_POLICY.retryBackoffMs;
   const maxAttempts = retries + 1;
   let lastError = null;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    if (signal?.aborted) return { ok: false, error: 'aborted' };
-    let res;
-    try {
-      res = await fetchImpl(url, { signal });
-    } catch (err) {
-      if (signal?.aborted || err?.name === 'AbortError') return { ok: false, error: 'aborted' };
-      lastError = err?.message || String(err);
+    const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs });
+    if (got.status === 'aborted') return { ok: false, error: 'aborted' };
+    if (got.status === 'timeout') return { ok: false, error: got.error, timedOut: true };
+    if (got.status === 'error' && !got.malformed && (got.httpStatus === undefined || isRetryableStatus(got.httpStatus))) {
+      lastError = got.error;
       if (attempt < maxAttempts - 1) { await sleep(backoff[Math.min(attempt, backoff.length - 1)]); continue; }
       return { ok: false, error: lastError };
     }
-    if (!res.ok) {
-      if (isRetryableStatus(res.status) && attempt < maxAttempts - 1) { await sleep(backoff[Math.min(attempt, backoff.length - 1)]); continue; }
-      return { ok: false, error: `HTTP ${res.status}` };
-    }
-    let body;
-    try { body = await res.json(); } catch { return { ok: false, error: 'Malformed JSON response.' }; }
-    if (body?.error) return { ok: false, error: body.error.message || 'USGS quad index returned an error.' };
-    return { ok: true, body };
+    if (!got.ok) return { ok: false, error: got.error };
+    if (got.body?.error) return { ok: false, error: got.body.error.message || 'USGS quad index returned an error.' };
+    return { ok: true, body: got.body };
   }
   return { ok: false, error: lastError || 'Request failed.' };
 }
 
-// timeoutMs is part of the public contract; a per-attempt deadline is fetchImpl's job (e.g. AbortSignal.timeout).
+// Paging stops at `maxPages`, and at a page that adds no cell not already read: a service
+// that flags "more" forever, or ignores resultOffset and repeats itself, ends as 'partial'
+// rather than as a loop. An honest bbox (2 degrees at most) is one or two pages.
 export async function fetchCellsForBbox({
   bboxLonLat, fetchImpl = globalThis.fetch, signal, pageSize = 200,
-  timeoutMs = REQUEST_POLICY.timeoutMs, retries = REQUEST_POLICY.retries,
+  timeoutMs = TIMEOUT_MS, retries = REQUEST_POLICY.retries, maxPages = MAX_PAGES,
 }) {
-  const cells = []; const warnings = [];
+  const cells = []; const warnings = []; const seen = new Set();
   let pages = 0;
   let offset = 0;
   let coverage = 'complete';
   let error = null;
+  let timedOut = false;
   for (;;) {
     if (signal?.aborted) { coverage = pages === 0 ? 'unavailable' : 'partial'; break; }
     const url = buildBboxQueryUrl({ bboxLonLat, offset, pageSize });
-    const result = await fetchJsonPage(url, { fetchImpl, signal, retries });
-    if (!result.ok) { error = result.error; coverage = pages === 0 ? 'unavailable' : 'partial'; break; }
+    const result = await fetchJsonPage(url, { fetchImpl, signal, retries, timeoutMs });
+    if (!result.ok) { error = result.error; timedOut = result.timedOut === true; coverage = pages === 0 ? 'unavailable' : 'partial'; break; }
     pages += 1;
     const features = Array.isArray(result.body.features) ? result.body.features : [];
-    for (const feature of features) cells.push(normalizeCell(feature));
-    if (result.body.exceededTransferLimit === true) { offset += features.length; continue; }
-    break;
+    let added = 0;
+    for (const feature of features) {
+      const cell = normalizeCell(feature);
+      if (seen.has(cell.cellId)) continue;
+      seen.add(cell.cellId);
+      cells.push(cell);
+      added += 1;
+    }
+    if (result.body.exceededTransferLimit !== true) break;
+    if (added === 0) { error = 'The quad index flagged more pages but returned nothing new.'; coverage = 'partial'; break; }
+    if (pages >= maxPages) { error = `The quad index kept paging past ${maxPages} pages.`; coverage = 'partial'; break; }
+    offset += features.length;
   }
   if (coverage === 'complete') {
     for (const arithmetic of cellsForBbox(bboxLonLat)) {
@@ -133,18 +145,18 @@ export async function fetchCellsForBbox({
   }
   const out = { coverage, cells, pages, warnings };
   if (error) out.error = error;
+  if (timedOut) out.timedOut = true;
   return out;
 }
 
-export async function searchByName({ name, state, fetchImpl = globalThis.fetch, signal, limit = 20 }) {
+export async function searchByName({ name, state, fetchImpl = globalThis.fetch, signal, limit = 20, timeoutMs = TIMEOUT_MS }) {
   let url;
   try { url = buildNameQueryUrl({ name, state, limit }); } catch (err) { return { ok: false, cells: [], error: err.message }; }
+  const got = await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs });
+  if (!got.ok) return { ok: false, cells: [], error: got.error, ...(got.status === 'timeout' ? { timedOut: true } : {}) };
+  if (got.body?.error) return { ok: false, cells: [], error: got.body.error.message || 'USGS quad index returned an error.' };
   try {
-    const res = await fetchImpl(url, { signal });
-    if (!res.ok) return { ok: false, cells: [], error: `HTTP ${res.status}` };
-    const body = await res.json();
-    if (body?.error) return { ok: false, cells: [], error: body.error.message || 'USGS quad index returned an error.' };
-    const features = Array.isArray(body.features) ? body.features : [];
+    const features = Array.isArray(got.body?.features) ? got.body.features : [];
     return { ok: true, cells: features.map(normalizeCell), error: null };
   } catch (err) {
     return { ok: false, cells: [], error: err?.message || String(err) };

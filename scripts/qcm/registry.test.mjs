@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
-  SOURCES, APPROVED_ORIGINS, REQUEST_POLICY, FAILURE, cspDirectivesFor,
+  SOURCES, APPROVED_ORIGINS, REQUEST_POLICY, DEFAULT_SOURCE_TIMEOUT_MS, FAILURE, cspDirectivesFor,
 } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-registry.js';
 
 const REQUIRED = ['id', 'name', 'kind', 'origin', 'serviceUrl', 'metadataUrl', 'spatialReference',
@@ -257,4 +257,20 @@ test('usgsRoadNames carries the measured service facts and its own docs row', ()
   const row = doc.split('\n').find((l) => l.startsWith('|') && l.includes('transportation MapServer') && l.includes('Road names'));
   assert.ok(row, 'a source-table row names the road-name layers');
   assert.ok(row.includes(s.serviceUrl));
+});
+
+// QQA-13: one 10 s ceiling would turn the place-names path into routine timeouts, so the
+// deadline is per source. A source may exceed the default only by citing its measurement.
+test('every source carries a timeoutMs of 10000 or less unless it cites a measurement', () => {
+  assert.equal(DEFAULT_SOURCE_TIMEOUT_MS, 10000);
+  for (const [key, src] of Object.entries(SOURCES)) {
+    assert.ok(Number.isInteger(src.timeoutMs) && src.timeoutMs > 0, `${key} lacks a timeoutMs`);
+    if (src.timeoutMs > DEFAULT_SOURCE_TIMEOUT_MS) {
+      assert.match(src.timeoutMeasured || '', /\d/, `${key} exceeds ${DEFAULT_SOURCE_TIMEOUT_MS} ms without a cited measurement`);
+    }
+  }
+  assert.equal(SOURCES.gnisNames.timeoutMs, 20000);
+  assert.equal(SOURCES.nwsForecast.timeoutMs, 10000);
+  assert.equal(SOURCES.nwsAlerts.timeoutMs, 10000);
+  assert.equal(SOURCES.usgsQuadIndex.timeoutMs, 10000);
 });

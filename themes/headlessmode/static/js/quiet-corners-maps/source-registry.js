@@ -197,7 +197,15 @@ const CALTRANS_COVERAGE_AREAS = Object.freeze([
   { id: 'ca-d12', name: 'District 12 (Orange County)', serviceUrl: `${CALTRANS_CCTV_BASE}/d12/cctv/cctvStatusD12.json`, bbox: { minLon: -118.2, minLat: 33.2, maxLon: -117.4, maxLat: 34.1 } },
 ].map((area) => Object.freeze({ ...area, bbox: Object.freeze(area.bbox) })));
 
-export const SOURCES = deepFreeze({
+/** The deadline for one request to a source that has not cited a slower measurement.
+ *  Per source, not one number for the app: the GNIS names path is measured at 31 s.
+ *  Only the modules moved onto request.js read it so far (GNIS names, quad index, the NWS
+ *  forecast and alerts loaders); the rest still run at REQUEST_POLICY.timeoutMs until PR-B. */
+export const DEFAULT_SOURCE_TIMEOUT_MS = 10000;
+const withTimeouts = (sources) => Object.fromEntries(Object.entries(sources)
+  .map(([key, src]) => [key, { timeoutMs: DEFAULT_SOURCE_TIMEOUT_MS, ...src }]));
+
+export const SOURCES = deepFreeze(withTimeouts({
   usgsTopo: {
     id: 'usgsTopo',
     name: 'USGS Topo basemap',
@@ -298,6 +306,10 @@ export const SOURCES = deepFreeze({
     attribution: 'USGS Geographic Names Information System (GNIS) via The National Map',
     termsUrl: USGS_TERMS_URL,
     dateBasis: 'service-metadata',
+    // Keeps the old 20 s, not the 10 s default: source-terrain-names.js records measured
+    // latency up to 31 s, and a flat 10 s would make the place-names path time out routinely.
+    timeoutMs: 20000,
+    timeoutMeasured: 'up to 31 s (source-terrain-names.js, fetchJson)',
     // A published gazetteer compilation with a vintage, not a reading of today.
     claim: 'inventory',
     coverageSemantics: 'Named populated places and physical/hydrographic features from the federal '
@@ -2239,7 +2251,7 @@ export const SOURCES = deepFreeze({
       + 'picture was taken.',
     measuredOn: '2026-10-05',
   },
-});
+}));
 
 export const APPROVED_ORIGINS = Object.freeze(
   [...new Set(Object.values(SOURCES).map((s) => s.origin))].sort(),
