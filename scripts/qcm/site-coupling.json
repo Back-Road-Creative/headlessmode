@@ -47,6 +47,8 @@
     "scripts/qcm/layers-compact-browser.test.mjs",
     "scripts/qcm/layout.test.mjs",
     "scripts/qcm/layouts-scope.test.mjs",
+    "scripts/qcm/leak-cycles-browser.test.mjs",
+    "scripts/qcm/leak-heap-browser.test.mjs",
     "scripts/qcm/live-smoke.test.mjs",
     "scripts/qcm/map-ready-lifecycle.test.mjs",
     "scripts/qcm/map-resize-contain.test.mjs",

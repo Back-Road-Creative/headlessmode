@@ -57,7 +57,8 @@ import { fireLayer, fireReader, readPerimeters, summarise as fireSummarise, area
 import { terrainSlopeLayer, coverageText as terrainCoverageText } from './source-terrain-surface.js';
 import { attachTerrainControl } from './terrain-view.js';
 import { fetchBounded, createSearchGuard } from './source-terrain-names.js';
-import { fetchElevations, ELEVATION_SOURCE, pointElevationFact } from './source-elevation.js';
+import { fetchElevations, ELEVATION_SOURCE, ELEVATION_CACHE_LIMIT, pointElevationFact } from './source-elevation.js';
+import { createUrlSlot, createLru } from './leak-guards.js';
 import { KINDS as NAME_KINDS, namesPlanForView } from './terrain-names.js';
 import { placeScreenLabels, dedupeAgainstTownLabels, mergeStreamNames, isStaleGeneration, namesAdapterPayload, STATUS_MESSAGE, cappedMessage, nameCardLines, iconFor, SIZE_SCALE, labelFontSize, measureLabel } from './name-labels.js';
 import { fetchRoadNames, createRoadNamesFetcher } from './source-road-names.js';
@@ -2459,7 +2460,7 @@ function hillshadeModeArgs(state) {
  *  fetched blob straight to the overlay as an object URL. */
 function hillshadeContextLayer(mapL) {
   const layer = mapL.imageOverlay('', [[0, 0], [0, 0]], { opacity: 0.6, interactive: false, alt: '' });
-  let objectUrl = null;
+  const picture = createUrlSlot();
   layer.refresh = async function refresh(mapRef, lightState) {
     const b = mapRef.getBounds();
     const size = mapRef.getSize();
@@ -2468,15 +2469,19 @@ function hillshadeContextLayer(mapL) {
       bboxLonLat: { minLon: b.getWest(), minLat: b.getSouth(), maxLon: b.getEast(), maxLat: b.getNorth() },
       width: size.x, height: size.y, mode, azimuth, altitude,
     });
+    const ticket = picture.ticket();
     const result = await hillshadeFetcher.fetchImage(request);
     if (result.status === 'ready') {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      objectUrl = URL.createObjectURL(result.blob);
+      // Switched off while the fetch was in flight: release() outdated the ticket, so no url is made.
+      const objectUrl = picture.set(result.blob, ticket);
+      if (objectUrl === null) return { status: 'stale' };
       layer.setBounds(b);
       layer.setUrl(objectUrl);
     }
     return result;
   };
+  // Off the map, nothing shows the last picture, so its bytes go back with it.
+  layer.release = () => picture.release();
   return layer;
 }
 
@@ -2592,16 +2597,19 @@ async function renderHillshade() {
   const el = $('qcm-layer-hillshadeLight-report');
   if (!layers.hillshadeLight) {
     if (map.hasLayer(hillshade)) map.removeLayer(hillshade);
+    hillshade.release();
     if (el) { el.textContent = ''; el.hidden = true; }
     return;
   }
   renderSurfaceCaption();
   const result = await hillshade.refresh(map, hillshadeLight);
-  if (!map) return;
+  // Switched off while the picture was loading: the off branch above already cleared the row.
+  if (!map || !layersFromControls().hillshadeLight) return;
   if (result.status === 'ready') {
     if (!map.hasLayer(hillshade)) hillshade.addTo(map);
-  } else if (result.status !== 'stale' && map.hasLayer(hillshade)) {
-    map.removeLayer(hillshade);
+  } else if (result.status !== 'stale') {
+    if (map.hasLayer(hillshade)) map.removeLayer(hillshade);
+    hillshade.release();
   }
   if (!el) return;
   el.textContent = result.status === 'ready' || result.status === 'stale'
@@ -2959,7 +2967,7 @@ let elevationController = null;
 // renders), and only ever holds a settled answer: a metres number, or null
 // for NoData -- an error or an abort is never cached, so either still
 // retries on the next popupopen.
-const elevationCache = new Map();
+const elevationCache = createLru(ELEVATION_CACHE_LIMIT);
 // The cache above only helps once an answer has landed. A redraw that lands
 // WHILE the answer is still loading (town labels or the bulk names answer
 // arriving, a pan settling, the Places list reselecting the same row) also
@@ -4356,9 +4364,10 @@ for (const el of document.querySelectorAll('.qcm-controls select, .qcm-controls 
 // One sheet of paper, once per printer: the scale error and the unprintable margin
 // are the only two things the zero-paper CI proof cannot settle. No route and no
 // link — the flag is the whole entry point.
+const calibrationUrl = createUrlSlot();
 async function offerCalibrationSheet() {
   const bytes = await createCalibrationPdf({ PDFLib }), a = $('qcm-calibration-download');
-  a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+  a.href = calibrationUrl.set(new Blob([bytes], { type: 'application/pdf' }));
   a.hidden = false;
   say('Calibration sheet ready. Print ONE copy at Actual size / 100% with Fit and Shrink off, then read the instructions on the sheet.');
 }
@@ -4367,11 +4376,12 @@ $('qcm-calibrate').addEventListener('click', () => { offerCalibrationSheet().cat
 // The key on its own sheet: what the chosen layers CAN draw, before any sheet of
 // the set is spent. Same layer choice and grid the on-page key reads, so the two
 // cannot disagree; its own anchor, so it never takes the map PDF's.
+const keySheetUrl = createUrlSlot();
 async function offerKeySheet() {
   const layers = state.recipe ? state.recipe.layers : controls().layers;
   const bytes = await createKeySheetPdf({ PDFLib, layers, grid: checked('qcm-grid'), states: state.areaStates });
   const a = $('qcm-key-sheet-download');
-  a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' })); a.download = 'field-maps-key.pdf';
+  a.href = keySheetUrl.set(new Blob([bytes], { type: 'application/pdf' })); a.download = 'field-maps-key.pdf';
   a.hidden = false;
   say('Map key ready: every symbol the chosen layers can draw, with the notices they oblige. Print at Actual size / 100%.');
 }
