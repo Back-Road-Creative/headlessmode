@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Influence Diagrams — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-risk">Risk</a> &gt; <span aria-current="page">Influence Diagrams</span></nav>
+
+
+
+<h1>Influence Diagrams</h1>
+<p><em>Risk technique</em> ·
+   <a href="map-all#node-technique:influence_diagrams">See it on the map</a></p>
+<p>Guide only — A diagram builder could serve this.</p>
+<p>A network diagram showing how decisions, uncertain events, and outcomes affect one another.</p>
+<h2>When to use it</h2><p>When a decision involves several interacting uncertain factors that would make a decision tree&#39;s branches multiply out of hand, and you want a single diagram that shows what depends on what without enumerating every combination explicitly.</p>
+<h2>When to avoid it</h2><p>For a decision simple enough that a decision tree already communicates it clearly — an influence diagram trades the tree&#39;s readable branch-by-branch payoffs for compactness, and that trade isn&#39;t worth it when there&#39;s nothing to compress. It&#39;s also a weaker tool than a tree for actually walking a <dfn><a href="glossary#stakeholder">stakeholder</a></dfn> through why a specific choice wins.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-influence-diagrams-0"> Identify the decision points, uncertain (chance) factors, and final outcome measures relevant to the situation.</label></li>
+
+<li><label><input type="checkbox" id="step-influence-diagrams-1"> Draw a node for each: typically a rectangle for a decision, an oval for an uncertain factor, and a diamond or rounded shape for an outcome value.</label></li>
+
+<li><label><input type="checkbox" id="step-influence-diagrams-2"> Draw an arrow between any two nodes where one directly influences the other — this is the diagram&#39;s main content, and getting it right requires genuinely understanding the causal structure, not just listing everything you know about.</label></li>
+
+<li><label><input type="checkbox" id="step-influence-diagrams-3"> Check the diagram for cycles; a decision-support diagram should resolve in one direction, decisions and chance factors flowing toward the outcome.</label></li>
+
+<li><label><input type="checkbox" id="step-influence-diagrams-4"> Use the diagram to identify which factors most directly drive the outcome, and to check whether a proposed decision addresses a real influence or a coincidental one.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A network diagram of decisions, uncertain factors, and outcomes with directional influence relationships marked.</li><li>A shared, checkable picture of what the team believes drives the outcome — useful for spotting a disagreement about causation before it becomes a disagreement about the decision.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Drawing every factor anyone mentions instead of only the ones with a real influence relationship, which produces a diagram too tangled to read — the opposite of what it&#39;s for.</li><li>Treating the arrows as proven causation when they&#39;re really the team&#39;s working assumption; the diagram is only as good as the shared understanding behind it.</li><li>Using this in place of a decision tree when a stakeholder actually needs to see the specific expected-value comparison between two named choices — the diagram doesn&#39;t compute a number the way a tree&#39;s EMV rollup does.</li></ul>
+
+
+<h2>Worked example</h2><p>A product launch decision involves three interacting uncertainties: competitor timing, manufacturing yield, and a regulatory approval date. Rather than drawing eight separate decision-tree branches for every combination, the team draws one influence diagram: an arrow from &#39;regulatory approval date&#39; to &#39;launch window,&#39; one from &#39;manufacturing yield&#39; to &#39;units available at launch,&#39; and one from &#39;competitor timing&#39; to &#39;pricing decision.&#39; The diagram makes visible that pricing and launch timing are influenced by different, independent factors — a fact the team had been implicitly treating as one combined risk.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §11.4.2.5</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-11.4">Perform Quantitative Risk Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-contingent-response-strategies">Contingent Response Strategies</a></li>
+
+      <li><a href="techniques-decision-tree-analysis">Decision Tree Analysis</a></li>
+
+      <li><a href="techniques-prompt-lists">Prompt Lists</a></li>
+
+      <li><a href="techniques-representations-of-uncertainty">Representations of Uncertainty</a></li>
+
+      <li><a href="techniques-risk-categorization">Risk Categorization</a></li>
+
+      <li><a href="techniques-risk-probability-and-impact-assessment">Risk Probability and Impact Assessment</a></li>
+
+      <li><a href="techniques-sensitivity-analysis">Sensitivity Analysis</a></li>
+
+      <li><a href="techniques-simulation">Simulation</a></li>
+
+      <li><a href="techniques-strategies-for-opportunities">Strategies for Opportunities</a></li>
+
+      <li><a href="techniques-strategies-for-overall-project-risk">Strategies for Overall Project Risk</a></li>
+
+      <li><a href="techniques-strategies-for-threats">Strategies for Threats</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:influence_diagrams">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

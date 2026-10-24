@@ -1,0 +1,12 @@
+{
+  "product": "framegrade",
+  "images": {
+    "home.svg": {
+      "source": null,
+      "captured_at": "2026-10-19T08:50:00-04:00",
+      "viewport": "800x500",
+      "scenario": "home page: designed tile, not a screenshot (one frame, flat on the left, graded on the right)",
+      "alt": "Illustration of what Framegrade does: one landscape frame, flat and gray on the left, graded with color on the right"
+    }
+  }
+}

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test and Inspection Planning — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-quality">Quality</a> &gt; <span aria-current="page">Test and Inspection Planning</span></nav>
+
+
+
+<h1>Test and Inspection Planning</h1>
+<p><em>Quality technique</em> ·
+   <a href="map-all#node-technique:test_and_inspection_planning">See it on the map</a></p>
+<p>Guide only — Deciding what and how to test is a judgment call.</p>
+<p>Deciding, while quality is still being planned, what will be checked, how, and when.</p>
+<h2>When to use it</h2><p>Any deliverable with acceptance criteria worth verifying before handoff — essentially always, with the plan&#39;s weight scaled to the deliverable&#39;s risk.</p>
+<h2>When to avoid it</h2><p>Building an elaborate test and inspection plan for a trivial, low-risk deliverable where a quick visual check is proportionate — the planning overhead should stay smaller than what it&#39;s protecting.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-test-and-inspection-planning-0"> List the deliverables and, for each, the acceptance criteria it must meet.</label></li>
+
+<li><label><input type="checkbox" id="step-test-and-inspection-planning-1"> For each criterion, choose a verification method — 100% inspection, statistical sampling, functional test, or a professional/regulatory sign-off — matched to how costly a miss would be.</label></li>
+
+<li><label><input type="checkbox" id="step-test-and-inspection-planning-2"> Decide timing: inspect at the point a defect is cheapest to catch, such as before it&#39;s covered by the next trade, not only at final handoff.</label></li>
+
+<li><label><input type="checkbox" id="step-test-and-inspection-planning-3"> Assign who performs each check and who has authority to reject.</label></li>
+
+<li><label><input type="checkbox" id="step-test-and-inspection-planning-4"> Define pass/fail thresholds in writing up front, so acceptance isn&#39;t negotiated in the moment.</label></li>
+
+<li><label><input type="checkbox" id="step-test-and-inspection-planning-5"> Build the resulting checks into the schedule as real activities with duration and dependencies, not an afterthought tacked onto the end.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A test and inspection plan naming what gets checked, how, when, by whom, and against what threshold.</li><li>Inspection points built into the project schedule.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Planning inspection only at final handoff, so a defect that could have been caught mid-process — and cheaply reworked — is instead discovered after it&#39;s buried under later work.</li><li>Vague thresholds like &#39;looks good&#39; decided in the moment rather than specified in advance, which turns acceptance into a negotiation.</li><li>Planning tests for the deliverables that are easy to test rather than the ones that are actually risky.</li></ul>
+
+
+<h2>Worked example</h2><p>For a deck-building job, Larch &amp; Rowe plans a footing-depth inspection before backfill (cheap to fix wrong now, impossible after), a racking check before decking goes down, and a final walkthrough against the client&#39;s written acceptance criteria — each with a named inspector and a documented pass threshold, built into the schedule as its own line rather than assumed to happen &#39;at the end.&#39;</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §8.1</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-8.1">Plan Quality Management</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-audits">Audits</a></li>
+
+      <li><a href="techniques-design-for-x">Design for X</a></li>
+
+      <li><a href="techniques-problem-solving">Problem Solving</a></li>
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+      <li><a href="techniques-root-cause-analysis">Root Cause Analysis</a></li>
+
+      <li><a href="techniques-testing-product-evaluations">Testing Product Evaluations</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:test_and_inspection_planning">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cost Aggregation — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-cost">Cost</a> &gt; <span aria-current="page">Cost Aggregation</span></nav>
+
+
+
+<h1>Cost Aggregation</h1>
+<p><em>Cost technique</em> ·
+   <a href="map-all#node-technique:cost_aggregation">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Adding up cost estimates from the smallest tasks up through the whole project into one traceable budget.</p>
+<h2>When to use it</h2><p>Whenever you need a cost <dfn><a href="glossary#baseline">baseline</a></dfn> that survives being questioned: every figure at every level should be recoverable by adding the level below it. Do it once the <dfn><a href="glossary#wbs">WBS</a></dfn> is stable enough that work packages won&#39;t keep moving between control accounts.</p>
+<h2>When to avoid it</h2><p>Don&#39;t re-aggregate from scratch every time one estimate changes — that&#39;s how a spreadsheet turns into an hour of clicking. If the <dfn><a href="glossary#wbs">WBS</a></dfn> itself is still churning, aggregate loosely and re-<dfn><a href="glossary#baseline">baseline</a></dfn> later rather than chasing a moving structure to the penny.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-cost-aggregation-0"> Confirm every work package has exactly one owning control account; a package counted in two accounts double-books the budget.</label></li>
+
+<li><label><input type="checkbox" id="step-cost-aggregation-1"> Sum work package estimates up to each control account.</label></li>
+
+<li><label><input type="checkbox" id="step-cost-aggregation-2"> Sum control accounts up to the project total (BAC).</label></li>
+
+<li><label><input type="checkbox" id="step-cost-aggregation-3"> Add contingency reserve at the account or project level, not inside individual work package estimates, so it stays visible as reserve.</label></li>
+
+<li><label><input type="checkbox" id="step-cost-aggregation-4"> Publish the rolled-up total as the cost baseline and record the date it was approved.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A cost baseline: one total, traceable down to every work package that makes it up.</li><li>A control-account-by-control-account breakdown usable for later variance reporting.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>A work package attached to two control accounts, silently doubling its cost in the rollup.</li><li>Contingency buried inside individual estimates instead of held visibly at the account level, so nobody can later tell how much cushion is left.</li><li>Aggregating before the WBS is stable, then re-aggregating every time a package moves, instead of waiting for a natural re-baseline point.</li></ul>
+
+
+<h2>Worked example</h2><p>A tenant-improvement build-out has three control accounts: Demolition, MEP rough-in, and Finishes. Demolition sums four work packages to $38,000; MEP rough-in sums seven to $164,500; Finishes sums nine to $97,200. The project total, before reserve, is $299,700. The team adds $18,000 of contingency reserve at the project level, giving a BAC of $317,700 that a stakeholder can trace back to any of the twenty work packages underneath it.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §7.3.2.2</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-7.3">Determine Budget</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-cost-of-quality">Cost of Quality</a></li>
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+      <li><a href="techniques-financing">Financing</a></li>
+
+      <li><a href="techniques-funding-limit-reconciliation">Funding Limit Reconciliation</a></li>
+
+      <li><a href="techniques-historical-information-review">Historical Information Review</a></li>
+
+      <li><a href="techniques-reserve-analysis">Reserve Analysis</a></li>
+
+      <li><a href="techniques-to-complete-performance-index">To-Complete Performance Index</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-cost-baseline">Cost Baseline</a></li>
+
+      <li><a href="artifacts-project-funding-requirements">Project Funding Requirements</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:cost_aggregation">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

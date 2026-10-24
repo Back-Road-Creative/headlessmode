@@ -1,0 +1,2242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kanban</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods" aria-current="page">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="methods">Methods</a> &gt; <span aria-current="page">Kanban</span></nav>
+
+<h1>Kanban</h1>
+<p>A way of managing ongoing work by making it visible, capping how much runs at once, and improving steadily.</p>
+<p class="provenance">Source: Essential Kanban Condensed, 2016 edition (Anderson &amp; Carmichael, Lean Kanban University).</p>
+
+
+
+
+
+
+
+<h2>Event</h2>
+<dl class="technique-index">
+
+  <dt id="kanban_meeting">Kanban Meeting</dt>
+  <dd>A short daily meeting where the team looks at the board and plans its next step.
+
+    <br><small>Crosswalk: Meetings</small>
+
+
+
+<section class="related" aria-labelledby="related-kanban_meeting-heading">
+  <h2 id="related-kanban_meeting-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-kanban_meeting-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-kanban_meeting-0">
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-kanban_meeting-1">Other Kanban practices</h3>
+    <ul aria-labelledby="related-kanban_meeting-1">
+
+      <li><a href="methods-kanban#replenishment_meeting">Replenishment Meeting</a></li>
+
+      <li><a href="methods-kanban#delivery_planning_meeting">Delivery Planning Meeting</a></li>
+
+      <li><a href="methods-kanban#service_delivery_review">Service Delivery Review</a></li>
+
+      <li><a href="methods-kanban#operations_review">Operations Review</a></li>
+
+      <li><a href="methods-kanban#risk_review">Risk Review</a></li>
+
+      <li><a href="methods-kanban#strategy_review">Strategy Review</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-kanban_meeting-2">Map</h3>
+    <ul aria-labelledby="related-kanban_meeting-2">
+
+      <li><a href="map-all#node-technique:meetings">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="kanban_meeting-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>It stays short, stays focused on the board, and ends with clear next steps rather than open discussion.</li><li>It happens at the same time and place every day so it becomes a habit, not an event to schedule around.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>It turns into a long status meeting where each person narrates their day instead of the team looking at the board together.</li><li>It gets skipped whenever the team feels busy, which is exactly when it would help most.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="replenishment_meeting">Replenishment Meeting</dt>
+  <dd>A regular meeting where new work is chosen and pulled onto the board.
+
+    <br><small>Crosswalk: Meetings</small>
+
+
+
+<section class="related" aria-labelledby="related-replenishment_meeting-heading">
+  <h2 id="related-replenishment_meeting-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-replenishment_meeting-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-replenishment_meeting-0">
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-replenishment_meeting-1">Other Kanban practices</h3>
+    <ul aria-labelledby="related-replenishment_meeting-1">
+
+      <li><a href="methods-kanban#kanban_meeting">Kanban Meeting</a></li>
+
+      <li><a href="methods-kanban#delivery_planning_meeting">Delivery Planning Meeting</a></li>
+
+      <li><a href="methods-kanban#service_delivery_review">Service Delivery Review</a></li>
+
+      <li><a href="methods-kanban#operations_review">Operations Review</a></li>
+
+      <li><a href="methods-kanban#risk_review">Risk Review</a></li>
+
+      <li><a href="methods-kanban#strategy_review">Strategy Review</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-replenishment_meeting-2">Map</h3>
+    <ul aria-labelledby="related-replenishment_meeting-2">
+
+      <li><a href="map-all#node-technique:meetings">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="replenishment_meeting-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>It runs on its own cadence, separate from the daily meeting, and only pulls in work that is genuinely ready.</li><li>What gets pulled in is limited to what the board&#39;s own capacity can actually absorb next.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>It gets skipped, so new work is added to the board ad hoc whenever someone thinks of it.</li><li>Items are pulled in before they are ready, so they stall on the board waiting for information that should have been settled first.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="delivery_planning_meeting">Delivery Planning Meeting</dt>
+  <dd>A regular meeting where the team plans the next delivery of finished work.
+
+    <br><small>Crosswalk: Meetings</small>
+
+
+
+<section class="related" aria-labelledby="related-delivery_planning_meeting-heading">
+  <h2 id="related-delivery_planning_meeting-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-delivery_planning_meeting-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-delivery_planning_meeting-0">
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-delivery_planning_meeting-1">Other Kanban practices</h3>
+    <ul aria-labelledby="related-delivery_planning_meeting-1">
+
+      <li><a href="methods-kanban#kanban_meeting">Kanban Meeting</a></li>
+
+      <li><a href="methods-kanban#replenishment_meeting">Replenishment Meeting</a></li>
+
+      <li><a href="methods-kanban#service_delivery_review">Service Delivery Review</a></li>
+
+      <li><a href="methods-kanban#operations_review">Operations Review</a></li>
+
+      <li><a href="methods-kanban#risk_review">Risk Review</a></li>
+
+      <li><a href="methods-kanban#strategy_review">Strategy Review</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-delivery_planning_meeting-2">Map</h3>
+    <ul aria-labelledby="related-delivery_planning_meeting-2">
+
+      <li><a href="map-all#node-technique:meetings">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="service_delivery_review">Service Delivery Review</dt>
+  <dd>A regular review of how well the service is meeting its delivery targets.
+
+    <br><small>Crosswalk: 8.3</small>
+
+
+
+<section class="related" aria-labelledby="related-service_delivery_review-heading">
+  <h2 id="related-service_delivery_review-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-service_delivery_review-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-service_delivery_review-0">
+
+      <li><a href="pmbok-8.3">Control Quality</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-service_delivery_review-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-service_delivery_review-1">
+
+      <li><a href="techniques-data-gathering">Data Gathering</a></li>
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-inspection">Inspection</a></li>
+
+      <li><a href="techniques-testing-product-evaluations">Testing Product Evaluations</a></li>
+
+      <li><a href="techniques-data-representation">Data Representation</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-service_delivery_review-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-service_delivery_review-2">
+
+      <li><a href="artifacts-quality-control-measurements">Quality Control Measurements</a></li>
+
+      <li><a href="artifacts-verified-deliverables">Verified Deliverables</a></li>
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+      <li><a href="artifacts-deliverables">Deliverables</a></li>
+
+      <li><a href="artifacts-work-performance-data">Work Performance Data</a></li>
+
+      <li><a href="artifacts-approved-change-requests">Approved Change Requests</a></li>
+
+      <li><a href="artifacts-test-and-evaluation-documents">Test and Evaluation Documents</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-service_delivery_review-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-service_delivery_review-3">
+
+      <li><a href="methods-kanban#kanban_meeting">Kanban Meeting</a></li>
+
+      <li><a href="methods-kanban#replenishment_meeting">Replenishment Meeting</a></li>
+
+      <li><a href="methods-kanban#delivery_planning_meeting">Delivery Planning Meeting</a></li>
+
+      <li><a href="methods-kanban#operations_review">Operations Review</a></li>
+
+      <li><a href="methods-kanban#risk_review">Risk Review</a></li>
+
+      <li><a href="methods-kanban#strategy_review">Strategy Review</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-service_delivery_review-4">Map</h3>
+    <ul aria-labelledby="related-service_delivery_review-4">
+
+      <li><a href="map-all#node-process:8.3">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="operations_review">Operations Review</dt>
+  <dd>A regular review across teams of how the whole operation is performing.
+
+    <br><small>Crosswalk: 4.5</small>
+
+
+
+<section class="related" aria-labelledby="related-operations_review-heading">
+  <h2 id="related-operations_review-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-operations_review-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-operations_review-0">
+
+      <li><a href="pmbok-4.5">Monitor and Control Project Work</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-operations_review-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-operations_review-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-decision-making">Decision Making</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-operations_review-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-operations_review-2">
+
+      <li><a href="artifacts-work-performance-reports">Work Performance Reports</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+      <li><a href="artifacts-issue-log">Issue Log</a></li>
+
+      <li><a href="artifacts-cost-forecasts">Cost Forecasts</a></li>
+
+      <li><a href="artifacts-schedule-forecasts">Schedule Forecasts</a></li>
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-operations_review-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-operations_review-3">
+
+      <li><a href="methods-kanban#kanban_meeting">Kanban Meeting</a></li>
+
+      <li><a href="methods-kanban#replenishment_meeting">Replenishment Meeting</a></li>
+
+      <li><a href="methods-kanban#delivery_planning_meeting">Delivery Planning Meeting</a></li>
+
+      <li><a href="methods-kanban#service_delivery_review">Service Delivery Review</a></li>
+
+      <li><a href="methods-kanban#risk_review">Risk Review</a></li>
+
+      <li><a href="methods-kanban#strategy_review">Strategy Review</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-operations_review-4">Map</h3>
+    <ul aria-labelledby="related-operations_review-4">
+
+      <li><a href="map-all#node-process:4.5">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="risk_review">Risk Review</dt>
+  <dd>A regular review of the risks facing the work and how they are being handled.
+
+    <br><small>Crosswalk: 11.7</small>
+
+
+
+<section class="related" aria-labelledby="related-risk_review-heading">
+  <h2 id="related-risk_review-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-risk_review-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-risk_review-0">
+
+      <li><a href="pmbok-11.7">Monitor Risks</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-risk_review-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-risk_review-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-audits">Audits</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-risk_review-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-risk_review-2">
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+      <li><a href="artifacts-risk-management-plan">Risk Management Plan</a></li>
+
+      <li><a href="artifacts-issue-log">Issue Log</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-work-performance-data">Work Performance Data</a></li>
+
+      <li><a href="artifacts-work-performance-reports">Work Performance Reports</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-risk_review-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-risk_review-3">
+
+      <li><a href="methods-kanban#kanban_meeting">Kanban Meeting</a></li>
+
+      <li><a href="methods-kanban#replenishment_meeting">Replenishment Meeting</a></li>
+
+      <li><a href="methods-kanban#delivery_planning_meeting">Delivery Planning Meeting</a></li>
+
+      <li><a href="methods-kanban#service_delivery_review">Service Delivery Review</a></li>
+
+      <li><a href="methods-kanban#operations_review">Operations Review</a></li>
+
+      <li><a href="methods-kanban#strategy_review">Strategy Review</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-risk_review-4">Map</h3>
+    <ul aria-labelledby="related-risk_review-4">
+
+      <li><a href="map-all#node-process:11.7">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="strategy_review">Strategy Review</dt>
+  <dd>A periodic review of whether the work still serves the organization&#39;s direction.
+
+    <br><small>Crosswalk: 4.1</small>
+
+
+
+<section class="related" aria-labelledby="related-strategy_review-heading">
+  <h2 id="related-strategy_review-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-strategy_review-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-strategy_review-0">
+
+      <li><a href="pmbok-4.1">Develop Project Charter</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-strategy_review-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-strategy_review-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-data-gathering">Data Gathering</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-strategy_review-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-strategy_review-2">
+
+      <li><a href="artifacts-project-charter">Project Charter</a></li>
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+      <li><a href="artifacts-business-case">Business Case</a></li>
+
+      <li><a href="artifacts-benefits-management-plan">Benefits Management Plan</a></li>
+
+      <li><a href="artifacts-agreements-initial">Agreements Initial</a></li>
+
+      <li><a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-strategy_review-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-strategy_review-3">
+
+      <li><a href="methods-kanban#kanban_meeting">Kanban Meeting</a></li>
+
+      <li><a href="methods-kanban#replenishment_meeting">Replenishment Meeting</a></li>
+
+      <li><a href="methods-kanban#delivery_planning_meeting">Delivery Planning Meeting</a></li>
+
+      <li><a href="methods-kanban#service_delivery_review">Service Delivery Review</a></li>
+
+      <li><a href="methods-kanban#operations_review">Operations Review</a></li>
+
+      <li><a href="methods-kanban#risk_review">Risk Review</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-strategy_review-4">Map</h3>
+    <ul aria-labelledby="related-strategy_review-4">
+
+      <li><a href="map-all#node-process:4.1">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+</dl>
+
+
+
+
+<h2>Artifact</h2>
+<dl class="technique-index">
+
+  <dt id="kanban_board">Kanban Board</dt>
+  <dd>A shared board with a column for each stage of the workflow.
+
+    <br><small>Crosswalk: Data Representation</small>
+
+
+
+<section class="related" aria-labelledby="related-kanban_board-heading">
+  <h2 id="related-kanban_board-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-kanban_board-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-kanban_board-0">
+
+      <li><a href="techniques-data-representation">Data Representation</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-kanban_board-1">Other Kanban practices</h3>
+    <ul aria-labelledby="related-kanban_board-1">
+
+      <li><a href="methods-kanban#card">Card</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-kanban_board-2">Map</h3>
+    <ul aria-labelledby="related-kanban_board-2">
+
+      <li><a href="map-all#node-technique:data_representation">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="card">Card</dt>
+  <dd>One card for one piece of work, moved across the board as its state changes.
+
+    <br><small>Crosswalk: 5.4</small>
+
+
+
+<section class="related" aria-labelledby="related-card-heading">
+  <h2 id="related-card-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-card-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-card-0">
+
+      <li><a href="pmbok-5.4">Create WBS</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-card-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-card-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-decomposition">Decomposition</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-card-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-card-2">
+
+      <li><a href="artifacts-scope-baseline">Scope Baseline</a></li>
+
+      <li><a href="artifacts-scope-management-plan">Scope Management Plan</a></li>
+
+      <li><a href="artifacts-project-scope-statement">Project Scope Statement</a></li>
+
+      <li><a href="artifacts-requirements-documentation">Requirements Documentation</a></li>
+
+      <li><a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-card-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-card-3">
+
+      <li><a href="methods-kanban#kanban_board">Kanban Board</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-card-4">Map</h3>
+    <ul aria-labelledby="related-card-4">
+
+      <li><a href="map-all#node-process:5.4">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+</dl>
+
+
+
+
+<h2>Policy</h2>
+<dl class="technique-index">
+
+  <dt id="visualize_workflow">Visualize the Workflow</dt>
+  <dd>A board that shows every piece of work and which stage it is in.
+
+    <br><small>Crosswalk: Data Representation</small>
+
+
+
+<section class="related" aria-labelledby="related-visualize_workflow-heading">
+  <h2 id="related-visualize_workflow-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-visualize_workflow-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-visualize_workflow-0">
+
+      <li><a href="techniques-data-representation">Data Representation</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-visualize_workflow-1">Other Kanban practices</h3>
+    <ul aria-labelledby="related-visualize_workflow-1">
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-visualize_workflow-2">Map</h3>
+    <ul aria-labelledby="related-visualize_workflow-2">
+
+      <li><a href="map-all#node-technique:data_representation">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="visualize_workflow-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>The board&#39;s columns match the path work actually follows, not an idealized version of it.</li><li>Every piece of work in progress has a card on the board, with nothing moving through a side channel the board can&#39;t see.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>Hidden work never gets a card, so the board stops reflecting what people are actually doing.</li><li>The board is updated in a weekly meeting instead of as work actually moves, so it is always stale.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="limit_work_in_progress">Limit Work in Progress</dt>
+  <dd>A hard cap on how many items each stage of work may hold at once.
+
+    <br><small>Crosswalk: Resource Optimization</small>
+
+
+
+<section class="related" aria-labelledby="related-limit_work_in_progress-heading">
+  <h2 id="related-limit_work_in_progress-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-limit_work_in_progress-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-limit_work_in_progress-0">
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-limit_work_in_progress-1">Other Kanban practices</h3>
+    <ul aria-labelledby="related-limit_work_in_progress-1">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-limit_work_in_progress-2">Map</h3>
+    <ul aria-labelledby="related-limit_work_in_progress-2">
+
+      <li><a href="map-all#node-technique:resource_optimization">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="limit_work_in_progress-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>Each column&#39;s limit is a hard cap that holds even when it would be convenient to start one more thing.</li><li>When a column is at its limit, the team helps clear it rather than starting new work elsewhere.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>The limit gets raised whenever it becomes inconvenient, until it no longer limits anything.</li><li>Limits are set once and never revisited even as the team&#39;s capacity changes.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="manage_flow">Manage Flow</dt>
+  <dd>Watching how smoothly items move through the stages to catch delays early.
+
+    <br><small>Crosswalk: 6.6</small>
+
+
+
+<section class="related" aria-labelledby="related-manage_flow-heading">
+  <h2 id="related-manage_flow-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-manage_flow-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-manage_flow-0">
+
+      <li><a href="pmbok-6.6">Control Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-manage_flow-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-manage_flow-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-manage_flow-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-manage_flow-2">
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+      <li><a href="artifacts-schedule-forecasts">Schedule Forecasts</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-work-performance-data">Work Performance Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-manage_flow-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-manage_flow-3">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-manage_flow-4">Map</h3>
+    <ul aria-labelledby="related-manage_flow-4">
+
+      <li><a href="map-all#node-process:6.6">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="manage_flow-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>Cycle time and where items stall are watched as a trend over many items, not judged from one anecdote.</li><li>A stall gets attention while the item is still on the board, not after it finally ships.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>Flow metrics are collected and displayed but nobody acts on what they show.</li><li>Attention only goes to the newest or loudest item, not the one that has actually stalled longest.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="make_policies_explicit">Make Policies Explicit</dt>
+  <dd>Writing down the rules for moving work forward so everyone applies them the same way.
+
+    <br><small>Crosswalk: 8.1</small>
+
+
+
+<section class="related" aria-labelledby="related-make_policies_explicit-heading">
+  <h2 id="related-make_policies_explicit-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-make_policies_explicit-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-make_policies_explicit-0">
+
+      <li><a href="pmbok-8.1">Plan Quality Management</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-make_policies_explicit-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-make_policies_explicit-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-data-gathering">Data Gathering</a></li>
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-cost-of-quality">Cost of Quality</a></li>
+
+      <li><a href="techniques-decision-making">Decision Making</a></li>
+
+      <li><a href="techniques-data-representation">Data Representation</a></li>
+
+      <li><a href="techniques-test-and-inspection-planning">Test and Inspection Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-make_policies_explicit-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-make_policies_explicit-2">
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-project-charter">Project Charter</a></li>
+
+      <li><a href="artifacts-requirements-management-plan">Requirements Management Plan</a></li>
+
+      <li><a href="artifacts-risk-management-plan">Risk Management Plan</a></li>
+
+      <li><a href="artifacts-stakeholder-engagement-plan">Stakeholder Engagement Plan</a></li>
+
+      <li><a href="artifacts-scope-baseline">Scope Baseline</a></li>
+
+      <li><a href="artifacts-requirements-documentation">Requirements Documentation</a></li>
+
+      <li><a href="artifacts-stakeholder-register">Stakeholder Register</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-make_policies_explicit-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-make_policies_explicit-3">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-make_policies_explicit-4">Map</h3>
+    <ul aria-labelledby="related-make_policies_explicit-4">
+
+      <li><a href="map-all#node-process:8.1">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="make_policies_explicit-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>The rules for moving work forward are written down somewhere everyone can reach, not kept in one person&#39;s head.</li><li>A dispute about whether an item can move gets settled by pointing at the written policy.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>The real rule for moving work only exists as one senior person&#39;s judgment, so decisions vary by who is asked.</li><li>Policies are written once and never checked against how work is actually moving.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="implement_feedback_loops">Implement Feedback Loops</dt>
+  <dd>Holding the regular reviews below so the process itself keeps improving.
+
+    <br><small>Crosswalk: Meetings</small>
+
+
+
+<section class="related" aria-labelledby="related-implement_feedback_loops-heading">
+  <h2 id="related-implement_feedback_loops-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-implement_feedback_loops-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-implement_feedback_loops-0">
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-implement_feedback_loops-1">Other Kanban practices</h3>
+    <ul aria-labelledby="related-implement_feedback_loops-1">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-implement_feedback_loops-2">Map</h3>
+    <ul aria-labelledby="related-implement_feedback_loops-2">
+
+      <li><a href="map-all#node-technique:meetings">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="improve_collaboratively">Improve Collaboratively</dt>
+  <dd>Changing the process one small, agreed step at a time, based on the evidence.
+
+    <br><small>Crosswalk: 8.2</small>
+
+
+
+<section class="related" aria-labelledby="related-improve_collaboratively-heading">
+  <h2 id="related-improve_collaboratively-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-improve_collaboratively-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-improve_collaboratively-0">
+
+      <li><a href="pmbok-8.2">Manage Quality</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-improve_collaboratively-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-improve_collaboratively-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-root-cause-analysis">Root Cause Analysis</a></li>
+
+      <li><a href="techniques-audits">Audits</a></li>
+
+      <li><a href="techniques-design-for-x">Design for X</a></li>
+
+      <li><a href="techniques-problem-solving">Problem Solving</a></li>
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-improve_collaboratively-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-improve_collaboratively-2">
+
+      <li><a href="artifacts-quality-report">Quality Report</a></li>
+
+      <li><a href="artifacts-test-and-evaluation-documents">Test and Evaluation Documents</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-quality-control-measurements">Quality Control Measurements</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-improve_collaboratively-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-improve_collaboratively-3">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-improve_collaboratively-4">Map</h3>
+    <ul aria-labelledby="related-improve_collaboratively-4">
+
+      <li><a href="map-all#node-process:8.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="start_with_what_you_do_now">Start With What You Do Now</dt>
+  <dd>Begin with the way work happens today instead of redesigning it first.
+
+    <br><small>Crosswalk: none — PMBOK-6 assumes a plan precedes execution; it carries no principle of starting from the current, unchanged process.</small>
+
+
+
+<section class="related" aria-labelledby="related-start_with_what_you_do_now-heading">
+  <h2 id="related-start_with_what_you_do_now-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-start_with_what_you_do_now-0">Other Kanban practices</h3>
+    <ul aria-labelledby="related-start_with_what_you_do_now-0">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-start_with_what_you_do_now-1">Map</h3>
+    <ul aria-labelledby="related-start_with_what_you_do_now-1">
+
+      <li><a href="map">See the whole map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="pursue_incremental_change">Pursue Incremental Change</dt>
+  <dd>Agree to make small, gradual improvements rather than one big overhaul.
+
+    <br><small>Crosswalk: 8.2</small>
+
+
+
+<section class="related" aria-labelledby="related-pursue_incremental_change-heading">
+  <h2 id="related-pursue_incremental_change-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-pursue_incremental_change-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-pursue_incremental_change-0">
+
+      <li><a href="pmbok-8.2">Manage Quality</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pursue_incremental_change-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-pursue_incremental_change-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-root-cause-analysis">Root Cause Analysis</a></li>
+
+      <li><a href="techniques-audits">Audits</a></li>
+
+      <li><a href="techniques-design-for-x">Design for X</a></li>
+
+      <li><a href="techniques-problem-solving">Problem Solving</a></li>
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pursue_incremental_change-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-pursue_incremental_change-2">
+
+      <li><a href="artifacts-quality-report">Quality Report</a></li>
+
+      <li><a href="artifacts-test-and-evaluation-documents">Test and Evaluation Documents</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-quality-control-measurements">Quality Control Measurements</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pursue_incremental_change-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-pursue_incremental_change-3">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pursue_incremental_change-4">Map</h3>
+    <ul aria-labelledby="related-pursue_incremental_change-4">
+
+      <li><a href="map-all#node-process:8.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="encourage_leadership_at_every_level">Encourage Leadership at Every Level</dt>
+  <dd>Support anyone, not only managers, in acting to improve how work gets done.
+
+    <br><small>Crosswalk: none — PMBOK-6 assigns improvement authority to named roles (sponsor, manager); it names no principle of leadership from any level.</small>
+
+
+
+<section class="related" aria-labelledby="related-encourage_leadership_at_every_level-heading">
+  <h2 id="related-encourage_leadership_at_every_level-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-encourage_leadership_at_every_level-0">Other Kanban practices</h3>
+    <ul aria-labelledby="related-encourage_leadership_at_every_level-0">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-encourage_leadership_at_every_level-1">Map</h3>
+    <ul aria-labelledby="related-encourage_leadership_at_every_level-1">
+
+      <li><a href="map">See the whole map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="focus_on_customer_needs">Focus on Customer Needs</dt>
+  <dd>Understand and focus on what the customer actually expects.
+
+    <br><small>Crosswalk: 5.2</small>
+
+
+
+<section class="related" aria-labelledby="related-focus_on_customer_needs-heading">
+  <h2 id="related-focus_on_customer_needs-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-focus_on_customer_needs-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-focus_on_customer_needs-0">
+
+      <li><a href="pmbok-5.2">Collect Requirements</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-focus_on_customer_needs-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-focus_on_customer_needs-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-data-gathering">Data Gathering</a></li>
+
+      <li><a href="techniques-benchmarking">Benchmarking</a></li>
+
+      <li><a href="techniques-focus-groups">Focus Groups</a></li>
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-decision-making">Decision Making</a></li>
+
+      <li><a href="techniques-voting">Voting</a></li>
+
+      <li><a href="techniques-autocratic-decision-making">Autocratic Decision Making</a></li>
+
+      <li><a href="techniques-multicriteria-decision-analysis">Multicriteria Decision Analysis</a></li>
+
+      <li><a href="techniques-data-representation">Data Representation</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-context-diagram">Context Diagram</a></li>
+
+      <li><a href="techniques-prototypes">Prototypes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-focus_on_customer_needs-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-focus_on_customer_needs-2">
+
+      <li><a href="artifacts-requirements-documentation">Requirements Documentation</a></li>
+
+      <li><a href="artifacts-requirements-traceability-matrix">Requirements Traceability Matrix</a></li>
+
+      <li><a href="artifacts-project-charter">Project Charter</a></li>
+
+      <li><a href="artifacts-scope-management-plan">Scope Management Plan</a></li>
+
+      <li><a href="artifacts-requirements-management-plan">Requirements Management Plan</a></li>
+
+      <li><a href="artifacts-stakeholder-engagement-plan">Stakeholder Engagement Plan</a></li>
+
+      <li><a href="artifacts-stakeholder-register">Stakeholder Register</a></li>
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-focus_on_customer_needs-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-focus_on_customer_needs-3">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-focus_on_customer_needs-4">Map</h3>
+    <ul aria-labelledby="related-focus_on_customer_needs-4">
+
+      <li><a href="map-all#node-process:5.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="manage_the_work_not_the_people">Manage the Work, Not the People</dt>
+  <dd>Manage the work itself and let people decide how to organize around it.
+
+    <br><small>Crosswalk: 9.4</small>
+
+
+
+<section class="related" aria-labelledby="related-manage_the_work_not_the_people-heading">
+  <h2 id="related-manage_the_work_not_the_people-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-manage_the_work_not_the_people-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-manage_the_work_not_the_people-0">
+
+      <li><a href="pmbok-9.4">Develop Team</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-manage_the_work_not_the_people-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-manage_the_work_not_the_people-1">
+
+      <li><a href="techniques-colocation">Colocation</a></li>
+
+      <li><a href="techniques-virtual-teams">Virtual Teams</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-team-building">Team Building</a></li>
+
+      <li><a href="techniques-recognition-and-rewards">Recognition and Rewards</a></li>
+
+      <li><a href="techniques-training">Training</a></li>
+
+      <li><a href="techniques-individual-and-team-assessments">Individual and Team Assessments</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-manage_the_work_not_the_people-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-manage_the_work_not_the_people-2">
+
+      <li><a href="artifacts-team-performance-assessments">Team Performance Assessments</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-resource-management-plan">Resource Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-project-team-assignments">Project Team Assignments</a></li>
+
+      <li><a href="artifacts-resource-calendars">Resource Calendars</a></li>
+
+      <li><a href="artifacts-team-charter">Team Charter</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-manage_the_work_not_the_people-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-manage_the_work_not_the_people-3">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-manage_the_work_not_the_people-4">Map</h3>
+    <ul aria-labelledby="related-manage_the_work_not_the_people-4">
+
+      <li><a href="map-all#node-process:9.4">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="evolve_policies_to_improve_outcomes">Evolve Policies to Improve Outcomes</dt>
+  <dd>Regularly adjust the rules for how work moves to get better results.
+
+    <br><small>Crosswalk: 8.2</small>
+
+
+
+<section class="related" aria-labelledby="related-evolve_policies_to_improve_outcomes-heading">
+  <h2 id="related-evolve_policies_to_improve_outcomes-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-evolve_policies_to_improve_outcomes-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-evolve_policies_to_improve_outcomes-0">
+
+      <li><a href="pmbok-8.2">Manage Quality</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-evolve_policies_to_improve_outcomes-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-evolve_policies_to_improve_outcomes-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-root-cause-analysis">Root Cause Analysis</a></li>
+
+      <li><a href="techniques-audits">Audits</a></li>
+
+      <li><a href="techniques-design-for-x">Design for X</a></li>
+
+      <li><a href="techniques-problem-solving">Problem Solving</a></li>
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-evolve_policies_to_improve_outcomes-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-evolve_policies_to_improve_outcomes-2">
+
+      <li><a href="artifacts-quality-report">Quality Report</a></li>
+
+      <li><a href="artifacts-test-and-evaluation-documents">Test and Evaluation Documents</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-quality-control-measurements">Quality Control Measurements</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-evolve_policies_to_improve_outcomes-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-evolve_policies_to_improve_outcomes-3">
+
+      <li><a href="methods-kanban#visualize_workflow">Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban#limit_work_in_progress">Limit Work in Progress</a></li>
+
+      <li><a href="methods-kanban#manage_flow">Manage Flow</a></li>
+
+      <li><a href="methods-kanban#make_policies_explicit">Make Policies Explicit</a></li>
+
+      <li><a href="methods-kanban#implement_feedback_loops">Implement Feedback Loops</a></li>
+
+      <li><a href="methods-kanban#improve_collaboratively">Improve Collaboratively</a></li>
+
+      <li><a href="methods-kanban#start_with_what_you_do_now">Start With What You Do Now</a></li>
+
+      <li><a href="methods-kanban#pursue_incremental_change">Pursue Incremental Change</a></li>
+
+      <li><a href="methods-kanban#encourage_leadership_at_every_level">Encourage Leadership at Every Level</a></li>
+
+      <li><a href="methods-kanban#focus_on_customer_needs">Focus on Customer Needs</a></li>
+
+      <li><a href="methods-kanban#manage_the_work_not_the_people">Manage the Work, Not the People</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-evolve_policies_to_improve_outcomes-4">Map</h3>
+    <ul aria-labelledby="related-evolve_policies_to_improve_outcomes-4">
+
+      <li><a href="map-all#node-process:8.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+</dl>
+
+
+
+
+<h2>Metric</h2>
+<dl class="technique-index">
+
+  <dt id="work_in_progress">Work in Progress</dt>
+  <dd>Counting how many items are actively being worked on right now.
+
+    <br><small>Crosswalk: 6.6</small>
+
+
+
+<section class="related" aria-labelledby="related-work_in_progress-heading">
+  <h2 id="related-work_in_progress-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-work_in_progress-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-work_in_progress-0">
+
+      <li><a href="pmbok-6.6">Control Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-work_in_progress-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-work_in_progress-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-work_in_progress-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-work_in_progress-2">
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+      <li><a href="artifacts-schedule-forecasts">Schedule Forecasts</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-work-performance-data">Work Performance Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-work_in_progress-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-work_in_progress-3">
+
+      <li><a href="methods-kanban#lead_time">Lead Time</a></li>
+
+      <li><a href="methods-kanban#cycle_time">Cycle Time</a></li>
+
+      <li><a href="methods-kanban#throughput">Throughput</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-work_in_progress-4">Map</h3>
+    <ul aria-labelledby="related-work_in_progress-4">
+
+      <li><a href="map-all#node-process:6.6">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="lead_time">Lead Time</dt>
+  <dd>How long an item takes from being requested to being delivered.
+
+    <br><small>Crosswalk: 6.6</small>
+
+
+
+<section class="related" aria-labelledby="related-lead_time-heading">
+  <h2 id="related-lead_time-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-lead_time-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-lead_time-0">
+
+      <li><a href="pmbok-6.6">Control Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-lead_time-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-lead_time-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-lead_time-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-lead_time-2">
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+      <li><a href="artifacts-schedule-forecasts">Schedule Forecasts</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-work-performance-data">Work Performance Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-lead_time-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-lead_time-3">
+
+      <li><a href="methods-kanban#work_in_progress">Work in Progress</a></li>
+
+      <li><a href="methods-kanban#cycle_time">Cycle Time</a></li>
+
+      <li><a href="methods-kanban#throughput">Throughput</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-lead_time-4">Map</h3>
+    <ul aria-labelledby="related-lead_time-4">
+
+      <li><a href="map-all#node-process:6.6">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="cycle_time">Cycle Time</dt>
+  <dd>How long an item takes once work on it actually starts.
+
+    <br><small>Crosswalk: 6.6</small>
+
+
+
+<section class="related" aria-labelledby="related-cycle_time-heading">
+  <h2 id="related-cycle_time-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-cycle_time-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-cycle_time-0">
+
+      <li><a href="pmbok-6.6">Control Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-cycle_time-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-cycle_time-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-cycle_time-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-cycle_time-2">
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+      <li><a href="artifacts-schedule-forecasts">Schedule Forecasts</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-work-performance-data">Work Performance Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-cycle_time-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-cycle_time-3">
+
+      <li><a href="methods-kanban#work_in_progress">Work in Progress</a></li>
+
+      <li><a href="methods-kanban#lead_time">Lead Time</a></li>
+
+      <li><a href="methods-kanban#throughput">Throughput</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-cycle_time-4">Map</h3>
+    <ul aria-labelledby="related-cycle_time-4">
+
+      <li><a href="map-all#node-process:6.6">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="throughput">Throughput</dt>
+  <dd>How many items finish in a given period of time.
+
+    <br><small>Crosswalk: 6.6</small>
+
+
+
+<section class="related" aria-labelledby="related-throughput-heading">
+  <h2 id="related-throughput-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-throughput-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-throughput-0">
+
+      <li><a href="pmbok-6.6">Control Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-throughput-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-throughput-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-throughput-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-throughput-2">
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+      <li><a href="artifacts-schedule-forecasts">Schedule Forecasts</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-work-performance-data">Work Performance Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-throughput-3">Other Kanban practices</h3>
+    <ul aria-labelledby="related-throughput-3">
+
+      <li><a href="methods-kanban#work_in_progress">Work in Progress</a></li>
+
+      <li><a href="methods-kanban#lead_time">Lead Time</a></li>
+
+      <li><a href="methods-kanban#cycle_time">Cycle Time</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-throughput-4">Map</h3>
+    <ul aria-labelledby="related-throughput-4">
+
+      <li><a href="map-all#node-process:6.6">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+</dl>
+
+
+
+<h2>Board Policy Template</h2>
+<ol><li>Name every column on the board and what &#39;done&#39; means to leave it for the next one.</li><li>Set an explicit work-in-progress limit for each column that needs one.</li><li>State the pull rule: a column pulls from upstream only when it has spare capacity.</li><li>Write down what makes an item eligible to enter the board at all.</li><li>Record how blocked work is marked and who is responsible for unblocking it.</li><li>Set the cadence for reviewing and changing these policies.</li></ol>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Headless Mode / rigscore — security contact (RFC 9116).
+# Report a vulnerability in rigscore or this site privately via the GitHub
+# Security Advisories link below. Please do not open a public issue for
+# security reports.
+Contact: https://github.com/Back-Road-Creative/rigscore/security/advisories/new
+Canonical: https://headlessmode.com/.well-known/security.txt
+Policy: https://github.com/Back-Road-Creative/rigscore/security/policy
+Preferred-Languages: en
+Expires: 2027-07-18T00:00:00.000Z

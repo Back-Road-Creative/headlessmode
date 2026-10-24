@@ -1,0 +1,6 @@
+{
+  "retired": "2026-07-31",
+  "data": [],
+  "note": "Tombstone. The state population/density series was removed from the Quiet Corners pipeline and nothing on the dashboard ever consumed it. This file exists to OVERWRITE a stale 2009-vintage copy that Cloudflare Pages kept serving after the real file was deleted from the build. Do not delete it: deleting the file is exactly what left the stale copy live.",
+  "replaces": "states.json — 51 states, densities 2000-2009"
+}

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Testing Product Evaluations — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-quality">Quality</a> &gt; <span aria-current="page">Testing Product Evaluations</span></nav>
+
+
+
+<h1>Testing Product Evaluations</h1>
+<p><em>Quality technique</em> ·
+   <a href="map-all#node-technique:testing_product_evaluations">See it on the map</a></p>
+<p>Guide only — Running and judging a test is a judgment call.</p>
+<p>Checking a finished product itself against its requirements, not the process that made it.</p>
+<h2>When to use it</h2><p>Before handoff or release, whenever there&#39;s a deliverable with defined requirements and the cost of a defect reaching the client exceeds the cost of testing it first.</p>
+<h2>When to avoid it</h2><p>As a substitute for process control on a high-volume repeat product — testing every unit after the fact is expensive insurance for problems a controlled process would have prevented earlier. Testing finds defects; it doesn&#39;t prevent them, so don&#39;t rely on it alone when the underlying process is known to be unstable.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-testing-product-evaluations-0"> Pull the requirement or acceptance criterion for the product under test, from test and inspection planning if that step already happened.</label></li>
+
+<li><label><input type="checkbox" id="step-testing-product-evaluations-1"> Choose the evaluation method that actually verifies the criterion — functional test, dimensional check, load test, visual inspection, or a client walkthrough.</label></li>
+
+<li><label><input type="checkbox" id="step-testing-product-evaluations-2"> Run the test under conditions representative of real use, not just ideal conditions.</label></li>
+
+<li><label><input type="checkbox" id="step-testing-product-evaluations-3"> Record the actual result against the target, not just pass/fail — the margin matters for the next product.</label></li>
+
+<li><label><input type="checkbox" id="step-testing-product-evaluations-4"> On a fail, route it back to the deliverable&#39;s owner with the specific criterion missed, not a general &#39;didn&#39;t pass.&#39;</label></li>
+
+<li><label><input type="checkbox" id="step-testing-product-evaluations-5"> On a pass, record the evaluation as part of the deliverable&#39;s acceptance record.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A documented pass/fail result per criterion, with actual values recorded.</li><li>An acceptance record for the deliverable.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Confusing this with an audit: a passed product evaluation says nothing about whether the process that built the product was followed, and a clean audit says nothing about whether this particular unit meets spec — they answer different questions and neither substitutes for the other.</li><li>Testing under ideal conditions that don&#39;t represent the client&#39;s actual use.</li><li>Recording only pass/fail and losing the margin, so a product drifting toward the threshold isn&#39;t noticed until it fails outright.</li></ul>
+
+
+<h2>Worked example</h2><p>Larch &amp; Rowe pours a set of custom concrete countertops. The testing/product evaluation is the 28-day compressive strength test on cured sample cylinders against the specified PSI — a check on this specific pour&#39;s product. It&#39;s separate from, and doesn&#39;t replace, an audit of whether the crew followed the documented curing and mixing procedure; the two would catch different failures if the strength test came back low.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §8.3</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-8.3">Control Quality</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-audits">Audits</a></li>
+
+      <li><a href="techniques-design-for-x">Design for X</a></li>
+
+      <li><a href="techniques-problem-solving">Problem Solving</a></li>
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+      <li><a href="techniques-root-cause-analysis">Root Cause Analysis</a></li>
+
+      <li><a href="techniques-test-and-inspection-planning">Test and Inspection Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-quality-control-measurements">Quality Control Measurements</a></li>
+
+      <li><a href="artifacts-verified-deliverables">Verified Deliverables</a></li>
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:testing_product_evaluations">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

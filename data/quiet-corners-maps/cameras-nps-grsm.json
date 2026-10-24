@@ -1,0 +1,126 @@
+{
+  "generatedAt": "2026-09-27T18:34:30.000Z",
+  "source": "https://developer.nps.gov/api/v1/webcams?parkCode=grsm",
+  "cameras": [
+    {
+      "provider": "nps-grsm",
+      "providerId": "52E38701-AF1C-D2FC-3F23861BB6E221BB",
+      "name": "Purchase Knob Webcam",
+      "lat": 35.58867834584287,
+      "lon": -83.07446926832199,
+      "locationPrecision": "exact",
+      "category": "scenic",
+      "operator": "NPS Air Quality Network",
+      "officialUrl": "https://www.nps.gov/media/webcam/view.htm?id=52E38701-AF1C-D2FC-3F23861BB6E221BB",
+      "subject": "Visit webcam page for current view.",
+      "bearing": null,
+      "media": {
+        "still": "https://www.nps.gov/featurecontent/ard/webcams/images/grpklarge.jpg",
+        "stream": null,
+        "streamKind": null
+      },
+      "capturedAt": null,
+      "fetchedAt": "2026-09-27T18:34:30.000Z",
+      "validUntil": null,
+      "rights": "unverified",
+      "attribution": "National Park Service — Great Smoky Mountains National Park",
+      "health": "active"
+    },
+    {
+      "provider": "nps-grsm",
+      "providerId": "6878C635-B83A-8F41-A6E3B0160539BEAA",
+      "name": "Look Rock Webcam",
+      "lat": 35.63255464701812,
+      "lon": -83.94305597438682,
+      "locationPrecision": "exact",
+      "category": "scenic",
+      "operator": "NPS Air Quality Network",
+      "officialUrl": "https://www.nps.gov/media/webcam/view.htm?id=6878C635-B83A-8F41-A6E3B0160539BEAA",
+      "subject": "Visit webcam page for current view.",
+      "bearing": null,
+      "media": {
+        "still": "https://www.nps.gov/featurecontent/ard/webcams/images/grsmlarge.jpg",
+        "stream": null,
+        "streamKind": null
+      },
+      "capturedAt": null,
+      "fetchedAt": "2026-09-27T18:34:30.000Z",
+      "validUntil": null,
+      "rights": "unverified",
+      "attribution": "National Park Service — Great Smoky Mountains National Park",
+      "health": "active"
+    },
+    {
+      "provider": "nps-grsm",
+      "providerId": "29A53AEC-1DD8-B71B-0BC49F5DA731C317",
+      "name": "Twin Creek Webcam",
+      "lat": null,
+      "lon": null,
+      "locationPrecision": null,
+      "category": "scenic",
+      "operator": "NPS Air Quality Network",
+      "officialUrl": "https://www.nps.gov/media/webcam/view.htm?id=29A53AEC-1DD8-B71B-0BC49F5DA731C317",
+      "subject": "Twins Creek webcam",
+      "bearing": null,
+      "media": {
+        "still": null,
+        "stream": null,
+        "streamKind": null
+      },
+      "capturedAt": null,
+      "fetchedAt": "2026-09-27T18:34:30.000Z",
+      "validUntil": null,
+      "rights": "unverified",
+      "attribution": "National Park Service — Great Smoky Mountains National Park",
+      "health": "inactive"
+    },
+    {
+      "provider": "nps-grsm",
+      "providerId": "C589EEEF-1DD8-B71B-0B0463C308FF64DD",
+      "name": "Newfound Gap Webcam",
+      "lat": 35.61113313363304,
+      "lon": -83.42655139590175,
+      "locationPrecision": "exact",
+      "category": "scenic",
+      "operator": "NPS Air Quality Network",
+      "officialUrl": "https://www.nps.gov/media/webcam/view.htm?id=C589EEEF-1DD8-B71B-0B0463C308FF64DD",
+      "subject": "Located at high elevation in the center of the park, Newfound Gap webcam views to the South",
+      "bearing": null,
+      "media": {
+        "still": "https://www.nps.gov/featurecontent/ard/webcams/images/gsnglarge.jpg",
+        "stream": null,
+        "streamKind": null
+      },
+      "capturedAt": null,
+      "fetchedAt": "2026-09-27T18:34:30.000Z",
+      "validUntil": null,
+      "rights": "unverified",
+      "attribution": "National Park Service — Great Smoky Mountains National Park",
+      "health": "active"
+    },
+    {
+      "provider": "nps-grsm",
+      "providerId": "BDFD47F3-1DD8-B71B-0B81AFE928DDCBCF",
+      "name": "Kuwohi Webcam",
+      "lat": null,
+      "lon": null,
+      "locationPrecision": null,
+      "category": "scenic",
+      "operator": "NPS Air Quality Network",
+      "officialUrl": "https://www.nps.gov/media/webcam/view.htm?id=BDFD47F3-1DD8-B71B-0B81AFE928DDCBCF",
+      "subject": "Located at high elevation in the center of the park, Clingmans Dome webcam offers views to the west.",
+      "bearing": null,
+      "media": {
+        "still": "https://www.nps.gov/featurecontent/ard/webcams/images/grcdlarge.jpg",
+        "stream": null,
+        "streamKind": null
+      },
+      "capturedAt": null,
+      "fetchedAt": "2026-09-27T18:34:30.000Z",
+      "validUntil": null,
+      "rights": "unverified",
+      "attribution": "National Park Service — Great Smoky Mountains National Park",
+      "health": "inactive"
+    }
+  ]
+}

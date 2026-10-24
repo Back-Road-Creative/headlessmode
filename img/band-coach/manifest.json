@@ -1,0 +1,68 @@
+{
+  "product": "band-coach",
+  "images": {
+    "instrument-picker.png": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "1440x900",
+      "scenario": "instrument picker, 26 instruments grouped by family (variants collapsed)",
+      "alt": "Band Coach's instrument picker: one button per instrument family, with More tools and More ways to practise closed below"
+    },
+    "panel-ear.png": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "1440x900",
+      "scenario": "ear training panel, scale-degree question in progress",
+      "alt": "Ear training panel: exercise buttons above the question Which scale degree do you hear?"
+    },
+    "panel-history.png": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "1440x900",
+      "scenario": "my progress panel, practice calendar before any session logged",
+      "alt": "My progress panel: no sessions logged yet, a practice calendar and a daily minutes goal"
+    },
+    "panel-songs.png": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "1440x900",
+      "scenario": "songs list, built-in tunes",
+      "alt": "Songs panel: built-in tunes, each with MIDI, MusicXML and ABC export buttons"
+    },
+    "settings.png": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "1440x900",
+      "scenario": "More options rail menu open: reset instrument, save/restore a backup, check for updates",
+      "alt": "Keyboard trainer with More options open: reset instrument, save or restore a backup, check for updates"
+    },
+    "song-practice.png": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "1440x900",
+      "scenario": "Hot Cross Buns opened from Songs, first step of practice underway",
+      "alt": "Hot Cross Buns opened from Songs, with a Play it on list of instruments and the first listen step"
+    },
+    "trainer-keyboard.png": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "1440x900",
+      "scenario": "keyboard trainer, desktop width",
+      "alt": "Keyboard trainer at Level 1 (C, D and E): on-screen keyboard, Start button and energy meter"
+    },
+    "trainer-phone.png": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "390x844",
+      "scenario": "instrument picker at phone width, More ways to practise open",
+      "alt": "Band Coach on a 390 px wide phone: the instrument picker with More ways to practise open"
+    },
+    "home.jpg": {
+      "source": "v1.9.0",
+      "captured_at": "2026-09-26T22:21:24.506Z",
+      "viewport": "800x500",
+      "scenario": "home page: crop of trainer-keyboard.png, scaled to 800x500",
+      "alt": "Band Coach's keyboard trainer: an on-screen keyboard with the note to play highlighted"
+    }
+  }
+}

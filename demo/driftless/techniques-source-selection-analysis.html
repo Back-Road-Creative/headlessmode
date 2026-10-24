@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Source Selection Analysis — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-procurement">Procurement</a> &gt; <span aria-current="page">Source Selection Analysis</span></nav>
+
+
+
+<h1>Source Selection Analysis</h1>
+<p><em>Procurement technique</em> ·
+   <a href="map-all#node-technique:source_selection_analysis">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Choosing how you will pick a vendor before you start looking for one.</p>
+<h2>When to use it</h2><p>Any time you are about to seek more than one vendor for a purchase of real consequence — enough money or enough risk that the method of choosing matters. Decide the method before requesting proposals, so the criteria aren&#39;t quietly reshaped by whoever happens to respond first.</p>
+<h2>When to avoid it</h2><p>For a small, low-risk purchase, naming a formal selection method is theatre — pick a vendor you trust and move on. It is also the wrong technique to reach for once proposals are already in hand: at that point you are evaluating, not selecting a method, and pretending otherwise lets the method get reverse-engineered to fit whichever proposal you already like.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-source-selection-analysis-0"> Identify what actually varies across likely vendors for this purchase: price only, qualifications, quality, or some mix.</label></li>
+
+<li><label><input type="checkbox" id="step-source-selection-analysis-1"> Pick the method that fits: lowest cost for a commodity purchase where quality is uniform; qualifications-only when the work is too specialised to price-compare sensibly; quality-and-cost-based when both matter and you can weigh them; sole source when only one vendor can plausibly do the work and a competition would be theatre, not diligence.</label></li>
+
+<li><label><input type="checkbox" id="step-source-selection-analysis-2"> Record the chosen method and the reason for it before any vendor is contacted.</label></li>
+
+<li><label><input type="checkbox" id="step-source-selection-analysis-3"> Use that method to shape what you ask vendors for — a quality-and-cost method needs a proposal, a lowest-cost method just needs a price.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A named selection method and the reason it fits this purchase</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Choosing &#39;lowest cost&#39; for work where quality varies enormously between vendors, then being surprised when the cheapest bidder delivers the least.</li><li>Declaring sole source out of convenience rather than because only one vendor can actually do the work — sole source is a finding, not a shortcut.</li><li>Picking the method after seeing who is available, so the method is really just a justification for a vendor already chosen informally.</li></ul>
+
+
+<h2>Worked example</h2><p>A nonprofit needs a video producer for a single fundraising event. Because the creative quality of the final video matters more than shaving a few hundred dollars off the price, the project lead selects a quality-and-cost-based method before reaching out to anyone, rather than defaulting to lowest cost, which would optimise for the wrong thing.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §12.1.2</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-12.1">Plan Procurement Management</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-advertising">Advertising</a></li>
+
+      <li><a href="techniques-bidder-conferences">Bidder Conferences</a></li>
+
+      <li><a href="techniques-claims-administration">Claims Administration</a></li>
+
+      <li><a href="techniques-inspections-and-audits">Inspections and Audits</a></li>
+
+      <li><a href="techniques-make-or-buy-analysis">Make-or-Buy Analysis</a></li>
+
+      <li><a href="techniques-procurement-performance-reviews">Procurement Performance Reviews</a></li>
+
+      <li><a href="techniques-proposal-evaluation">Proposal Evaluation</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-bid-documents">Bid Documents</a></li>
+
+      <li><a href="artifacts-independent-cost-estimates">Independent Cost Estimates</a></li>
+
+      <li><a href="artifacts-procurement-management-plan">Procurement Management Plan</a></li>
+
+      <li><a href="artifacts-procurement-statement-of-work">Procurement Statement of Work</a></li>
+
+      <li><a href="artifacts-procurement-strategy">Procurement Strategy</a></li>
+
+      <li><a href="artifacts-source-selection-criteria">Source Selection Criteria</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:source_selection_analysis">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

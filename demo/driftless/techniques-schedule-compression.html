@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schedule Compression — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-schedule">Schedule</a> &gt; <span aria-current="page">Schedule Compression</span></nav>
+
+
+
+<h1>Schedule Compression</h1>
+<p><em>Schedule technique</em> ·
+   <a href="map-all#node-technique:schedule_compression">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Shortening a schedule without cutting scope, by adding resources or overlapping tasks.</p>
+<h2>When to use it</h2><p>Use it when a real, specific deadline pressure exists and the schedule as planned doesn&#39;t meet it — never as a default first move, but as a deliberate response to a stated need to pull the finish date in.</p>
+<h2>When to avoid it</h2><p>Don&#39;t use it as a routine planning step (&#34;compress everything a bit just in case&#34;) — both techniques carry real, specific costs, and paying them without a concrete deadline forcing the tradeoff wastes money or adds risk for nothing.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-schedule-compression-0"> Confirm the compression is needed against the critical path specifically — shortening a task that isn&#39;t on the critical path doesn&#39;t shorten the project at all.</label></li>
+
+<li><label><input type="checkbox" id="step-schedule-compression-1"> For crashing: identify which critical-path tasks can be shortened by adding resources, and compute the cost of each option per day saved (the cost-per-day slope), then choose the cheapest options first.</label></li>
+
+<li><label><input type="checkbox" id="step-schedule-compression-2"> For fast-tracking: identify critical-path tasks currently sequenced finish-to-start that could instead overlap, and check what rework risk that overlap introduces — you&#39;re now starting the successor on unfinished, potentially-changing input from the predecessor.</label></li>
+
+<li><label><input type="checkbox" id="step-schedule-compression-3"> Apply the chosen compression, then re-run critical path method — compression frequently creates a new critical path, and a second round of compression aimed at the old path wastes effort.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A shortened schedule for a stated cost (crashing) or a stated rework risk (fast-tracking), with the tradeoff explicit rather than implied.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Crashing adds cost and coordination overhead — more people on a task means more communication paths, onboarding time for the newly added resource, and sometimes negative returns past a point (Brooks&#39;s-law-style diminishing or reversing returns) — and rarely returns the linear time-for-money tradeoff the plan assumed going in.</li><li>Fast-tracking trades schedule time for rework risk that shows up later and gets attributed to something else — the successor task built on the predecessor&#39;s unfinished output has to be partly redone once the predecessor&#39;s real output lands, and that rework cost rarely gets traced back to the fast-tracking decision that caused it.</li><li>Compression is applied and the finish date is reported as fixed, without carrying forward the added cost or risk it was purchased with — the deadline looks met and the bill (in cost or in later rework) arrives separately.</li></ul>
+
+
+<h2>Worked example</h2><p>A product launch date moves up by two weeks. The team crashes &#34;integration testing&#34; by adding a second QA engineer, cutting it from ten days to six at roughly 1.5x the original cost for that task, and fast-tracks &#34;write release notes&#34; to start once the feature list is 80% locked rather than waiting for final code freeze — accepting that a late feature cut will mean rewriting part of the notes.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §6.5.2.6</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-6.5">Develop Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+      <li><a href="techniques-analogous-estimating">Analogous Estimating</a></li>
+
+      <li><a href="techniques-bottom-up-estimating">Bottom Up Estimating</a></li>
+
+      <li><a href="techniques-critical-chain-method">Critical Chain Method</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-dependency-determination">Dependency Determination</a></li>
+
+      <li><a href="techniques-leads-and-lags">Leads and Lags</a></li>
+
+      <li><a href="techniques-parametric-estimating">Parametric Estimating</a></li>
+
+      <li><a href="techniques-precedence-diagramming-method">Precedence Diagramming Method</a></li>
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-rolling-wave-planning">Rolling Wave Planning</a></li>
+
+      <li><a href="techniques-schedule-network-analysis">Schedule Network Analysis</a></li>
+
+      <li><a href="techniques-three-point-estimating">Three Point Estimating</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:schedule_compression">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

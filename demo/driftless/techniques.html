@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Technique library</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <span aria-current="page">Techniques</span></nav>
+
+<h1>Technique library</h1>
+<p><em>Every technique Driftless works with, explained — the tools and techniques the
+   PMBOK ITTO catalog names, and any Driftless adds to its own vocabulary that no process
+   names — when to use each, when not to, the steps, what it produces and what usually
+   goes wrong. Theory reference: nothing here reads a project or a date.</em></p>
+
+<details class="how-to-read">
+  <summary>How to read this page</summary>
+
+<p>The library is grouped by family — the kind of work a technique belongs to. Each family
+   opens with what it is for, then one row per technique: its name, what it is for in a
+   line, and how much help this product gives you with it. Open any technique for when to
+   use it, when not to, the steps in order, what it produces and what usually goes wrong.</p>
+
+</details>
+
+
+<dl class="tier-legend">
+  <dt>Runnable here</dt>
+  <dd>Driftless has an assistant you can open and run for it — 55 of 90.</dd>
+  <dt>Worksheet</dt>
+  <dd>No calculator, but a printable worksheet walks you through it — 35 of 90.</dd>
+  <dt>Anything else</dt>
+  <dd>The column holds the one sentence recorded beside that technique saying why this
+      product explains it rather than running it — 0 of 90.</dd>
+</dl>
+
+
+<h2 id="family-general">General</h2>
+<p class="family-note">Techniques that serve any part of a project — gathering information, weighing options, judging what the numbers are telling you — rather than belonging to one specialism.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="General techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">General techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-communication-methods">Communication Methods</a></th>
+    <td>Choosing how a message travels: a live back-and-forth, a message sent out, or one people retrieve on their own.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-communication-models">Communication Models</a></th>
+    <td>Tracing how a message actually moves from one person&#39;s mind to another&#39;s, to see where it broke down.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-communication-requirements-analysis">Communication Requirements Analysis</a></th>
+    <td>Working out who needs which information, in what form, and how often, before choosing a channel for any of it.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-communication-skills">Communication Skills</a></th>
+    <td>The personal abilities, like clarity, tone, and listening, that make a specific communication actually land.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-communication-technology">Communication Technology</a></th>
+    <td>Choosing the medium a message travels over, based on urgency, privacy, audience size, and how much tone matters.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-data-analysis">Data Analysis</a></th>
+    <td>The general term for methods that turn data you already have into a conclusion.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-data-gathering">Data Gathering</a></th>
+    <td>The general term for methods that collect information a project does not already have.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-data-representation">Data Representation</a></th>
+    <td>The general term for turning analyzed data into a picture a reader can absorb quickly.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-decision-making">Decision Making</a></th>
+    <td>The general term for how a group turns its options into one chosen course of action.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-expert-judgment">Expert Judgment</a></th>
+    <td>Asking someone experienced for a judgment call instead of working the answer out from scratch yourself.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></th>
+    <td>The general term for people-facing skills, like listening and influencing, a project manager uses directly.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-meetings">Meetings</a></th>
+    <td>A deliberately convened session where specific people decide something or share status together.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-project-management-information-system">Project Management Information System</a></th>
+    <td>The tools that hold a project&#39;s working data and make it usable by the team.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-project-reporting">Project Reporting</a></th>
+    <td>Collecting and distributing project status and progress in the format each audience actually needs.</td>
+    <td>Worksheet</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-integration">Integration</h2>
+<p class="family-note">Holding the whole project together: choosing what to do, approving changes, and keeping the separate plans consistent with one another.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Integration techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Integration techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-change-control-tools">Change Control Tools</a></th>
+    <td>Deciding whether a proposed change to an already-approved plan is accepted, and updating the plan only once it is.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-information-management">Information Management</a></th>
+    <td>The tools and habits for storing and finding project documents already written down.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-knowledge-management">Knowledge Management</a></th>
+    <td>Moving know-how from the person who has it to the person who needs it.</td>
+    <td>Worksheet</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-scope">Scope</h2>
+<p class="family-note">Deciding and writing down exactly what the project will deliver, and what it will not, so later work can be checked against it.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Scope techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Scope techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-benchmarking">Benchmarking</a></th>
+    <td>Comparing your project against similar organizations or projects to find a useful target, a gap, or a practice worth copying.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-context-diagram">Context Diagram</a></th>
+    <td>One picture of a system as a box, showing everything outside it that it touches.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-decomposition">Decomposition</a></th>
+    <td>Splitting project work into progressively smaller pieces until each is small enough to plan and track.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-inspection">Inspection</a></th>
+    <td>Checking a finished deliverable against its requirements before it is formally accepted.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-product-analysis">Product Analysis</a></th>
+    <td>Turning a stated product idea into a defined, actionable set of requirements and deliverables.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-prototypes">Prototypes</a></th>
+    <td>Building a working model of a product early, so stakeholders can react to something real.</td>
+    <td>Runnable here</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-schedule">Schedule</h2>
+<p class="family-note">Working out the order of the work, how long each piece takes, and when it has to happen to hit the dates.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Schedule techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Schedule techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-agile-release-planning">Agile Release Planning</a></th>
+    <td>Deciding which features ship in which release from a prioritized backlog and the team&#39;s known speed, not a fixed long-range schedule.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-analogous-estimating">Analogous Estimating</a></th>
+    <td>Estimate a task&#39;s duration or cost by pointing at a genuinely similar past task and scaling from what that one actually took.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-bottom-up-estimating">Bottom Up Estimating</a></th>
+    <td>Estimating each smallest piece of work separately, then adding them up for the most accurate, most labor-intensive total.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-critical-chain-method">Critical Chain Method</a></th>
+    <td>Scheduling around resource limits, removing padding from individual tasks, and pooling that padding into shared buffers.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-critical-path-method">Critical Path Method</a></th>
+    <td>Finding the longest chain of dependent tasks, the one whose length sets how soon the project can finish.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-dependency-determination">Dependency Determination</a></th>
+    <td>Sorting each link between tasks into what is a fixed fact and what is really a choice.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-leads-and-lags">Leads and Lags</a></th>
+    <td>Adjusting timing between two linked tasks so one starts early or is deliberately delayed.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-parametric-estimating">Parametric Estimating</a></th>
+    <td>Estimating by multiplying a known amount of work by a rate drawn from past data.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-precedence-diagramming-method">Precedence Diagramming Method</a></th>
+    <td>Drawing the schedule as linked task boxes, so its order is a picture, not a memory.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-resource-optimization">Resource Optimization</a></th>
+    <td>Adjusting the schedule to fit real resource limits, either by delaying work or shifting it within slack.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-rolling-wave-planning">Rolling Wave Planning</a></th>
+    <td>Planning near-term work in detail and far-off work only roughly, refining it as it gets closer.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-schedule-compression">Schedule Compression</a></th>
+    <td>Shortening a schedule without cutting scope, by adding resources or overlapping tasks.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-schedule-network-analysis">Schedule Network Analysis</a></th>
+    <td>The general term for techniques that build a project schedule from its task dependencies.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-three-point-estimating">Three Point Estimating</a></th>
+    <td>Combining an optimistic, a pessimistic, and a most-likely estimate into one figure.</td>
+    <td>Runnable here</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-cost">Cost</h2>
+<p class="family-note">Estimating what the work will cost, setting the budget, and tracking the spend against it as the work proceeds.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Cost techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Cost techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-cost-aggregation">Cost Aggregation</a></th>
+    <td>Adding up cost estimates from the smallest tasks up through the whole project into one traceable budget.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-cost-of-quality">Cost of Quality</a></th>
+    <td>Sorting quality spending into four buckets, to see if a project pays to prevent defects or fix them.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-earned-value-analysis">Earned Value Analysis</a></th>
+    <td>Comparing planned, completed, and spent work at one point in time to judge cost and schedule performance.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-financing">Financing</a></th>
+    <td>Arranging outside funding to cover project costs the owner&#39;s own cash cannot carry.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-funding-limit-reconciliation">Funding Limit Reconciliation</a></th>
+    <td>Reshaping planned spending so it never asks for more money than is actually available each period.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-historical-information-review">Historical Information Review</a></th>
+    <td>Pulling actual cost, schedule, and estimating data from comparable past projects to sanity-check or ground a current estimate, instead of estimating from a blank page.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-reserve-analysis">Reserve Analysis</a></th>
+    <td>Setting aside one budget cushion inside the cost baseline for known risks, and another outside the baseline for the unknown.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-to-complete-performance-index">To-Complete Performance Index</a></th>
+    <td>The cost efficiency remaining work must hit to land on a realistic target cost.</td>
+    <td>Runnable here</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-quality">Quality</h2>
+<p class="family-note">Deciding what good enough means for the deliverables, then checking both the work and the way it is being done against that.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Quality techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Quality techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-audits">Audits</a></th>
+    <td>A structured, independent check of whether the project&#39;s actual quality process was followed — as distinct from whether the product it produced meets its requirements.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-design-for-x">Design for X</a></th>
+    <td>A family of design rules that shapes a product around one specific later concern, like safety or cost.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-problem-solving">Problem Solving</a></th>
+    <td>A disciplined path from noticing something is wrong to a tested fix.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></th>
+    <td>Formal, repeatable programs that drive down defects or variation across many measured cycles over time.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-root-cause-analysis">Root Cause Analysis</a></th>
+    <td>Tracing a problem back to the condition that, once fixed, stops the whole pattern recurring.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-test-and-inspection-planning">Test and Inspection Planning</a></th>
+    <td>Deciding, while quality is still being planned, what will be checked, how, and when.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-testing-product-evaluations">Testing Product Evaluations</a></th>
+    <td>Checking a finished product itself against its requirements, not the process that made it.</td>
+    <td>Worksheet</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-resource">Resource</h2>
+<p class="family-note">Finding, assigning and developing the people and equipment the work needs, and keeping the load on them realistic.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Resource techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Resource techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-colocation">Colocation</a></th>
+    <td>Putting most of a project team in one physical workspace to get faster, more informal communication.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-conflict-management">Conflict Management</a></th>
+    <td>Resolving disagreement between team members on purpose, by picking a response that fits the situation.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-individual-and-team-assessments">Individual and Team Assessments</a></th>
+    <td>Using a structured tool, like a survey or profile, to surface team strengths and friction points.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-influencing">Influencing</a></th>
+    <td>Getting cooperation from people the project manager has no formal authority over, using relationships, evidence, and persuasion instead of a reporting line that doesn&#39;t exist.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-negotiation">Negotiation</a></th>
+    <td>Working out directly with whoever controls a resource the terms on which the project gets it.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-organizational-theory">Organizational Theory</a></th>
+    <td>Using known patterns of how people and teams behave to decide how to lead the project team.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-pre-assignment">Pre Assignment</a></th>
+    <td>Naming who will do the work before the project is even approved or planned.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-recognition-and-rewards">Recognition and Rewards</a></th>
+    <td>Formally acknowledging and rewarding behavior the project needs more of — explicitly tied to what actually helped the project, not handed out generically for morale.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-team-building">Team Building</a></th>
+    <td>Deliberate activities that build how well a team works together, not just its skills.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-training">Training</a></th>
+    <td>Deliberately building a skill or certification a team member needs but doesn&#39;t yet have, aimed at a specific project need rather than general professional development.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-virtual-teams">Virtual Teams</a></th>
+    <td>Building a team that rarely shares a physical location, on purpose and with care.</td>
+    <td>Runnable here</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-risk">Risk</h2>
+<p class="family-note">Finding what could go wrong or unexpectedly right, judging how much it would matter, and deciding what to do about it in advance.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Risk techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Risk techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-contingent-response-strategies">Contingent Response Strategies</a></th>
+    <td>A backup plan held in reserve and used only if a specific, named event actually happens.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-decision-tree-analysis">Decision Tree Analysis</a></th>
+    <td>Mapping an uncertain decision as branching choices and chances, then weighing each branch&#39;s likely value.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-influence-diagrams">Influence Diagrams</a></th>
+    <td>A network diagram showing how decisions, uncertain events, and outcomes affect one another.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-prompt-lists">Prompt Lists</a></th>
+    <td>Working through a predetermined list of risk categories to surface risks a free-form discussion would miss.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-representations-of-uncertainty">Representations of Uncertainty</a></th>
+    <td>Describing an uncertain amount as a range instead of one falsely precise number.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-risk-categorization">Risk Categorization</a></th>
+    <td>Grouping identified risks by source or area so patterns become visible instead of staying a flat list.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-risk-probability-and-impact-assessment">Risk Probability and Impact Assessment</a></th>
+    <td>Rating each risk&#39;s likelihood and effect on agreed scales so risks can be fairly compared.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-sensitivity-analysis">Sensitivity Analysis</a></th>
+    <td>Changing one uncertain input at a time to see which ones actually move the outcome.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-simulation">Simulation</a></th>
+    <td>Running a risk model many times with varying inputs to see the range of likely outcomes.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-strategies-for-opportunities">Strategies for Opportunities</a></th>
+    <td>Choosing a deliberate response to a risk that would help the project if it happened.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-strategies-for-overall-project-risk">Strategies for Overall Project Risk</a></th>
+    <td>Responding to a project&#39;s risk as one combined whole, not just risk by risk.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-strategies-for-threats">Strategies for Threats</a></th>
+    <td>Choosing a deliberate response to a risk that would hurt the project if it happened.</td>
+    <td>Runnable here</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-procurement">Procurement</h2>
+<p class="family-note">Deciding what to buy rather than build, choosing who to buy it from, and managing the agreements that result.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Procurement techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Procurement techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-advertising">Advertising</a></th>
+    <td>Publishing a notice that a project is seeking vendors, so the field of respondents isn&#39;t limited to whoever the buyer already happens to know.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-bidder-conferences">Bidder Conferences</a></th>
+    <td>A meeting where every prospective vendor asks questions before proposals are due, so everyone hears the same answers.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-claims-administration">Claims Administration</a></th>
+    <td>Handling a disputed change to a contract by following the contract&#39;s own rules for settling disagreements.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-inspections-and-audits">Inspections and Audits</a></th>
+    <td>Checking a vendor&#39;s finished work and its working process against what the contract requires.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-make-or-buy-analysis">Make-or-Buy Analysis</a></th>
+    <td>Comparing doing work yourself against buying it from an outside vendor before deciding.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-procurement-performance-reviews">Procurement Performance Reviews</a></th>
+    <td>Checking, at regular intervals, how a live contract is actually performing against its terms.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-proposal-evaluation">Proposal Evaluation</a></th>
+    <td>Scoring the proposals actually received against a set of criteria to compare them fairly.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-source-selection-analysis">Source Selection Analysis</a></th>
+    <td>Choosing how you will pick a vendor before you start looking for one.</td>
+    <td>Runnable here</td></tr>
+
+</table>
+</div>
+
+
+<h2 id="family-stakeholder">Stakeholder</h2>
+<p class="family-note">Working out who is affected by the project, what each of them needs from it, and how to keep them properly involved.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Stakeholder techniques (scrolls sideways)">
+<table>
+<caption class="sr-only">Stakeholder techniques: what each one is for, and how much help this product gives</caption>
+<tr><th scope="col">Technique</th><th scope="col">What it is for</th><th scope="col">How much help</th></tr>
+
+<tr><th scope="row"><a href="techniques-autocratic-decision-making">Autocratic Decision Making</a></th>
+    <td>One person — usually the project manager or another accountable role — makes the decision alone, without a group vote or consensus process.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-focus-groups">Focus Groups</a></th>
+    <td>A guided discussion where a small group&#39;s interaction, not just each answer, is what gets studied.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-ground-rules">Ground Rules</a></th>
+    <td>A team&#39;s written agreement on how it will behave, made before any real disagreement tests it.</td>
+    <td>Worksheet</td></tr>
+
+<tr><th scope="row"><a href="techniques-multicriteria-decision-analysis">Multicriteria Decision Analysis</a></th>
+    <td>Scoring several options against stated, weighted criteria, so the choice is traceable rather than argued.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-stakeholder-analysis">Stakeholder Analysis</a></th>
+    <td>Finding everyone with a stake in the project, and recording what each one wants and can affect.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-stakeholder-engagement-assessment-matrix">Stakeholder Engagement Assessment Matrix</a></th>
+    <td>A table comparing a stakeholder&#39;s current involvement against the involvement a project actually needs from them.</td>
+    <td>Runnable here</td></tr>
+
+<tr><th scope="row"><a href="techniques-voting">Voting</a></th>
+    <td>A group decides by each member stating a preference, then applying an agreed rule to it.</td>
+    <td>Runnable here</td></tr>
+
+</table>
+</div>
+
+
+</main>
+</body>
+</html>

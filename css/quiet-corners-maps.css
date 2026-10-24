@@ -1,0 +1,1129 @@
+/*
+ * Quiet Corners Field Maps — the two panels on the dashboard map, loaded by
+ * layouts/_default/quiet-corners-dashboard.html ONLY. It used to dress a
+ * standalone app page under layouts/_default/quiet-corners-maps.html, which is
+ * documentation now; that page's frame — .qcm-header, .qcm-wordmark, .qcm-nav,
+ * .qcm-body and .qcm-preview — is DELETED here rather than left inert. Unreachable
+ * three independent ways: no whole-token occurrence in any source file in the repo,
+ * none in the built public/**.html, and none among the className/classList
+ * assignments under themes/headlessmode/static/js/ — every one of those is a
+ * literal, so no name is assembled at runtime. Then counted in a real browser with
+ * both panels open at 1280x900 and 390x844: zero elements each, in the same reading
+ * that found .qcm-controls 2, .qcm-panel 2 and .qcm-legend 1. `.qcm-preview` never
+ * reached #qcm-preview-note — that is an id, and the element's class is .qcm-status.
+ *
+ * .qcm-state-band and .qcm-map are gone the same way and by the same three
+ * readings: the per-state pages no longer exist (scripts/qcm/layers-reach-paper
+ * .test.mjs forbids main.js reading a state off the page), and main.js deleted the
+ * #qcm-map second-Leaflet fallback — the dashboard's map box is .qc-map-container.
+ * Nothing known-unreached is left in this file.
+ *
+ * That textual check is no longer a habit someone has to remember:
+ * scripts/qcm/css-selector-reach.test.mjs runs it in CI. A class token in this file
+ * that no template and no script writes down fails the build and names itself
+ * while doing it, and there is no ignore list to add it to.
+ *
+ * 1023px, not 768px, wherever this file changes at a width: the two-column app
+ * layout begins at 1024px, because between the two the map was 209px wide before
+ * anything was even opened (audit F02). quiet-corners.css and both panel queries
+ * below use that same single breakpoint.
+ *
+ * Contrast (WCAG AA needs 4.5:1): #e4e4e7 on the #12121e panel 14.6:1, on
+ * #18181b 14.0:1, on #27272a 11.7:1; #a1a1aa on #18181b 6.9:1, on #12121e
+ * 7.2:1; #6cc77f on #0d0d1a 9.3:1; #f0fdf4 on #14532d 8.7:1; #d4d4d8 on
+ * #27272a 10.1:1 (disabled controls, held above AA anyway). The focus ring is
+ * --accent-500, #4caf63 under the dashboard's dark tokens: 6.7:1 on #12121e.
+ *
+ * A CONTROL is styled through `.qcm-controls`, the wrapper both panel partials
+ * emit — never through a panel's own name. `qcm-app` is an ID on the print
+ * panel (layout.test.mjs and find-and-scale.test.mjs both address it as one),
+ * so the `.qcm-app` CLASS selectors that used to carry the control chrome here
+ * matched nothing for as long as they existed, which is how ten buttons and
+ * selects came to be painted as bare borderless text. phone-controls.test.mjs
+ * and panel-chrome.test.mjs measure what comes out, in a real browser.
+ */
+.qcm-status { min-height: 1.5rem; padding: 0.6rem 1.5rem; background: #14532d; color: #f0fdf4; }
+.qcm-status:empty { display: none; }
+
+/* The access caveat. Deliberately NOT styled as a hint: it is the one sentence a
+   reader of a drawn boundary has to see, and a state page has no body prose to
+   carry it. Amber, so it does not read as more of the green status band above. */
+.qcm-access-note {
+    margin: 0; padding: 0.55rem 1.5rem;
+    background: #1c1917; color: #fde68a;
+    border-bottom: 1px solid #292524;
+    font-size: 0.85rem; line-height: 1.5;
+}
+/* The print-proof caveat, rendered by qcm-controls.html while the record is not
+   `passed`. Red, not amber: the access note above is a standing caveat about land,
+   this one says a measurement has not been taken yet. */
+.qcm-proof-note {
+    margin: 0 0 0.75rem; padding: 0.55rem 0.7rem;
+    background: #2a1215; color: #fecaca; border: 1px solid #7f1d1d;
+    border-radius: 0.25rem; font-size: 0.8rem; line-height: 1.5;
+}
+.qcm-proof-note strong { color: #fca5a5; }
+
+.qcm-controls { display: flex; flex-direction: column; gap: 0.6rem; min-width: 0; }
+.qcm-controls fieldset {
+    margin: 0; padding: 0.6rem 0.8rem; min-width: 0;
+    display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; align-items: center;
+    background: #18181b; border: 1px solid #3f3f46; border-radius: 6px;
+}
+.qcm-controls legend { padding: 0 0.3rem; color: #a1a1aa; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.qcm-controls label { display: inline-flex; align-items: center; gap: 0.4rem; color: #e4e4e7; }
+/* The one place a control's chrome on these panels is written down. Tailwind's
+   preflight strips a button and a select back to a transparent box with a
+   zero-width border, so anything not dressed here reads as a label rather than
+   as something to press. `.qcm-controls` is the wrapper both partials emit, so
+   this hangs off the same hook as the disabled and 44px-touch variants below —
+   rename it and all three fail together instead of one going quiet. */
+.qcm-controls select, .qcm-controls button {
+    font: inherit; padding: 0.35rem 0.6rem; border-radius: 4px;
+    color: #e4e4e7; background: #27272a; border: 1px solid #3f3f46;
+}
+.qcm-controls button:disabled, .qcm-controls select:disabled { color: #d4d4d8; cursor: not-allowed; opacity: 1; }
+.qcm-build { font-weight: 600; padding: 0.7rem 1rem; }
+.qcm-build:not(:disabled) { background: #4caf63; color: #052e16; border-color: #4caf63; }
+.qcm-hint { margin: 0; color: #a1a1aa; font-size: 0.75rem; }
+.qcm-estimate { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; margin: 0; padding: 0.6rem 0.8rem; background: #18181b; border: 1px solid #3f3f46; border-radius: 6px; }
+.qcm-estimate dt { color: #a1a1aa; }
+.qcm-estimate dd { margin: 0; color: #e4e4e7; overflow-wrap: anywhere; }
+.qcm-controls input:not([type="radio"], [type="checkbox"]) { font: inherit; padding: 0.3rem 0.5rem; border-radius: 4px; color: #e4e4e7; background: #27272a; border: 1px solid #3f3f46; }
+.qcm-controls input[type="number"] { width: 6.5rem; }
+.qcm-results { list-style: none; margin: 0; padding: 0; width: 100%; max-height: 10rem; overflow-y: auto; }
+.qcm-results li { padding: 0.3rem 0.5rem; cursor: pointer; border-top: 1px solid #3f3f46; }
+.qcm-controls progress { width: 100%; }
+.qcm-controls a.qcm-build { text-align: center; text-decoration: none; border-radius: 4px; }
+.qcm-handle { width: 12px; height: 12px; background: #6cc77f; border: 2px solid #052e16; border-radius: 2px; }
+.qcm-sheet-label { background: #0d0d1a; color: #e4e4e7; border: 1px solid #6cc77f; padding: 0 0.3rem; font: 600 0.75rem ui-monospace, monospace; }
+/* Focus, for the two elements the site-wide ring does not reach. style.css's
+   `a:focus-visible, button:focus-visible` already rings every link and button
+   in these panels in --accent-500; a select or a field falls through to
+   Chromium's own auto ring, a white hairline with no offset. Same token as the
+   site-wide rule rather than a literal, so one gesture has one colour here. */
+.qcm-controls select:focus-visible, .qcm-controls input:focus-visible {
+    outline: 2px solid var(--accent-500); outline-offset: 2px;
+}
+
+/* On-page map key. The swatch markup comes from legend-view.js so it is the same
+   geometry pdf.js prints; this only positions it. */
+.qcm-legend { list-style: none; margin: 0; padding: 0; }
+.qcm-legend li { display: flex; align-items: center; gap: 0.5rem; padding: 0.15rem 0; font-size: 0.8125rem; line-height: 1.3; }
+.qcm-legend-swatch { flex: 0 0 48px; height: 14px; display: block; }
+/* A row that explains missing data stays readable: the muted colour (the panel's own hint
+   grey, 6.9:1 on the panel) says "absent" and a light fade of 0.8 backs it, where 0.55
+   alone dropped the very rows a reader needs to read below 3:1. type-scale.test.mjs
+   computes the contrast. */
+.qcm-legend li[data-state="absent"], .qcm-legend li[data-state="unknown"] { opacity: 0.8; color: #a1a1aa; }
+
+/* Preset buttons: a shortcut to the switches below, so they sit above them and read as
+   actions rather than another row of state. The chrome came from `.qcm-controls button`
+   above; what is left here is only what makes a preset different from the buttons beside
+   it — smaller, left-aligned, and sharing the row. Descendant-scoped so those two
+   declarations outrank the `font: inherit` in that shared rule. */
+/* U1: grid, not flex-wrap, and fixed at four columns — six preset labels vary too widely in
+   length ("Map only" at 81px beside "Public land & access", renamed Land access by QUX-04b,
+   at 266px) for flex-wrap to pair
+   them reliably, measured at 390px leaving 5 of the 6 alone on their own row (246px total)
+   because each wide button claimed the row before a narrow one could share it. Four columns
+   holds the six presets plus Undo and Reset (items 7-8) in the same 2 rows the six presets
+   alone needed at three columns: a separate row for Undo/Reset measured 656px at 390px
+   against the 600px map-key-reach budget below, 56px over; sharing the grid's own spare
+   cells in row 2 costs nothing further. Loud or quiet made seven presets: nine buttons need a
+   third row, measured 607px at 390px (7 over) and 50px past layer-panel-compact-browser's
+   budget, and an 8-track grid that packed Undo/Reset into one cell failed axe and the 200%
+   text check (CI 39783695477). So Undo and Reset left the grid for the layer count line
+   (.qcm-preset-actions below), and the last preset takes the spare eighth cell, which at
+   1280px keeps "Loud or quiet" on one line instead of three. Four narrower columns wrap the longest labels onto
+   a second line at 390px, so the preset/action font, line-height and padding below are
+   trimmed from the shared button chrome's defaults (0.8rem/1.3/0.35rem 0.6rem) until a
+   wrapped row still clears the 44px phone touch target without pushing the panel past the
+   budget — measured 631px at the shared-chrome size, 600px at the earlier 0.72rem size.
+   QQA-05d raised the label to 0.875rem (14px) with the line-height and 44px phone
+   minimum unchanged; layout.test.mjs still holds the budget. */
+.qcm-presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.3rem; margin: 0 0 0.2rem; }
+.qcm-controls .qcm-preset { font-size: 0.875rem; line-height: 1.15;
+    text-align: left; cursor: pointer; padding: 0.35rem 0.4rem; }
+.qcm-presets > .qcm-preset:last-of-type { grid-column: span 2; }
+.qcm-controls .qcm-preset-action { text-align: center; }
+.qcm-controls .qcm-preset-action:disabled { opacity: 0.5; cursor: default; }
+/* U1: what a preset button's aria-describedby names -- which switches it would move,
+   before it is pressed. Carries real text for a screen reader, same as .qc-finder-status
+   and .qc-view-status above use for their own announcements, but takes no space in the
+   panel: layout.test.mjs holds the layer switches and map key within 600px of the map
+   at 390px and 1440px, a budget six preset buttons already sit close to (measured
+   721px/1222px with this text left visible, both over budget). */
+.qcm-preset-preview {
+    position: absolute; width: 1px; height: 1px;
+    margin: -1px; padding: 0; border: 0;
+    clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+}
+
+
+/* Layer panel groups. A flat list of nine checkboxes put overlays, extra SHEETS
+   and state layers side by side as if they were the same kind of thing. */
+.qcm-layer-group { margin: 0 0 0.45rem; }
+.qcm-layer-group + .qcm-layer-group { border-top: 1px solid #262626; padding-top: 0.6rem; }
+.qcm-group-title {
+    margin: 0 0 0.15rem;
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    color: #a3a3a3;
+}
+.qcm-layer-row { margin: 0 0 0.35rem; }
+/* UX-03b: the Cameras entry above the groups -- two regions, a Go to each, one status line each.
+   Kept tight: the default Layers panel has a length budget (layer-panel-compact-browser.test.mjs). */
+.qcm-camera-entry { margin: 0 0 0.4rem; }
+.qcm-camera-entry-title { margin: 0 0 0.15rem; font-size: 0.78rem; font-weight: 600; color: #e4e4e7; }
+.qcm-camera-entry ul { margin: 0; padding: 0; list-style: none; }
+.qcm-camera-entry li { display: grid; grid-template-columns: 1fr auto; column-gap: 0.4rem; align-items: start; margin: 0 0 0.15rem; font-size: 0.78rem; line-height: 1.3; color: #d4d4d8; }
+.qcm-camera-region-text { min-width: 0; }
+.qcm-camera-goto { padding: 0 0.45rem; font-size: 0.72rem; line-height: 1.4; }
+.qcm-camera-region-status { color: #a3a3a3; font-size: 0.72rem; }
+.qcm-camera-region-status[data-status="outside-coverage"] { color: #fde68a; }
+.qcm-camera-region-status[data-status="unavailable"] { color: #fca5a5; }
+/* What the layer actually answered. Colour carries the distinction the words do:
+   an empty answer from a source with gaps is not the same as "nothing is here". */
+.qcm-layer-report { margin: 0.1rem 0 0 1.4rem; font-size: 0.78rem; line-height: 1.45; color: #a3a3a3; }
+.qcm-layer-report[data-state="ready"] { color: #86efac; }
+.qcm-layer-report[data-state="empty"] { color: #fde68a; }
+.qcm-layer-report[data-state="blocked"] { color: #fca5a5; }
+
+/* U0: find-a-layer / active-only toolbar, at the top of the row list's scroll box and
+   sticky there, so it never pushes the list away from the reader (QUX-04c: the panel is
+   the scroll box now, and the Map key sits above the list, out of the toolbar's way).
+   The fieldset's own colour behind it, so rows scrolling under it do not show through. */
+.qcm-layer-scroll { min-width: 0; width: 100%; }
+.qcm-layer-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; margin: 0 0 0.6rem;
+    position: sticky; top: 0; z-index: 1; padding-bottom: 0.3rem; background: #18181b; }
+.qcm-layer-toolbar label { font-size: 0.78rem; color: #d4d4d8; }
+.qcm-layer-toolbar input[type="search"] { margin-left: 0.35rem; }
+.qcm-layer-count-row { display: flex; flex-basis: 100%; align-items: center; gap: 0.3rem; }
+#qcm-layer-count { margin: 0; flex: 1 1 auto; }
+/* Undo and Reset share the count line rather than a preset row (see the U1 note above).
+   At 1024px and up they are trimmed to the count line's own height, so the line does not
+   grow and the collapsed panel stays at its budget; under 1024px the shared 44px touch
+   minimum and the 0.875rem starting-set label floor (phone-controls.test.mjs) still apply. */
+.qcm-preset-actions { display: flex; gap: 0.3rem; }
+@media (min-width: 1024px) {
+    .qcm-controls .qcm-preset-actions .qcm-preset-action { font-size: 0.78rem; padding: 0 0.6rem; }
+}
+
+/* One badge word per row: off / loading / ready / empty / partial / unavailable / zoom in. */
+.qcm-layer-state {
+    display: inline-block; margin-left: 0.4rem; padding: 0.05rem 0.4rem;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+    border-radius: 0.2rem; color: #a3a3a3; background: #262626;
+}
+.qcm-layer-retry { margin: 0.15rem 0 0 1.4rem; font-size: 0.75rem; }
+.qcm-layer-about { margin: 0.15rem 0 0 1.4rem; }
+.qcm-layer-about summary { font-size: 0.75rem; color: #a1a1aa; cursor: pointer; }
+.qcm-layer-about p { margin: 0.2rem 0 0; font-size: 0.75rem; line-height: 1.45; color: #a3a3a3; }
+
+/* The one line the map carries while a context surface is drawn. In normal flow under the
+   map on a phone — where the map itself is in normal flow — and floated onto the bottom of
+   the map's grid column above 1024px, where the map is `absolute inset-0` in that column.
+   Hidden whenever no surface is on, so it costs the resting layout nothing at all.
+
+   Bottom LEFT of the map column, 1rem in: the panels are in the dock beside the map, not
+   on it, and Leaflet's own attribution has the bottom-right corner. */
+.qcm-surface-caption {
+    margin: 0.5rem 1rem; padding: 0.4rem 0.7rem;
+    background: rgba(18, 18, 30, 0.96); border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem; color: #e5e5e5; font-size: 0.85rem; line-height: 1.35;
+}
+@media (min-width: 1024px) {
+    .qcm-surface-caption {
+        grid-column: 2; grid-row: 1;
+        position: absolute; bottom: 1rem; left: 1rem; z-index: 20;
+        margin: 0; max-width: min(28rem, calc(100% - 9rem));
+        backdrop-filter: blur(6px);
+    }
+}
+
+/* Clear/Undo/Edit strip for the print area. Leaflet's zoom control has the map's
+   top-left corner and the Share/Reset/Locate row its bottom-left, so above 1024px this
+   sits top-CENTER of the map's grid column. In normal flow — a plain row above the
+   panels, never floated over the map — on a phone, matching .qcm-surface-caption's
+   own mobile pattern. Hidden by construction whenever no area is selected, so it
+   costs the resting layout nothing. */
+.qcm-area-strip {
+    margin: 1rem; padding: 0.4rem 0.6rem;
+    background: rgba(18, 18, 30, 0.96); border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem; color: #e5e5e5; font-size: 0.85rem;
+}
+/* `display` only set when the [hidden] attribute is absent -- an unconditional
+   `display: flex` here has the same specificity as the UA stylesheet's
+   `[hidden] { display: none }` and, as an author rule, would beat it outright,
+   leaving the strip visible (and its budget-busting height counted) while hidden. */
+.qcm-area-strip:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.qcm-area-strip button {
+    min-height: 44px; min-width: 44px; padding: 0.3rem 0.7rem;
+    background: #1c1c2e; border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.4rem; color: #e5e5e5; font-size: 0.85rem; cursor: pointer;
+}
+.qcm-area-strip button:hover, .qcm-area-strip button:focus-visible { background: #26263c; }
+.qcm-area-strip button:disabled { opacity: 0.45; cursor: default; }
+@media (min-width: 1024px) {
+    .qcm-area-strip:not([hidden]) {
+        grid-column: 2; grid-row: 1;
+        position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 20;
+        margin: 0; backdrop-filter: blur(6px);
+    }
+}
+
+/* Quad-set selection (QUX-10b). Selected quads and their ring are drawn on the
+   overlay's real SVG renderer (main.js `attach()`), not the canvas base map, so
+   they are real <path> elements a keyboard and this stylesheet can both reach. */
+.qcm-quad-selected { cursor: pointer; }
+.qcm-quad-ring { cursor: pointer; }
+
+.qcm-quad-list {
+    list-style: none; margin: 0.4rem 0; padding: 0;
+    display: flex; flex-direction: column; gap: 0.3rem;
+}
+.qcm-quad-list li {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem;
+    padding: 0.3rem 0.5rem;
+    background: #1c1c2e; border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.4rem; color: #e5e5e5; font-size: 0.85rem;
+}
+.qcm-quad-list button {
+    min-height: 44px; min-width: 44px; padding: 0.3rem 0.7rem;
+    background: #26263c; border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 0.4rem; color: #e5e5e5; font-size: 0.85rem; cursor: pointer;
+}
+.qcm-quad-list button:hover, .qcm-quad-list button:focus-visible { background: #34344e; }
+
+/* The builder as a panel on the dashboard's map, rather than a page of its own.
+   Collapsed by default: a reader who came to choose a county should not have to
+   scroll past a print dialog to reach the map. */
+.qcm-panel {
+    background: #12121e; border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem; margin: 1rem; padding: 0.75rem 1rem;
+    color: #e5e5e5; font-size: 0.9rem;
+}
+
+/* The dock (>=1024px). #qc-map-container is a two-column grid: #qc-sheet -- the four
+   panels, in reading order -- is column 1 and the map is column 2, so no panel is ever
+   painted over the map (it used to be: Explore and Conditions were full-width overlay
+   bars across it, Print top-left and Layers top-right). The map column's floor is the
+   480px minimum (.qc-map-container's own min-width), and the dock column has one fixed
+   width per viewport width (--qc-dock-w below), so opening any panel can only take the
+   map down to that floor and no further -- the box-model failure audit F01 measured (a
+   flex-sibling panel taking the map from 625px to zero at 1440px) cannot happen.
+   Nothing resizes the dock: not Explore, not a nested disclosure, not a loading note
+   (QQA-02; it used to widen to 46rem while Explore was open, which moved the map's left
+   edge by up to 350px under a reader who had only opened a panel). The comparison data
+   fits the narrow dock as cards -- the last rule of this block. Height, min-height, sticky and overflow: clip stay on
+   .qc-map-container in quiet-corners.css. Below 1024px #qc-sheet is the bottom sheet
+   instead -- see the phone block further down and in quiet-corners.css.
+   scripts/qcm/dock-layout-browser.test.mjs holds all of this. */
+@media (min-width: 1024px) {
+    #qc-map-container {
+        display: grid;
+        grid-template-columns: minmax(16rem, var(--qc-dock-w)) minmax(min(480px, 100%), 1fr);
+        grid-template-rows: minmax(0, 1fr);
+        --qc-dock-w: clamp(18rem, 26vw, 24rem);
+    }
+    /* `absolute inset-0` from the markup: with a grid placement its containing block is
+       the column-2 area, not the whole container. */
+    #qc-map { grid-column: 2; grid-row: 1; }
+    #qc-sheet {
+        grid-column: 1; grid-row: 1;
+        display: flex; flex-direction: column;
+        min-height: 0; overflow: clip;
+        background: #12121e;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        container: qc-panels / inline-size;
+    }
+    /* An accordion: closed panels are their summary rows, the one open panel takes the
+       rest of the dock's height and is its only scroller (QUX-04c). */
+    #qc-sheet > .qcm-panel {
+        position: static; width: auto; margin: 0;
+        max-height: none; border-radius: 0; flex: 0 0 auto;
+        border-width: 0 0 1px;
+    }
+    #qc-sheet > .qcm-panel[open] { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    #qc-sheet:not(:has(.qcm-panel[open]))::after {
+        content: "Open a panel above to explore, filter, change layers or print.";
+        padding: 1rem; color: #a1a1aa; font-size: 0.85rem; line-height: 1.45;
+    }
+    /* The grip bar is drag/resize-only chrome for the phone sheet; there is nothing to
+       resize in the dock. */
+    .qc-sheet-grip { display: none; }
+
+    /* Comparison data as cards (QQA-02). The dock is one narrow column (288px at 1024px),
+       so the county and candidate-town rows are the same comparison cards a phone gets
+       (quiet-corners.css, max-width: 1023px): no column dropped, each value drawn beside
+       its own heading from `data-label`, the header row gone because the sort picker
+       (Explore's "Sort the ... by" + Reverse) replaces it. Scoped to #qc-sheet so the
+       rule outranks the table's single-class rules without a !important, and so nothing
+       outside the dock changes. A name wraps here instead of ellipsising: a card is
+       tall already, and a cut-off county name is a different county. */
+    #qc-sheet .qc-log-header,
+    #qc-sheet .qc-candidates-header { display: none; }
+    #qc-sheet .qc-row,
+    #qc-sheet .qc-row.sprawl-visible,
+    #qc-sheet .qc-candidate-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 0.2rem 0.75rem;
+        padding: 0.5rem 0.6rem;
+        margin-bottom: 0.4rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 0.375rem;
+    }
+    #qc-sheet .qc-row .qc-name,
+    #qc-sheet .qc-candidate-row .qc-name {
+        grid-column: 1 / -1;
+        font-size: 0.9375rem;
+        margin-bottom: 0.15rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        overflow-wrap: anywhere;
+    }
+    #qc-sheet .qc-row > *:not(.qc-name),
+    #qc-sheet .qc-candidate-row > *:not(.qc-name) {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.5rem;
+        text-align: right;
+        min-width: 0;
+    }
+    #qc-sheet .qc-row > *:not(.qc-name)::after,
+    #qc-sheet .qc-candidate-row > *:not(.qc-name)::after {
+        content: attr(data-label);
+        order: -1;
+        flex: 0 0 auto;
+        color: var(--text-muted);
+        font-family: var(--qc-font-ui);
+        font-size: 0.75rem;
+        font-weight: 400;
+        text-align: left;
+    }
+    #qc-sheet .qc-row .qc-score::before,
+    #qc-sheet .qc-candidate-row .qc-score::before { margin-left: auto; }
+    /* At the narrowest dock (288px at 1024px) a half-width cell is 102px and "Affordability
+       + the band glyph + 100" needs 118: one measure per line instead. #qc-sheet is the
+       `qc-panels` size container, so this follows the dock's own width. */
+    @container qc-panels (max-width: 20rem) {
+        #qc-sheet .qc-row,
+        #qc-sheet .qc-row.sprawl-visible,
+        #qc-sheet .qc-candidate-row { grid-template-columns: minmax(0, 1fr); }
+        /* The Layers presets are four equal columns that floor at their content: in the
+           287px dock that ran 10px past the edge and the panel scrolled sideways. */
+        #qc-sheet .qcm-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    /* The filters sit in a two-column grid whose `sm:` switch keys on the VIEWPORT, so in
+       a dock a third of that wide each half-width control was ~110px. One column, like the
+       phone. */
+    #qc-sheet .qc-controls > .grid > .filter-group { grid-column: 1 / -1; }
+    /* A 260px tooltip centred on its label hung past the dock's edge (the dock clips, and
+       the open panel scrolls sideways to reach it). Anchored to the label's left edge and
+       capped to what the dock has left, it cannot. */
+    #qc-sheet .qc-controls .qc-tooltip .qc-tooltip-text {
+        left: 0; transform: none;
+        max-width: calc(var(--qc-dock-w) - 4.5rem);
+    }
+    #qc-sheet .qc-controls .qc-tooltip .qc-tooltip-text::after {
+        left: 0.75rem; margin-left: 0;
+    }
+}
+/* The map column is narrower than the old full-width map -- 736px at 1024 and 947px at
+   1280, whichever panel is open -- and its bottom edge carries two Leaflet corners: the
+   Share/Reset/Locate row bottom-left and the map key bottom-right. Unbounded, the key
+   ran to 378px on its one-line note and the row to 317px, and when Explore still widened
+   the dock (before QQA-02) the key was painted over "Use my location" at 1280. The key is capped, and the row wraps to
+   what the column has left beside it: the column is the viewport less the dock
+   (--qc-dock-w, inherited from #qc-map-container), and 25rem is the capped key plus
+   both corners' margins and a gap. Leaflet's attribution line, bottom-right under the
+   key, is capped the same way: in a 574px column it ran the column's full width and covered
+   the scale bar bottom-left; 8rem leaves the scale bar its own room. */
+@media (min-width: 1024px) {
+    .qc-legend { max-width: 22rem; }
+    .qc-view-controls.leaflet-control { max-width: max(8rem, calc(100vw - var(--qc-dock-w) - 25rem)); }
+    #qc-map .leaflet-control-attribution { max-width: min(calc(100vw - var(--qc-dock-w) - 8rem), calc((100vw - var(--qc-dock-w)) * 0.6)); }
+}
+/* QUX-04c: the layer list has ONE scrolling ancestor, the open panel (03c's sheet panel
+   below 1024px, the dock's open panel above). The Map key sits above the list, so layout.test.mjs's
+   MAX_LAYERS_GAP no longer depends on the list's height and the nested 40vh cap is gone. */
+/* ...and on the phone the toolbar scrolls WITH the list instead of sticking (R2, measured
+   2026-09-28 at 390x844): the half sheet's open panel is 185px tall and the toolbar 126px, so
+   a sticky toolbar left ~30px of list and painted over every row scrolled to the middle
+   (phone-controls.test.mjs: 36 controls "painted under label"). At and above 1024px the
+   panel is ~700px tall and the toolbar stays sticky. */
+@media (max-width: 1023px) {
+    .qcm-layer-toolbar { position: static; }
+}
+
+/* QUX-03c: below 1024px the four panels no longer leave the map and grow down
+   the page under their own per-panel max-height cap (the layer panel measured
+   691px, the print panel 1416px, at 390x844 -- taller than the phone screen
+   itself, audit A11) -- they live inside #qc-sheet, which resizes the whole
+   stage instead (quiet-corners.css's phone block: collapsed/half/expanded).
+   The open panel becomes the sheet's one scroll region; every closed panel
+   collapses to its summary row and joins the closed bar those rows form.
+   Sheet size is per-STATE now (half = 45% of the stage, well over the map's
+   35-40% floor; expanded = the whole stage), not a per-panel vh budget.
+
+   The switch list has no scroll region of its own (QUX-04c) -- the open panel is
+   the one scroller, and how tall it grows is the sheet's job.
+
+   These and the desktop dock rules sit in disjoint media queries, so whatever
+   their specificity they never apply to the same screen.
+   scripts/qcm/panel-shell-browser.test.mjs's PHONE section measures what is
+   left of the map at each sheet size, so a regression here fails loudly
+   rather than drifting. */
+@media (max-width: 1023px) {
+    /* Line 32's "Explore / Layers / Print action bar" is literal: the four
+       closed summaries share ONE row, not one each. `flex: 1 1 auto` alone
+       stacked them instead -- each closed row measured 68px (its own
+       max-content width, Print's label alone ran 367px, wider than a 320px
+       or even 390px phone) because a flex item's default `min-width: auto`
+       floors its shrink at that content width, so `overflow:hidden` +
+       `text-overflow:ellipsis` on the summary below never got the chance to
+       engage; the four rows stacked past MIN_MAP_ON_SCREEN's 280px floor at
+       320px (89px left) and Print's own row hung 10px past the viewport's
+       right edge at both 320 and 390 (the horizontal-overflow gate).
+       `flex-basis: 0` (an equal split via flex-grow alone) looked right but
+       collapsed all four to 0px width instead: `.qc-sheet-grip` above them
+       is `width: 100%` with its own `flex-basis` left `auto`, so its used
+       flex-basis is the full row (388px at 390px wide); a flex item whose
+       *hypothetical* main size is 0 never pushes a wrap line's running total
+       past the container width, so the flex-wrap line-breaking algorithm
+       (CSS Flexbox 1 SS9.3) placed all four 0-basis panels on the grip's own
+       already-full line instead of wrapping them to one of their own --
+       leaving 0 free space for their flex-grow to distribute. Giving each
+       panel a real `flex-basis: 25%` instead makes the running total
+       (388 + 97) exceed 388px right after the grip, forcing the four onto a
+       new line by themselves, where 4 x 25% exactly fills it (no leftover to
+       grow, none needed); `min-width: 0` still lets each label wrap within
+       its even quarter-share (the summary rule below). The same math
+       forces the correct split when a panel is open too: the three 25%-basis
+       closed siblings (order 0) always fill one line together, whichever
+       line that is.
+
+       `order: -1` on the open panel and `order: 1` on .qc-sheet-grip put the
+       open panel first, ahead of the 88px bar, for layout.test.mjs's
+       MAX_LAYERS_GAP. applySheet() sums sibling row heights, so order is free. */
+    .qc-sheet .qcm-panel:not([open]) {
+        border: 0;
+        border-radius: 0;
+        flex: 1 1 25%;
+        margin: 0;
+        min-width: 0;
+        padding: 0;
+        position: static;
+    }
+    /* The label wraps inside its quarter of the bar rather than being cut off with an
+       ellipsis: at 200% text (WCAG 1.4.4, a11y-dynamic-browser.test.mjs) a one-line
+       label was clipped to its first word or two. `anywhere` lets a long word break
+       rather than push the row past the viewport. */
+    .qc-sheet .qcm-panel:not([open]) summary {
+        min-height: 44px;
+        overflow-wrap: anywhere;
+        padding: 0.375rem 0.5rem;
+    }
+    /* At 320px a quarter of the bar is ~80px; the longer labels wrap to three or four lines
+       and the bar ate the map's 280px floor (panel-shell-browser.test.mjs). Smaller, tighter
+       type in rem units still scales with the reader's text size. */
+    @media (max-width: 359px) {
+        .qc-sheet .qcm-panel:not([open]) summary {
+            font-size: 0.75rem;
+            line-height: 1.15;
+            padding: 0.25rem 0.25rem;
+        }
+    }
+    /* A closed body is still laid out (tests measure it), so give it the sheet's
+       full width, not its 25% slot. The UA's content-visibility:hidden contains
+       layout and would trap the absolute box in the slot; visibility hides it. */
+    .qc-sheet .qcm-panel:not([open])::details-content {
+        content-visibility: visible;
+        visibility: hidden;
+    }
+    .qc-sheet .qcm-panel:not([open]) > :not(summary) {
+        left: 0;
+        position: absolute;
+        right: 0;
+    }
+    .qc-sheet .qcm-panel[open] {
+        flex: 1 1 100%;
+        min-height: 0;
+        order: -1;
+        overflow-y: auto;
+    }
+}
+.qcm-panel-summary { cursor: pointer; font-weight: 600; letter-spacing: 0.01em; }
+.qcm-panel[open] .qcm-panel-summary { margin-bottom: 0.6rem; }
+.qcm-panel .qcm-controls { max-height: none; }
+
+/* QUX-03b-iii: the print builder's own "Options" disclosure — Paper, Overlap,
+   Grid, Quality and the two extra sheets, closed by default so the primary
+   build flow (Area, Scale, Build, Download) is what a reader meets first.
+   Same chrome tokens as .qcm-panel-summary above, not shared with it: this
+   summary is a fieldset-level control nested inside .qcm-controls, not the
+   panel's own top-level disclosure. `min-height: 44px` unconditionally, not
+   only under the 1023px control-chrome media query below, because
+   phone-controls.test.mjs's CONTROLS list does not reach `summary` elements
+   — this file's own print-options.test.mjs is what holds this one to the
+   WCAG 2.5.8 44px touch-target minimum. Deliberately no `display` override
+   here (unlike .qcm-panel-summary's own `display: block` at 1023px below,
+   which that rule needs for a different reason): `<summary>` renders
+   `display: list-item` by default with the native disclosure triangle as its
+   `::marker`, and `display: flex` or `display: block` on it drops that
+   marker, so height comes from `min-height` + `line-height` + `padding`
+   only. */
+.qcm-print-options summary {
+    cursor: pointer; font-weight: 600; letter-spacing: 0.01em;
+    min-height: 44px; line-height: 44px; padding: 0 0.3rem;
+}
+.qcm-print-options[open] summary { margin-bottom: 0.6rem; }
+
+/* QUX-03a follow-up: Close and Back, the two controls that get a reader out of an
+   open panel without Escape. A header row rather than folded into .qcm-controls —
+   they act on the PANEL itself, not on whatever the panel happens to hold, so they
+   sit right under the summary, ahead of everything else. Same chrome tokens as
+   `.qcm-controls button` above (this is the one other place a bare Tailwind-reset
+   button gets its background/border back — panel-chrome.test.mjs holds both to the
+   same "not bare text" outcome) but not scoped through `.qcm-controls` itself, since
+   these two buttons are siblings of it, not inside it.
+
+   `min-height: 44px` unconditionally, not only under the 1023px control-chrome media
+   query below: phone-controls.test.mjs measures every `#dashboard button` regardless
+   of viewport-scoped rules, and these are exactly the two controls a thumb reaches
+   for first when it wants out of a panel. Back starts `hidden` in the markup and
+   quiet-corners.js keeps it that way while panelState.history is empty.
+
+   In normal flow (>=1024px, where the panel is short and unbounded) a 44px-tall row
+   ahead of the layer switches costs nothing. Below 1024px it is not free: the layer
+   panel's toolbar comment above already measured 582px of the 600px MAX_LAYERS_GAP
+   budget spent before this row existed (layout.test.mjs), and a 44px row plus its own
+   margin overshot the remaining 18px by nearly double (measured 636px). So below
+   1024px the row is taken out of flow instead — absolutely positioned over the
+   summary's own line, which the summary reserves room for with padding-right, rather
+   than stacked above the layer list. It still reads as a header row; it is just not
+   also a row of document height the phone gap budget has to pay for. */
+.qcm-panel-header { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.6rem; }
+.qcm-panel-header button {
+    font: inherit; padding: 0.35rem 0.8rem; border-radius: 4px;
+    color: #e4e4e7; background: #27272a; border: 1px solid #3f3f46;
+    min-height: 44px; cursor: pointer;
+}
+.qcm-panel-header button:focus-visible {
+    outline: 2px solid var(--accent-500); outline-offset: 2px;
+}
+@media (max-width: 1023px) {
+    .qcm-panel { position: relative; }
+    .qcm-panel-header {
+        position: absolute; top: 0.6rem; right: 1rem; margin-bottom: 0; z-index: 1;
+    }
+    .qcm-panel-summary { padding-right: 8.5rem; display: block; }
+}
+
+/* D1: Highlight shortcuts + the Advanced screen-only emphasis controls. Shares the
+   `.qcm-controls fieldset`/button/select/input chrome above; this is only what makes
+   these particular controls different -- a touch target big enough to press with a
+   thumb, no function that only a hover can reach, and the three states an OS or a
+   reader can ask for that this panel had never answered. */
+.qcm-highlight-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; width: 100%; }
+/* 44px is the WCAG 2.5.8 target-size minimum, not a guess -- the shared button rule
+   above (0.35rem 0.6rem padding on a small type size) falls well short of it. */
+.qcm-highlight-buttons button,
+.qcm-advanced-controls input[type="range"],
+.qcm-advanced-controls select {
+    min-height: 44px;
+}
+.qcm-highlight-buttons button { min-width: 44px; padding: 0.6rem 0.9rem; }
+.qcm-highlight-buttons button[aria-pressed="true"] {
+    background: #4caf63; color: #052e16; border-color: #4caf63; font-weight: 600;
+}
+.qcm-advanced-controls { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; margin-top: 0.5rem; }
+.qcm-advanced-controls label { display: flex; flex-direction: column; align-items: stretch; gap: 0.3rem; }
+.qcm-advanced-controls input[type="range"] { width: 100%; }
+.qcm-advanced-controls output { align-self: flex-end; color: #a1a1aa; font-size: 0.8rem; }
+/* Every control here is keyboard- and click-operable already (buttons, a native
+   range, a native select); nothing in this block is bound to :hover, so there is no
+   hover-only function to name here -- that is a statement about what was NOT added,
+   not a rule with a selector. */
+
+/* prefers-contrast: the dimming this panel draws (base opacity, legend swatch
+   opacity) is a deliberate LOSS of contrast for everything but the spotlight, which
+   is the opposite of what this preference asks for. Undoing it here rather than
+   trying to redraw a "high-contrast dim" that would still be a contrast reduction
+   by construction. */
+@media (prefers-contrast: more) {
+    #qc-map .leaflet-overlay-pane path,
+    .qcm-legend-swatch {
+        opacity: 1 !important;
+    }
+    .qcm-highlight-buttons button[aria-pressed="true"] { outline: 2px solid currentColor; outline-offset: 1px; }
+    /* QQA-05a: the owned name labels' plate goes opaque, and the text takes white. */
+    .qc-terrain-name-label, .qc-terrain-road-label { background: #000; color: #fff; }
+}
+
+/* forced-colors (Windows High Contrast): the same opacity-based dimming would sit on
+   top of a system palette it cannot reason about and could hide a shape the system
+   otherwise guarantees is visible. Same fix as prefers-contrast, plus letting the
+   forced palette draw the pressed state instead of the literal green. */
+@media (forced-colors: active) {
+    #qc-map .leaflet-overlay-pane path,
+    .qcm-legend-swatch {
+        opacity: 1 !important;
+    }
+    .qcm-highlight-buttons button[aria-pressed="true"] {
+        background: Highlight; color: HighlightText; border-color: HighlightText;
+        forced-color-adjust: none;
+    }
+    .qc-terrain-name-label, .qc-terrain-road-label {
+        background: Canvas; color: CanvasText; border: 1px solid CanvasText; forced-color-adjust: none;
+    }
+}
+
+/* prefers-reduced-motion: dimming/highlighting changes are instant already (no
+   transition is declared on opacity or background above), so there is nothing to
+   disable for the controls this unit added -- recorded here, next to the other two
+   preferences, so a future transition on `.qcm-legend-swatch` or the highlight
+   buttons is not added without also being guarded. */
+@media (prefers-reduced-motion: reduce) {
+    .qcm-legend-swatch, .qcm-highlight-buttons button { transition: none; }
+}
+
+/* A point symbol on the preview. The divIcon wrapper is Leaflet's, not ours --
+   it ships a white background and a border, which would put a box around every
+   campsite. The SVG inside carries the whole symbol. */
+.qcm-site-marker {
+    background: none;
+    border: 0;
+}
+.qcm-site-marker:focus-visible {
+    outline: 2px solid #f0fdf4;
+    outline-offset: 2px;
+}
+
+/* The card a BLM pin opens: the agency's own directions, description, fee text, vintage
+   and page link. A Leaflet popup is absolutely positioned in its own pane, so nothing
+   here can push the map out of the width the layout tests hold it to. The height is
+   capped here at 230 px (QUX-05c, up from 180, which cut off a GNIS name card's lines
+   and actions), and past the cap the content scrolls rather than growing the box.
+   Leaflet's own maxHeight cannot hold it: Leaflet measures a card once, as its popup
+   opens, and a camera card's still lands after that (wireCameraPin), growing one to
+   384 px. */
+.qcm-site-popup .leaflet-popup-content { max-height: 230px; overflow-y: auto; }
+.qcm-site-card { font-size: 0.85rem; line-height: 1.45; }
+.qcm-site-card p { margin: 0 0 0.5rem; }
+.qcm-site-card p:last-child { margin-bottom: 0; }
+.qcm-site-card-name { font-weight: 600; }
+.qcm-site-card:focus-visible { outline: 2px solid #f0fdf4; outline-offset: 2px; }
+
+/* A card's actions (a name card's Copy coordinates, Share place, Save, Before
+   you go and Nearby; a camera's Save and Before you go) and the status line
+   reporting the last one, docked to the popup's bottom edge. A name card is
+   taller than its popup (the cap above scrolls everything past 230 px), and at
+   the end of the card all five actions opened below the fold. Sticky keeps
+   the dock on that edge, on the popup's own background, while the lines
+   scroll under it; at the end of the scroll it is back in flow, so no line
+   stays hidden. The status line leads the dock and spans it, so a report
+   grows the dock upward and leaves every button where it was. The buttons sit
+   in a grid of fixed columns rather than a wrapping row: a row reflows when
+   Save's label grows to "Saved — remove", dropping Nearby onto a new line
+   under a pointer already aimed at the next press. A column is at least
+   5.75rem and more than a third of the row, so the count follows only the
+   popup's width and the text size, never a label: two up to a 20 px root,
+   beside a 17 px classic scrollbar too, and one past that rather than a
+   button running off the card's edge. 0.7rem with 0.15rem of padding is what
+   fits the longest label, Copy coordinates, on one line beside that scrollbar
+   at the default size; a little larger, it wraps, which grows its row.
+   --qcm-dock-max caps the dock: a larger text size grows every rem in it while
+   the popup holds at 230 px (above), and past the cap the dock scrolls on its
+   own rather than covering the card it belongs to. 150px holds a default-size
+   name card's dock with Nearby's three-line status. */
+.qcm-site-card { --qcm-dock-max: 150px; }
+.qcm-site-card-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    box-sizing: border-box;
+    max-height: var(--qcm-dock-max);
+    overflow-y: auto;
+    margin: 0.5rem 0 0;
+    padding: 0.4rem 0;
+    border-top: 1px solid currentColor;
+    background: var(--bg-elevated, #1e1e2e);
+}
+.qcm-site-card-actions .qcm-site-card-status { margin: 0 0 0.3rem; }
+.qcm-site-card-actions .qcm-site-card-status:empty { margin: 0; }
+.qcm-site-card-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(5.75rem, 34%)), 1fr));
+    gap: 0.25rem;
+}
+/* A browser scrolls a focused link into view only when it is outside the
+   scrollport, and cannot know the dock covers the scrollport's bottom: a link
+   scrolled under the dock would take focus there, its ring behind the buttons.
+   A scroll margin as tall as the dock can grow keeps it clear. The margin
+   counts for every scroller around the link, so a link that close to the
+   window's bottom edge scrolls the page too; Leaflet puts its own container's
+   scroll straight back (its _onScroll). The dock itself holds no link. */
+.qcm-site-card a { scroll-margin-bottom: var(--qcm-dock-max); }
+/* An odd one out (a name card's fifth, Nearby) takes the whole last row. */
+.qcm-site-card-action:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.qcm-site-card-action {
+    min-height: 24px;
+    padding: 0.15rem;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    cursor: pointer;
+}
+.qcm-site-card-action:hover, .qcm-site-card-action:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+}
+.qcm-site-card-action:focus-visible {
+    outline: 2px solid #f0fdf4;
+    outline-offset: 2px;
+}
+.qcm-site-card-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+/* QQA-08: the chooser a tap opens when two or more roads or trails lie within a finger's
+   width of it. Each choice is a full-width button at touch size, so it can be hit. */
+.qcm-route-chooser ul { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+.qcm-route-choice {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin: 0 0 0.3rem;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid currentColor;
+    border-radius: 2px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+}
+.qcm-route-choice:hover, .qcm-route-choice:focus-visible { background: rgba(255, 255, 255, 0.12); }
+.qcm-route-choice:focus-visible { outline: 2px solid #f0fdf4; outline-offset: 2px; }
+/* Never hidden (spec-a11y-2): it is a live region, and one that is not rendered when its
+   text changes may never be announced. Empty, it has no height and (in the dock, above)
+   no margin, so it takes no room until an action writes into it. */
+.qcm-site-card-status {
+    font-size: 0.8em;
+    opacity: 0.85;
+}
+
+/* QUX-06: the one-point elevation line and its source caveat -- same dim,
+   small-print treatment as .qcm-site-card-status above. */
+.qcm-site-card-elevation-caveat {
+    font-size: 0.8em;
+    opacity: 0.85;
+}
+.qcm-site-card-elevation-caveat[hidden] { display: none; }
+
+/* N2: named terrain & places (GNIS). The marker glyph reuses .qcm-site-marker's
+   own "no white Leaflet divIcon box" rule; the label is an owned DOM span (not a
+   raster pixel) so displayStyle's emphasis/contrast can reach it like any other
+   drawn layer. Selecting a name (click, or the suppressed-names list) gives it
+   label priority on the next render -- `.is-selected` is the only visual cue
+   needed, since re-placement itself is what keeps it drawn. */
+.qcm-name-marker { background: none; border: 0; }
+/* QUX-02 follow-up: the divIcon box is 240x240 (main.js's `box`) so collision-
+   avoidance has room to place a name label away from its own point, but the
+   box is transparent and, left at Leaflet's default, clickable across its
+   whole area -- a click aimed at one marker can land on a denser neighbor's
+   box instead. Leaflet's own .leaflet-marker-icon.leaflet-interactive sets
+   pointer-events: auto at specificity 0,2,0; this file loads after
+   vendor/leaflet.css (quiet-corners-dashboard.html), so an equal-specificity
+   override here wins with no !important, same pattern the popup rules above
+   already rely on. Only the drawn glyph and label stay clickable/focusable. */
+.qcm-name-marker.leaflet-interactive { pointer-events: none; }
+.qcm-name-marker-glyph { pointer-events: auto; }
+.qcm-name-marker:focus-within .qcm-name-label,
+.qcm-name-marker-glyph:focus-visible { outline: 2px solid #f0fdf4; outline-offset: 2px; }
+.qcm-name-label {
+    /* QQA-05a: the same plate recipe and size source as the dashboard's town names
+       (quiet-corners.css .qc-place-label): font-size follows --qc-label-px, set from
+       Q/name-labels.js SIZE_SCALE on the map container; box-sizing makes the inline
+       width/height main.js reserves (text + the plate's padding) the painted box. */
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: var(--qc-label-px, 0.875rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: #dbe4f0;
+    background: rgba(13, 13, 26, 0.82);
+    padding: 1px 5px;
+    border-radius: 3px;
+    pointer-events: auto;
+    white-space: nowrap;
+}
+.qcm-name-label.is-selected { color: #6cc77f; outline: 1px solid #6cc77f; }
+/* QQA-05r-2: a road name, in pane qcm-roads (z 405, no pointer events). The same face, size
+   source and plate recipe as the names above so the plate main.js measured is the plate painted;
+   main.js sets width, height and the rotation along the road. Plain system text on a dark plate
+   (amber on rgba(13,13,26,.82) is well past 4.5:1 over any base tile). */
+.qcm-road-marker { pointer-events: none; background: none; border: 0; }
+.qcm-road-label {
+    display: block;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: var(--qc-label-px, 0.875rem);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    /* QQA-05r-3: amber, not the place plates' #dbe4f0, so a road named for the creek or knob
+       beside it is not mistaken for that creek or summit. >= 4.5:1 over the plate on white or black
+       (type-scale.test.mjs). prefers-contrast and forced-colors keep their own palette in the blocks after this rule. */
+    color: #fde68a;
+    background: rgba(13, 13, 26, 0.82);
+    padding: 1px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+    pointer-events: none;
+    transform-origin: 50% 50%;
+}
+/* After the base rules above on purpose: equal specificity, so the later rule wins. These sat
+   before them and did nothing. */
+@media (prefers-contrast: more) {
+    .qcm-name-label, .qcm-road-label { background: #000; color: #fff; }
+}
+@media (forced-colors: active) {
+    .qcm-name-label, .qcm-road-label {
+        background: Canvas; color: CanvasText; border: 1px solid CanvasText; forced-color-adjust: none;
+    }
+    .qcm-name-label.is-selected { color: CanvasText; outline: 2px solid Highlight; }
+}
+/* QUX-11a: 14rem (was 8rem) -- "Places in this view" can hold every fetched
+   name, not just the ones the declutter loop crowded out, so the old cap
+   scrolled almost immediately. */
+.qcm-names-list { list-style: none; margin: 0.3rem 0 0; padding: 0; max-height: 14rem; overflow-y: auto; }
+.qcm-names-list li { border-top: 1px solid #3f3f46; }
+/* QUX-11a §2.3: a native <button>, full width and left-aligned, replacing the
+   old li[tabindex]+keydown row -- same padding/font-size the row itself used
+   to carry, so the row's footprint and focus ring look unchanged. */
+.qcm-place-row {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.3rem 0.4rem;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8rem;
+    background: none;
+    border: 0;
+    color: inherit;
+}
+.qcm-place-row:focus-visible { outline: 2px solid #f0fdf4; outline-offset: -2px; }
+.qcm-place-row-meta { opacity: 0.75; }
+
+/* QUX-11a §2.3: the group-filter checkboxes and "Only … not labelled" toggle,
+   wrapped compactly so the control cluster does not force the panel wider. */
+.qcm-places-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.8rem;
+    margin: 0.4rem 0;
+    padding: 0;
+    border: 0;
+    font-size: 0.8rem;
+}
+.qcm-places-filters legend { font-size: 0.75rem; opacity: 0.85; padding: 0; }
+
+/* E2: name labels draped over the 3D terrain canvas. A plain absolutely
+   positioned span, not a Leaflet divIcon -- terrain-view.js places it with
+   map.project() and rewrites the whole set on every moveend/pitchend, same
+   plate treatment as .qcm-name-label above so a name reads the same
+   whether it is over the 2D map or the relief. */
+.qc-terrain-names {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.qc-terrain-name-label {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    /* terrain-view.js sets font-size inline from the same SIZE_SCALE; the var is the
+       fallback for a label placed before it does. */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: var(--qc-label-px, 0.875rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: #dbe4f0;
+    background: rgba(13, 13, 26, 0.82);
+    padding: 1px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+/* QQA-06c-2: road names over the relief. A layer of its own (not .qc-terrain-names) so a re-place
+   of the road names never rewrites the GNIS names. The same face, amber and plate as the screen
+   map's .qcm-road-label; terrain-view.js sets left/top (the label's centre), width and height (the
+   plate it measured), font-size from the label-size setting and a rotation along the road as the
+   screen shows it. */
+.qc-terrain-roads {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+.qc-terrain-road-label {
+    position: absolute;
+    display: block;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: var(--qc-label-px, 0.875rem);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    color: #fde68a;
+    background: rgba(13, 13, 26, 0.82);
+    padding: 1px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+    pointer-events: none;
+    transform-origin: 50% 50%;
+}
+
+/* E2: the terrain panel's capability-notice list (brief item 4) -- every layer
+   on in 2D, either drawn over the relief ("shown"/"loading in 2D first") or
+   disclosed as staying flat ("Available in 2D"). Sits above the canvas/control
+   bar inside the dialog, same dark surface as the rest of the panel chrome. */
+.qc-terrain-notices {
+    background: #18181b;
+    border-bottom: 1px solid #3f3f46;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+}
+.qc-terrain-notices-heading {
+    margin: 0 0 0.2rem;
+    font-weight: 600;
+    color: #f4f4f5;
+}
+.qc-terrain-notices ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.8rem;
+}
+.qc-terrain-notice { color: #d4d4d8; }
+.qc-terrain-notice-loading { color: #fbbf24; }
+.qc-terrain-notice-available-2d { color: #a1a1aa; font-style: italic; }
+
+/* The layer switches and the print builder, as a thumb meets them (audit F05).
+
+   Below 1024px both panels are in normal flow under the map and everything in
+   them is tapped rather than clicked, but they kept the desktop treatment: a
+   13x13 checkbox in a 20.6px label, buttons 17-21px tall, the scale and overlap
+   selects at 18px. 44px is this product's own touch-target goal, the same one
+   the map's finder button already answers to in quiet-corners.css.
+
+   `min-height`, not `height`: three of the layer labels already wrap to two
+   lines at 41.2px and have to keep growing rather than be clamped. This block
+   sits last in the file because its selectors are no more specific than the
+   ones they override, so source order is what decides.
+
+   16px on a field is not a style choice: mobile Safari zooms the whole page
+   when a focused input's text is under it, which throws the reader out of the
+   map. The panel keeps its 0.9rem prose — only what you type into moves.
+
+   scripts/qcm/phone-controls.test.mjs measures both, in a real browser. */
+@media (max-width: 1023px) {
+    .qcm-controls label,
+    .qcm-controls button,
+    .qcm-controls select,
+    .qcm-controls .qcm-build,
+    .qcm-controls input:not([type="radio"], [type="checkbox"]) {
+        min-height: 44px;
+    }
+    .qcm-controls select,
+    .qcm-controls input:not([type="radio"], [type="checkbox"]) {
+        font-size: 1rem;
+    }
+}
+
+/* QUX-08D: a camera pin, screen-only (never printed). Same "no box" treatment as
+   .qcm-site-marker -- the divIcon wrapper is Leaflet's, the dot is ours. Each
+   provider gets its own modifier color so road and park cameras read apart on a
+   map that can show both; the park modifier lands with the park layer (08D-ii),
+   since css-selector-reach fails a class no template or script writes. */
+.qcm-camera-pin {
+    background: none;
+    border: 0;
+}
+.qcm-camera-pin::before {
+    content: "";
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #052e16;
+}
+.qcm-camera-pin--road::before { background: #38bdf8; }
+.qcm-camera-pin--park::before { background: #facc15; }
+.qcm-camera-pin--research::before { background: #4ade80; }
+.qcm-camera-pin--airport::before { background: #c084fc; }
+/* Link-only pins open the operator's page, never a picture; pink keeps them apart from airport purple. */
+.qcm-camera-pin--link::before { background: #f472b6; }
+.qcm-camera-pin:focus-visible {
+    outline: 2px solid #f0fdf4;
+    outline-offset: 2px;
+}
+
+/* The picture area inside a camera's card (.qcm-site-card, above): an empty
+   <figure> until popupopen fills it, capped to the popup's own width rather
+   than the image's native size. */
+.qcm-camera-media img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* The methodology section under the map (#documentation on /quiet-corners/) is prose with
+   inline code in it -- hosts, paths, file names -- and a code span is one unbroken word.
+   At a 320px viewport (WCAG 1.4.10, 400% zoom of 1280) one ran 29px past the right edge and
+   the whole page scrolled sideways. Same rule the maps documentation page has for its own
+   prose (style.css `.qcm-docs :not(pre) > code`). The same goes for a long path-like word in a list item or a
+   heading at 200% text on a phone ("recreation/retirement" ran 77px past the edge), so the whole section wraps. */
+#documentation, #documentation :not(pre) > code { overflow-wrap: anywhere; }
+
+/* Map credits are links inside running text on a coloured plate; colour alone must not be the only cue (WCAG 1.4.1). */
+#qc-map .leaflet-control-attribution a,
+#qc-map .maplibregl-ctrl-attrib-inner a { text-decoration: underline; }
+
+/* The 3D dialog's credit line inherits the page's light text colour onto MapLibre's own pale plate (white at 50%, white when
+   compact): 2.85:1 measured. Dark text on that plate is >= 4.5:1 even over a black scene behind the translucent plate. */
+.qc-terrain-dialog .maplibregl-ctrl-attrib,
+.qc-terrain-dialog .maplibregl-ctrl-attrib a { color: #111; }
+.qc-terrain-dialog .maplibregl-ctrl-attrib a { text-decoration: underline; }
+
+/* The header's two links wrap onto a second line instead of pushing the page sideways when the reader's text is enlarged (WCAG 1.4.4 / 1.4.10). */
+@media (max-width: 1023px) {
+  .qc-app-nav { flex-wrap: wrap; }
+}
+
+/* A trust-panel row is a label and a value side by side; at 200% text on a phone they wrap onto two lines instead of
+   running past the right edge (WCAG 1.4.4 / 1.4.10). */
+.qc-trust-row { flex-wrap: wrap; column-gap: 0.75rem; }
+.qc-trust-row > span { min-width: 0; overflow-wrap: anywhere; }
+
+/* WCAG 2.4.11 (focus not obscured): the map's own controls (legend, zoom, credits) sit above its pins, so a pin could take
+   keyboard focus and lie entirely under one (measured: a place pin under the map key's title at 1280x800). While a pin has
+   keyboard focus the controls drop one step under the map pane, so the focused pin and its label show. Cards stay above both
+   (popup pane), and the controls come back the moment focus moves on. */
+#qc-map:has(.leaflet-marker-icon:focus-visible) .leaflet-top,
+#qc-map:has(.leaflet-marker-icon:focus-visible) .leaflet-bottom { z-index: 399; }
+@media (min-width: 1024px) {
+  #qc-map:has(.leaflet-marker-icon:focus-visible) .leaflet-top,
+  #qc-map:has(.leaflet-marker-icon:focus-visible) .leaflet-bottom { z-index: 9; }
+}
