@@ -199,8 +199,8 @@ const CALTRANS_COVERAGE_AREAS = Object.freeze([
 
 /** The deadline for one request to a source that has not cited a slower measurement.
  *  Per source, not one number for the app: the GNIS names path is measured at 31 s.
- *  Every module in this directory except main.js reads its own source's value through
- *  request.js (scripts/qcm/no-raw-fetch.test.mjs holds that); main.js joins them in PR-B2.
+ *  Every module in this directory reads its own source's value through request.js
+ *  (scripts/qcm/no-raw-fetch.test.mjs holds that).
  *  `REQUEST_POLICY.timeoutMs` is no longer a request deadline. */
 export const DEFAULT_SOURCE_TIMEOUT_MS = 10000;
 const withTimeouts = (sources) => Object.fromEntries(Object.entries(sources)

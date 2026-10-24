@@ -13,6 +13,7 @@
 // listed there, which is not a statement about snow.
 import { SOURCES } from './source-registry.js';
 import { SYMBOLS } from './legend.js';
+import { fetchWithDeadline, orThrow } from './request.js';
 import { stationsInView } from './source-nws-observations.js';
 
 const SRC = SOURCES.usdaSnotel;
@@ -89,9 +90,7 @@ export async function fetchSnotel(catalogue, bbox, { fetchImpl = fetch, signal, 
   if (!chosen.length) return { ...base, status: 'empty', inView };
   let json;
   try {
-    const res = await fetchImpl(snotelUrl(chosen.map((s) => s.id), nowMs), { signal });
-    if (!res || !res.ok) throw new Error('HTTP');
-    json = await res.json();
+    json = orThrow(await fetchWithDeadline(snotelUrl(chosen.map((s) => s.id), nowMs), { fetchImpl, signal, timeoutMs: SRC.timeoutMs }));
   } catch (e) { return { ...base, status: 'unavailable', inView, shown: chosen.length }; }
   const byId = new Map(readSnotel(json).map((r) => [r.id, r]));
   const sites = chosen.filter((s) => byId.has(s.id)).map((s) => ({ ...byId.get(s.id), name: s.name, lat: s.lat, lon: s.lon, elevFt: s.elevFt }));
@@ -102,9 +101,9 @@ export async function fetchSnotel(catalogue, bbox, { fetchImpl = fetch, signal, 
 /** The catalogue, read once by the page. Never throws. */
 export async function loadCatalogue(fetchImpl = fetch) {
   try {
-    const res = await fetchImpl(CATALOGUE_URL);
-    if (!res || !res.ok) throw new Error('catalogue');
-    return { status: 'ready', ...readCatalogue(await res.json()) };
+    const got = await fetchWithDeadline(CATALOGUE_URL, { fetchImpl, timeoutMs: SRC.timeoutMs });
+    if (!got.ok) throw new Error('catalogue');
+    return { status: 'ready', ...readCatalogue(got.body) };
   } catch (e) { return { status: 'unavailable', stations: [], dropped: 0 }; }
 }
 

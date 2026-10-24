@@ -10,6 +10,7 @@
 // open to the public, never how loud a place is and never how often anything passes.
 import { SOURCES } from './source-registry.js';
 import { SYMBOLS } from './legend.js';
+import { fetchWithDeadline, orThrow } from './request.js';
 
 const RAIL = SOURCES.btsRailClass1;
 const AIRPORTS = SOURCES.btsAirports;
@@ -81,25 +82,23 @@ export function readAirports(json) {
   return { airports, dropped, seen: features.length, capped: !!json && (json.exceededTransferLimit === true || features.length >= PAGE) };
 }
 
-async function getJson(url, fetchImpl, signal) {
-  const res = await fetchImpl(url, { signal });
-  if (!res || !res.ok) throw new Error(`HTTP ${res && res.status}`);
-  const json = await res.json();
+async function getJson(url, fetchImpl, signal, timeoutMs) {
+  const json = orThrow(await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs }));
   if (json && json.error) throw new Error('service refused the query');
   return json;
 }
 
-async function ask(bbox, ok, url, read, key, { fetchImpl = fetch, signal, nowMs = Date.now() } = {}) {
+async function ask(bbox, ok, url, read, key, timeoutMs, { fetchImpl = fetch, signal, nowMs = Date.now() } = {}) {
   const none = { [key]: [], dropped: 0, capped: false, fetchedMs: null };
   if (!ok(bbox).ok) return { status: 'too-wide', ...none };
   let json;
-  try { json = await getJson(url(bbox), fetchImpl, signal); } catch (e) { return { status: 'unavailable', ...none }; }
+  try { json = await getJson(url(bbox), fetchImpl, signal, timeoutMs); } catch (e) { return { status: 'unavailable', ...none }; }
   const got = read(json);
   return { status: got[key].length ? 'ready' : 'empty', [key]: got[key], dropped: got.dropped, capped: got.capped, fetchedMs: nowMs };
 }
 /** One view's answer. Never throws: a failure is `status: 'unavailable'`. */
-export const fetchRail = (bbox, opts) => ask(bbox, railBoxStatus, railUrl, readRail, 'lines', opts);
-export const fetchAirports = (bbox, opts) => ask(bbox, airportBoxStatus, airportsUrl, readAirports, 'airports', opts);
+export const fetchRail = (bbox, opts) => ask(bbox, railBoxStatus, railUrl, readRail, 'lines', RAIL.timeoutMs, opts);
+export const fetchAirports = (bbox, opts) => ask(bbox, airportBoxStatus, airportsUrl, readAirports, 'airports', AIRPORTS.timeoutMs, opts);
 
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
