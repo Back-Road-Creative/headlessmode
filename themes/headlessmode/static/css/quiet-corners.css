@@ -1132,20 +1132,43 @@ dialog::backdrop {
     #qc-sheet[data-sheet="expanded"] {
         height: 100%;
     }
-    /* On a tall phone a half sheet leaves the map at least 35% of the stage
-       whatever else sits in it (36% here: the stage's border and pixel rounding
-       take a point back; 35% is the floor the sheet's own header comment
-       cites). The print-area strip and the surface caption share the stage with
+    /* A half sheet leaves the map a floor share of the stage whatever else sits
+       in it. The print-area strip and the surface caption share the stage with
        the map and the sheet, and the sheet's 45% did not give way to them: with
-       a print area chosen the map was left ~31% of the stage at 390x844. The
-       map's floor makes the flex split take the shortfall from the sheet, the
-       one box here that can shrink (`flex-shrink: 1`, `min-height: 0` above).
-       Half only: collapsed is a bar and expanded is a deliberate full-stage
-       read. Not on a short phone (320x568): the stage is ~400px, the sheet's
-       grip bar and four summaries alone need ~150px, and a floor there pushes
-       them out of the frame, which clips them. scripts/qcm/panel-shell-browser.test.mjs
-       holds both. */
+       a print area chosen the map was left ~31% of the stage at 390x844 and
+       ~25% at 375x667. The map's floor makes the flex split take the shortfall
+       from the sheet, the one box here that can shrink (`flex-shrink: 1`,
+       `min-height: 0` above). Half only: collapsed is a bar and expanded is a
+       deliberate full-stage read.
+
+       The floor can only be as high as the sheet's own controls leave room for:
+       the grip bar and four summaries need ~150px, and a floor that squeezes
+       them past the stage's bottom edge clips them (the stage clips). So it
+       steps with the window, and with the caption, which takes ~85px more:
+         - 700px and taller, caption hidden: 36% (the stage's border and pixel
+           rounding take a point back from the 35% the sheet's header comment
+           cites). 732 measured: fits with room.
+         - 640-699px (375x667, 390x664), caption hidden: 30%, the most that fits
+           there (36% ended the grip bar 14px past the edge); 25% before.
+         - 850px and taller, caption showing: 36%; that is the shortest window
+           whose stage holds the strip, the caption, the sheet's controls and a
+           36% map (a 732px window ended the grip 51px past the edge). Below it
+           the caption case keeps the 45% sheet.
+         - Shorter than 640px (320x568): none; the stage is ~400px and the
+           controls alone need ~150px of it.
+       scripts/qcm/panel-shell-browser.test.mjs holds 932, 844, 732, 667, 664
+       and 568. */
     @media (min-height: 700px) {
+        #qc-map-container:has(#qc-sheet[data-sheet="half"]):not(:has(#qcm-surface-caption:not([hidden]))) #qc-map {
+            min-height: 36%;
+        }
+    }
+    @media (min-height: 640px) and (max-height: 699px) {
+        #qc-map-container:has(#qc-sheet[data-sheet="half"]):not(:has(#qcm-surface-caption:not([hidden]))) #qc-map {
+            min-height: 30%;
+        }
+    }
+    @media (min-height: 850px) {
         #qc-map-container:has(#qc-sheet[data-sheet="half"]) #qc-map {
             min-height: 36%;
         }

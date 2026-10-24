@@ -718,17 +718,22 @@ test('sheet: rotating 390x844 -> 844x390 keeps a half-open sheet at half with th
 // A04: the combined state. A print area chosen puts the area strip (Edit, Undo,
 // Clear, ~110px plus its margins) above the sheet in the same stage, and a half
 // sheet used to keep its 45% regardless, so the map was left ~190px of a 606px
-// stage at 390x844 and ~80px at 320x568. The sheet's own comment (quiet-corners.css)
-// puts the map's floor at 35% of the stage. A tall phone is held to that; a short
-// one cannot be (the sheet's grip bar and four summaries alone are ~150px of a
-// ~400px stage, and squeezing them out of the frame clips them, which the
-// inside-the-frame tests below catch), so it is held to an absolute map height: today's ~80px, a floor that
-// stops it getting worse, not a statement that 80px is enough.
+// stage at 390x844, ~120px of 478 at 375x667 and ~80px at 320x568. The sheet's own
+// comment (quiet-corners.css) puts the map's floor at 35% of the stage, and the
+// floor steps with the window because the sheet's grip bar and four summaries
+// need ~150px: a window 700px or taller is held to 35%; one of 640-699px
+// (375x667, 390x664, common with browser toolbars up) to 28%, the most that fits
+// there; a short one (320x568) cannot be, so it is held to an absolute map height:
+// today's ~80px, a floor that stops it getting worse, not a statement that 80px
+// is enough. The inside-the-frame tests below run the same windows with the
+// surface caption too, so a floor that pushes the controls past the edge fails.
+const A04_CUTOFF_H = 640;
+const A04_VIEWPORTS = [...PHONE_VIEWPORTS, { w: 375, h: 667 }, { w: 390, h: 664 }, { w: 412, h: 732 }, { w: 430, h: 932 }];
 const MIN_PANEL_ROOM = 88; // two touch goals: a summary row plus one row to act on
 const SHORT_PHONE_MIN_MAP = 72;
 
-for (const vp of PHONE_VIEWPORTS) {
-  const tall = vp.h >= 700;
+for (const vp of A04_VIEWPORTS) {
+  const share = vp.h >= 700 ? 0.35 : vp.h >= A04_CUTOFF_H ? 0.28 : 0;
   test(`sheet: with a print area chosen, a half sheet keeps the map usable (${vp.w}x${vp.h})`, { skip }, async () => {
     await forgetSavedRecipe();
     const page = await freshPageAt(vp);
@@ -737,9 +742,9 @@ for (const vp of PHONE_VIEWPORTS) {
       await trustedClick(page, sel);
       const snap = await page.evaluate(sheetSnapshot);
       assert.equal(snap.sheet, 'half', `data-sheet is "${snap.sheet}" after opening ${sel}, expected "half"`);
-      if (tall) {
-        assert.ok(snap.mapHeight >= 0.35 * snap.containerHeight,
-          `with a print area chosen and ${sel} open, #qc-map is ${snap.mapHeight}px of a ${snap.containerHeight}px stage — under 35%`);
+      if (share) {
+        assert.ok(snap.mapHeight >= share * snap.containerHeight,
+          `with a print area chosen and ${sel} open, #qc-map is ${snap.mapHeight}px of a ${snap.containerHeight}px stage — under ${share * 100}%`);
       } else {
         assert.ok(snap.mapHeight >= SHORT_PHONE_MIN_MAP,
           `with a print area chosen and ${sel} open, #qc-map is only ${snap.mapHeight}px tall — under ${SHORT_PHONE_MIN_MAP}px`);
@@ -807,7 +812,7 @@ function assertInsideFrame(seen, sheets, shows) {
   assert.deepEqual(cut, [], `the map frame clips at its bottom edge, so this is cut off: ${cut.join('; ')}`);
 }
 
-for (const vp of PHONE_VIEWPORTS) {
+for (const vp of A04_VIEWPORTS) {
   test(`sheet: collapsed, half and expanded each end inside the map frame (${vp.w}x${vp.h})`, { skip }, async () => {
     await forgetSavedRecipe();
     const page = await freshPageAt(vp);
