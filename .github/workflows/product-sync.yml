@@ -1,8 +1,7 @@
 # Generalises rigscore-facts-sync.yml's pattern (release -> site PR, no human
-# step) to every product with a GitHub-release source. rigscore keeps its own
+# step) to GitHub Release objects and stable source tags. rigscore keeps its own
 # workflow for now (its facts pipeline is npm/Node-shaped, not this JSON
-# contract) — this one covers band-coach and driftless, and grows a matrix
-# entry the day a third product gets a release workflow. Data contract:
+# contract) — this one covers band-coach, driftless, waypost and framegrade. Data contract:
 # data/releases/<slug>.json (unit H12a). Named product-sync.yml, not
 # sync-*, because .github/workflows/sync-* is hard-denied by the autoland
 # policy (bin/autoland-policy.toml) — this workflow itself is not
@@ -23,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       product:
-        description: 'Limit to one product slug (band-coach, driftless). Empty = all.'
+        description: 'Limit to one product slug (band-coach, driftless, waypost, framegrade). Empty = all.'
         type: string
         default: ''
       tag:
@@ -56,6 +55,14 @@ jobs:
             source_repo: Back-Road-Creative/driftless
             asset_pattern: 'driftless-showcase-{tag}.tar.gz'
             test_files: scripts/test_release_data.py scripts/test_driftless_demo.py
+          - slug: waypost
+            source_repo: Back-Road-Creative/waypost
+            asset_pattern: ''
+            test_files: scripts/test_release_data.py
+          - slug: framegrade
+            source_repo: Back-Road-Creative/framegrade
+            asset_pattern: ''
+            test_files: scripts/test_release_data.py
     steps:
       - name: Skip this matrix entry if the dispatch named a different product
         id: gate
@@ -92,7 +99,10 @@ jobs:
             TAG_INPUT="${{ github.event.client_payload.tag }}"
           fi
           HAVE=$(jq -r '.version // ""' "data/releases/${{ matrix.slug }}.json")
-          if [ -n "$TAG_INPUT" ]; then
+          SOURCE=$(jq -r '.release_source' "data/releases/${{ matrix.slug }}.json")
+          if [ "$SOURCE" = "github-tag" ]; then
+            python3 bin/product-tag-resolve.py "$REPO" --tag "$TAG_INPUT" > release.json
+          elif [ -n "$TAG_INPUT" ]; then
             gh api "repos/$REPO/releases/tags/$TAG_INPUT" > release.json
           elif ! gh api "repos/$REPO/releases/latest" > release.json 2> gh-error.txt; then
             # A product with no published release yet is a skip, not a failure:
@@ -112,7 +122,9 @@ jobs:
 
           VERSION="${TAG#v}"
           echo "have=${HAVE}" >> "$GITHUB_OUTPUT"
-          if [ "$VERSION" = "$HAVE" ]; then
+          HAVE_COMMIT=$(jq -r '.source_commit // ""' "data/releases/${{ matrix.slug }}.json")
+          WANT_COMMIT=$(jq -r '.source_commit // ""' release.json)
+          if [ "$VERSION" = "$HAVE" ] && [ "$HAVE_COMMIT" = "$WANT_COMMIT" ]; then
             echo "Already synced to ${TAG} — nothing to do."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
@@ -189,7 +201,7 @@ jobs:
           else
             gh pr create \
               --title "release: ${{ matrix.slug }} ${TAG} data + demo sync" \
-              --body "Auto-generated data/releases/${{ matrix.slug }}.json refresh (and demo bundle, if this product ships one) for ${{ matrix.slug }} ${TAG}. Release notes: ${RELEASE_URL}. Opened by the product-sync workflow — no human step in between." \
+              --body "Auto-generated data/releases/${{ matrix.slug }}.json refresh (and demo bundle, if this product ships one) for ${{ matrix.slug }} ${TAG}. Source: ${RELEASE_URL}. Opened by the product-sync workflow — no human step in between." \
               --head "${BRANCH}" \
               --base master
           fi

@@ -1,12 +1,12 @@
 {
   "product": "waypost",
   "name": "Waypost",
-  "release_source": "manual",
+  "release_source": "github-tag",
   "source_repo": "Back-Road-Creative/waypost",
-  "version": null,
+  "version": "0.2.1",
   "released_at": null,
-  "release_url": null,
-  "source_ref": null,
+  "release_url": "https://github.com/Back-Road-Creative/waypost/tree/v0.2.1",
+  "source_ref": "v0.2.1",
   "assets": {},
   "demo": {
     "path": "static/demo/waypost/",
@@ -16,5 +16,6 @@
     "pages": 5
   },
   "media_source": null,
-  "notes": "Waypost's repository is public but has no release or tag to read. The demo bundle's manifest.json 'source' (62f9408) is honestly a SITE commit (PR #331) that built the bundle, not a product ref."
+  "notes": "Stable source tag, not a GitHub Release object; no publication date or downloadable assets are inferred. The tagged package is seo-manager (Python library and CLI). The frozen console demo is a separate studio integration, built from site commit 62f9408, not this product tag.",
+  "source_commit": "68aa5216ede12b1d90f5e0b798e8348acdb25ee4"
 }

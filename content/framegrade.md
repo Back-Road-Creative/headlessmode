@@ -1,14 +1,16 @@
 ---
 title: "Framegrade — the media engine"
-description: "A media engine that grades video and photos, checks each finished file and builds route films from GPS tracks. Pre-release; Waypost runs it underneath."
+description: "A media engine that grades video and photos, checks each finished file and builds route films from GPS tracks. Available as tagged source; used by the studio media workflow."
 date: 2026-10-08
 draft: false
 tags: ["creator-tools", "video-pipeline", "photo-develop", "automation"]
 ---
 
-> **Access.** Framegrade is pre-release. The source is public under Apache-2.0 at
-> [Back-Road-Creative/framegrade](https://github.com/Back-Road-Creative/framegrade), and there is no
-> installer or versioned release. It is available through a studio engagement;
+> **Access.** The source is public under Apache-2.0 at
+> [Back-Road-Creative/framegrade](https://github.com/Back-Road-Creative/framegrade).
+> A versioned source package is available; open **Release details** above for the current
+> tag and verified source commit. Follow the repository's installation instructions.
+> Help with deployment is available through a studio engagement;
 > [contact me](/contact/) for setup.
 
 Framegrade is the engine that turns raw video and photos into finished files. It does the

@@ -775,3 +775,33 @@ holds the rule.
 
 Archive when headlessmode.com is retired, or when the studio's systems have moved
 elsewhere.
+
+
+### Product version freshness
+
+`data/releases/<slug>.json` is the source for the product sheet's Release details.
+`product-sync.yml` checks Band Coach and Driftless's GitHub Release objects and
+Waypost and Framegrade's stable source tags daily at 06:47 UTC. It also accepts
+manual and `product-release` dispatches. Updates open review PRs; a failed sync
+opens or updates its tracking issue. Review and merge are still required before
+the website changes, so automation detects drift rather than promising an
+instant deployment.
+
+A `github-tag` record stores the highest stable numeric semantic version and the
+peeled commit from GitHub's paginated tag list. It links to that source tree,
+leaves `released_at` null and has no release assets: a commit timestamp is not a
+release publication date. A moved tag's changed commit also opens an update PR.
+`bin/product-tag-resolve.py` resolves this input; `bin/product-sync.sh` validates
+and writes it. The frozen Waypost demo retains its independent site-commit
+provenance and is not relabelled as the current `seo-manager` source package.
+
+Offline regression checks use captured API-shaped fixtures, never live API calls:
+
+```bash
+python3 -m pytest scripts/test_product_sync.py scripts/test_release_data.py scripts/test_systems_contract.py
+```
+
+Build first for the rendered product-sheet assertions. New tag-sourced products
+need a release-ledger record and a product-sync matrix row. The older drift
+sentinel's GitHub Release comparison remains specific to `github-release` records;
+tag freshness and failure reporting are owned by product-sync.

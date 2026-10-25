@@ -677,7 +677,7 @@ def test_waypost_and_framegrade_entries_carry_their_public_repo(name):
 @pytest.mark.parametrize("name", sorted(PUBLIC_PRODUCTS))
 def test_waypost_and_framegrade_pages_state_public_source_and_licence(name):
     """The Access note names the public source, URL and licence while keeping
-    the business facts (pre-release, no release, studio engagement); the
+    the source-package / studio-engagement distinction; the
     Documentation section points at the repository README."""
     repo, spdx = PUBLIC_PRODUCTS[name]
     text = (ROOT / "content" / f"{repo}.md").read_text()
@@ -685,7 +685,8 @@ def test_waypost_and_framegrade_pages_state_public_source_and_licence(name):
     flat = re.sub(r"\s+(?:>\s*)?", " ", access)
     assert f"The source is public under {spdx}" in flat
     assert f"https://github.com/Back-Road-Creative/{repo}" in flat
-    assert "pre-release" in flat and "no installer or versioned release" in flat
+    assert "no installer or versioned release" not in flat
+    assert "source package" in flat and "Release details" in flat
     assert "studio engagement" in flat
     assert "source is private" not in text
     assert "documentation are private" not in text
@@ -1263,3 +1264,17 @@ def test_bot_battle_station_is_not_offered_as_a_windows_installer():
     assert "SmartScreen" not in page
     assert "for Windows" not in page
     assert "Runs on Linux, macOS" in page
+
+
+@pytest.mark.parametrize("slug", ["waypost", "framegrade"])
+def test_source_tag_details_render_ledger_without_invented_release_date(slug):
+    record = json.loads((ROOT / "data" / "releases" / f"{slug}.json").read_text())
+    html = built(f"/{slug}/").read_text()
+    assert "Latest source tag" in html
+    assert record["source_ref"] in html
+    assert record["release_url"] in html
+    assert record["source_commit"] in html
+    assert "no GitHub Release assets" in html
+    assert "Latest release" not in html
+    assert "no installer or versioned release" not in html
+    assert "January 0001" not in html

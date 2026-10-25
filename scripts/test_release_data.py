@@ -36,7 +36,7 @@ REQUIRED_KEYS = {
     "notes": (str, type(None)),
 }
 
-KNOWN_RELEASE_SOURCES = {"github-release", "manual"}
+KNOWN_RELEASE_SOURCES = {"github-release", "github-tag", "manual"}
 KNOWN_DEMO_SOURCE_KINDS = {"product-tag", "product-commit", "site-commit"}
 
 
@@ -141,6 +141,14 @@ def test_release_source_requires_its_fields(slug: str) -> None:
             f"{slug}.json release_source=github-release needs source_repo as bare "
             f"owner/repo, got {record['source_repo']!r}"
         )
+    elif record["release_source"] == "github-tag":
+        assert re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", record["source_repo"] or "")
+        assert re.fullmatch(r"[0-9a-f]{40}", record.get("source_commit", ""))
+        assert re.fullmatch(r"v?\d+\.\d+\.\d+", record["source_ref"] or "")
+        assert record["version"] == record["source_ref"].removeprefix("v")
+        assert record["release_url"] == f"https://github.com/{record['source_repo']}/tree/{record['source_ref']}"
+        assert record["released_at"] is None, "a git tag does not establish a release publication date"
+        assert record["assets"] == {}, "a git tag does not establish downloadable release assets"
     elif record["release_source"] == "manual":
         assert record["notes"], f"{slug}.json release_source=manual but notes is empty/null"
 

@@ -6,21 +6,28 @@ draft: false
 tags: ["creator-tools", "video-pipeline", "self-hosted", "automation"]
 ---
 
-> **Access.** Waypost is pre-release. The source is public under MIT at
-> [Back-Road-Creative/waypost](https://github.com/Back-Road-Creative/waypost), and there is no
-> installer or versioned release. It is available through a studio engagement;
+> **Access.** The source is public under MIT at
+> [Back-Road-Creative/waypost](https://github.com/Back-Road-Creative/waypost).
+> A versioned source package is available; open **Release details** above for the current
+> tag and verified source commit. Follow the repository's installation instructions.
+> Help with deployment is available through a studio engagement;
 > [contact me](/contact/) for setup.
 
 **[Open the read-only demo →](/demo/waypost/)** — a fixed fictional console for a made-up brand,
 frozen at 2026-09-01. The forms and buttons are removed, so it shows a saved example and
-cannot submit anything.
+cannot submit anything. This demo is a studio integration, not a screen supplied by the
+tagged source package.
 
-Waypost is a web console that runs on your own machine. It starts video and photo runs in
+The tagged Waypost package is `seo-manager`, a Python library and command-line tools for
+SEO metadata, validation, scheduling decisions and analytics. Its supported integrations
+and setup requirements are documented in the repository.
+
+The studio deployment shown in the demo adds a web console that runs on your own machine. It starts video and photo runs in
 the GoMoveShift pipeline, shows their progress and holds the publishing queue.
 [Go Move Shift](https://gomoveshift.com/), a travel video channel, is made with it.
 Each brand gets its own tab, with its own queue and credentials.
 
-## Media workflow
+## Studio media workflow
 
 - **Video.** The Drives tab launches the same pipeline command you would run by hand. A run
   can stop at a review gate; the operator answers it in the console, from a phone browser if
@@ -34,7 +41,7 @@ Each brand gets its own tab, with its own queue and credentials.
   keyframe-aligned cuts, [redactcam](/redactcam/) for blurring, [pycube-lut](/pycube-lut/) for
   grading and [sun-track](/sun-track/) for sun position.
 
-## Publishing routes
+## Studio publishing routes
 
 Approved shorts are planned into a queue, one calendar per brand. The queue allows one active
 delivery per short per platform and does not republish one that is already published. Each
@@ -58,7 +65,8 @@ TikTok. A failed delivery or a missed slot can post to a notification URL the op
 
 ## Running it
 
-Waypost runs as a container with its state on a separate volume. Backup and restore scripts
+The studio console runs as a container with its state on a separate volume. These deployment
+features describe the studio integration, not an installer included with `seo-manager`. Backup and restore scripts
 are included, with a restore drill that opens the newest archive; scheduling the nightly
 backup is a setup step. Console login by token is optional.
 
