@@ -124,12 +124,15 @@ export function probedStorage(storage) {
   }
 }
 
+// A browser that blocks site storage can throw on reading `localStorage` itself (QQA-16b), so the read is guarded.
+const pageStorage = () => { try { return typeof localStorage === 'undefined' ? null : localStorage; } catch { return null; } };
+
 /** localStorage-backed store for display prefs ONLY (base/labels/emphasis --
  *  see view-state.js's prefsFromView). Its own key, never 'last' -- that key
  *  belongs to project-store.js's print recipe, a different feature this must
  *  never collide with. Every method degrades silently: missing or blocked
  *  storage means no persistence, never a throw. */
-export function createPrefsStore(key = PREFS_KEY, storage = probedStorage(typeof localStorage === 'undefined' ? null : localStorage)) {
+export function createPrefsStore(key = PREFS_KEY, storage = probedStorage(pageStorage())) {
   return {
     load() {
       if (!storage) return null;

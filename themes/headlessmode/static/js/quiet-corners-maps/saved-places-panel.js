@@ -114,8 +114,10 @@ function buildRow(place, { onShow, onShare, onConditions, onRemove, setStatus })
 
 /** Wires `#qc-saved` to `store`. Called once from main.js's start(). `onShare`
  *  returns a promise of status text, the card's own Share contract.
- *  `onConditions` wires "Before you go" (QUX-09b); 09a leaves it absent. */
-export function mountSavedPlaces({ root = document, store, onShow = null, onShare = null, onConditions = null } = {}) {
+ *  `onConditions` wires "Before you go" (QUX-09b); 09a leaves it absent.
+ *  `onChange` is called after every render, so another list of the same places (QQA-16b's Saved
+ *  cameras) can follow a removal, an import or a clear made here. */
+export function mountSavedPlaces({ root = document, store, onShow = null, onShare = null, onConditions = null, onChange = null } = {}) {
   const find = (id) => root.querySelector(`#${id}`);
   const statusEl = find('qc-saved-status');
   const listEl = find('qc-saved-list');
@@ -138,6 +140,7 @@ export function mountSavedPlaces({ root = document, store, onShow = null, onShar
       onRemove: (p) => { store.remove(p.ref); render(); },
       setStatus,
     })));
+    if (onChange) onChange();
   }
 
   // Download: the main.js:2292 Blob-then-<a download> pattern (plan §2.3),
