@@ -9,17 +9,17 @@ import { readFileSync } from 'node:fs';
 import { PRESETS, PRESET_BY_ID, BUDGET, MAX_LABEL_WORDS, definePreset, layerSwitches, presetLeavesAlone, opensOn, presetCost, presetApplied,
   presetPreview, presetPreviewText, readerStrings }
   from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-presets.js';
-import { LAYERS, LAYER_BY_ID, enabledLayers, layerControlSpecs }
+import { LAYERS, LAYER_BY_ID, TASK_GROUP_OF, enabledLayers, layerControlSpecs }
   from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
 import { BASE_BY_ID } from '../../themes/headlessmode/static/js/quiet-corners-maps/source-basemaps.js';
 
 const MAIN = readFileSync(new URL('../../themes/headlessmode/static/js/quiet-corners-maps/main.js', import.meta.url), 'utf8');
 const build = (over) => definePreset({ id: 't', label: 'T', question: 'T?', base: 'usgsTopo', layers: ['mvum'], ...over });
 
-test('six presets, each naming real layers, a real base and the question it answers', () => {
+test('eight presets, each naming real layers, a real base and the question it answers', () => {
   // U1 (F03): task presets plus Reset/Undo -- Map only, Trails & terrain, Land access,
   // Compare counties, retaining the two S10 presets unchanged.
-  assert.equal(PRESETS.length, 7, 'the two S10 presets, U1\'s four task presets and Loud or quiet (E5)');
+  assert.equal(PRESETS.length, 8, 'the two S10 presets, U1\'s four task presets, Loud or quiet (E5) and QQA-18b\'s Check conditions');
   for (const p of PRESETS) {
     assert.ok(BASE_BY_ID[p.base], `${p.id} names base ${p.base}`);
     for (const id of p.layers) assert.ok(LAYER_BY_ID[id], `${p.id} names layer ${id}`);
@@ -255,4 +255,68 @@ test('every row that opens on is the reader\'s, not a preset\'s or a page load\'
   assert.doesNotMatch(MAIN, /screenOnly && !!l\.defaultOn|l\.screenOnly && l\.defaultOn/,
     'main.js spells the reader\'s own row itself instead of asking opensOn');
   assert.match(MAIN, /LAYERS\.filter\(opensOn\)/, 'viewToPresetShape seeds the initial view with every row that opens on');
+});
+
+// QQA-18b: the plan's three task presets are Explore outdoors, Check conditions and Night sky.
+// Saved and shared views restore a preset by id, so no existing id may be renamed or removed.
+test('every preset id that shipped before QQA-18b is still a preset, with the same label', () => {
+  const shipped = { nightSky: 'Night sky', publicLandDay: 'Public land', mapOnly: 'Map only',
+    trailsTerrain: 'Trails & terrain', publicAccess: 'Land access', compareCounties: 'Compare counties' };
+  for (const [id, label] of Object.entries(shipped)) assert.equal(PRESET_BY_ID[id]?.label, label, `${id} was renamed or removed`);
+});
+
+// Explore outdoors is NOT a preset of its own: "where may I go, and what is there" is
+// publicLandDay's question and "which trails, and what does the ground do" is trailsTerrain's, so a
+// third set over the same Places & routes and Land & access rows would be a near-duplicate button.
+test('Explore outdoors is answered by the Public land and Trails & terrain sets, not a third near-duplicate', () => {
+  assert.equal(PRESET_BY_ID.exploreOutdoors, undefined, 'a separate Explore outdoors preset adds nothing');
+  const outdoors = ['places', 'land', 'terrain'];
+  for (const id of ['publicLandDay', 'trailsTerrain']) {
+    assert.ok(PRESET_BY_ID[id].layers.every((l) => outdoors.includes(TASK_GROUP_OF[l])),
+      `${id} stays inside the outdoors task groups (Places & routes, Land & access, Terrain & landscape)`);
+  }
+});
+
+// The reader-facing page lists buttons; it must not name a task that has no button, nor cite the
+// internal plan. The Explore-outdoors mapping lives in scripts/qcm/README.md and layer-presets.js.
+test('the public maps page lists no Explore outdoors button and does not cite the plan', () => {
+  const page = readFileSync(new URL('../../content/quiet-corners-maps.md', import.meta.url), 'utf8');
+  const start = page.indexOf('## Starting sets');
+  const section = page.slice(start, page.indexOf('\n## ', start + 1));
+  assert.ok(start >= 0, 'the Starting sets section exists');
+  assert.doesNotMatch(section, /Explore outdoors/, 'no task without a button is named on the page');
+  assert.doesNotMatch(section, /the plan/i, 'the internal plan is not a reader-facing source');
+  const lines = section.split('\n');
+  const first = lines.findIndex((l) => l.startsWith('- **'));
+  let end = first;
+  while (end < lines.length && lines[end].startsWith('- **')) end++;
+  assert.equal(end - first, PRESETS.length, 'the list has one bullet per preset button');
+  assert.match(section, /Public land[^.]*Trails & terrain|Trails & terrain[^.]*Public land/, 'one plain sentence points to the two sets');
+});
+
+test('checkConditions is the weather set: radar plus the air, smoke and fire overlays, within budget', () => {
+  const p = PRESET_BY_ID.checkConditions;
+  assert.ok(p, 'checkConditions must exist');
+  assert.equal(p.label, 'Check conditions');
+  assert.ok(p.question.trim().endsWith('?'));
+  assert.deepEqual([...p.layers].sort(), ['epaAirNowAqi', 'nifcFirePerimeters', 'noaaHmsSmoke', 'nwsRadar']);
+  // Only Weather & conditions rows, and exactly one view-filling surface (radar); the other three are
+  // vector overlays that sit beside it (QQA-06d), so the set obeys the one-surface rule by construction.
+  for (const id of p.layers) assert.equal(TASK_GROUP_OF[id], 'weather', `${id} is not a Weather & conditions row`);
+  assert.deepEqual(p.layers.filter((id) => LAYER_BY_ID[id].rasterSurface), ['nwsRadar']);
+  assert.deepEqual(presetCost(p), { fetchLayers: 0, rasterSurfaces: 1, symbolKeys: 1 });
+  assert.equal(p.base, 'usgsTopo', 'radar draws at 0.55 and is clear where nothing falls, so the ground stays readable under it');
+  // The flood zones are a regulatory map, not a condition: the registry says laying one beside a
+  // weather alert is the misreading it is most prone to, so the set leaves it a switch away.
+  assert.ok(!p.layers.includes('femaNfhl'));
+  const on = layerSwitches(p);
+  for (const l of LAYERS) assert.equal(on[l.id], l.required || p.layers.includes(l.id), `${l.id} disagrees with checkConditions`);
+  // The preview names exactly what pressing it would turn on, in the reader's own labels.
+  const text = presetPreviewText(p, {});
+  for (const id of p.layers) assert.ok(text.includes(LAYER_BY_ID[id].label), `${id} is missing from the preview`);
+  assert.ok(!text.includes(LAYER_BY_ID.femaNfhl.label));
+});
+
+test('a set with a second raster surface beside the weather overlays is still refused', () => {
+  assert.throws(() => build({ layers: ['nwsRadar', 'nightLights', 'epaAirNowAqi'] }), /context surface/);
 });

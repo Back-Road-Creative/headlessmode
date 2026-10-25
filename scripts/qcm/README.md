@@ -431,6 +431,8 @@ a height ceiling (7.5rem) that scrolls. With a surface and every overlay on it s
 | --- | --- |
 | `layer-registry.test.mjs` | The surface/overlay split is derived from `rasterSurface`; every context id is exactly one of the two. |
 | `layer-presets.test.mjs` | A preset may name one raster surface plus overlays, never two surfaces. |
+| `layer-presets.test.mjs` (QQA-18b) | Check conditions is exactly radar plus three weather overlays inside the budget; every earlier preset id and label survives; no separate Explore outdoors preset. |
+| `presets-browser.test.mjs` (QQA-18b) | Journey 11: Check conditions turns on exactly its four layers and the Active list names them; Undo restores a different prior state (layers, surface, base); an old share link restores by id. |
 | `surface-choice.test.mjs` | The radio group in a browser: None at rest, one surface at a time. |
 | `context-overlays-browser.test.mjs` | Fire and air quality are drawn together, with or without a surface; old links restore by id; the caption is one line per entry within its height budget. |
 
@@ -443,8 +445,13 @@ extras). A new provider adds a row to an existing task group, never a new top-le
 `layer-task-groups.test.mjs` fails when a registry id has no home. `main.js` renders rows by id,
 so no layer id, input id, exclusivity or render path moves. `activeOnMapRows` and
 `groupsToCollapse` (`layer-panel.js`) decide the **Active on map** list (checked, not a base
-choice, not a Print options row) and which groups a cleared search closes again. The count line agrees with that list: `COUNTED_SCREEN_GROUPS` leaves `extras` out, so a print extra never reads as "1 layer on". The list is rebuilt only when its content changes, so a focused Remove or Retry button keeps focus through a fetch re-render. Task presets
-(Explore outdoors, Check conditions, Night sky) are not built yet.
+choice, not a Print options row) and which groups a cleared search closes again. The count line agrees with that list: `COUNTED_SCREEN_GROUPS` leaves `extras` out, so a print extra never reads as "1 layer on". The list is rebuilt only when its content changes, so a focused Remove or Retry button keeps focus through a fetch re-render. Task presets (QQA-18b)
+are the same panel's named sets, in `PRESETS` (`layer-presets.js`): **Night sky** (`nightSky`), **Check conditions**
+(`checkConditions`: radar, air quality, smoke and fire perimeters; flood zones are left out because a regulatory floodplain
+is not a condition) and **Explore outdoors**, which is not a button of its own but `publicLandDay` (Public land) plus
+`trailsTerrain` (Trails & terrain) — a third set over the same rows would be a near-duplicate. Preset ids are never renamed
+or removed, because saved and shared views restore by id. A preset moves the reader's own switches, so the Active on map
+list follows it with no extra code, and Undo puts back what it moved.
 
 | Proof | What it holds |
 | --- | --- |
