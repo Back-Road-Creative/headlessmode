@@ -13,8 +13,9 @@
 // logged, stored, or returned in a status; the caller keeps it out of the share URL,
 // saved views, the title and analytics. The request carries no cookies and no referrer.
 //
-// request.js (fetchWithDeadline) is the shared helper now. This function still keeps its own
-// deadline and cancel handling, so no-raw-fetch.test.mjs lists it until it moves onto it.
+// The request goes through request.js (fetchWithDeadline), so it has a deadline and a cancel
+// like every other read in the map; no-raw-fetch.test.mjs holds that.
+import { fetchWithDeadline } from './request.js';
 
 export const GEOCODE_PATH = '/api/geocode';
 /** Client-side deadline; the function's own upstream deadline is 8 s. */
@@ -76,32 +77,20 @@ function normalizeResults(body) {
 export async function geocodeAddress(query, { signal, timeoutMs = GEOCODE_TIMEOUT_MS, fetchImpl = globalThis.fetch } = {}) {
   const q = typeof query === 'string' ? query.trim() : '';
   if (q.length < QUERY_MIN || q.length > QUERY_MAX) return { status: 'bad-query' };
-  if (signal && signal.aborted) return { status: 'aborted' };
-
-  const controller = new AbortController();
-  const onAbort = () => controller.abort();
-  if (signal) signal.addEventListener('abort', onAbort);
-  let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
-  try {
-    const res = await fetchImpl(buildGeocodeUrl(q), {
-      signal: controller.signal, credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer',
-    });
-    if (signal && signal.aborted) return { status: 'aborted' };
-    if (res.status === 429) return { status: 'rate-limited' };
-    if (res.status === 504) return { status: 'timeout' };
-    if (res.status === 400) return { status: 'bad-query' };
-    if (!res.ok) return { status: 'unavailable' };
-    let body;
-    try { body = await res.json(); } catch { return { status: 'unavailable' }; }
-    if (!body || typeof body !== 'object' || !Array.isArray(body.results)) return { status: 'unavailable' };
-    const results = normalizeResults(body);
-    return results.length ? { status: 'ready', results } : { status: 'none' };
-  } catch {
-    if (signal && signal.aborted) return { status: 'aborted' };
-    return { status: timedOut ? 'timeout' : 'unavailable' };
-  } finally {
-    clearTimeout(timer);
-    if (signal) signal.removeEventListener('abort', onAbort);
+  const got = await fetchWithDeadline(buildGeocodeUrl(q), {
+    fetchImpl, signal, timeoutMs,
+    init: { credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer' },
+  });
+  if (got.status === 'aborted') return { status: 'aborted' };
+  if (got.status === 'timeout') return { status: 'timeout' };
+  if (!got.ok) {
+    if (got.httpStatus === 429) return { status: 'rate-limited' };
+    if (got.httpStatus === 504) return { status: 'timeout' };
+    if (got.httpStatus === 400) return { status: 'bad-query' };
+    return { status: 'unavailable' };
   }
+  const body = got.body;
+  if (!body || typeof body !== 'object' || !Array.isArray(body.results)) return { status: 'unavailable' };
+  const results = normalizeResults(body);
+  return results.length ? { status: 'ready', results } : { status: 'none' };
 }

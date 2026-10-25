@@ -220,10 +220,10 @@
 .qcm-layer-about summary { font-size: 0.75rem; color: #a1a1aa; cursor: pointer; }
 .qcm-layer-about p { margin: 0.2rem 0 0; font-size: 0.75rem; line-height: 1.45; color: #a3a3a3; }
 
-/* The one line the map carries while a context surface is drawn. In normal flow under the
+/* The lines the map carries while a context surface or overlay is drawn. In normal flow under the
    map on a phone — where the map itself is in normal flow — and floated onto the bottom of
    the map's grid column above 1024px, where the map is `absolute inset-0` in that column.
-   Hidden whenever no surface is on, so it costs the resting layout nothing at all.
+   Hidden whenever no surface or overlay is on, so it costs the resting layout nothing at all.
 
    Bottom LEFT of the map column, 1rem in: the panels are in the dock beside the map, not
    on it, and Leaflet's own attribution has the bottom-right corner. */
@@ -231,7 +231,12 @@
     margin: 0.5rem 1rem; padding: 0.4rem 0.7rem;
     background: rgba(18, 18, 30, 0.96); border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 0.5rem; color: #e5e5e5; font-size: 0.85rem; line-height: 1.35;
+    /* A surface plus six overlays is seven entries: one line each, and a ceiling that scrolls
+       rather than a box that grows over the map (or, in flow on a phone, shoves the sheet). */
+    max-height: 7.5rem; overflow-y: auto;
 }
+.qcm-surface-caption-line { display: block; }
+.qcm-surface-caption-line + .qcm-surface-caption-line { margin-top: 0.2rem; }
 @media (min-width: 1024px) {
     .qcm-surface-caption {
         grid-column: 2; grid-row: 1;

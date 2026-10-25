@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { findChromium, launch } from './helpers/browser.mjs';
 import { startSiteServer, siteIsBuilt } from './helpers/site-server.mjs';
-import { CONTEXT_LAYER_IDS } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
+import { CONTEXT_SURFACE_IDS } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
 
 const CHROMIUM = findChromium();
 const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this proof)'
@@ -50,8 +50,10 @@ test('the context group is one surface at a time: None at rest, one drawn, and a
     // declares, so a surface that silently drops out of the rendered group still fails here.
     // A surface leaving the REGISTRY is a different regression, and the surface's own test
     // is what catches that.
-    assert.equal(r.before.count, CONTEXT_LAYER_IDS.length + 1,
-      `the page drew ${r.before.count} radios for ${CONTEXT_LAYER_IDS.length} registered surfaces plus None`);
+    // QQA-06d: only the raster surfaces are in the radio group now; vector overlays (fire, air
+    // quality, ...) are independent checkboxes beside it (context-overlays-browser.test.mjs).
+    assert.equal(r.before.count, CONTEXT_SURFACE_IDS.length + 1,
+      `the page drew ${r.before.count} radios for ${CONTEXT_SURFACE_IDS.length} registered surfaces plus None`);
     assert.ok(r.before.ids.includes('qcm-context-none'), 'turning them all off has to be reachable');
     assert.deepEqual(r.before.onAtRest, ['none'], 'a reader who opens the page has no surface over the map');
     assert.equal(r.before.lights, 0);

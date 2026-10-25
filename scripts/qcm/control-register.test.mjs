@@ -50,11 +50,12 @@ const TEXT_FIELDS = ['id', 'purpose', 'scope', 'effect', 'keyboard'];
 // Ids come from layer-registry.js and source-basemaps.js, never from a copy here: a new
 // registry row with no register row fails, and so does a register row for a deleted one.
 // Which input a row renders as follows main.js: base radios from BASES, context radios
-// for the context group (plus "none"), a checkbox for every other group. The usgsTopo
+// for the context rows that fill the view as a picture (`rasterSurface`, plus "none"), a
+// checkbox for every other row, a context overlay (fire, smoke, flood...) included. The usgsTopo
 // row is the required base layer: the base radios draw it, so it has no checkbox.
 export const derivedIds = {
-  layerCheckboxes: LAYERS.filter((l) => l.group !== 'context' && l.group !== 'base').map((l) => l.id),
-  contextRadios: [...LAYERS.filter((l) => l.group === 'context').map((l) => l.id), 'none'],
+  layerCheckboxes: LAYERS.filter((l) => l.group !== 'base' && !(l.group === 'context' && l.rasterSurface)).map((l) => l.id),
+  contextRadios: [...LAYERS.filter((l) => l.group === 'context' && l.rasterSurface).map((l) => l.id), 'none'],
   baseRadios: BASES.map((b) => b.id),
 };
 const DERIVED_SELECTOR = {

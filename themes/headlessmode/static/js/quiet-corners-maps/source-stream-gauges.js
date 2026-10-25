@@ -9,6 +9,7 @@
 // value. And a box over the area cap is never requested: the reader is told to zoom in.
 import { SOURCES } from './source-registry.js';
 import { SYMBOLS } from './legend.js';
+import { fetchWithDeadline, orThrow } from './request.js';
 
 const SRC = SOURCES.usgsWaterGauges;
 
@@ -90,9 +91,7 @@ export function readGauges(latest, names) {
 }
 
 async function getJson(url, fetchImpl, signal) {
-  const res = await fetchImpl(url, { signal });
-  if (!res || !res.ok) throw new Error(`HTTP ${res && res.status}`);
-  return res.json();
+  return orThrow(await fetchWithDeadline(url, { fetchImpl, signal, timeoutMs: SRC.timeoutMs }));
 }
 
 /** One view's answer. Never throws: a failure is `status: 'unavailable'`. The names request

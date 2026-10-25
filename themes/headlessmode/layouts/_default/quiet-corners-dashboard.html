@@ -383,15 +383,16 @@
                      painted under the map canvas, and an inline height: 100%
                      cannot be overridden from the stylesheet. */}}
 
-            {{/* The surface caption. One line, on the MAP, naming the continuous-colour
-                 surface currently laid over it and the time that surface's own data refers
+            {{/* The surface caption. On the MAP, one line per context row that is on —
+                 the continuous-colour surface and each overlay drawn with it — naming it
+                 and the time that surface's own data refers
                  to — a forecast's valid time, an observation's observation time, an
                  inventory's vintage. Never the time it was retrieved. Filled by main.js
                  (renderSurfaceCaption) from layer-registry.js's surfaceCaption, and hidden
-                 whenever no surface is on, so the resting layout is unchanged. Here rather
+                 whenever no surface or overlay is on, so the resting layout is unchanged. Here rather
                  than inside the Layers panel because a panel the reader has closed is not
                  where "this is a picture of two hours ago" belongs. */}}
-            <p id="qcm-surface-caption" class="qcm-surface-caption" role="status" aria-live="polite" hidden></p>
+            <p id="qcm-surface-caption" class="qcm-surface-caption" role="status" aria-live="polite" aria-atomic="false" hidden></p>
 
             {{/* Share / Reset the view: a reserved #map= URL fragment carries center,
                  zoom, base, surface, overlays and the county wash's metric/opacity.

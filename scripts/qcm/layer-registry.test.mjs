@@ -4,7 +4,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { LAYERS, groupHint, shortLabel, LAYER_BY_ID, LAYER_IDS, DEFAULT_LAYERS, GROUPS, GROUP_IDS, enabledLayers, layerControlSpecs,
-  baseControlSpecs, contextControlSpecs, CONTEXT_LAYERS, DEFAULT_CONTEXT, surfaceCaption, LAYER_DRAPE, drapeKindFor }
+  baseControlSpecs, contextControlSpecs, CONTEXT_LAYERS, CONTEXT_LAYER_IDS, CONTEXT_SURFACE_LAYERS, CONTEXT_SURFACE_IDS,
+  CONTEXT_OVERLAY_LAYERS, CONTEXT_OVERLAY_IDS, DEFAULT_CONTEXT, surfaceCaption, LAYER_DRAPE, drapeKindFor }
   from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
 import { LAYERS_WITH_DRAPE } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
 import { capabilityNotices } from '../../themes/headlessmode/static/js/quiet-corners-maps/terrain-overlays.js';
@@ -85,12 +86,12 @@ test('the screen base is a choice: four radios, topo checked by default, and the
 // It was four independent checkboxes, so four opaque rasters could be stacked and
 // nothing stopped it. Radios, plus an explicit None, are what make the sentence true.
 
-test('the context group is a choice of one: a radio per surface, an explicit None, and None by default', () => {
+test('the context surfaces are a choice of one: a radio per raster surface, an explicit None, and None by default', () => {
   const specs = contextControlSpecs();
   assert.equal(DEFAULT_CONTEXT, 'none', 'no surface is laid over the map until a reader asks for one');
-  assert.ok(CONTEXT_LAYERS.length >= 4, 'the four surfaces this group exists for');
-  assert.deepEqual(specs.map((s) => s.id), [...CONTEXT_LAYERS.map((l) => l.id), 'none'],
-    'every context layer, then the way back out');
+  assert.ok(CONTEXT_SURFACE_LAYERS.length >= 4, 'the four surfaces this group exists for');
+  assert.deepEqual(specs.map((s) => s.id), [...CONTEXT_SURFACE_LAYERS.map((l) => l.id), 'none'],
+    'every raster surface, then the way back out');
   for (const spec of specs) {
     assert.equal(spec.type, 'radio', `${spec.id} is still a checkbox — four could be on at once`);
     assert.equal(spec.name, 'qcm-context', `${spec.id} must share the group's name or it is not a choice`);
@@ -100,20 +101,53 @@ test('the context group is a choice of one: a radio per surface, an explicit Non
   }
   // Exactly one on, always, and None is it until asked otherwise.
   assert.deepEqual(specs.filter((s) => s.checked).map((s) => s.id), ['none']);
-  for (const l of CONTEXT_LAYERS) {
+  for (const l of CONTEXT_SURFACE_LAYERS) {
     assert.deepEqual(contextControlSpecs(l.id).filter((s) => s.checked).map((s) => s.id), [l.id],
       `choosing ${l.id} must leave exactly one surface on`);
   }
   // Turning them all off again has to be reachable, which is the whole reason None is a row.
   assert.deepEqual(contextControlSpecs('none').filter((s) => s.checked).map((s) => s.id), ['none']);
+  // An id that used to be a radio (fire, air quality) is no longer one: asking the radio
+  // group for it lands on None rather than on a row that does not exist.
+  for (const id of CONTEXT_OVERLAY_IDS) {
+    assert.deepEqual(contextControlSpecs(id).filter((s) => s.checked).map((s) => s.id), ['none'],
+      `${id} is an overlay, not a surface choice`);
+  }
   // Each surface keeps the caveat it already had, and the report line it already writes into.
-  for (const l of CONTEXT_LAYERS) {
+  for (const l of CONTEXT_SURFACE_LAYERS) {
     const spec = specs.find((s) => s.id === l.id);
     assert.equal(spec.label, l.label);
     assert.equal(spec.note, l.coverageCaveat, `${l.id} lost its caveat in the move to radios`);
     assert.ok(spec.noteId, `${l.id} needs its caveat wired to the input`);
     assert.equal(spec.reportId, `qcm-layer-${l.id}-report`, `${l.id}'s status line must keep its id`);
   }
+});
+
+// QQA-06d: exclusivity follows how a row RENDERS, not its topic. A raster that fills the
+// view (`rasterSurface`) paints over another and stays one radio group; a vector row draws
+// ink on top and hides nothing, so it is an independent checkbox that coexists with
+// whichever surface is chosen. Both lists are derived from the one flag the surface budget
+// (layer-presets.js) already counts, so there is no second table to drift.
+test('a context row is a radio surface iff it fills the view as a raster; vector rows are independent overlays', () => {
+  assert.deepEqual([...CONTEXT_SURFACE_IDS, ...CONTEXT_OVERLAY_IDS].sort(), [...CONTEXT_LAYER_IDS].sort(),
+    'every context row is exactly one of surface or overlay');
+  assert.equal(CONTEXT_SURFACE_IDS.filter((id) => CONTEXT_OVERLAY_IDS.includes(id)).length, 0);
+  for (const l of CONTEXT_SURFACE_LAYERS) assert.equal(l.rasterSurface, true, `${l.id} is a radio but is not a raster surface`);
+  for (const l of CONTEXT_OVERLAY_LAYERS) assert.ok(!l.rasterSurface, `${l.id} fills the view as a raster, so it cannot be an independent overlay`);
+  for (const id of ['nifcFirePerimeters', 'epaAirNowAqi', 'noaaHmsSmoke', 'femaNfhl', 'swpcAurora', 'gbifOccurrence']) {
+    assert.ok(CONTEXT_OVERLAY_IDS.includes(id), `${id} draws vector ink and must be an independent overlay`);
+  }
+  for (const id of ['nightLights', 'nwsRadar', 'terrainSlope', 'nlcdLandCover', 'nlcdTreeCanopy', 'countyScore', 'hillshadeLight']) {
+    assert.ok(CONTEXT_SURFACE_IDS.includes(id), `${id} is a raster surface and must stay in the exclusive group`);
+  }
+  // Stable ids: nothing was renamed or dropped, so an old link naming fire as its `s=`
+  // surface still parses (view-state.js validates against this list).
+  assert.ok(CONTEXT_LAYER_IDS.includes('nifcFirePerimeters') && CONTEXT_LAYER_IDS.includes('epaAirNowAqi'));
+  // An overlay's checkbox is the ordinary layer row, so share links (`o=`), presets and
+  // Reset reach it with no special case.
+  const fire = layerControlSpecs({ nifcFirePerimeters: true }).find((s) => s.id === 'nifcFirePerimeters');
+  assert.equal(fire.inputId, 'qcm-layer-nifcFirePerimeters');
+  assert.equal(fire.checked, true);
 });
 
 // --- the active surface names itself, its time, and its age ------------------

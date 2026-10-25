@@ -177,10 +177,10 @@ test('aurora: switched on and off before its answer arrives, the layer is never 
     await session.evaluate(`(async () => { const s = qcMoves(); window.qcMap.setView([40, -100], 6, { animate: false }); await s('the map to settle'); return true; })()`);
     await page.watchBodyReads(AURORA_URL);
     page.hold(AURORA_URL);
-    await session.evaluate(`document.getElementById('qcm-context-swpcAurora').click(); void 0;`);
+    await session.evaluate(`document.getElementById('qcm-layer-swpcAurora').click(); void 0;`);
     const asked = await until('the aurora request', () => heldFor(page, AURORA_URL)[0]);
-    await session.evaluate(`document.getElementById('qcm-context-none').click(); void 0;`);
-    assert.equal(await session.evaluate(`document.getElementById('qcm-context-swpcAurora').checked`), false);
+    await session.evaluate(`document.getElementById('qcm-layer-swpcAurora').click(); void 0;`);
+    assert.equal(await session.evaluate(`document.getElementById('qcm-layer-swpcAurora').checked`), false);
 
     await page.answer(asked, AURORA_BODY);
     await until('the aurora request to end', () => page.ended.get(asked.url));
@@ -193,7 +193,7 @@ test('aurora: switched on and off before its answer arrives, the layer is never 
 
     // The control: the same answer, with the layer left on, does draw -- or the zero above proves nothing.
     page.release();
-    await session.evaluate(`document.getElementById('qcm-context-swpcAurora').click(); void 0;`);
+    await session.evaluate(`document.getElementById('qcm-layer-swpcAurora').click(); void 0;`);
     await until('the aurora cell to be drawn', async () => {
       for (const h of heldFor(page, AURORA_URL)) if (!h.answered) await page.answer(h, AURORA_BODY);
       return (await session.evaluate(AURORA_CELLS)) > 0;

@@ -47,6 +47,13 @@ const { fetchSurfaceOwnership } = await mod('source-surface-ownership');
 const { fetchTrails } = await mod('source-trails');
 const { fetchLandBoundaries } = await mod('source-land-boundaries');
 const stateSources = await mod('state-sources');
+const { geocodeAddress } = await mod('address-geocode');
+const { createZoneStore } = await mod('source-avalanche');
+const { fetchNrhp } = await mod('source-nrhp');
+const { fetchRail, fetchAirports } = await mod('source-ntad-rail-airports');
+const nwsObservations = await mod('source-nws-observations');
+const snotel = await mod('source-snotel');
+const { fetchGauges } = await mod('source-stream-gauges');
 
 const SLACK_MS = 250;
 const SMALL_MS = 50;
@@ -55,6 +62,7 @@ const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 const bbox = { minLon: -83.6, minLat: 35.0, maxLon: -83.4, maxLat: 35.2 };
 const sheet = { id: 'S1', pixel: { width: 800, height: 600 } };
+const station = { id: 'S1', name: 'A station', lat: 35.1, lon: -83.5, elevFt: 3000 };
 const feature = { id: 'r1', name: 'A trail', paths: [[[-83.5, 35.0], [-83.49, 35.01]]] };
 const landPair = (() => {
   for (const state of stateSources.STATE_CODES) {
@@ -117,6 +125,19 @@ const ROWS = [
   { name: 'fetchSurfaceOwnership', source: 'usfsSurfaceOwnership', call: (o) => fetchSurfaceOwnership({ bboxLonLat: bbox, ...o }) },
   { name: 'fetchTrails', source: null, call: (o) => fetchTrails({ bboxLonLat: bbox, ...o }) },
   { name: 'fetchLandBoundaries', source: null, call: (o) => fetchLandBoundaries({ ...landPair, bboxLonLat: bbox, ...o }) },
+  { name: 'geocodeAddress', source: null, param: true,
+    call: ({ fetchImpl, signal, timeoutMs }) => geocodeAddress('1 Main St, Franklin NC', { fetchImpl, signal, ...(timeoutMs ? { timeoutMs } : {}) }),
+    verdict: (v) => v.status },
+  { name: 'avalanche zone store', source: 'avalancheOrgZones',
+    call: ({ fetchImpl, signal }) => createZoneStore({ fetchImpl }).get(signal), verdict: (v) => v.status },
+  { name: 'fetchNrhp', source: 'npsNrhp', call: ({ fetchImpl, signal }) => fetchNrhp(bbox, { fetchImpl, signal }), verdict: (v) => v.status },
+  { name: 'fetchRail', source: 'btsRailClass1', call: ({ fetchImpl, signal }) => fetchRail(bbox, { fetchImpl, signal }), verdict: (v) => v.status },
+  { name: 'fetchAirports', source: 'btsAirports', call: ({ fetchImpl, signal }) => fetchAirports(bbox, { fetchImpl, signal }), verdict: (v) => v.status },
+  { name: 'fetchObservations', source: 'nwsObservations',
+    call: ({ fetchImpl, signal }) => nwsObservations.fetchObservations([station], bbox, { fetchImpl, signal }), verdict: (v) => v.status },
+  { name: 'fetchSnotel', source: 'usdaSnotel',
+    call: ({ fetchImpl, signal }) => snotel.fetchSnotel([station], bbox, { fetchImpl, signal }), verdict: (v) => v.status },
+  { name: 'fetchGauges', source: 'usgsWaterGauges', call: ({ fetchImpl, signal }) => fetchGauges(bbox, { fetchImpl, signal }), verdict: (v) => v.status },
 ];
 
 const registryMs = (row) => (row.source ? SOURCES[row.source].timeoutMs : DEFAULT_SOURCE_TIMEOUT_MS);
@@ -209,6 +230,24 @@ test('the never-throws adapters answer null for a missing or malformed area', as
   }
 });
 
+// The two station catalogues are same-origin files read once with no caller signal, so the table's
+// cancel row does not apply; they must still end on their source's deadline as "unavailable".
+for (const [name, catalogue, source] of [['nws-observations', nwsObservations, 'nwsObservations'], ['snotel', snotel, 'usdaSnotel']]) {
+  test(`${name} loadCatalogue ends on its registry deadline when the file never answers`, async (t) => {
+    const ms = SOURCES[source].timeoutMs;
+    mock.timers.enable({ apis: ['setTimeout'] });
+    t.after(() => mock.timers.reset());
+    const out = watch(catalogue.loadCatalogue(never));
+    await flush();
+    mock.timers.tick(ms - 1);
+    await flush();
+    assert.equal(out.done, false, `settled before its ${ms} ms deadline`);
+    await advance(out, 1);
+    assert.ok(out.done, 'the catalogue read has no deadline of its own');
+    assert.equal(out.value.status, 'unavailable');
+  });
+}
+
 test('the table covers every source module that reads from a service', async () => {
   const { readdirSync } = await import('node:fs');
   const dir = new URL(M, import.meta.url);
@@ -222,10 +261,6 @@ test('the table covers every source module that reads from a service', async () 
     'source-terrain-surface', 'source-usgs-topo', 'source-weather', 'source-wetlands', 'source-blm-rec-sites',
     'source-county-lines', 'source-federal-land', 'source-rec-sites', 'source-road-basic',
     'source-surface-ownership', 'source-trails', 'source-land-boundaries',
-  ];
-  // Source modules that reached master after QQA-13 and still make their own raw calls (no-raw-fetch.test.mjs
-  // lists them too). They have no deadline to pin yet; a row replaces the entry when each moves onto request.js.
-  const pending = [
     'source-avalanche', 'source-nrhp', 'source-ntad-rail-airports',
     'source-nws-observations', 'source-snotel', 'source-stream-gauges',
   ];
@@ -233,6 +268,5 @@ test('the table covers every source module that reads from a service', async () 
   const reaching = readdirSync(dir).filter((f) => f.startsWith('source-') && f.endsWith('.js'))
     .filter((f) => /\bfetchImpl\b|\bfetch:\s*fetchImpl/.test(readFileSync(new URL(f, dir), 'utf8')))
     .map((f) => f.replace(/\.js$/, ''));
-  assert.deepEqual(reaching.filter((n) => !covered.includes(n) && !pending.includes(n)), [], 'add a row for the new source module');
-  assert.deepEqual(pending.filter((n) => !reaching.includes(n)), [], 'no longer reads from a service: drop it from pending');
+  assert.deepEqual(reaching.filter((n) => !covered.includes(n)), [], 'add a row for the new source module');
 });
