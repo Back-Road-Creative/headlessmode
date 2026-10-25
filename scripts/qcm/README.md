@@ -472,13 +472,32 @@ area's centre). The near scope's failed, partial and nothing-loaded states come 
 its own place (`listLoadState`), not from the map view's per-layer flags. Purposes, one per camera layer id: roadCameras and linkCameras are Roads (linkCameras is
 mostly state road-camera links, with HPWREN and AlertWest fire links among them), parkCameras is
 Scenery & parks, airportCameras is Weather & aviation, phenoCameras is Wildlife & seasons (it also
-holds the volcano and Great Lakes cameras). The list reads snapshot schema 1 only. Not here yet
-(slice b): saved cameras, a bounded Search this area, and a cluster summary at broad zoom.
+holds the volcano and Great Lakes cameras). The list reads snapshot schema 1 only.
+
+QQA-16b adds three things, all in the same list. **Saved** is a third scope: a Save button on each row
+and on the camera card writes the camera's ref (`camera:provider:providerId`) to the saved-places
+store (`qc-saved-places`), so it survives a reload and sits beside saved places; nothing is put in the
+URL, share link, title or analytics. `main.js` reads storage through a guarded getter (`siteStorage`,
+and `pageStorage` in `view-wiring.js`) so a throwing `localStorage` gives the honest "Saving
+unavailable" state (`SAVING_UNAVAILABLE`) instead of a dead page; `mountSavedPlaces` takes an
+`onChange` so the list repaints when saved places change. A saved camera missing from the snapshot
+is listed as such (`savedCameraRows` states listed/gone/failed/pending; `savedListStatus`). **Search
+this area** (`#qcm-camera-search`) loads the camera files within `SEARCH_RADIUS_KM` (100) of the map's
+own centre (a file counts only when its area is within that radius by `kmToBox`, so the square's corners are left out), at most `SEARCH_MAX_FILES` (20), only on press; a newer press wins
+(`searchBox`, `searchFiles`, `searchStatus`). **Cluster summary**: below `MIN_PIN_ZOOM` (7) the status
+is a per-purpose count of the records already loaded (`clusterStatus`, key `cluster`), never of
+drawn pins. A camera saved under an old ref (`LEGACY_REF_ALIASES`) and under its current ref is one
+camera: `canonicalCameraRef` (camera-layer.js) is the key the rows, the card and the toggle compare, and
+removal drops every stored ref that shares it. `main.js` tracks the open camera card (`openCameraCard`)
+and repaints its Save button when a row or the saved-places panel changes the store; the card's press
+reads the store, not its own label. Camera snapshot schema 1 and the five layer ids are unchanged.
 
 | Proof | What it holds |
 | --- | --- |
 | `camera-list.test.mjs` | The purpose map (five layer ids, each under one purpose), distance and reach box, the view and near scopes, the filter and per-purpose counts, unlocated cameras, every status key, the 300-pin note appearing only past 300, the latest-pick place order and the near/view load states. |
 | `camera-list-browser.test.mjs` | Journey 10: a heading, count and real list; the view scope counting 350 cameras while the map draws 300 pins and the list says why; purpose filter and its filtered-out state; the near scope with its stated radius and nearest-first rows; J10d/J10d2: the near scope reads unavailable only when its own place's files failed, and a failure under the map elsewhere does not touch it; J10e: a name pin picked after a finder pick moves the near list to the pin; opening a camera from a row requests one picture; a quiet live status; zoomed-out, outside-coverage, none, unavailable, loading and images-unavailable states. Every camera request is stubbed. |
+| `camera-find.test.mjs` | Pure: the search box and file choice and its bound, the search status text, the cluster summary counts and note, saved-row states (listed, gone, failed, pending) and the saved-list status keys; a search reads only files within the radius (not the square's corner); `canonicalCameraRef`. |
+| `camera-find-browser.test.mjs` | Journey 10 f-i: save from a row and the card, reload, still saved; blocked storage (throwing accessor) shows the saving-unavailable state; Search this area fires one request set and states the radius; below zoom 7 the summary counts match the loaded records; J10j: an open card follows a save or removal made from the list, and its press reads the store; J10k: a camera saved under an old id reads Saved, is not saved twice and is removed whole. |
 
 ## Physical print proof
 
