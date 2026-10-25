@@ -93,3 +93,26 @@ export function fixedFilesStub() {
   out[INDEX_PATH] = JSON.stringify({ schema: 1, files });
   return out;
 }
+
+/** { [path]: json string } for a stub index and ONE schema 2 park file (nps-webcams, region nps-nc)
+ *  holding exactly `cameras`, each { providerId, name, lat, lon, still, capturedAt?, validUntil? }.
+ *  For a browser test that needs a row with a capture time or an expiry, which the fixed schema 1
+ *  rows above cannot carry. Written through compactSnapshot, so it is the format the build writes. */
+export function richParkFilesStub(cameras, { generatedAt = FIXED_AT } = {}) {
+  const f = FIXED_FILES.find((x) => x.dir === 'nps-webcams');
+  const records = cameras.map((c) => Object.freeze({
+    provider: f.header.provider, providerId: c.providerId, name: c.name, lat: c.lat, lon: c.lon,
+    locationPrecision: 'exact', category: f.header.category, operator: f.header.operator,
+    officialUrl: f.header.officialUrl, subject: null, bearing: null,
+    media: { still: c.still, stream: null, streamKind: null },
+    capturedAt: c.capturedAt ?? null, fetchedAt: generatedAt, validUntil: c.validUntil ?? null,
+    rights: f.header.rights, attribution: f.header.attribution, health: 'active',
+  }));
+  const file = compactSnapshot(records, { ...f.header, layer: f.layer, region: f.region, regionName: f.regionName, generatedAt });
+  const lats = cameras.map((c) => c.lat), lons = cameras.map((c) => c.lon);
+  const path = `${f.dir}/${f.region}.json`;
+  const index = { schema: 1, files: [{ file: path, provider: f.header.provider, layer: f.layer, region: f.region, regionName: f.regionName,
+    bbox: { minLon: Math.min(...lons), minLat: Math.min(...lats), maxLon: Math.max(...lons), maxLat: Math.max(...lats) },
+    count: cameras.length, generatedAt }] };
+  return { [INDEX_PATH]: JSON.stringify(index), [`${CAMERA_DIR}/${path}`]: JSON.stringify(file) };
+}

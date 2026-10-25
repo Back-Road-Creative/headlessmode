@@ -74,7 +74,7 @@ import { mountSavedPlaces, statusTextFor, CAMERA_NO_LOCATION } from './saved-pla
 // layerReport aliased: app-state.js already exports its own layerReport (the printable-vector
 // summary line); this is camera-layer.js's own, for the roadCameras report paragraph only.
 import { cameraList, cameraListStatus, cameraRowText, listPlace, listLoadState, reachBox, CAMERA_PURPOSES, NEAR_RADIUS_KM,
-  camerasInView, layerReport as cameraLayerReport, cardLines as cameraCardLines, ageText as cameraAgeText, stillPlan as cameraStillPlan, PICTURE_TIMEOUT_MS, cameraRef, findCamera, viewTouchesCoverage, viewTouchesLayer, cameraStatus,
+  camerasInView, layerReport as cameraLayerReport, cardLines as cameraCardLines, ageLine as cameraAgeLine, stillPlan as cameraStillPlan, PICTURE_TIMEOUT_MS, cameraRef, findCamera, viewTouchesCoverage, viewTouchesLayer, cameraStatus,
   MIN_PIN_ZOOM, padView, filesInView, failureProvider, pinsToDraw, unloadedFilesNear, nearestCoverage, providerRow as cameraProviderRow, aboutLinkText as cameraAboutLinkText } from './camera-layer.js';
 import { expandSnapshot } from './camera-snapshot.js';
 import { distanceToPathsMeters } from './near-unpaved.js';
@@ -2265,7 +2265,8 @@ function cameraMediaNode() {
 /** Builds one camera's popup card and wires the still-loading lifecycle: popupopen fetches the
  *  still (Caltrans's `fetch` plan reads it as a blob, so Last-Modified is readable under ACAO `*`;
  *  NPS's `img` plan (08D-ii) instead points an `<img>` straight at the still -- `www.nps.gov`
- *  grants no ACAO, so there is no header to read and no age line, only a load/error state), and
+ *  grants no ACAO, so there is no header to read: its age line comes from the record's capturedAt when
+ *  it has one (QQA-10f) and is otherwise empty, and there is a load/error state), and
  *  the `link`-only plan makes no request at all. popupclose aborts an in-flight Caltrans fetch,
  *  revokes its object URL, and removes any `<img>` (blob-backed or direct-src, either plan) so a
  *  reader who taps through several pins never leaks blobs or races a stale answer onto the wrong
@@ -2305,7 +2306,9 @@ function wireCameraPin(pin, camera, meta = {}) {
         img.removeAttribute('src');
         img.remove();
       };
-      img.addEventListener('load', () => { settle(); status.textContent = ''; }, { once: true });
+      // An img-plan still has no header to read; the age line, when there is one, comes from the
+      // record's capturedAt (QQA-10f).
+      img.addEventListener('load', () => { settle(); status.textContent = cameraAgeLine(camera); }, { once: true });
       img.addEventListener('error', giveUp, { once: true });
       // An <img> whose server never answers fires neither event, so the card stops waiting itself.
       timer = cameraOpenTimer = setTimeout(giveUp, PICTURE_TIMEOUT_MS);
@@ -2334,7 +2337,7 @@ function wireCameraPin(pin, camera, meta = {}) {
       img.src = cameraOpenUrl;
       img.alt = `Picture from ${camera.name} (${row.altCredit})`;
       figure.append(img);
-      status.textContent = cameraAgeText(lastModified, new Date(), camera.provider);
+      status.textContent = cameraAgeLine(camera, { lastModified, now: new Date() });
     } catch (err) {
       if (ctrl.signal.aborted && !timedOut) return;
       status.textContent = failed;
