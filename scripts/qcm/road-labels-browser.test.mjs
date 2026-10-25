@@ -15,6 +15,7 @@ import { PLACE_FEATURES } from './fixtures/gnis-names-declutter.mjs';
 import { groupRoads } from '../../themes/headlessmode/static/js/quiet-corners-maps/road-names.js';
 import { ROAD_DENSITY_CAP } from '../../themes/headlessmode/static/js/quiet-corners-maps/road-names.js';
 import { VIEWPORT_FETCH } from '../../themes/headlessmode/static/js/quiet-corners-maps/app-state.js';
+import { contrastRatio, hexToRgb } from './helpers/contrast.mjs';
 
 const CHROMIUM = findChromium();
 const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this proof)'
@@ -111,6 +112,39 @@ const READ = `(() => [...document.querySelectorAll('.qcm-road-label')].map((e) =
   return { text: e.textContent, x: r.left, y: r.top, w: r.width, h: r.height, fontSize: parseFloat(cs.fontSize), transform: cs.transform };
 }))()`;
 const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+
+test('road geometry stays visible with labels across relief, imagery and no base, and turns off with them', { skip }, async () => {
+  await withDashboard(async (page) => {
+    await goTo(page, SYLVA);
+    await waitLabels(page, 'road labels to draw', 'n > 0');
+    for (const base of ['usgsShadedRelief', 'usgsImagery', 'none', 'usgsTopo']) {
+      await page.evaluate(`document.getElementById('qcm-base-${base}').click()`);
+      await roadsIdle(page);
+      const seen = await page.evaluate(`(() => {
+        const pane = qcMap.getPane('qcm-roads');
+        const layers = []; qcMap.eachLayer(layer => layers.push(layer));
+        const lines = layers.filter(e => e.options.className === 'qcm-road-line');
+        const casings = layers.filter(e => e.options.className === 'qcm-road-casing');
+        return { labels: pane.querySelectorAll('.qcm-road-label').length,
+          lines: lines.map(e => ({ points: e.getLatLngs().flat().length, inPane: pane.contains(e._renderer._container), color: e.options.color, width: e.options.weight })),
+          casings: casings.map(e => ({ color: e.options.color, width: e.options.weight })),
+          interactive: lines.some(e => e.options.interactive) };
+      })()`);
+      assert.ok(seen.lines.length > 0, `${base}: labels have no road geometry beneath them`);
+      assert.ok(seen.labels > 0, `${base}: road labels disappeared`);
+      assert.equal(seen.lines.length, seen.casings.length);
+      assert.equal(seen.interactive, false, 'roads must not intercept map clicks');
+      assert.ok(seen.lines.every(e => e.points >= 2 && e.inPane), 'road geometry renders above the overlays');
+      for (const [i, line] of seen.lines.entries()) {
+        assert.ok(contrastRatio(hexToRgb(line.color), hexToRgb(seen.casings[i].color)) >= 3,
+          'road centre and casing need at least 3:1 contrast');
+        assert.ok(seen.casings[i].width > line.width, 'a contrasting outline remains visible');
+      }
+    }
+    await page.evaluate(`document.getElementById('qcm-layer-roads').click()`);
+    assert.equal(await page.evaluate(`(() => { let n = document.querySelectorAll('.qcm-road-label').length; qcMap.eachLayer(e => { if (/^qcm-road-(line|casing)$/.test(e.options.className)) n++; }); return n; })()`), 0);
+  });
+});
 
 test('the row is registered on by default, and does not make the layer count lie', { skip }, async () => {
   await withDashboard(async (page) => {

@@ -2814,6 +2814,13 @@ import { factorDisplay, freshness, availabilityState } from './quiet-corners-map
     function submitNameSearch(box, list) {
         var q = parseNameSearchQuery(box.value);
         if (!q.name) return;
+        // Coordinates already have a complete local answer. Sending the pair to
+        // GNIS adds a misleading "No names matched" beside a valid result.
+        if (parseCoordinates(box.value)) {
+            clearNameSearchState();
+            renderFinderResults(box, list);
+            return;
+        }
         // Text that is shaped like a street address (a house number and a street
         // word, a ZIP, a PO box) is not a place name: the GNIS service can only answer
         // it with "no names matched", which tells the reader their address is a missing

@@ -100,13 +100,20 @@ const STREET_SUFFIX = '(?:st|street|rd|road|ave|avenue|blvd|boulevard|ln|lane|dr
   + 'cir|circle|way|trl|trail|pkwy|parkway|hwy|highway|pl|place|ter|terrace|loop|pike|'
   + 'rte|route|rt|fwy|expy|sq)';
 
+// A conventional house number or a rural grid number (N1234 / W123N456).
+const HOUSE_NUMBER = '(?:\\d{1,6}(?:-\\d{1,6}|[a-z])?|[nsew]\\d{1,6}(?:[nsew]\\d{1,6})?)';
 // 1-6 digits (an optional letter, as in 12B; "10th" is an ordinal, not a number),
 // an optional compass word, up to five name words, then a street suffix. A mileage
 // name ("7 Mile Rd", "10 Mile Creek Road") is a road's name, not a household: the
 // first word after the number may not be "mile".
 const HOUSE_AND_STREET = new RegExp(
-  "^\\s*\\d{1,6}(?:-\\d{1,6}|[a-z])?\\s+(?:[nsew]{1,2}\\.?\\s+)?(?!mi(?:les?)?\\b)[\\w'.-]+(?:\\s+[\\w'.-]+){0,4}?\\s+"
+  '^\\s*' + HOUSE_NUMBER + "\\s+(?:[nsew]{1,2}\\.?\\s+)?(?!mi(?:les?)?\\b)[\\w'.-]+(?:\\s+[\\w'.-]+){0,4}?\\s+"
   + STREET_SUFFIX + '\\b', 'i');
+
+// On a numbered highway the street type comes BEFORE the route number.
+// Requiring a separate house number keeps "Highway 64" on the named-place path.
+const HOUSE_AND_ROUTE = new RegExp('^\\s*' + HOUSE_NUMBER
+  + '\\s+(?:(?:us|u\\.s\\.|state|county)\\s+)?(?:highway|hwy|route|rte|rt)\\.?\\s+\\d+[a-z]?\\b', 'i');
 
 // A unit word and number on their own: "Apt 4", "Unit 3B", "Suite 200". Only the WHOLE
 // term counts. Real place names carry the same words ("Lake Unit 4", "Pond Suite 2",
@@ -116,7 +123,7 @@ const UNIT_ONLY = /^\s*(?:apt|apartment|unit|suite|ste)\b\.?\s*#?\s*(?:\d[\w-]*|
 // A leading house number and a unit at the end, whatever the street word ("12 Main, Apt 4").
 // The house number is what makes it an address; "Lake Unit 4" has none.
 const HOUSE_AND_UNIT = new RegExp(
-  "^\\s*\\d{1,6}(?:-\\d{1,6}|[a-z])?\\s+(?!mi(?:les?)?\\b)\\S.*?[\\s,]"
+  '^\\s*' + HOUSE_NUMBER + "\\s+(?!mi(?:les?)?\\b)\\S.*?[\\s,]"
   + "(?:(?:apt|apartment|unit|suite|ste)\\b\\.?\\s*#?\\s*|#\\s*)\\d[\\w-]*\\s*$", 'i');
 const PO_BOX = /\bp\.?\s?o\.?\s*box\s+\d+/i;
 // A whole-term ZIP or ZIP+4, or one trailing a two-letter state ("Hamilton, MT 59840").
@@ -137,7 +144,7 @@ export function looksLikeStreetAddress(term) {
   // service. Each tail from a comma on is tested, so a unit after a comma still counts.
   const pieces = t.split(',');
   const tails = pieces.map((_, i) => pieces.slice(i).join(','));
-  return tails.some((p) => HOUSE_AND_STREET.test(p) || HOUSE_AND_UNIT.test(p))
+  return tails.some((p) => HOUSE_AND_STREET.test(p) || HOUSE_AND_ROUTE.test(p) || HOUSE_AND_UNIT.test(p))
     || UNIT_ONLY.test(t) || PO_BOX.test(t) || ZIP_ONLY.test(t) || STATE_ZIP.test(t);
 }
 

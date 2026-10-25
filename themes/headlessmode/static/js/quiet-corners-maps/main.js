@@ -3980,6 +3980,21 @@ function drawRoads() {
   if (!layersFromControls().roads || !roadsReach(map.getZoom()) || !roads.entries.length) { renderNameList(placesListOn()); return; }
   const size = map.getSize();
   const container = map.getContainer();
+  // Relief and imagery have no road cartography. Keep the fetched geometry
+  // underneath its names on every base, above the thematic overlays. A dark
+  // casing and light centre remain distinguishable on both bright and dark tiles.
+  // Draw all casings first so a later road cannot erase an earlier centreline.
+  for (const casing of [true, false]) {
+    for (const road of roads.entries) {
+      L.polyline(road.parts.map(part => part.map(([lon, lat]) => [lat, lon])), {
+        pane: 'qcm-roads', interactive: false,
+        className: casing ? 'qcm-road-casing' : 'qcm-road-line',
+        color: casing ? '#17202b' : '#fde68a',
+        weight: (road.classKey === 'controlled' ? 3 : 2) + (casing ? 2 : 0),
+        opacity: 1,
+      }).addTo(roadLayer);
+    }
+  }
   const { placed } = placeRoadLabels(roads.entries, {
     toPx: (lon, lat) => map.latLngToContainerPoint([lat, lon]),
     viewport: { width: size.x, height: size.y },
