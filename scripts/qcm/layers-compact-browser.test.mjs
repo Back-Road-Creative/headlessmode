@@ -44,7 +44,9 @@ const IS_VISIBLE = `(el) => el.checkVisibility({ contentVisibilityAuto: true, op
 // fallback for the federal/state groups). Computed from the registry itself, not
 // retyped, so a registry change updates this list rather than silently drifting from it.
 const KEPT_NOTE_IDS = [
-  ...LAYERS.filter((l) => l.group === 'context').map((l) => `qcm-context-${l.id}`),
+  // QQA-06d: a raster surface is a `qcm-context-` radio; a vector context overlay is an ordinary
+  // `qcm-layer-` checkbox in the same group. Neither has an About disclosure.
+  ...LAYERS.filter((l) => l.group === 'context').map((l) => (l.rasterSurface ? `qcm-context-${l.id}` : `qcm-layer-${l.id}`)),
   ...LAYERS.filter((l) => l.group === 'reading').map((l) => `qcm-layer-${l.id}`),
   ...LAYERS.filter((l) => l.group === 'extras').map((l) => `qcm-layer-${l.id}`),
   // Road cameras (QUX-08D): no About disclosure, so the coverage caveat stays as its note.

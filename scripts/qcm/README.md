@@ -408,6 +408,30 @@ scripts. `QCM_SMOKE_NO_BROWSER=1` makes the CLI behave as if there were no Chrom
 
 **Not wired into deploy yet.** Running this after `deploy-production.yml` is a separate change to the workflow, made and merged by a person. Firefox and WebKit lanes are not in this slice: the checks drive Chromium over the Chrome DevTools protocol, which those browsers do not speak, so a later slice needs them installed plus a driver.
 
+## The context group: surfaces and overlays
+
+**Land, sky & light context** holds two kinds of row, and which kind a row is follows how it
+renders, not what it is about. A row that fills the view as a raster (`rasterSurface` in
+`layer-registry.js`: night lights, radar, slope, land cover, tree canopy, the county wash,
+the hillshade) hides what is under it, so those stay one radio group (`qcm-context`) with an
+explicit **No context surface**. A row that draws vector ink on top (NIFC fire perimeters,
+air quality, smoke, flood zones, aurora, wildlife) is an ordinary checkbox
+(`qcm-layer-<id>`) and coexists with whichever surface is chosen. Ids never change, so an old
+share link or saved state that names fire or air quality as its surface (`s=`) still turns
+that overlay on.
+
+The map caption (`#qcm-surface-caption`) carries one `.qcm-surface-caption-line` block per
+thing on, keyed by layer id so a toggle adds or removes only its own line, inside a box with
+a height ceiling (7.5rem) that scrolls. With a surface and every overlay on it stays within
+160px at 390px and 1280px wide.
+
+| Proof | What it holds |
+| --- | --- |
+| `layer-registry.test.mjs` | The surface/overlay split is derived from `rasterSurface`; every context id is exactly one of the two. |
+| `layer-presets.test.mjs` | A preset may name one raster surface plus overlays, never two surfaces. |
+| `surface-choice.test.mjs` | The radio group in a browser: None at rest, one surface at a time. |
+| `context-overlays-browser.test.mjs` | Fire and air quality are drawn together, with or without a surface; old links restore by id; the caption is one line per entry within its height budget. |
+
 ## Physical print proof
 
 Layout is proven here without paper. Whether a printer honours it is a separate check:

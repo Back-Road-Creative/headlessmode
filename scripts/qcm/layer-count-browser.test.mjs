@@ -16,7 +16,7 @@ import { findChromium, launch } from './helpers/browser.mjs';
 import { trustedClick } from './helpers/trusted-click.mjs';
 import { startSiteServer, siteIsBuilt } from './helpers/site-server.mjs';
 import { readyDashboard, chooseExampleArea } from './helpers/waits.mjs';
-import { CONTEXT_LAYER_IDS } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
+import { CONTEXT_SURFACE_IDS } from '../../themes/headlessmode/static/js/quiet-corners-maps/layer-registry.js';
 
 const CHROMIUM = findChromium();
 const skip = !CHROMIUM ? 'no Chromium on this box (set CHROME_PATH to run this proof)'
@@ -129,7 +129,7 @@ test('an area drawn and sources checked (recipe set, rows rebuilt): checking Roa
 
 test('a context radio is counted, and "No context surface" takes the count back to none', { skip }, async () => {
   const page = await freshPage({ group: 'Land, sky & light context' });
-  const id = CONTEXT_LAYER_IDS[0];
+  const id = CONTEXT_SURFACE_IDS[0];   // a radio; overlays are qcm-layer-<id> checkboxes
   await trustedClick(page, `#qcm-context-${id}`);
   assert.equal(await page.evaluate(`document.getElementById('qcm-context-${id}').checked`), true, 'the trusted click did not select the context radio');
   assert.equal(await countText(page), '1 layer on', `context surface "${id}" is selected but the count does not say so`);

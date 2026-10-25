@@ -125,10 +125,10 @@
  "derived": {
   "layerCheckboxes": {
    "family": "Basemap / context / overlays / presets",
-   "purpose": "A layer switch: one checkbox per non-base, non-surface row of layer-registry.js.",
+   "purpose": "A layer switch: one checkbox per non-base, non-surface row of layer-registry.js, context overlays included.",
    "keyboard": "Tab to it, then Space toggles it.",
    "persistence": "shared link",
-   "tests": ["scripts/qcm/layer-panel-compact-browser.test.mjs","scripts/qcm/layers-compact-browser.test.mjs","scripts/qcm/panel-shell-browser.test.mjs"],
+   "tests": ["scripts/qcm/context-overlays-browser.test.mjs","scripts/qcm/layer-panel-compact-browser.test.mjs","scripts/qcm/layers-compact-browser.test.mjs","scripts/qcm/panel-shell-browser.test.mjs"],
    "rows": {
     "mvum": {"scope":"Map overlay.","effect":"Shows or hides \"MVUM roads & trails\" on the map; the print recipe reads the same switch."},
     "trails": {"scope":"Map overlay.","effect":"Shows or hides \"Hiking & non-motorized trails\" on the map; the print recipe reads the same switch."},
@@ -157,35 +157,35 @@
     "parkCameras": {"scope":"Camera pins on the map.","effect":"Shows or hides the \"Park cameras (NPS parks)\" pins on the map; a camera toggle changes no print recipe.","family":"Camera / freshness / link-out / retry"},
     "linkCameras": {"scope":"Camera pins on the map.","effect":"Shows or hides the \"Camera links (HPWREN, AlertWest)\" pins on the map; a camera toggle changes no print recipe.","family":"Camera / freshness / link-out / retry"},
     "phenoCameras": {"scope":"Camera pins on the map.","effect":"Shows or hides the \"Research cameras (PhenoCam)\" pins on the map; a camera toggle changes no print recipe.","family":"Camera / freshness / link-out / retry"},
-    "airportCameras": {"scope":"Camera pins on the map.","effect":"Shows or hides the \"Airport cameras (AviationWX)\" pins on the map; a camera toggle changes no print recipe.","family":"Camera / freshness / link-out / retry"}
+    "airportCameras": {"scope":"Camera pins on the map.","effect":"Shows or hides the \"Airport cameras (AviationWX)\" pins on the map; a camera toggle changes no print recipe.","family":"Camera / freshness / link-out / retry"},
+    "femaNfhl": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"FEMA flood hazard map (regulatory floodplain)\" on the map, drawn on top of whichever surface is chosen."},
+    "gbifOccurrence": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"Wildlife records submitted here (open-licensed only)\" on the map, drawn on top of whichever surface is chosen."},
+    "swpcAurora": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"Aurora forecast (about an hour ahead)\" on the map, drawn on top of whichever surface is chosen."},
+    "epaAirNowAqi": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"Air quality category (the latest hour EPA published)\" on the map, drawn on top of whichever surface is chosen."},
+    "noaaHmsSmoke": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"Smoke plumes seen from orbit (NOAA analysis, aloft)\" on the map, drawn on top of whichever surface is chosen."},
+    "nifcFirePerimeters": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"Mapped wildfire perimeters (interagency record)\" on the map, drawn on top of whichever surface is chosen."},
+    "streamGauges": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"Stream gauges (flow and gage height, latest USGS reading)\" on the map, drawn on top of whichever surface is chosen."},
+    "nwsObservations": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"Weather stations (temperature, wind and humidity now)\" on the map, drawn on top of whichever surface is chosen."},
+    "avalancheDanger": {"scope":"Map overlay, screen only; it coexists with the chosen surface.","effect":"Shows or hides \"Avalanche danger (forecast centre ratings)\" on the map, drawn on top of whichever surface is chosen; the row lists the zones in view with each rating, its window and the centre's forecast link."}
    }
   },
   "contextRadios": {
    "family": "Basemap / context / overlays / presets",
-   "purpose": "A surface choice: one radio per context row of layer-registry.js, plus None.",
+   "purpose": "A surface choice: one radio per context row of layer-registry.js that fills the view as a picture (rasterSurface), plus None.",
    "keyboard": "Tab into the group, then arrow keys move the choice.",
    "persistence": "shared link",
    "tests": ["scripts/qcm/layer-count-browser.test.mjs","scripts/qcm/presets-browser.test.mjs","scripts/qcm/surface-choice.test.mjs"],
    "rows": {
     "nightLights": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Night light emissions (2016 satellite composite)\" as the surface; the surface caption names it and its data time."},
     "transportNoise": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Transportation noise (modelled, 2020)\" as the surface; the surface caption names it and its data time."},
-    "femaNfhl": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"FEMA flood hazard map (regulatory floodplain)\" as the surface; the surface caption names it and its data time."},
     "nwsRadar": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Precipitation on radar (live)\" as the surface; the surface caption names it and its data time."},
-    "gbifOccurrence": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Wildlife records submitted here (open-licensed only)\" as the surface; the surface caption names it and its data time."},
-    "swpcAurora": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Aurora forecast (about an hour ahead)\" as the surface; the surface caption names it and its data time."},
-    "epaAirNowAqi": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Air quality category (the latest hour EPA published)\" as the surface; the surface caption names it and its data time."},
-    "noaaHmsSmoke": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Smoke plumes seen from orbit (NOAA analysis, aloft)\" as the surface; the surface caption names it and its data time."},
-    "nifcFirePerimeters": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Mapped wildfire perimeters (interagency record)\" as the surface; the surface caption names it and its data time."},
     "terrainSlope": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Steepness of the ground (slope, in degrees)\" as the surface; the surface caption names it and its data time."},
     "nlcdLandCover": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"What the ground was mapped as (NLCD land cover, by year)\" as the surface; the surface caption names it and its data time."},
     "nlcdTreeCanopy": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"How much tree crown covers the ground (NLCD canopy percent, by year)\" as the surface; the surface caption names it and its data time."},
     "countyScore": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"County score\" as the surface; the surface caption names it and its data time."},
     "hillshadeLight": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Hillshade (adjustable light)\" as the surface; the surface caption names it and its data time."},
-    "streamGauges": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Stream gauges (flow and gage height, latest USGS reading)\" as the surface; the surface caption names it and its data time."},
-    "nwsObservations": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Weather stations (temperature, wind and humidity now)\" as the surface; the surface caption names it and its data time."},
     "terrainContours": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Contour lines (25 m interval)\" as the surface; the surface caption names it and its data time."},
     "snowDepthModel": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Snow depth (modelled)\" as the surface; the surface caption names it and its data time."},
-    "avalancheDanger": {"scope":"The one continuous-colour surface laid over the base map (only one at a time).","effect":"Chooses \"Avalanche danger (forecast centre ratings)\" as the surface; the surface caption names it, and the row lists the zones in view with each rating, its window and the centre's forecast link."},
     "none": {"scope":"The one continuous-colour surface laid over the base map.","effect":"No surface: removes the current one."}
    }
   },

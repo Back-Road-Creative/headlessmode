@@ -23,7 +23,8 @@ import { BASE_BY_ID } from './source-basemaps.js';
  *  the base: lights draw at opacity 0.8 (source-night-lights.js leafletOptions) and radar at
  *  0.55 (source-nws-radar.js radarLayer), so together the base keeps 0.2 x 0.45 of its light,
  *  under a tenth, and nothing beneath is readable. At most ONE. Aurora and air quality are
- *  vector rectangles drawn only where their value is non-trivial, so they may accompany it.
+ *  vector rectangles drawn only where their value is non-trivial, so they may accompany it --
+ *  they are independent checkboxes in the panel, not part of the surface choice (QQA-06d).
  *  `symbolKeys` — the distinct marks a preset can draw, which is also the rows a reader scans
  *  in the map key beside it. Nineteen is the public-land set; the night set draws one.
  *  Task completion, the plan's third measure, is the one that is not mechanical: it is
@@ -87,11 +88,12 @@ export function definePreset({ id, label, question, base, layers }) {
     if (LAYER_BY_ID[l].required) bad(`${l} is required and is not a preset's to switch`);
   }
   if (new Set(layers).size !== layers.length) bad('names a layer twice');
-  // The context group is a choice of ONE (layer-registry.js contextControlSpecs), so a
-  // preset naming two surfaces is a set the panel cannot hold. Refused here rather than
-  // silently dropped by applyPreset, which would leave the reader a set nobody asked for.
-  const surfaces = layers.filter((l) => LAYER_BY_ID[l].group === 'context');
-  if (surfaces.length > 1) bad(`names ${surfaces.length} context surfaces and the map draws one context surface at a time`);
+  // The raster context surfaces are a choice of ONE (layer-registry.js contextControlSpecs),
+  // so a preset naming two is a set the panel cannot hold. Refused here rather than silently
+  // dropped by applyPreset, which would leave the reader a set nobody asked for. A vector
+  // context overlay (fire, air quality) is an independent checkbox and may accompany one.
+  const surfaces = layers.filter((l) => LAYER_BY_ID[l].group === 'context' && LAYER_BY_ID[l].rasterSurface);
+  if (surfaces.length > 1) bad(`names ${surfaces.length} raster context surfaces and the map draws one context surface at a time`);
   const p = Object.freeze({ id, label, question, base, layers: Object.freeze([...layers]) });
   const cost = presetCost(p);
   for (const [unit, cap] of Object.entries(BUDGET)) {
