@@ -12,6 +12,7 @@
     "scripts/qcm/build-identity.test.mjs",
     "scripts/qcm/camera-card.test.mjs",
     "scripts/qcm/camera-discovery-browser.test.mjs",
+    "scripts/qcm/camera-expiry-browser.test.mjs",
     "scripts/qcm/camera-find-browser.test.mjs",
     "scripts/qcm/camera-list-browser.test.mjs",
     "scripts/qcm/camera-mixed-scene-browser.test.mjs",
