@@ -4,10 +4,10 @@
 Source-only (no Hugo build): data/systems.json, content/framegrade.md,
 content/waypost.md, data/releases/framegrade.json.
 
-Framegrade is the media engine Waypost runs underneath. It is a pre-release
-product with a public repository (Apache-2.0) and no dated release, so the page
-may describe what the engine does and must carry no price, count, date or
-availability promise (business facts come only from the owner).
+Framegrade is the media engine used by the studio workflow. Its public
+Apache-2.0 repository publishes source tags, not GitHub Release objects. The
+page can name that source package without inventing a publication date,
+installer, price or customer count.
 
 Run: pytest scripts/test_framegrade_page.py -v
 """
@@ -43,7 +43,7 @@ def test_framegrade_is_a_product_row_with_no_invented_facts() -> None:
     assert row["shipped"] is None
     assert not row["blurb"].endswith("."), "blurb carries no closing period"
     for key in ("download", "install", "store"):
-        assert key not in row, f"no {key!r}: no installer or release exists"
+        assert key not in row, f"no {key!r}: a source tag does not establish an installer"
     assert row["repo"] == "https://github.com/Back-Road-Creative/framegrade"
 
 
@@ -64,7 +64,9 @@ def test_framegrade_page_has_frontmatter_documentation_and_access_note() -> None
     assert re.search(r"^title:", fm, re.M) and re.search(r"^description:", fm, re.M)
     assert re.search(r"^draft:\s*false", fm, re.M)
     assert "\n## Documentation\n" in text
-    assert "pre-release" in text.lower()
+    assert "versioned source package" in text.lower()
+    assert "Release details" in text
+    assert "no installer or versioned release" not in text
     assert "/waypost/" in text
 
 
@@ -80,10 +82,13 @@ def test_framegrade_page_states_no_price_count_or_date() -> None:
 def test_framegrade_release_record_is_honest() -> None:
     rec = json.loads(RELEASE.read_text(encoding="utf-8"))
     assert rec["product"] == "framegrade" and rec["name"] == "Framegrade"
-    assert rec["release_source"] == "manual" and rec["notes"]
+    assert rec["release_source"] == "github-tag" and rec["notes"]
     assert rec["source_repo"] == "Back-Road-Creative/framegrade"
     assert "no product repository" not in rec["notes"]
-    assert rec["version"] is None and rec["released_at"] is None
+    assert re.fullmatch(r"\d+\.\d+\.\d+", rec["version"])
+    assert rec["source_ref"] == f"v{rec['version']}"
+    assert re.fullmatch(r"[0-9a-f]{40}", rec["source_commit"])
+    assert rec["released_at"] is None
     assert rec["demo"] is None and rec["assets"] == {}
 
 

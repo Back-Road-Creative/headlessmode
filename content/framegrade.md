@@ -1,6 +1,6 @@
 ---
 title: "Framegrade — the media engine"
-description: "A media engine that grades video and photos, checks each finished file and builds route films from GPS tracks. Available as tagged source; used by the studio media workflow."
+description: "Grades video and photos, checks finished files and builds route films from GPS tracks. Available as tagged source for the studio media workflow."
 date: 2026-10-08
 draft: false
 tags: ["creator-tools", "video-pipeline", "photo-develop", "automation"]
