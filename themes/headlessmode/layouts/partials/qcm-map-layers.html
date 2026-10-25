@@ -43,14 +43,21 @@
                 <div id="qcm-preset-actions" class="qcm-preset-actions" role="group" aria-label="Undo or reset a starting set"></div>
             </div>
         </div>
+        {{/* QQA-18: "Active on map" -- filled by main.js from the switches below, hidden while
+             nothing is on so it costs no panel length. Above the groups, outside the search and
+             active-only filters, so a layer filtered out of sight is still one press from off. */}}
+        <div id="qcm-active-layers" class="qcm-active-layers" role="group" aria-label="Active on map" hidden>
+            <p class="qcm-active-title" tabindex="-1">Active on map</p>
+            <ul></ul>
+        </div>
         {{/* Filled from layer-registry.js by main.js: a new layer is a
              registry entry, never an edit here. */}}
         <div id="qcm-layers"></div>
         </div>
     </fieldset>
     {{/* QUX-04b: the manual hillshade light knobs, collapsed by default — only
-         meaningful once "Hillshade (adjustable light)" is chosen under Land, sky &
-         light context above, yet they sat open in the panel whether or not a reader
+         meaningful once "Hillshade (adjustable light)" is chosen under Terrain &
+         landscape above, yet they sat open in the panel whether or not a reader
          had that surface on. They sit after the list, so this is panel length and
          clutter, not MAX_LAYERS_GAP (nothing after #qcm-legend moves it). The brief
          for this unit also named the Highlight fieldset below for the same wrapper;
@@ -95,7 +102,7 @@
              is chosen, so this disclosure never opens onto nothing, and the light
              controls (hidden, never removed — their ids stay wired) while "Hillshade
              (adjustable light)" is. */}}
-        <p id="qcm-appearance-hint" class="qcm-hint">Light controls appear here once Hillshade (adjustable light) is chosen under Land, sky &amp; light context.</p>
+        <p id="qcm-appearance-hint" class="qcm-hint">Light controls appear here once Hillshade (adjustable light) is chosen under Terrain &amp; landscape.</p>
         <fieldset id="qcm-hillshade-fieldset" aria-label="Hillshade light" hidden>
             <legend>Hillshade light</legend>
             <div class="qcm-hillshade-light" role="group" aria-label="Hillshade light">

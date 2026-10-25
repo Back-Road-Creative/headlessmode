@@ -45,6 +45,7 @@
     "scripts/qcm/label-size-browser.test.mjs",
     "scripts/qcm/late-restore-browser.test.mjs",
     "scripts/qcm/layer-count-browser.test.mjs",
+    "scripts/qcm/layer-groups-browser.test.mjs",
     "scripts/qcm/layer-panel-browser.test.mjs",
     "scripts/qcm/layer-panel-compact-browser.test.mjs",
     "scripts/qcm/layers-compact-browser.test.mjs",

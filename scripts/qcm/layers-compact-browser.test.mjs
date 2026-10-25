@@ -198,7 +198,7 @@ test('the Hillshade light fieldset is hidden until hillshadeLight is chosen, the
   const hint = () => page.evaluate("document.getElementById('qcm-appearance-hint')?.hidden ?? 'missing'");
   assert.equal(await hint(), false, 'with the light controls hidden, Map appearance must show its hint rather than open onto nothing');
 
-  await trustedClick(page, '.qcm-layer-group[aria-label="Land, sky & light context"] summary');
+  await trustedClick(page, '.qcm-layer-group[aria-label="Terrain & landscape"] summary');
   await page.evaluate(`(() => {
     const radio = document.getElementById('qcm-context-hillshadeLight');
     radio.checked = true;

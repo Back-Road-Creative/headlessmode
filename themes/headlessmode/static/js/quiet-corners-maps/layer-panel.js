@@ -12,10 +12,12 @@ const norm = (s) => String(s || '').toLowerCase();
  *  CURRENT choice — the brief keeps those visible so the group never reads as empty).
  *
  *  `rows`: [{ id, group, label, note, keywords, checked, alwaysShow }]; `keywords` is the
- *  row's extra search words (the registry's `searchTerms`), never shown. `groups`: [{ id, label }]. */
+ *  row's extra search words (the registry's `searchTerms`), never shown. `groups`: [{ id, label,
+ *  searchTerms? }] -- a group's own purpose words match every row under it (QQA-18: "weather"
+ *  finds the radar row although no label says it). */
 export function filterLayerSpecs(rows, groups, { query = '', activeOnly = false } = {}) {
   const q = norm(query).trim();
-  const groupLabel = Object.fromEntries(groups.map((g) => [g.id, norm(g.label)]));
+  const groupLabel = Object.fromEntries(groups.map((g) => [g.id, `${norm(g.label)} ${norm(g.searchTerms)}`]));
   const visibleIds = new Set();
   const visibleGroupIds = new Set();
   for (const r of rows) {
@@ -62,10 +64,12 @@ export function layerCountLine(rows) {
 }
 
 /** The groups whose rows are optional screen layers the fetch pass never badges: a context
- *  surface, a reading, a camera pin set or an extra sheet is switched on or off and has no
- *  `state.states` entry. `base` is the screen base-map CHOICE (always exactly one, so it says
- *  nothing about what is "on"), and `federal`/`state` rows carry their own fetch badge. */
-export const COUNTED_SCREEN_GROUPS = Object.freeze(['context', 'reading', 'cameras', 'extras']);
+ *  surface, a reading or a camera pin set is switched on or off and has no `state.states`
+ *  entry. `base` is the screen base-map CHOICE (always exactly one, so it says nothing about
+ *  what is "on"), and `federal`/`state` rows carry their own fetch badge. `extras` is left out
+ *  on purpose (QQA-18): a print extra adds a page to the PDF and draws nothing, so it is not
+ *  "on the map" -- the Print options hint says so and the Active on map list never shows it. */
+export const COUNTED_SCREEN_GROUPS = Object.freeze(['context', 'reading', 'cameras']);
 
 /** Count rows for every selected row of `registry` in COUNTED_SCREEN_GROUPS, from the
  *  `layers` switches (`{ [id]: boolean }`). Selected is not loaded is not rendered: a camera
@@ -117,6 +121,25 @@ export function rowSummaryLine({ checked = false, disabled = false, note = '' } 
  *  might one day want an exception has a single function to change. */
 export function groupIsCollapsedByDefault(group) {
   return true;
+}
+
+/** QQA-18: the compact "Active on map" list. `rows` is every control row in the panel
+ *  ({ id, label, checked, group, base, lettering }); `base` marks a default choice that is not a
+ *  layer (the screen base radios and "No context surface"). `lettering` marks a row that opens ON
+ *  (road and place names, layer-presets.js opensOn): the layer-count line already leaves it out
+ *  because the reader did not choose it, and the list does the same, so a fresh page lists nothing
+ *  and spends no panel height. A print extra adds a page to the PDF and draws nothing, so the
+ *  Print options group is never "on the map". */
+export const PRINT_GROUP_ID = 'print';
+export function activeOnMapRows(rows) {
+  return rows.filter((r) => r.checked && !r.base && !r.lettering && r.group !== PRINT_GROUP_ID);
+}
+
+/** QQA-18: a search (or active-only) opens the groups that hold a match; clearing it closes the
+ *  ones IT opened, so the panel returns to what it was before the search. A group the reader
+ *  toggled by hand while filtering is theirs and stays as they left it. */
+export function groupsToCollapse({ openedByFilter, touched }) {
+  return [...openedByFilter].filter((id) => !touched.has(id));
 }
 
 /** The "About this layer" text: source name/origin, attribution, coverage, freshness,

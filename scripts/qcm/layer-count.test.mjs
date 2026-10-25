@@ -18,8 +18,7 @@ test('a checked camera layer is counted, never "No layers on"', () => {
   assert.equal(line({ roadCameras: true, parkCameras: true }), '2 layers on');
 });
 
-test('context, reading and extras layers count the same way', () => {
-  assert.equal(line({ aerial: true }), '1 layer on');
+test('context and reading layers count the same way', () => {
   assert.equal(line({ padusAccess: true }), '1 layer on');
   const context = LAYERS.find((l) => l.group === 'context');
   assert.equal(line({ [context.id]: true }), '1 layer on');
@@ -49,10 +48,19 @@ test('no required row sits in a counted group, so the count needs no `required` 
   assert.deepEqual(stray, [], 'a required row in a counted group would always read as "on"');
 });
 
-test('every registry group is either counted here, badged by main.js, or the basemap choice', () => {
+test('QQA-18: a print extra is a page in the PDF, not a layer on the map, so it never moves the count', () => {
+  for (const id of ['aerial', 'terrain', 'tripPage']) {
+    assert.equal(LAYERS.find((l) => l.id === id).group, 'extras');
+    assert.equal(line({ [id]: true }), 'No layers on', `${id} is a print extra and must not read as on the map`);
+  }
+  assert.equal(line({ tripPage: true, roadCameras: true }), '1 layer on');
+  assert.ok(!COUNTED_SCREEN_GROUPS.includes('extras'));
+});
+
+test('every registry group is either counted here, badged by main.js, the basemap choice, or a print page', () => {
   const badgedByMain = new Set(['federal', 'state']);
   for (const g of GROUPS) {
-    if (g.id === 'base') continue;
+    if (g.id === 'base' || g.id === 'extras') continue;
     assert.ok(badgedByMain.has(g.id) || COUNTED_SCREEN_GROUPS.includes(g.id),
       `group "${g.id}" is in no count: its checked rows would read "No layers on"`);
   }

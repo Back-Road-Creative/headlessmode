@@ -129,6 +129,55 @@ export const GROUPS = Object.freeze([
 ]);
 export const GROUP_IDS = Object.freeze(GROUPS.map((g) => g.id));
 
+/** QQA-18: how the Layers panel is HEADED. `group` above is a layer's rendering role and stays
+ *  that -- drape, the count, the surface caption and the fetch pass all read it. These are the
+ *  task groups a reader navigates by (plan 4.7): one primary home per layer id, whatever its
+ *  provider or role. Presentation only: a group changes which heading a row sits under, never
+ *  its id, its input id, whether it is a radio or a checkbox, or what it draws. The raster
+ *  surfaces are still the one `qcm-context` radio choice although they sit under different
+ *  headings (Weather, Night sky, Terrain, Explore counties).
+ *
+ *  `ids` is the row order inside the heading. Every registry id, every screen base and the
+ *  No-context row must appear in exactly one `ids` (layer-task-groups.test.mjs), so a new
+ *  provider's layer has to be homed here and cannot grow a top-level heading of its own.
+ *  `searchTerms` are purpose words a reader types that no label carries; the group's label is
+ *  searched too. */
+export const NO_CONTEXT_ROW_ID = 'noContextSurface';
+export const TASK_GROUPS = Object.freeze([
+  Object.freeze({ id: 'mapStyle', label: 'Map style', ids: Object.freeze(['usgsTopo', 'usgsImagery', 'usgsShadedRelief', 'none', NO_CONTEXT_ROW_ID]),
+    searchTerms: 'background basemap base map imagery aerial relief',
+    hint: 'What the map is drawn on, on screen. Printed sheets always carry the USGS Topo base; aerial imagery and shaded relief print as companion sheets under Print options. No context surface clears the one colour surface chosen under another heading (Terrain, Weather, Explore counties and so on).' }),
+  Object.freeze({ id: 'places', label: 'Places & routes', ids: Object.freeze(['mvum', 'trails', 'recSites', 'blmRecSites', 'names', 'roads', 'railClass1', 'airports', 'historicPlaces']),
+    searchTerms: 'hiking camping roads campsites trailheads recreation',
+    hint: 'Roads, trails, recreation sites and place names, drawn on the map anywhere in the lower 48.' }),
+  Object.freeze({ id: 'land', label: 'Land & access', ids: Object.freeze(['federalLand', 'surfaceOwnership', 'countyLines', 'gameLands', 'stateParks', 'managedAreas', 'parcels']),
+    searchTerms: 'public land ownership boundaries hunting',
+    hint: 'Who manages the land. Federal layers draw anywhere in the lower 48; state rows are offered only where the area you drew reaches a state that publishes them.' }),
+  Object.freeze({ id: 'terrain', label: 'Terrain & landscape', ids: Object.freeze(['hillshadeLight', 'terrainSlope', 'terrainContours', 'nlcdLandCover', 'nlcdTreeCanopy', 'wetlands', 'gbifOccurrence', 'transportNoise']),
+    searchTerms: 'ground slope steep forest vegetation wildlife species',
+    hint: 'The ground and what covers it. Hillshade, slope, land cover and tree canopy are colour surfaces, a choice of one across the whole panel; wetlands and wildlife records draw on top of the map.' }),
+  Object.freeze({ id: 'weather', label: 'Weather & conditions', ids: Object.freeze(['nwsRadar', 'epaAirNowAqi', 'noaaHmsSmoke', 'nifcFirePerimeters', 'femaNfhl', 'nwsObservations', 'streamGauges', 'snotelSnowpack', 'snowDepthModel', 'avalancheDanger']),
+    searchTerms: 'rain storm forecast air smoke wildfire flood',
+    hint: 'What is happening now on the map. Radar is a colour surface, a choice of one across the whole panel; air quality, smoke, fire perimeters and flood zones draw on top and can be on together. Screen only.' }),
+  Object.freeze({ id: 'sky', label: 'Night sky', ids: Object.freeze(['nightLights', 'swpcAurora']),
+    searchTerms: 'night lights aurora northern lights light pollution',
+    hint: 'Night lights is a colour surface, a choice of one across the whole panel; the aurora forecast draws on top. Screen only.' }),
+  Object.freeze({ id: 'cameras', label: 'Cameras', ids: Object.freeze(['roadCameras', 'parkCameras', 'linkCameras', 'phenoCameras', 'airportCameras']),
+    searchTerms: 'webcam live view',
+    hint: 'Camera locations on the screen map; a picture loads only when you open a camera. Never printed.' }),
+  Object.freeze({ id: 'facts', label: 'Place facts', ids: Object.freeze(['padusAccess', 'epaEcoregions']),
+    searchTerms: 'inspect about this place access ecoregion',
+    hint: 'Answers in words about the area you drew, written into this panel. Nothing is drawn on the map and nothing is added to a printed sheet.' }),
+  Object.freeze({ id: 'counties', label: 'Explore counties', ids: Object.freeze(['countyScore']),
+    searchTerms: 'compare ranking score',
+    hint: 'Compare counties. The county score is a colour surface, a choice of one across the whole panel, drawn on the screen map only.' }),
+  Object.freeze({ id: 'print', label: 'Print options', ids: Object.freeze(['aerial', 'terrain', 'tripPage']),
+    searchTerms: 'pdf companion sheet page paper',
+    hint: 'Added as their own printed pages at the back of the PDF. Not drawn on the map, and not counted as on the map.' }),
+]);
+/** layer id (or base id, or NO_CONTEXT_ROW_ID) -> its task group id. */
+export const TASK_GROUP_OF = Object.freeze(Object.fromEntries(TASK_GROUPS.flatMap((g) => g.ids.map((id) => [id, g.id]))));
+
 export const LAYERS = Object.freeze([
   Object.freeze({
     id: 'usgsTopo',
@@ -666,7 +715,7 @@ export const LAYERS = Object.freeze([
     symbolKeys: [SYMBOLS.basemap.key],
     emptyMeans: 'none',
     status: 'live',
-    coverageCaveat: 'Flown on a multi-year cycle, so it can be several seasons old. It shows ground cover, not legal access. To see it on the map, choose it under Base map.',
+    coverageCaveat: 'Flown on a multi-year cycle, so it can be several seasons old. It shows ground cover, not legal access. To see it on the map, choose it under Map style.',
     render: render('none'),
   }),
   Object.freeze({
@@ -680,7 +729,7 @@ export const LAYERS = Object.freeze([
     symbolKeys: [SYMBOLS.basemap.key],
     emptyMeans: 'none',
     status: 'live',
-    coverageCaveat: 'Shows the shape of the ground, not what is on it. Contour values stay on the topo sheet. To see it on the map, choose it under Base map.',
+    coverageCaveat: 'Shows the shape of the ground, not what is on it. Contour values stay on the topo sheet. To see it on the map, choose it under Map style.',
     render: render('none'),
   }),
   Object.freeze({

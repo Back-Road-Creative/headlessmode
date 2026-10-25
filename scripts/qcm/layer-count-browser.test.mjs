@@ -128,8 +128,12 @@ test('an area drawn and sources checked (recipe set, rows rebuilt): checking Roa
 });
 
 test('a context radio is counted, and "No context surface" takes the count back to none', { skip }, async () => {
-  const page = await freshPage({ group: 'Land, sky & light context' });
+  // QQA-18: the surface radios sit under their task heading (night lights: Night sky), while
+  // "No context surface" sits under Map style -- one `qcm-context` choice across two groups.
+  const page = await freshPage({ group: 'Night sky' });
   const id = CONTEXT_SURFACE_IDS[0];   // a radio; overlays are qcm-layer-<id> checkboxes
+  const styleSel = '.qcm-layer-group[aria-label="Map style"]';
+  await trustedClick(page, `${styleSel} summary`, { until: `document.querySelector('${styleSel}').open` });
   await trustedClick(page, `#qcm-context-${id}`);
   assert.equal(await page.evaluate(`document.getElementById('qcm-context-${id}').checked`), true, 'the trusted click did not select the context radio');
   assert.equal(await countText(page), '1 layer on', `context surface "${id}" is selected but the count does not say so`);

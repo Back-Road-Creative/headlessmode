@@ -89,7 +89,7 @@ test('fire perimeters and air quality are independent checkboxes in the context 
   const page = await freshPage();
   const r = await page.evaluate(`(() => {
     const el = (id) => document.getElementById(id);
-    const group = [...document.querySelectorAll('.qcm-layer-group')].find((g) => g.getAttribute('aria-label') === 'Land, sky & light context');
+    const group = [...document.querySelectorAll('.qcm-layer-group')].find((g) => g.getAttribute('aria-label') === 'Weather & conditions');
     return { fireType: el('qcm-layer-nifcFirePerimeters').type, aqiType: el('qcm-layer-epaAirNowAqi').type,
       fireInGroup: group.contains(el('qcm-layer-nifcFirePerimeters')), aqiInGroup: group.contains(el('qcm-layer-epaAirNowAqi')),
       noFireRadio: !el('qcm-context-nifcFirePerimeters'), noAqiRadio: !el('qcm-context-epaAirNowAqi'),
@@ -97,7 +97,7 @@ test('fire perimeters and air quality are independent checkboxes in the context 
   })()`);
   assert.equal(r.fireType, 'checkbox');
   assert.equal(r.aqiType, 'checkbox');
-  assert.ok(r.fireInGroup && r.aqiInGroup, 'the overlays stay in the context group, not a new top-level group');
+  assert.ok(r.fireInGroup && r.aqiInGroup, 'the weather overlays sit under Weather & conditions, beside the radar they draw on');
   assert.ok(r.noFireRadio && r.noAqiRadio, 'a vector overlay must not also be a radio');
   assert.ok(r.radios.includes('none') && r.radios.includes('nightLights'), 'the raster surfaces are still the radio choice');
   assert.ok(!r.radios.includes('nifcFirePerimeters') && !r.radios.includes('epaAirNowAqi'));

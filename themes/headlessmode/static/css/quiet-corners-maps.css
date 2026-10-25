@@ -171,6 +171,15 @@
     color: #a3a3a3;
 }
 .qcm-layer-row { margin: 0 0 0.35rem; }
+/* QQA-18: the Active on map list -- one line per layer that is on, a Remove at its end. Hidden
+   (the `hidden` attribute) while empty, so the collapsed panel keeps its length budget. */
+.qcm-active-layers { margin: 0 0 0.5rem; padding: 0 0 0.4rem; border-bottom: 1px solid #262626; }
+.qcm-active-title { margin: 0 0 0.15rem; font-size: 0.78rem; font-weight: 600; color: #e4e4e7; }
+.qcm-active-layers ul { margin: 0; padding: 0; list-style: none; }
+.qcm-active-layers li { display: flex; flex-wrap: wrap; align-items: center; gap: 0 0.4rem; margin: 0 0 0.15rem; font-size: 0.78rem; line-height: 1.3; color: #d4d4d8; }
+.qcm-active-name { flex: 1 1 auto; min-width: 0; }
+.qcm-active-state { color: #a3a3a3; font-size: 0.72rem; }
+.qcm-active-remove, .qcm-active-retry { padding: 0 0.45rem; font-size: 0.72rem; line-height: 1.4; }
 /* UX-03b: the Cameras entry above the groups -- two regions, a Go to each, one status line each.
    Kept tight: the default Layers panel has a length budget (layer-panel-compact-browser.test.mjs). */
 .qcm-camera-entry { margin: 0 0 0.4rem; }
