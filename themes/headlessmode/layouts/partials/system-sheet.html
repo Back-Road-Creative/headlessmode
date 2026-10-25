@@ -57,7 +57,7 @@
             {{- if $version }}
             {{- if eq $release.release_source "github-tag" }}
             <p>Latest source tag <a href="{{ $release.release_url }}">{{ $release.source_ref }}</a></p>
-            <p>Source commit <a href="https://github.com/{{ $release.source_repo }}/commit/{{ $release.source_commit }}">{{ substr $release.source_commit 0 12 }}</a>. Source package; no GitHub Release assets.</p>
+            <p>Source commit <a href="https://github.com/{{ $release.source_repo }}/tree/{{ $release.source_commit }}">{{ substr $release.source_commit 0 12 }}</a>. Source package; no GitHub Release assets.</p>
             {{- else }}
             <p>Latest release {{ $version }}{{ with $release.released_at }} &middot; {{ time.Format "January 2006" . }}{{ end }}</p>
             {{- end }}

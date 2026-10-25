@@ -31,6 +31,7 @@ Run: hugo --configDir site-config --minify && pytest scripts/test_systems_contra
 
 import json
 import re
+import subprocess
 import tomllib
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
@@ -1278,3 +1279,20 @@ def test_source_tag_details_render_ledger_without_invented_release_date(slug):
     assert "Latest release" not in html
     assert "no installer or versioned release" not in html
     assert "January 0001" not in html
+
+
+@pytest.mark.parametrize("slug", ["waypost", "framegrade"])
+def test_source_provenance_links_use_the_hosted_checker_contract(slug):
+    script = """
+      import { readFileSync } from 'node:fs';
+      import { extractLinks, planCheck } from './scripts/qcm/check-github-links.mjs';
+      const links = extractLinks(readFileSync(process.argv[1], 'utf8'));
+      const errors = links.filter(url => url.startsWith('https://github.com/Back-Road-Creative/' + process.argv[2] + '/'))
+        .map(url => ({url, error: planCheck(url).error})).filter(result => result.error);
+      if (errors.length) { console.error(JSON.stringify(errors)); process.exitCode = 1; }
+    """
+    result = subprocess.run(
+        ["node", "--input-type=module", "-e", script, str(built(f"/{slug}/")), slug],
+        cwd=ROOT, capture_output=True, text=True, timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
