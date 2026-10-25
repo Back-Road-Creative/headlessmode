@@ -130,6 +130,9 @@ const NPS_ROW = Object.freeze({
   ageSource: 'none',
   listChecked: true,
   listCheckedLead: 'The park does not publish when this picture was taken.',
+  // QQA-10f: the sentence above is false for a record that carries a capture time, so such a card
+  // drops it (a row with no such lead falls back to listCheckedLead).
+  listCheckedLeadCaptured: '',
   emptyText: 'No park cameras in this view. Park cameras are listed only for parks with a located NPS webcam.',
   errorText: "The park's camera list did not load, so no cameras are shown. Turn the layer off and on to try again.",
   outsideText: 'Outside coverage: this view is not in a US state or territory, the only areas with park cameras here. Use Go to under Cameras.',
@@ -146,7 +149,8 @@ const NPS_ROW = Object.freeze({
 //   altCredit      the credit in the picture's alt text
 //   ageSource      'last-modified' (the picture file's header), 'captured' or 'none'
 //   listChecked    whether the card says when the camera list was last checked (listCheckedLead
-//                  is the sentence before the date)
+//                  is the sentence before the date; listCheckedLeadCaptured, when a row has it, is
+//                  the one used instead for a record that carries a capturedAt)
 //   emptyText / errorText / outsideText   the three layer-report sentences
 // A provider id that is not in the table gets NEUTRAL_PROVIDER: neutral words and plan 'link',
 // never another provider's text (08D-i used to fall back to Caltrans, which put Caltrans's name
@@ -313,7 +317,7 @@ export function layerReport({ provider = 'caltrans-cwwp2', cameras = [], inView 
 /** Plain strings for the camera's popup card. Never contains the word "live" -- a dead Caltrans
  *  feed cannot be told apart from a live one from this page (QUX-08D.md C15); the card reports
  *  what the file's own modification time says, never a liveness claim. */
-export function cardLines(camera, { generatedAt } = {}) {
+export function cardLines(camera, { generatedAt, now = new Date() } = {}) {
   // A link-only camera (HPWREN, AlertWest): name, the owner's credit, what the owner lists, and
   // why there is no picture. The owner's own link is drawn by the caller, labelled by linkLabel.
   if (isLinkOnly(camera)) {
@@ -332,13 +336,18 @@ export function cardLines(camera, { generatedAt } = {}) {
   }
   if (camera.health === 'inactive') {
     lines.push(`${camera.operator} lists this camera as out of service.`);
+  } else if (pictureExpired(camera, now)) {
+    // QQA-10f: the snapshot row had a picture and its validUntil has passed, so expandSnapshot took
+    // the still away. That is not "none published": the reader is told it is out of date.
+    lines.push("This camera's picture is out of date, so none is shown.");
   } else if (!camera.media || !camera.media.still) {
     lines.push('No picture is published for this camera.');
   }
   const row = providerRow(camera.provider);
   if (row.listChecked) {
     // The snapshot's own generatedAt; a record expanded from a snapshot carries it as fetchedAt.
-    lines.push(`${row.listCheckedLead} Camera list checked ${formatCheckedDate(generatedAt || camera.fetchedAt)}.`);
+    const lead = camera.capturedAt && row.listCheckedLeadCaptured !== undefined ? row.listCheckedLeadCaptured : row.listCheckedLead;
+    lines.push(`${lead} Camera list checked ${formatCheckedDate(generatedAt || camera.fetchedAt)}.`.trim());
   }
   return lines;
 }
@@ -377,6 +386,47 @@ export function ageText(lastModified, now = new Date(), provider = 'caltrans-cww
  *  owner's link (both plans: an <img> that never fires load or error, and a fetch that never
  *  answers). 20 s, the same limit the alerts and forecast requests use. */
 export const PICTURE_TIMEOUT_MS = 20000;
+
+// A capturedAt a little ahead of the reader's clock is clock skew and reads as just now; further
+// ahead is bad data and says nothing.
+const SKEW_MS = 5 * 60 * 1000;
+
+/** How old the picture is per the record's own capturedAt (a snapshot field, QQA-17b), or null when
+ *  there is no readable time to say anything from. The same 30-minute line as ageText decides
+ *  "may be stuck", so the two sources agree. It is the listed capture time, not a claim that the
+ *  picture is being refreshed. */
+export function capturedAgeText(capturedAt, now = new Date(), provider = 'caltrans-cwwp2') {
+  if (typeof capturedAt !== 'string' || capturedAt === '') return null;
+  const taken = new Date(capturedAt);
+  if (Number.isNaN(taken.getTime())) return null;
+  const age = now.getTime() - taken.getTime();
+  if (age < -SKEW_MS) return null;
+  const source = `${providerRow(provider).operator}'s listing`;
+  const head = `Picture taken ${formatDuration(Math.max(age, 0))} ago, per ${source}.`;
+  return age < STALE_MS ? head : `${head} The camera may be stuck.`;
+}
+
+/** The picture age line for a camera's card, as a string ('' for none). One rule: the picture file's
+ *  Last-Modified, when the fetch plan read a readable one, wins (it was measured on this fetch);
+ *  otherwise the record's capturedAt; otherwise a fetch-plan card says the server did not say, and an
+ *  img-plan card, which has no header to read, says nothing. */
+export function ageLine(camera, { lastModified = null, now = new Date() } = {}) {
+  if (lastModified && !Number.isNaN(new Date(lastModified).getTime())) return ageText(lastModified, now, camera.provider);
+  const captured = capturedAgeText(camera.capturedAt, now, camera.provider);
+  if (captured) return captured;
+  return stillPlan(camera) === 'fetch' ? ageText(null, now, camera.provider) : '';
+}
+
+/** True for a camera whose still was taken away by an expired `validUntil` (expandSnapshot drops the
+ *  still and keeps validUntil): no picture, and an expiry that has passed, valid up to and including
+ *  the instant. An unreadable expiry counts as past, as it does there. A row with no expiry, or an
+ *  expiry still ahead, is just a camera with no picture. */
+export function pictureExpired(camera, now = new Date()) {
+  if (!camera || (camera.media && camera.media.still)) return false;
+  const until = camera.validUntil;
+  if (until === null || until === undefined) return false;
+  return !(typeof until === 'string' && Date.parse(until) >= (now instanceof Date ? now.getTime() : Number(now)));
+}
 
 /** The plan comes from the provider table: 'fetch', 'img' or 'link' (inactive, no still at all,
  *  or a provider the table does not know -- no request is ever made). */
