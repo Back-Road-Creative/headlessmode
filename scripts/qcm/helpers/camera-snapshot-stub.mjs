@@ -94,6 +94,62 @@ export function fixedFilesStub() {
   return out;
 }
 
+// QQA-10b: one public point (Salinas, California) with a camera from every layer that can sit there,
+// so a browser test puts road, park, link-only, research and airport cameras in one view. Each file
+// keeps its provider's real header (operator, attribution, rights) from the committed seed; the rows
+// are fixtures with public picture addresses on the provider's own host, laid on a small grid around
+// the point so no two pins cover each other. The index lists only these five, so nothing else loads.
+export const MIXED_POINT = Object.freeze({ lat: 36.6777, lon: -121.6555 });
+const MIXED_REGION = { region: 'scene-salinas', regionName: 'Fixture scene (Salinas)' };
+const mixedPos = (slot) => [+(MIXED_POINT.lat + (1 - Math.floor(slot / 3)) * 0.01).toFixed(5), +(MIXED_POINT.lon + ((slot % 3) - 1) * 0.013).toFixed(5)];
+const MIXED_PROVIDERS = [
+  { layer: 'roadCameras', seed: 'caltrans-cwwp2/ca-d05.json', dir: 'caltrans-cwwp2', plan: 'fetch', reportNoun: 'road camera', altCredit: 'Caltrans',
+    names: ['US-101 : Fixture Road One', 'US-101 : Fixture Road Two', 'SR-68 : Fixture Road Three'],
+    still: (i) => `https://cwwp2.dot.ca.gov/data/d5/cctv/image/fixtureroad${i}/fixtureroad${i}.jpg`, page: () => null },
+  { layer: 'parkCameras', seed: 'nps-webcams/nps-nc.json', dir: 'nps-webcams', plan: 'img', reportNoun: 'park camera', altCredit: 'National Park Service',
+    names: ['Fixture Park Webcam One', 'Fixture Park Webcam Two'],
+    still: (i) => `https://www.nps.gov/featurecontent/ard/webcams/images/fixturepark${i}.jpg`, page: (i) => `https://www.nps.gov/media/webcam/view.htm?id=FX-${i}` },
+  { layer: 'linkCameras', seed: 'hpwren/hpwren-ca.json', dir: 'hpwren', plan: 'link', reportNoun: 'camera', altCredit: null,
+    names: ['Fixture Link Camera One', 'Fixture Link Camera Two'],
+    still: () => null, page: (i) => `https://www.hpwren.ucsd.edu/cameras/#mode=realTime&cams=fixture${i}` },
+  { layer: 'phenoCameras', seed: 'phenocam/us.json', dir: 'phenocam', plan: 'img', reportNoun: 'research camera', altCredit: 'PhenoCam Network (CC BY)',
+    names: ['Fixture Research Camera One', 'Fixture Research Camera Two'],
+    still: (i) => `https://phenocam.nau.edu/data/latest/fixtureresearch${i}.jpg`, page: (i) => `https://phenocam.nau.edu/webcam/sites/fixtureresearch${i}/` },
+  { layer: 'airportCameras', seed: 'aviationwx/us.json', dir: 'aviationwx', plan: 'img', reportNoun: 'airport camera', altCredit: 'AviationWX.org',
+    names: ['Fixture Airport (camera 1)', 'Fixture Airport (camera 2)'],
+    still: (i) => `https://api.aviationwx.org/v1/airports/fx${i}/webcams/0/image?size=720`, page: (i) => `https://fx${i}.aviationwx.org/` },
+];
+
+/** { files: { [path]: json string } (the five files and the index, keyed by url path), scene: [{ layer,
+ *  provider, plan, operator, cardOperator, altCredit, reportNoun, file, cameras: [{ ref, providerId,
+ *  name, lat, lon, still, officialUrl }] }] }. `cardOperator` is the name the camera's own card shows:
+ *  the operator, or for a link-only layer the owner's credit line. */
+export function mixedSceneStub() {
+  const files = {};
+  let slot = 0;
+  const scene = MIXED_PROVIDERS.map((p) => {
+    const { fields, rows, schema, ...header } = readSeed(p.seed);
+    const cameras = p.names.map((name, i) => {
+      const [lat, lon] = mixedPos(slot++);
+      const providerId = `fx${i + 1}`;
+      return { ref: `camera:${header.provider}:${providerId}`, providerId, name, lat, lon, still: p.still(i + 1), officialUrl: p.page(i + 1) || header.officialUrl };
+    });
+    const path = `${p.dir}/${MIXED_REGION.region}.json`;
+    files[`${CAMERA_DIR}/${path}`] = JSON.stringify({
+      schema: 1, ...header, ...MIXED_REGION, generatedAt: FIXED_AT, fields: FIXED_FIELDS,
+      rows: cameras.map((c) => [c.providerId, c.name, c.lat, c.lon, c.still, 'active', null, c.officialUrl === header.officialUrl ? null : c.officialUrl]),
+    });
+    const lats = cameras.map((c) => c.lat), lons = cameras.map((c) => c.lon);
+    return { layer: p.layer, provider: header.provider, plan: p.plan, operator: header.operator,
+      cardOperator: p.plan === 'link' ? header.operator : header.operator, altCredit: p.altCredit, reportNoun: p.reportNoun, file: `${CAMERA_DIR}/${path}`, cameras,
+      index: { file: path, provider: header.provider, layer: p.layer, ...MIXED_REGION,
+        bbox: { minLon: Math.min(...lons), minLat: Math.min(...lats), maxLon: Math.max(...lons), maxLat: Math.max(...lats) },
+        count: cameras.length, generatedAt: FIXED_AT } };
+  });
+  files[INDEX_PATH] = JSON.stringify({ schema: 1, files: scene.map((s) => s.index) });
+  return { files, scene };
+}
+
 /** { [path]: json string } for a stub index and ONE schema 2 park file (nps-webcams, region nps-nc)
  *  holding exactly `cameras`, each { providerId, name, lat, lon, still, capturedAt?, validUntil? }.
  *  For a browser test that needs a row with a capture time or an expiry, which the fixed schema 1
