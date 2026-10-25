@@ -395,11 +395,12 @@ failed; **1** for a failure; **2** for bad arguments. With no Chromium every bro
 | `pages` | `/quiet-corners/` (the map) and `/quiet-corners/maps/` (the Field Maps guide: sheet heading and a docs block with sections and list items) answer 200 and render. `/quiet-corners/cameras/` is optional: a 404 is "feature not deployed", a 200 must render a heading and a map or list. No such page exists in this repo yet, so that contract (`READY_CAMERAS`) is proved only against a stand-in page; change it together with the real page. |
 | `csp` | The dashboard raises no `securitypolicyviolation`, no first-party `console.error`, no uncaught error, and none of its own files fails. Failed outside images (USGS tiles 404 at the edge of coverage), third-party console errors and the Cloudflare analytics beacon (injected at the edge, blocked by our policy) are listed but not fatal. A violation arriving over a second after the page is ready is missed. |
 | `search` | "Bryson City" offers a town and choosing it lands the map there. A name search ("Cold Mountain"), once a result is chosen, leaves exactly ONE marker titled with it (#707/#708). A synthetic street address gets an honest message: any note that mentions an address passes, whatever its wording, so real address lookup shipping later does not break this. The old wording ("No town matching/named ...", the finder calling the address a missing town) means the feature is not deployed: it passes with the address part in `skips`. Any other note fails. |
+| `address` | Submitting the Census Bureau's public office address returns its match, and selecting it moves the map near that office. This runs independently of GNIS name search. A missing endpoint, lookup failure, empty answer or wrong destination fails, even with `--tolerate-service-errors`: the same-origin relay can fail in our code, and the check cannot attribute that failure to Census. |
 | `layers` | Switching Named places off removes every label, on paints them again, and no label is painted twice in the same spot (two places sharing a name are fine). |
 | `roads` | At Sylva NC, zoom 13, at least one `.qcm-road-label` is drawn. When none is, the reason says whose fault: `service error` (the USGS transportation service errored, never answered or sent an error body; `cause: service`) or `our code drew no road labels` (`cause: ours`). |
 | `inspection` | Pressing a name label opens its card, naming it. |
 
-Places are public landmarks (Bryson City, Cold Mountain, Sylva); the address is synthetic. `search`, `layers` and `inspection` depend on the live USGS names service, `roads` on its transportation service: an outage shows up as a `service` failure, not a silent pass.
+Places are public landmarks (Bryson City, Cold Mountain, Sylva). The typing-only address in `search` is synthetic; `address` submits the Census Bureau's public office at 4600 Silver Hill Rd, Washington, DC, through the same relay readers use. `search`, `layers` and `inspection` depend on the live USGS names service, `roads` on its transportation service: an outage shows up as a `service` failure, not a silent pass. An `address` failure always fails the run, including when Census itself is unavailable; a successful typing prompt is insufficient evidence of lookup health.
 
 `live-smoke-checks.mjs` holds the checks, argument parsing and exit rule as importable functions.
 `live-smoke.test.mjs` runs them against the locally built `public/` with every outside request stubbed
@@ -407,7 +408,7 @@ Places are public landmarks (Bryson City, Cold Mountain, Sylva); the address is 
 fail when its target is broken. `helpers/site-server.mjs` takes a `files` option for stand-in pages and
 scripts. `QCM_SMOKE_NO_BROWSER=1` makes the CLI behave as if there were no Chromium.
 
-**Not wired into deploy yet.** Running this after `deploy-production.yml` is a separate change to the workflow, made and merged by a person. Firefox and WebKit lanes are not in this slice: the checks drive Chromium over the Chrome DevTools protocol, which those browsers do not speak, so a later slice needs them installed plus a driver.
+Firefox and WebKit lanes are not in this slice: the checks drive Chromium over the Chrome DevTools protocol, which those browsers do not speak, so a later slice needs them installed plus a driver.
 
 ## The context group: surfaces and overlays
 

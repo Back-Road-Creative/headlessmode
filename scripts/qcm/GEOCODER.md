@@ -102,5 +102,7 @@ discarded because its ZIP check wrongly failed on ZIP+4 values, and I did not co
   check for a 200 JSON response and the expected match, and select that match on the map.
   Passing Node tests or checking the prompt while typing does not verify the hosted lookup.
   Inspect the Function event's response status: an `ok` execution outcome can still return an HTTP error.
+  The default production smoke run includes an independent `address` check for the Census office;
+  `node scripts/qcm/live-smoke.mjs --only address` runs that check alone. See the [smoke-check contract](README.md).
 - **Alternatives:** the plan's earlier Geoapify proposal was not re-evaluated (its terms, cost and key are your
   decision, and nothing was bought), and no other provider was measured.
