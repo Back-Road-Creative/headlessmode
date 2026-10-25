@@ -13,6 +13,7 @@
     "scripts/qcm/camera-card.test.mjs",
     "scripts/qcm/camera-discovery-browser.test.mjs",
     "scripts/qcm/camera-expiry-browser.test.mjs",
+    "scripts/qcm/camera-list-browser.test.mjs",
     "scripts/qcm/camera-picture-states-browser.test.mjs",
     "scripts/qcm/camera-requests.test.mjs",
     "scripts/qcm/card-over-panels-browser.test.mjs",

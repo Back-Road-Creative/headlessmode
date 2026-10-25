@@ -73,7 +73,8 @@ import { createSavedPlacesStore } from './saved-places.js';
 import { mountSavedPlaces, statusTextFor, CAMERA_NO_LOCATION } from './saved-places-panel.js';
 // layerReport aliased: app-state.js already exports its own layerReport (the printable-vector
 // summary line); this is camera-layer.js's own, for the roadCameras report paragraph only.
-import { camerasInView, layerReport as cameraLayerReport, cardLines as cameraCardLines, ageLine as cameraAgeLine, stillPlan as cameraStillPlan, PICTURE_TIMEOUT_MS, cameraRef, findCamera, viewTouchesCoverage, viewTouchesLayer, cameraStatus,
+import { cameraList, cameraListStatus, cameraRowText, listPlace, listLoadState, reachBox, CAMERA_PURPOSES, NEAR_RADIUS_KM,
+  camerasInView, layerReport as cameraLayerReport, cardLines as cameraCardLines, ageLine as cameraAgeLine, stillPlan as cameraStillPlan, PICTURE_TIMEOUT_MS, cameraRef, findCamera, viewTouchesCoverage, viewTouchesLayer, cameraStatus,
   MIN_PIN_ZOOM, padView, filesInView, failureProvider, pinsToDraw, unloadedFilesNear, nearestCoverage, providerRow as cameraProviderRow, aboutLinkText as cameraAboutLinkText } from './camera-layer.js';
 import { expandSnapshot } from './camera-snapshot.js';
 import { distanceToPathsMeters } from './near-unpaved.js';
@@ -578,6 +579,7 @@ function attach(hostedMap) {
     state.selectedNameId = hit ? hit.id : null;
     state.selectedCardOpen = !!hit;
     if (map && overlay) renderSources();
+    scheduleCameraList();
   };
   // Same B1 handoff as start()'s applyPreset(viewToPresetShape(...)) call below
   // for base/context/overlays (view-state.js's window.qcInitialView, resolved by
@@ -692,6 +694,7 @@ function setArea(area, { title, fit = false, recordUndo = true, announce } = {})
   resetSources(); replan();
   renderQuadUI();
   renderAreaStrip(announce);
+  scheduleCameraList();
 }
 
 function setBbox(b, opts) { setArea(areaFromBox(b), opts); }
@@ -818,6 +821,7 @@ function clearArea() {
   store.clear();
   stripAreaHandoffParams();
   renderAreaStrip();
+  scheduleCameraList();
 }
 
 /** Undo: restores the area Clear (or the last setBbox) just replaced. One step,
@@ -1172,7 +1176,7 @@ let activeListSignature = null;
 function renderActiveLayers() {
   const host = $('qcm-active-layers'); if (!host) return;
   const list = host.querySelector('ul');
-  const rows = [...document.querySelectorAll('#qcm-layers .qcm-layer-group input')].map((input) => ({
+  const rows = [...document.querySelectorAll('#qcm-layers .qcm-layer-group .qcm-layer-row input')].map((input) => ({
     id: input.value, label: input.dataset.layerLabel || input.value, checked: input.checked, input,
     group: input.closest('.qcm-layer-group').dataset.taskGroup,
     base: input.name === 'qcm-base' || input.id === 'qcm-context-none',
@@ -1653,6 +1657,7 @@ function renderLayerControls() {
       box.append(hint);
     }
     box.append(...group.ids.map(rowFor));
+    if (group.id === 'cameras') box.append(buildCameraList());
     return box;
   }));
   renderCameraEntry();
@@ -1762,6 +1767,167 @@ function renderCameraEntry() {
       el.textContent = status.text; el.setAttribute('data-status', status.key);
     }
   }
+  scheduleCameraList();
+}
+
+// QQA-16a: the Cameras list under the Cameras group -- one list over the five camera layers that are
+// on, built from the camera records LOADED for the scope (not from the drawn pins, so the map's
+// MAX_PINS cap never trims it). Two scopes: "In this view", and "Near selected place" (the finder's
+// pick, else the drawn area's centre, within NEAR_RADIUS_KM). Purpose switches filter by layer
+// (camera-layer.js PURPOSE_OF_LAYER). A row opens the same card its pin does, and only then is a
+// picture asked for. Redraws are debounced and write only what changed, so the live status line
+// speaks when the answer does and not on every pan.
+const CAMERA_LIST_DELAY_MS = 150;
+let cameraListHost = null, cameraListTimer = 0, cameraListRowsKey = '', cameraListScope = 'view', cameraNearPending = false;
+const cameraListPurposes = new Set(CAMERA_PURPOSES.map((p) => p.id));
+
+function buildCameraList() {
+  const host = document.createElement('section');
+  host.id = 'qcm-camera-list'; host.className = 'qcm-camera-list';
+  const title = document.createElement('h4');
+  title.id = 'qcm-camera-list-title'; title.className = 'qcm-camera-list-title';
+  const options = (className, legendText) => {
+    const set = document.createElement('fieldset');
+    set.className = className;
+    const legend = document.createElement('legend');
+    legend.textContent = legendText;
+    set.append(legend);
+    return set;
+  };
+  const scopes = options('qcm-camera-list-scopes', 'List cameras');
+  for (const [value, text] of [['view', 'In this view'], ['near', 'Near selected place']]) {
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+    input.type = 'radio'; input.name = 'qcm-camera-scope'; input.id = `qcm-camera-scope-${value}`; input.value = value;
+    input.checked = cameraListScope === value;
+    input.addEventListener('change', () => { cameraListScope = value; scheduleCameraList(); });
+    label.append(input, ` ${text}`);
+    scopes.append(label);
+  }
+  const radius = document.createElement('p');
+  radius.className = 'qcm-hint';
+  radius.textContent = `Near selected place: cameras within ${NEAR_RADIUS_KM} km of the place chosen with Search places, else of the centre of the drawn area.`;
+  const purposes = options('qcm-camera-list-purposes', 'Purpose');
+  for (const purpose of CAMERA_PURPOSES) {
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+    input.type = 'checkbox'; input.checked = cameraListPurposes.has(purpose.id); input.setAttribute('data-camera-purpose', purpose.id);
+    input.addEventListener('change', () => {
+      if (input.checked) cameraListPurposes.add(purpose.id); else cameraListPurposes.delete(purpose.id);
+      scheduleCameraList();
+    });
+    const count = document.createElement('span');
+    count.className = 'qcm-camera-purpose-count'; count.setAttribute('data-camera-purpose-count', purpose.id);
+    label.append(input, ` ${purpose.label} `, count);
+    purposes.append(label);
+  }
+  const status = document.createElement('p');
+  status.id = 'qcm-camera-list-status'; status.className = 'qcm-camera-list-status';
+  status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+  const rows = document.createElement('ul');
+  rows.id = 'qcm-camera-list-rows'; rows.className = 'qcm-camera-list-rows'; rows.setAttribute('aria-labelledby', 'qcm-camera-list-title');
+  const notes = document.createElement('p');
+  notes.id = 'qcm-camera-list-notes'; notes.className = 'qcm-camera-list-notes'; notes.hidden = true;
+  host.append(title, scopes, radius, purposes, status, rows, notes);
+  cameraListHost = host; cameraListRowsKey = '';
+  return host;
+}
+
+/** The place "Near selected place" measures from: the latest pick (camera-layer.js listPlace). */
+function cameraListPlace() {
+  return listPlace({ search: state.selectedSearchFeature, nearby: state.nearbyFrom, bbox: state.bbox });
+}
+
+function scheduleCameraList() {
+  if (!cameraListHost || cameraListTimer) return;
+  cameraListTimer = setTimeout(renderCameraList, CAMERA_LIST_DELAY_MS);
+}
+
+/** The camera files within NEAR_RADIUS_KM of a place, for the layers that are on, read once. A
+ *  reader's choice of the near scope and a place is the request, so this reads at any zoom; a
+ *  file that failed is not asked again until its layer is cycled. */
+async function loadCamerasNear(onIds, place) {
+  if (cameraNearPending) return;
+  if (!cameraIndex && onIds.every((id) => cameraFailed[id])) return;
+  const box = reachBox(place.lat, place.lon, NEAR_RADIUS_KM);
+  const missing = () => onIds.flatMap((id) => filesInView(cameraIndex.files, box, id))
+    .filter((r) => !cameraFiles.has(r.file) && !cameraFileFailed.has(r.file));
+  if (cameraIndex && !missing().length) return;
+  cameraNearPending = true; scheduleCameraList();
+  try {
+    try { await loadCameraIndex(); } catch (err) { for (const id of onIds) cameraFailed[id] = true; return; }
+    const wanted = missing();
+    const results = await Promise.allSettled(wanted.map(loadCameraFile));
+    results.forEach((r, i) => { if (r.status === 'rejected') cameraFileFailed.add(wanted[i].file); });
+  } finally { cameraNearPending = false; scheduleCameraList(); }
+}
+
+/** Opens the card of a listed camera: its pin is drawn (held past the pin cap) and opened, the same
+ *  pin and card the map gives it. The picture is requested by the card's own open, not here. */
+function openCameraFromList(row) {
+  const ref = cameraRef(row.camera);
+  syncCameraPins(row.layer, ref);
+  const pin = cameraPins.get(ref);
+  if (!pin) { say(CAMERA_NO_LOCATION); return; }
+  pin.openPopup();
+}
+
+function renderCameraList() {
+  cameraListTimer = 0;
+  const host = cameraListHost; if (!host || !map) return;
+  const layers = layersFromControls();
+  const onIds = CAMERA_LAYER_IDS.filter((id) => layers[id]);
+  const near = cameraListScope === 'near';
+  const place = near ? cameraListPlace() : null;
+  const view = viewBbox();
+  const box = near ? (place && reachBox(place.lat, place.lon, NEAR_RADIUS_KM)) : view;
+  if (near && place && onIds.length) loadCamerasNear(onIds, place);
+  const reaching = box ? onIds.filter((id) => viewTouchesLayer(box, LAYER_BY_ID[id])) : [];
+  const entries = onIds.flatMap((id) => camerasOf(loadedCameraFiles(id)).map((camera) => ({ camera, layer: id })));
+  const found = cameraList({ entries, scope: cameraListScope, view, place, purposes: [...cameraListPurposes] });
+  const reachRows = reaching.flatMap((id) => filesInView(cameraIndex ? cameraIndex.files : [], near ? box : padView(box), id));
+  const load = listLoadState({
+    near, reaching, rows: reachRows, isLoaded: (file) => cameraFiles.has(file), isFailed: (file) => cameraFileFailed.has(file),
+    indexRead: !!cameraIndex, layerFailed: cameraFailed,
+  });
+  const status = cameraListStatus({
+    scope: cameraListScope, onLayers: onIds.length, belowZoom: map.getZoom() < MIN_PIN_ZOOM, hasPlace: !!place, placeName: place ? place.name : '',
+    touches: reaching.length > 0, unavailable: load.unavailable, failedAreas: load.failedAreas, nothingLoaded: load.nothingLoaded,
+    loading: near ? cameraNearPending && reaching.length > 0 : reaching.some((id) => cameraLoading[id] > 0),
+    inScope: found.inScope, matching: found.matching.length, listed: found.listed.length, noPicture: found.noPicture, unlocated: found.unlocated,
+  });
+  const write = (el, text) => { if (el.textContent !== text) el.textContent = text; };
+  const titleEl = host.querySelector('#qcm-camera-list-title');
+  const shown = found.listed.length > 0 && ['in-scope', 'partial', 'images-unavailable'].includes(status.key);
+  write(titleEl, `${near ? `Cameras near ${place ? place.name : 'a selected place'}` : 'Cameras in this view'}${shown ? ` (${found.matching.length})` : ''}`);
+  for (const purpose of CAMERA_PURPOSES) {
+    write(host.querySelector(`[data-camera-purpose-count="${purpose.id}"]`), onIds.length ? `(${found.counts[purpose.id]})` : '');
+  }
+  const statusEl = host.querySelector('#qcm-camera-list-status');
+  write(statusEl, status.text);
+  if (statusEl.getAttribute('data-status') !== status.key) statusEl.setAttribute('data-status', status.key);
+  const notesEl = host.querySelector('#qcm-camera-list-notes');
+  write(notesEl, status.notes.join(' '));
+  notesEl.hidden = status.notes.length === 0;
+  // The rows are rebuilt only when what they say changes, so a pan never drops a keyboard user's focus.
+  const rows = shown ? found.listed : [];
+  const key = JSON.stringify(rows.map((r) => [cameraRef(r.camera), near ? Math.round(r.km * 10) : 0]));
+  if (key === cameraListRowsKey) return;
+  cameraListRowsKey = key;
+  host.querySelector('#qcm-camera-list-rows').replaceChildren(...rows.map((row) => {
+    const item = document.createElement('li');
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'qcm-camera-list-row';
+    const text = cameraRowText(row, { near });
+    const name = document.createElement('span');
+    name.className = 'qcm-camera-row-name'; name.textContent = text.name;
+    const meta = document.createElement('span');
+    meta.className = 'qcm-camera-row-meta'; meta.textContent = text.meta;
+    button.append(name, ' ', meta);
+    button.addEventListener('click', () => openCameraFromList(row));
+    item.append(button);
+    return item;
+  }));
 }
 
 /** The light-emissions surface, on or off, plus the one status its row can need. It is the
@@ -3068,6 +3234,7 @@ function renderOverlay() {
       state.selectedSearchFeature = null;
       state.selectedCardOpen = true;
       state.nearbyFrom = { id, name: m.title, lonLat: m.site.lonLat };
+      scheduleCameraList();
     };
     pin.on('click', () => { chooseSite(); renderSources(); });
     // A BLM record carries the agency's own directions, description, fee text, vintage
@@ -3311,7 +3478,7 @@ function renderNames(on) {
     // QUX-11b (§2.6): a GNIS pin click is one of the four places `nearbyFrom`
     // is set from, so "Nearest to <name>" (the places list's sort) can measure
     // from a name as well as a recreation site.
-    const chooseName = () => { state.selectedNameId = p.id; state.selectedSearchFeature = null; state.selectedCardOpen = true; state.nearbyFrom = { id: p.id, name: p.name, lonLat: [latlng.lng, latlng.lat] }; };
+    const chooseName = () => { state.selectedNameId = p.id; state.selectedSearchFeature = null; state.selectedCardOpen = true; state.nearbyFrom = { id: p.id, name: p.name, lonLat: [latlng.lng, latlng.lat] }; scheduleCameraList(); };
     pin.on('click', () => { chooseName(); renderSources(); });
     // QUX-09b: `open: p.selected` -- this loop builds a card for every PLACED
     // marker, most of which the reader never opens, so the ask:false mismatch
@@ -3350,7 +3517,7 @@ function renderNames(on) {
       const pin = L.marker(selLatlng, { icon, keyboard: true, alt: feat.name, title: feat.name }).addTo(overlay);
       nameMarkers.push(pin);
       namePins.set(feat.id, pin);
-      const chooseFeat = () => { state.selectedNameId = feat.id; state.selectedSearchFeature = null; state.selectedCardOpen = true; state.nearbyFrom = { id: feat.id, name: feat.name, lonLat: [feat.anchor[1], feat.anchor[0]] }; };
+      const chooseFeat = () => { state.selectedNameId = feat.id; state.selectedSearchFeature = null; state.selectedCardOpen = true; state.nearbyFrom = { id: feat.id, name: feat.name, lonLat: [feat.anchor[1], feat.anchor[0]] }; scheduleCameraList(); };
       pin.on('click', () => { chooseFeat(); renderSources(); });
       const card = nameCard(feat, iconFor(feat.kind).label, { open: true });
       attachElevation(pin, card, feat.anchor, feat.id);
@@ -3904,6 +4071,7 @@ function selectPlace(row) {
   state.selectedSearchFeature = null;
   state.selectedCardOpen = true;
   if (name && Array.isArray(lonLat)) state.nearbyFrom = { id, name, lonLat };
+  scheduleCameraList();
   renderSources();
   // QQA-08: a road or trail has no pin; its card opens on the map beside the line.
   if (source === 'route' || source === 'road-name') {
