@@ -156,3 +156,24 @@ test('the load state of a scope comes from the files that scope reaches, not fro
   assert.equal(view({ isFailed: set('a.json') }).nothingLoaded, true, 'view: none loaded yet and the flag not set reads nothing-loaded as before');
   assert.equal(view({ reaching: [] }).nothingLoaded, false);
 });
+
+test('QQA-16c: the near scope never tells a reader to zoom in; the view scope still may', () => {
+  const s = (o) => cameraListStatus({ scope: 'view', onLayers: 1, belowZoom: false, hasPlace: true, placeName: 'Salinas', touches: true,
+    loading: false, unavailable: false, failedAreas: 0, nothingLoaded: false, inScope: 80, matching: 80, listed: LIST_LIMIT, noPicture: 0, unlocated: 0, ...o });
+  const near = s({ scope: 'near' }).notes.join(' ');
+  assert.match(near, new RegExp(`Listing the nearest ${LIST_LIMIT} of 80`));
+  assert.match(near, /narrow by purpose to see the rest/);
+  assert.doesNotMatch(near, /zoom/i, 'zoom is not the remedy for a near list: its radius is fixed');
+  assert.match(s({}).notes.join(' '), /zoom in or narrow by purpose to see the rest/);
+});
+
+test('QQA-16c: the list speaks its count only when it settles, and never while a search is pending', () => {
+  const settled = cameraListStatus({ scope: 'view', onLayers: 1, inScope: 12, matching: 12, listed: 12 });
+  assert.equal(cameraLayer.listAnnouncement(settled), '12 cameras in this view.');
+  assert.equal(cameraLayer.listAnnouncement(settled, { searchPending: true }), null, 'a pending search is the only voice');
+  const loading = cameraListStatus({ scope: 'view', onLayers: 1, loading: true });
+  assert.equal(loading.key, 'loading');
+  assert.equal(cameraLayer.listAnnouncement(loading), null, 'a passing Loading line is not read out between two equal counts');
+  const off = cameraListStatus({ onLayers: 0 });
+  assert.equal(cameraLayer.listAnnouncement(off), off.text, 'a state that is not a count still speaks');
+});

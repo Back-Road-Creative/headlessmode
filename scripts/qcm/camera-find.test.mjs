@@ -7,6 +7,7 @@ import {
   CAMERA_PURPOSES, MIN_PIN_ZOOM, SEARCH_RADIUS_KM, SEARCH_MAX_FILES, SEARCH_HINT, reachBox,
   searchBox, searchFiles, searchStatus, filesHolding, canonicalCameraRef, savedCameraRows, savedRowText, savedListStatus, cameraListStatus,
 } from '../../themes/headlessmode/static/js/quiet-corners-maps/camera-layer.js';
+import { cameraCarriers, findLeak } from './helpers/leak-check.mjs';
 
 const VIEW = { minLon: -122, minLat: 36, maxLon: -121, maxLat: 37 };
 const file = (name, layer, bbox) => ({ file: name, layer, provider: 'caltrans-cwwp2', bbox });
@@ -84,6 +85,10 @@ test('the search status states the radius, the centre and what happened', () => 
   assert.match(capped, /nearest 20 of 31 files/);
   assert.match(capped, /search closer in/i);
   assert.match(searchStatus({ ...at, indexFailed: true }), /camera index did not load/i);
+  // QQA-16c: any other failure after the index read is said too, with the retry, never left as Searching.
+  const broke = searchStatus({ ...at, searchFailed: true });
+  assert.match(broke, /^Searched within 100 km of 36\.50, -121\.50: the search did not finish\. Press the button to try again\.$/);
+  assert.doesNotMatch(broke, /Searching/);
   assert.equal(searchStatus({ ...at, idle: true }), '');
 });
 
@@ -173,5 +178,49 @@ test('the Saved status: saving unavailable, nothing saved, and a count with what
   assert.match(s({ listed: 1, gone: 2 }).notes.join(' '), /2 are no longer in the camera list/);
   assert.match(s({ listed: 2, gone: 1 }).notes.join(' '), /^1 is no longer in the camera list\./);
   assert.match(s({ listed: 2, failed: 1 }).notes.join(' '), /1 could not be checked because the camera list did not load/);
+  assert.match(s({ listed: 2, failed: 1 }).notes.join(' '), /Press Saved again to try again\.$/, 'a failed check says how to retry');
   assert.equal(s({ listed: 2, pending: 1 }).key, 'loading');
+});
+
+// QQA-16c: the privacy guard's detector, proven against each way a camera could leak.
+const SAVED = { ref: 'camera:caltrans-cwwp2:d05:17', name: 'US-101 : Spot 3' };
+const leaks = (url, body = '') => findLeak([{ url, body }], SAVED);
+
+test('the privacy detector catches the ref in every form a request could carry it', () => {
+  for (const [what, url, body] of [
+    ['the ref in a query', 'https://x.test/a?c=camera:caltrans-cwwp2:d05:17'],
+    ['the encoded ref in a query', `https://x.test/a?c=${encodeURIComponent(SAVED.ref)}`],
+    ['the ref in a path', '/a/camera:caltrans-cwwp2:d05:17/b'],
+    ['the older ref (no district)', 'https://x.test/a?c=camera:caltrans-cwwp2:17'],
+    ['the encoded older ref', `https://x.test/a?c=${encodeURIComponent('camera:caltrans-cwwp2:17')}`],
+    ['the d05 tail in a path', '/a/d05:17'],
+    ['the encoded d05 tail in a query', '/a?x=d05%3A17'],
+    ['the name with %20', `/a?n=${encodeURIComponent(SAVED.name)}`],
+    ['the name with +', '/a?n=US-101+%3A+Spot+3'],
+    ['the bare id as a query value', '/a?id=17'],
+    ['the ref in a body', '/a', 'camera:caltrans-cwwp2:d05:17'],
+    ['the encoded ref in a body', '/a', `c=${encodeURIComponent(SAVED.ref)}`],
+    ['the name in a body', '/a', 'US-101 : Spot 3'],
+    ['the bare id in a JSON body', '/a', '{"id":17}'],
+  ]) assert.ok(leaks(url, body), `${what} should be a leak`);
+  assert.equal(leaks('/a?c=camera:caltrans-cwwp2:d05:17').carrier, 'camera:caltrans-cwwp2:d05:17');
+});
+
+test('the privacy detector does not flag requests that only look similar', () => {
+  for (const [what, url, body] of [
+    ['the camera file', '/data/quiet-corners-maps/cameras/caltrans-cwwp2/ca-d05.json'],
+    ['the index', '/data/quiet-corners-maps/cameras/index.json'],
+    ['a tile with the id as a coordinate', 'https://tile.test/9/17/50.png'],
+    ['an image named for the id', 'https://cwwp2.dot.ca.gov/data/d5/cctv/image/c17/c17.jpg'],
+    ['another camera in the same district', '/a?c=camera:caltrans-cwwp2:d05:170'],
+    ['an id that only contains the digits', '/a?id=117'],
+    ['an empty body', '/a', ''],
+    ['a body with the digits inside a word', '/a', 'x117y'],
+  ]) assert.equal(leaks(url, body), null, `${what} should be clean`);
+});
+
+test('the privacy detector names every carrier form and drops duplicates', () => {
+  const carriers = cameraCarriers(SAVED);
+  for (const c of ['camera:caltrans-cwwp2:d05:17', 'camera:caltrans-cwwp2:17', 'd05:17', 'US-101 : Spot 3', 'US-101%20%3A%20Spot%203', 'US-101+%3A+Spot+3']) assert.ok(carriers.includes(c), c);
+  assert.equal(new Set(carriers).size, carriers.length);
 });

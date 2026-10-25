@@ -633,6 +633,14 @@ function clusterStatus({ counts, inScope, failedAreas, unlocated }) {
   return { key: 'cluster', text: `${plural(inScope, 'camera')} loaded in this view at this zoom: ${parts.join(', ')}. Zoom in to list cameras (they are listed from zoom ${MIN_PIN_ZOOM}).`, notes };
 }
 
+/** What the list's polite announcer should say for `status`, or null to leave it as it was. QQA-16c: the
+ *  count is spoken when the answer settles, never for a passing Loading line (which would read the same
+ *  count again once it returns) and never while a search is pending (the search's own status is the one voice). */
+export function listAnnouncement(status, { searchPending = false } = {}) {
+  if (searchPending || status.key === 'loading') return null;
+  return status.text;
+}
+
 /** The one state the list is in, as { key, text, notes }. Keys read apart: layers-off, no-place, zoom-in,
  *  cluster (broad zoom, loaded cameras counted per purpose), loading, unavailable, outside-coverage, nothing-loaded, none, filtered-out, partial, images-unavailable,
  *  in-scope. `notes` are the extra sentences a listed result owes the reader (a failed area, the list's
@@ -667,7 +675,8 @@ export function cameraListStatus({ scope = 'view', onLayers = 0, belowZoom = fal
   if (matching === 0) {
     return state('filtered-out', `${inScope} ${camerasWord(inScope)} ${phrase} ${inScope === 1 ? 'is' : 'are'} hidden by the purpose filter. Turn a purpose back on to list ${inScope === 1 ? 'it' : 'them'}.`, notes);
   }
-  if (listed < matching) notes.push(`Listing the nearest ${listed} of ${matching}; zoom in or narrow by purpose to see the rest.`);
+  // QQA-16c: the near scope's radius is fixed, so zooming is no remedy there.
+  if (listed < matching) notes.push(`Listing the nearest ${listed} of ${matching}; ${near ? 'narrow' : 'zoom in or narrow'} by purpose to see the rest.`);
   if (inScope > MAX_PINS) notes.push(`The map draws at most ${MAX_PINS} pins at a time; this list counts every loaded camera ${phrase}, so it can hold more than the map shows.`);
   const allBare = noPicture === matching;
   if (noPicture > 0 && !allBare) notes.push(`${noPicture} of the ${matching} have no picture here and open the owner's page or say why.`);
@@ -713,11 +722,12 @@ export function searchFiles({ files, box, layers = [], centre, max = SEARCH_MAX_
 }
 
 /** The search's one status sentence, always naming its radius and centre. `pending` while it runs. */
-export function searchStatus({ radiusKm = SEARCH_RADIUS_KM, centre, pending = false, indexFailed = false, idle = false, total = 0, shown = 0, read = 0, failed = 0 } = {}) {
+export function searchStatus({ radiusKm = SEARCH_RADIUS_KM, centre, pending = false, indexFailed = false, searchFailed = false, idle = false, total = 0, shown = 0, read = 0, failed = 0 } = {}) {
   if (idle) return '';
   const where = `within ${radiusKm} km of ${centre.lat.toFixed(2)}, ${centre.lon.toFixed(2)}`;
   if (pending) return `Searching ${where}.`;
   if (indexFailed) return `Searched ${where}: the camera index did not load. Press the button to try again.`;
+  if (searchFailed) return `Searched ${where}: the search did not finish. Press the button to try again.`;
   if (total === 0) return `Searched ${where}: no camera list covers that area.`;
   let text = `Searched ${where}: ${read} of ${shown} camera files read.`;
   if (failed > 0) text += ` ${failed} did not load.`;
@@ -769,7 +779,7 @@ export function savedListStatus({ readState = 'ok', readMessage = '', total = 0,
   if (pending > 0) return state('loading', `Checking ${plural(total, 'saved camera')} against the camera list.`);
   const notes = [];
   if (gone > 0) notes.push(`${gone} ${gone === 1 ? 'is' : 'are'} no longer in the camera list. ${gone === 1 ? 'It stays' : 'They stay'} saved until you remove ${gone === 1 ? 'it' : 'them'}.`);
-  if (failed > 0) notes.push(`${failed} could not be checked because the camera list did not load.`);
+  if (failed > 0) notes.push(`${failed} could not be checked because the camera list did not load. Press Saved again to try again.`);
   return state('saved', `${plural(total, 'saved camera')}, stored only in this browser.`, notes);
 }
 
