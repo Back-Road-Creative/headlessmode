@@ -756,3 +756,110 @@ test('VolcView and GLERL cards: a plain <img> of the owner\'s picture, the opera
     assert.match(layerReport({ provider, inView: [c, c] }), new RegExp(`^2 ${noun}s in this view\\.`));
   }
 });
+
+// --- QQA-10f: an expired row, and a picture age read from capturedAt -------------------------
+// Added 2026-10-09. These reach the module through the namespace so a missing export fails one
+// test at a time instead of the whole file at link time.
+const NOW_10F = new Date('2026-10-09T15:00:00.000Z');
+const ago = (ms) => new Date(NOW_10F.getTime() - ms).toISOString();
+const MIN = 60 * 1000, HOUR = 60 * MIN;
+const NO_STILL = (camera) => ({ ...camera, media: { ...camera.media, still: null } });
+
+test('capturedAgeText: under 30 minutes names the age and the source, over it says the camera may be stuck', () => {
+  const fresh = cameraLayer.capturedAgeText(ago(3 * MIN), NOW_10F, 'nps-webcams');
+  assert.equal(fresh, "Picture taken 3 min ago, per the park's listing.");
+  assert.equal(cameraLayer.capturedAgeText(ago(29 * MIN), NOW_10F, 'nps-webcams'), "Picture taken 29 min ago, per the park's listing.");
+  assert.equal(cameraLayer.capturedAgeText(ago(31 * MIN), NOW_10F, 'nps-webcams'),
+    "Picture taken 31 min ago, per the park's listing. The camera may be stuck.");
+  assert.equal(cameraLayer.capturedAgeText(ago(2 * HOUR), NOW_10F, 'nps-webcams'),
+    "Picture taken 2 h ago, per the park's listing. The camera may be stuck.");
+});
+
+test('capturedAgeText: the same 30 minute line ageText uses decides "stuck" (one rule, two sources)', () => {
+  const edge = (text) => /may be stuck/.test(text);
+  for (const minutes of [1, 29, 30, 31, 90, 600]) {
+    const fromHeader = ageText(new Date(NOW_10F.getTime() - minutes * MIN).toUTCString(), NOW_10F, 'nps-webcams');
+    const fromCapture = cameraLayer.capturedAgeText(ago(minutes * MIN), NOW_10F, 'nps-webcams');
+    assert.equal(edge(fromCapture), edge(fromHeader), `${minutes} min`);
+  }
+});
+
+test('capturedAgeText: a missing, unreadable or future time says nothing, and no line says "live"', () => {
+  for (const bad of [null, undefined, '', 'yesterday', 12345, {}]) {
+    assert.equal(cameraLayer.capturedAgeText(bad, NOW_10F, 'nps-webcams'), null, String(bad));
+  }
+  assert.equal(cameraLayer.capturedAgeText(ago(-2 * HOUR), NOW_10F, 'nps-webcams'), null, 'a time two hours ahead is bad data, not a fresh picture');
+  assert.match(cameraLayer.capturedAgeText(ago(-2 * MIN), NOW_10F, 'nps-webcams'), /^Picture taken 0 min ago/, 'a couple of minutes of clock skew reads as just now');
+  for (const minutes of [1, 90]) assert.doesNotMatch(cameraLayer.capturedAgeText(ago(minutes * MIN), NOW_10F, 'caltrans-cwwp2'), /\blive\b/i);
+  assert.match(cameraLayer.capturedAgeText(ago(5 * MIN), NOW_10F, 'caltrans-cwwp2'), /per Caltrans's listing/);
+});
+
+test('ageLine: an img-plan card reads its age from capturedAt, and says nothing when there is none', () => {
+  const stuck = { ...PURCHASE_KNOB_NPS, capturedAt: ago(2 * HOUR) };
+  assert.equal(stillPlan(stuck), 'img');
+  assert.equal(cameraLayer.ageLine(stuck, { now: NOW_10F }), "Picture taken 2 h ago, per the park's listing. The camera may be stuck.");
+  assert.equal(cameraLayer.ageLine({ ...PURCHASE_KNOB_NPS, capturedAt: null }, { now: NOW_10F }), '', 'no capture time: no age line, as before');
+  assert.equal(cameraLayer.ageLine({ ...PURCHASE_KNOB_NPS, capturedAt: 'garbage' }, { now: NOW_10F }), '');
+});
+
+test('ageLine: on a fetch plan the picture file\'s Last-Modified wins, capturedAt fills in when the header is absent', () => {
+  const withCapture = { ...PILOT, capturedAt: ago(2 * HOUR) };
+  const header = new Date(NOW_10F.getTime() - 3 * MIN).toUTCString();
+  assert.equal(cameraLayer.ageLine(withCapture, { lastModified: header, now: NOW_10F }), ageText(header, NOW_10F, PILOT.provider),
+    'a readable header is the measured age of the file just fetched');
+  assert.equal(cameraLayer.ageLine(withCapture, { lastModified: null, now: NOW_10F }),
+    "Picture taken 2 h ago, per Caltrans's listing. The camera may be stuck.");
+  assert.equal(cameraLayer.ageLine(withCapture, { lastModified: 'not a date', now: NOW_10F }),
+    "Picture taken 2 h ago, per Caltrans's listing. The camera may be stuck.", 'an unreadable header is no header');
+  assert.equal(cameraLayer.ageLine(PILOT, { lastModified: null, now: NOW_10F }), ageText(null, NOW_10F, PILOT.provider),
+    'neither source: the existing "did not say" line, unchanged');
+});
+
+test('pictureExpired: only a camera that lost its still to a validUntil that has passed', () => {
+  const expired = NO_STILL({ ...PURCHASE_KNOB_NPS, validUntil: ago(HOUR) });
+  assert.equal(cameraLayer.pictureExpired(expired, NOW_10F), true);
+  assert.equal(cameraLayer.pictureExpired(NO_STILL({ ...PURCHASE_KNOB_NPS, validUntil: ago(-HOUR) }), NOW_10F), false, 'expiry still ahead');
+  assert.equal(cameraLayer.pictureExpired(NO_STILL({ ...PURCHASE_KNOB_NPS, validUntil: ago(0) }), NOW_10F), false, 'valid up to and including the instant');
+  assert.equal(cameraLayer.pictureExpired(NO_STILL({ ...PURCHASE_KNOB_NPS, validUntil: null }), NOW_10F), false, 'no expiry: just no picture');
+  assert.equal(cameraLayer.pictureExpired({ ...PURCHASE_KNOB_NPS, validUntil: ago(HOUR) }, NOW_10F), false, 'a camera that still has its picture is not expired');
+  assert.equal(cameraLayer.pictureExpired(NO_STILL({ ...PURCHASE_KNOB_NPS, validUntil: 'garbage' }), NOW_10F), true, 'an unreadable expiry counts as past, as expandSnapshot does');
+});
+
+test('expired row end to end: expandSnapshot drops the still, the plan is link, the card says out of date and not "no picture published"', () => {
+  const file = {
+    schema: 2, provider: 'nps-webcams', layer: 'parkCameras', region: 'nps-xx', regionName: 'Test', generatedAt: '2026-10-09T12:00:00.000Z',
+    source: null, operator: 'National Park Service', officialUrl: 'https://www.nps.gov/', attribution: 'National Park Service',
+    rights: 'unverified', category: 'scenic',
+    fields: ['providerId', 'name', 'lat', 'lon', 'still', 'health', 'subject', 'officialUrl', 'validUntil'],
+    rows: [
+      ['a', 'Old One', 35.1, -83.1, 'https://www.nps.gov/a.jpg', 'active', null, null, ago(HOUR)],
+      ['b', 'Fresh One', 35.2, -83.2, 'https://www.nps.gov/b.jpg', 'active', null, null, ago(-HOUR)],
+      ['c', 'No Still', 35.3, -83.3, null, 'active', null, null, null],
+    ],
+  };
+  const [old, fresh, none] = expandSnapshot(file, { now: NOW_10F });
+  assert.equal(old.media.still, null);
+  assert.equal(stillPlan(old), 'link', 'no request is ever made for it');
+  const oldLines = cardLines(old, { generatedAt: file.generatedAt, now: NOW_10F });
+  assert.ok(oldLines.some((l) => /out of date/i.test(l)), oldLines.join(' | '));
+  assert.ok(!oldLines.some((l) => /No picture is published/i.test(l)), oldLines.join(' | '));
+  assert.equal(stillPlan(fresh), 'img');
+  assert.ok(!cardLines(fresh, { generatedAt: file.generatedAt, now: NOW_10F }).some((l) => /out of date/i.test(l)));
+  const noneLines = cardLines(none, { generatedAt: file.generatedAt, now: NOW_10F });
+  assert.ok(noneLines.includes('No picture is published for this camera.'), 'a row that never had a picture reads as before');
+  assert.ok(!noneLines.some((l) => /out of date/i.test(l)));
+});
+
+test('cardLines: an out-of-service camera keeps the out-of-service line even when its expiry has passed', () => {
+  const lines = cardLines(NO_STILL({ ...OUT_OF_SERVICE, validUntil: ago(HOUR) }), { generatedAt: FETCHED_AT, now: NOW_10F });
+  assert.ok(lines.includes('Caltrans lists this camera as out of service.'), lines.join(' | '));
+  assert.ok(!lines.some((l) => /out of date/i.test(l)), lines.join(' | '));
+});
+
+test('cardLines: an NPS card that carries a capture time no longer says the park publishes none', () => {
+  const plain = cardLines(PURCHASE_KNOB_NPS, { generatedAt: FETCHED_AT_NPS });
+  assert.ok(plain.some((l) => /does not publish when this picture was taken/.test(l)), 'unchanged without a capture time');
+  const captured = cardLines({ ...PURCHASE_KNOB_NPS, capturedAt: ago(5 * MIN) }, { generatedAt: FETCHED_AT_NPS });
+  assert.ok(!captured.some((l) => /does not publish/.test(l)), captured.join(' | '));
+  assert.ok(captured.includes('Camera list checked 27 Sep 2026.'), captured.join(' | '));
+});
