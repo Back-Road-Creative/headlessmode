@@ -392,3 +392,127 @@ def test_resolve_step_still_fails_on_other_api_errors(tmp_path: Path) -> None:
     )
     assert proc.returncode != 0
     assert "skip=true" not in output.read_text()
+
+
+# Tagged source packages are distinct from GitHub Release objects. The resolver
+# accepts captured GitHub tag-list pages so these contracts never use the network.
+TAG_RESOLVER = REPO_ROOT / "bin" / "product-tag-resolve.py"
+
+
+def _tag_payload(tmp_path, tags, requested=""):
+    fixture = tmp_path / "tags.json"
+    _write_json(fixture, tags)
+    return subprocess.run(
+        ["python3", str(TAG_RESOLVER), "Back-Road-Creative/waypost",
+         "--tags-json", str(fixture), "--tag", requested],
+        capture_output=True, text=True, timeout=30,
+    )
+
+
+def test_tag_resolver_chooses_stable_semver_across_pages(tmp_path):
+    result = _tag_payload(tmp_path, [
+        [{"name": "v0.9.0", "commit": {"sha": "a" * 40}},
+         {"name": "v1.0.0-rc.1", "commit": {"sha": "b" * 40}}],
+        [{"name": "v0.10.0", "commit": {"sha": "c" * 40}},
+         {"name": "release/2026", "commit": {"sha": "d" * 40}}],
+    ])
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["tag_name"] == "v0.10.0"
+    assert payload["source_commit"] == "c" * 40
+    assert payload["release_source"] == "github-tag"
+    assert payload["published_at"] is None  # commit time is not a release date
+    assert payload["html_url"] == "https://github.com/Back-Road-Creative/waypost/tree/v0.10.0"
+    assert payload["assets"] == []
+
+
+@pytest.mark.parametrize("tags,requested", [
+    ([], ""),
+    ([{"name": "v1.0.0-rc.1", "commit": {"sha": "a" * 40}}], ""),
+    ([{"name": "v1.0.0", "commit": {"sha": "a" * 40}}], "v2.0.0"),
+    ([{"name": "v1.0.0", "commit": {"sha": "short"}}], ""),
+])
+def test_tag_resolver_refuses_missing_or_unverified_tag(tmp_path, tags, requested):
+    result = _tag_payload(tmp_path, [tags], requested)
+    assert result.returncode != 0
+    assert not result.stdout
+
+
+def test_tag_sync_preserves_demo_provenance_and_has_no_release_date(tmp_path, releases_dir):
+    data = dict(BAND_COACH_RELEASES, product="waypost", release_source="github-tag",
+                source_repo="Back-Road-Creative/waypost",
+                demo={"source_kind": "site-commit", "source": "abc123"})
+    _write_json(releases_dir / "waypost.json", data)
+    payload = tmp_path / "release.json"
+    _write_json(payload, {
+        "tag_name": "v0.2.1", "release_source": "github-tag",
+        "source_commit": "a" * 40, "published_at": None,
+        "html_url": "https://github.com/Back-Road-Creative/waypost/tree/v0.2.1",
+        "assets": [],
+    })
+    done = _run("waypost", "v0.2.1", "--release-json", str(payload),
+                "--releases-dir", str(releases_dir))
+    assert done.returncode == 0, done.stderr
+    after = json.loads((releases_dir / "waypost.json").read_text())
+    assert after["source_commit"] == "a" * 40
+    assert after["released_at"] is None
+    assert after["demo"] == data["demo"]
+    assert after["assets"] == {}
+
+
+def test_product_sync_includes_both_tagged_products():
+    workflow = yaml.safe_load(PRODUCT_SYNC_YML.read_text())
+    rows = {row["slug"]: row for row in workflow["jobs"]["sync"]["strategy"]["matrix"]["include"]}
+    for slug in ("waypost", "framegrade"):
+        assert rows[slug]["source_repo"] == f"Back-Road-Creative/{slug}"
+        assert rows[slug]["asset_pattern"] == ""
+    resolve = _resolve_step_script()
+    assert "product-tag-resolve.py" in resolve
+    assert "source_commit" in resolve  # a moved tag must not silently pass as current
+
+
+@pytest.mark.parametrize("stored_commit,expected_skip", [("a" * 40, "true"), ("b" * 40, "false")])
+def test_workflow_resolves_tag_and_detects_a_moved_tag(tmp_path, stored_commit, expected_skip):
+    fixture = tmp_path / "tags.json"
+    _write_json(fixture, [[{"name": "v0.2.1", "commit": {"sha": "a" * 40}}]])
+    work = tmp_path / "work"
+    (work / "data" / "releases").mkdir(parents=True)
+    (work / "bin").mkdir()
+    shutil.copy(TAG_RESOLVER, work / "bin" / TAG_RESOLVER.name)
+    # The helper renders the slug as driftless; source kind selects the API.
+    _write_json(work / "data" / "releases" / "driftless.json", {
+        "version": "0.2.1", "release_source": "github-tag", "source_commit": stored_commit,
+    })
+    output = tmp_path / "github_output"
+    output.touch()
+    script = 'python3() { command python3 "$@" --tags-json "$TAGS_FIXTURE"; }\n' + _resolve_step_script()
+    result = subprocess.run(
+        ["bash", "-c", script], cwd=work,
+        env={"PATH": "/usr/bin:/bin", "GITHUB_OUTPUT": str(output), "TAGS_FIXTURE": str(fixture),
+             "REPO": "Back-Road-Creative/waypost"}, capture_output=True, text=True, timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    outputs = dict(line.split("=", 1) for line in output.read_text().splitlines() if "=" in line)
+    assert outputs["tag"] == "v0.2.1"
+    assert outputs["skip"] == expected_skip
+
+
+@pytest.mark.parametrize("change", [
+    {"source_commit": "bad"}, {"published_at": "2026-10-25T00:00:00Z"},
+    {"html_url": "https://github.com/unrelated/repo/tree/v0.2.1"},
+    {"assets": [{"name": "installer.exe", "browser_download_url": "https://example.invalid"}]},
+])
+def test_tag_sync_refuses_unsubstantiated_claims_without_mutation(tmp_path, releases_dir, change):
+    path = releases_dir / "waypost.json"
+    _write_json(path, dict(BAND_COACH_RELEASES, product="waypost", release_source="github-tag",
+                           source_repo="Back-Road-Creative/waypost"))
+    before = path.read_bytes()
+    payload = tmp_path / "release.json"
+    _write_json(payload, {
+        "tag_name": "v0.2.1", "release_source": "github-tag", "source_commit": "a" * 40,
+        "published_at": None, "html_url": "https://github.com/Back-Road-Creative/waypost/tree/v0.2.1",
+        "assets": [], **change,
+    })
+    result = _run("waypost", "v0.2.1", "--release-json", str(payload), "--releases-dir", str(releases_dir))
+    assert result.returncode != 0
+    assert path.read_bytes() == before

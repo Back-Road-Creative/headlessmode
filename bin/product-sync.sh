@@ -99,6 +99,7 @@ python3 - <<'PY'
 import hashlib
 import json
 import os
+import re
 import sys
 
 slug = os.environ["PS_SLUG"]
@@ -134,6 +135,20 @@ if tag_name != tag:
         file=sys.stderr,
     )
     sys.exit(1)
+
+source = payload.get("release_source", "github-release")
+if source != data["release_source"]:
+    sys.exit("error: payload release_source does not match product ledger")
+if source == "github-tag":
+    sha = payload.get("source_commit", "")
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        sys.exit("error: source tag requires a verified commit SHA")
+    if payload.get("published_at") is not None or payload.get("assets"):
+        sys.exit("error: a source tag cannot claim a release date or release assets")
+    expected_url = f"https://github.com/{data['source_repo']}/tree/{tag}"
+    if payload.get("html_url") != expected_url:
+        sys.exit("error: source tag URL does not match the product repository")
+    data["source_commit"] = sha
 
 version = tag[1:] if tag.startswith("v") else tag
 
