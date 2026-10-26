@@ -60,6 +60,32 @@ test('the newest decisive run decides; cancelled and unfinished runs are not dec
   assert.equal(decide({ deployTree: T, prs: [pr(T, green)] }).ok, true);
 });
 
+// 2026-10-26, #50/#51: a PR opened with the workflow token gets a pull_request
+// run parked at action_required with zero jobs. Merging the PR closed it as
+// "failure" (40332015922, updated after the green dispatched run), and the gate
+// refused both deploys red-pr-ci. A run that executed no job decided nothing.
+test('a failure that executed no job is not decisive', () => {
+  const runs = [run('success', '2026-10-26T13:36:06Z', 1), { ...run('failure', '2026-10-26T13:36:10Z', 2), jobs: 0 }];
+  assert.equal(decide({ deployTree: T, prs: [pr(T, runs)] }).code, 'pr-ci-green');
+  assert.equal(decide({ deployTree: T, prs: [pr(T, [{ ...run('failure'), jobs: 0 }])] }).code, 'no-pr-ci');
+  const ran = [run('success', '2026-10-26T13:36:06Z', 1), { ...run('failure', '2026-10-26T13:36:10Z', 2), jobs: 4 }];
+  assert.equal(decide({ deployTree: T, prs: [pr(T, ran)] }).code, 'red-pr-ci');
+});
+
+const jobsApi = (jobCount) => async (path) => {
+  if (path === `/repos/o/r/commits/${'d'.repeat(40)}`) return { commit: { message: 'x', tree: { sha: T } } };
+  if (path.endsWith('/pulls')) return [{ number: 9, merged_at: '2026-10-26T14:05:44Z', base: { ref: 'master' }, head: { sha: 'c'.repeat(40) } }];
+  if (path.includes('/git/commits/')) return { tree: { sha: T } };
+  if (path.includes('/actions/workflows/pr-ci.yml/runs')) return { workflow_runs: [run('success', '2026-10-26T13:36:06Z', 1), run('failure', '2026-10-26T13:36:10Z', 2)] };
+  if (path === '/repos/o/r/actions/runs/2/jobs?per_page=1') return { total_count: jobCount, jobs: [] };
+  throw new Error(`unexpected ${path}`);
+};
+
+test('gather counts the jobs of each failed run, so a parked run that never executed does not refuse', async () => {
+  assert.equal(decide(await gather({ repo: 'o/r', sha: 'd'.repeat(40), api: jobsApi(0) })).code, 'pr-ci-green');
+  assert.equal(decide(await gather({ repo: 'o/r', sha: 'd'.repeat(40), api: jobsApi(4) })).code, 'red-pr-ci');
+});
+
 test('override deploys only with a reason, and says so', () => {
   const v = decide({ deployTree: T, prs: [], override: 'hotfix: PR CI runner outage' });
   assert.deepEqual([v.ok, v.code], [true, 'override']);

@@ -11,7 +11,12 @@
 //
 // Decisive = completed with success or failure. A cancelled run is what a newer
 // push or a PR edit does to its predecessor (pr-ci.yml's concurrency group), and
-// an unfinished run has not decided anything, so neither counts.
+// an unfinished run has not decided anything, so neither counts. Nor does a
+// failure that executed no job: a pull_request run parked at action_required
+// (the PR was opened with the workflow token) holds zero jobs, and GitHub
+// concludes it `failure` when the PR closes, after the real run went green.
+// Measured 2026-10-26: runs 40332015922 and 40332016835 refused the deploys of
+// #51 and #50 red-pr-ci that way. gather() counts each failed run's jobs.
 //
 // Refusal codes: no-pr, no-pr-ci, red-pr-ci, stale-tree. A manual dispatch may
 // pass `override_reason`; the run then deploys and logs the reason as a warning.
@@ -44,7 +49,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function newestDecisive(runs) {
   return runs
-    .filter((r) => r.status === 'completed' && DECISIVE.has(r.conclusion))
+    .filter((r) => r.status === 'completed' && DECISIVE.has(r.conclusion) && r.jobs !== 0)
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))[0];
 }
 
@@ -123,6 +128,11 @@ export async function gather({ repo, sha, api, sleep = wait, delays = RETRY_DELA
   for (const p of merged) {
     const head = await api(`/repos/${repo}/git/commits/${p.head.sha}`);
     const runs = await prCiRuns({ repo, headSha: p.head.sha, api, sleep, delays });
+    for (const r of runs) {
+      if (r.status === 'completed' && r.conclusion === 'failure') {
+        r.jobs = (await api(`/repos/${repo}/actions/runs/${r.id}/jobs?per_page=1`)).total_count;
+      }
+    }
     prs.push({ number: p.number, headSha: p.head.sha, headTree: head.tree.sha, runs });
   }
   return { deployTree: commit.commit.tree.sha, prs };
