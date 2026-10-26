@@ -3,10 +3,10 @@
   "name": "Waypost",
   "release_source": "github-tag",
   "source_repo": "Back-Road-Creative/waypost",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "released_at": null,
-  "release_url": "https://github.com/Back-Road-Creative/waypost/tree/v0.2.1",
-  "source_ref": "v0.2.1",
+  "release_url": "https://github.com/Back-Road-Creative/waypost/tree/v0.3.0",
+  "source_ref": "v0.3.0",
   "assets": {},
   "demo": {
     "path": "static/demo/waypost/",
@@ -17,5 +17,5 @@
   },
   "media_source": null,
   "notes": "Stable source tag, not a GitHub Release object; no publication date or downloadable assets are inferred. The tagged package is seo-manager (Python library and CLI). The frozen console demo is a separate studio integration, built from site commit 62f9408, not this product tag.",
-  "source_commit": "68aa5216ede12b1d90f5e0b798e8348acdb25ee4"
+  "source_commit": "58168f5079bb0ae22582170552f9173fe846a908"
 }
