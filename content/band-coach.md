@@ -14,7 +14,7 @@ Pick an instrument and press Start. Band Coach gives you notes or short phrases 
 
 <img src="/img/band-coach/trainer-keyboard.png" alt="Keyboard trainer at Level 1 (C, D and E): on-screen keyboard, Start button and energy meter" width="1440" height="900" loading="lazy">
 
-Songs are practiced the same way. Open a tune and it is split into graded steps on the instrument you are playing. My progress shows minutes, a practice calendar, a daily goal and a per-instrument breakdown.
+Songs are practiced the same way. Open a tune and it is split into graded steps on the instrument you are playing. Progress shows minutes, a practice calendar, a daily goal and a per-instrument breakdown.
 
 ## Get it running
 
@@ -22,7 +22,7 @@ Songs are practiced the same way. Open a tune and it is split into graded steps 
 2. Open the file in Chrome or Edge. The app's own MIDI message names those two browsers; without Web MIDI it still accepts screen keys and computer keys.
 3. Allow the microphone, or connect a MIDI keyboard. Keyboard uses MIDI, on-screen keys or computer keys; Drum kit uses an electronic kit over MIDI, computer keys, clicks on the drawn kit or the microphone; every other instrument listens through the microphone.
 
-Progress is saved in the browser's local storage, so a different browser or profile starts empty. Use "Save a backup" in the side rail's "More options" to download `band-coach-progress.json`, and "Restore a backup" to load it again. "Check for updates" in the same menu asks the Band Coach website for the latest version number and sends nothing about your playing; it is the only network request in the release I checked (v1.10.0).
+Progress is saved in the browser's local storage, so a different browser or profile starts empty. Use "Save a backup" under Settings → Backups and reset to download `band-coach-progress.json`, and "Restore a backup" to load it again. The release I checked (v1.10.0) makes two network requests, both only when you press their button in Settings, and neither sends anything about your playing: "Check for updates" asks the Band Coach website for the latest version number, and "Download model pack" fetches an optional extra download from the same site.
 
 ## Instruments
 
@@ -36,35 +36,31 @@ Band Coach v1.10.0 has 27 instruments, each with its own graded levels:
 
 Drum kit has its own trainer. It takes an electronic kit over MIDI, computer keys, a click on the drawn kit, or the microphone. The microphone can only tell kick, snare and hi-hat apart; a MIDI kit names every piece.
 
-<img src="/img/band-coach/instrument-picker.png" alt="Band Coach's instrument picker: one button per instrument family, with More tools and More ways to practise closed below" width="1440" height="900" loading="lazy">
+<img src="/img/band-coach/instrument-picker.png" alt="Band Coach's instrument picker: one button per instrument family, then a Tools row of drills, tuner, ear training and theory" width="1440" height="900" loading="lazy">
 
 ## What it can't hear {#what-it-cant-hear}
 
-Band Coach hears pitch and timing. It cannot see posture, breath, bowing or hand position, so it does not replace a teacher. The trainer follows one note at a time, and the app marks chord listening as experimental. Record a tune has a "More than one note at a time" option for audio you transcribe. Microphone use on phones has not been confirmed; the screenshot below only shows that the layout fits a 390 px wide screen.
+Band Coach hears pitch and timing. It cannot see posture, breath, bowing or hand position, so it does not replace a teacher. The trainer follows one note at a time, and the app marks chord listening as experimental. Add a song, in Songs, has a "More than one note at a time" option for audio you transcribe. Microphone use on phones has not been confirmed; the screenshot below only shows that the layout fits a 390 px wide screen.
 
-<img src="/img/band-coach/trainer-phone.png" alt="Band Coach on a 390 px wide phone: the instrument picker with More ways to practise open" width="390" height="844" loading="lazy">
+<img src="/img/band-coach/trainer-phone.png" alt="Band Coach on a 390 px wide phone: the main nav and the instrument picker" width="390" height="844" loading="lazy">
 
 ## Instruments, file formats and tools {#instruments-file-formats-and-tools}
 
 **Import:** a score (`.mid`, `.midi`, `.abc`, `.xml`, `.musicxml`, `.mxl`, `.gp`, `.gp5`), an audio file your browser can decode, a teacher's `.bandpack`, or a saved `.json`. Guitar Pro support is limited to `.gp5` (version 5.x) and `.gp` files.
 
-**Export:** each song in the library exports as MIDI, MusicXML or ABC.
+**Export:** open a song and its Export action saves it as MIDI, MusicXML or ABC.
 
-<img src="/img/band-coach/panel-songs.png" alt="Songs panel: built-in tunes, each with MIDI, MusicXML and ABC export buttons" width="1440" height="900" loading="lazy">
+<img src="/img/band-coach/panel-songs.png" alt="Songs: an Add a song button above the song library of built-in tunes" width="1440" height="900" loading="lazy">
 
-**More tools** (next to the instrument picker): Interval drill, Rhythm reading, Tuner and Capture a melody.
+**Main nav:** Practice (the trainer), Songs, Progress, Choose an instrument and Settings.
 
-**More ways to practise** (each opens a panel below the trainer):
+- **Songs:** practice a built-in tune, or use Add a song to record a tune or open a score or recording. An open song also has Edit notes and Play along.
+- **Progress:** practice calendar, daily goal and results by instrument, once you have logged a session.
+- **Settings:** backups, diagnostics, updates and the optional model pack.
 
-- **Songs:** practice a built-in tune or add your own.
-- **My progress:** practice calendar, daily goal and results by instrument.
-- **Ear training:** listening exercises with answer buttons.
-- **Music theory:** lessons and a lookup for keys, scales and chords.
-- **How to play it:** pick an instrument and note and see how to sound it.
-- **Record a tune** and **Learn this:** turn a recording or score into a song to practice.
-- **Play Along:** work with a song's decoded recording.
+**Tools** (a row in the instrument picker): Interval drill, Rhythm reading, Tuner, Capture a melody, Ear training, How to play it and Music theory.
 
-<img src="/img/band-coach/panel-history.png" alt="My progress panel: no sessions logged yet, a practice calendar and a daily minutes goal" width="1440" height="900" loading="lazy">
+<img src="/img/band-coach/panel-history.png" alt="Progress before any practice: no sessions logged yet, a Start your first session button and results by instrument" width="1440" height="900" loading="lazy">
 
 ## Documentation
 
