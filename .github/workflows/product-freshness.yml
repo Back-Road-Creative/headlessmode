@@ -1,0 +1,57 @@
+# Detects a missed or late product-sync (GitHub's cron ran 5 h late on
+# 2026-10-25 and skipped 10-26) or a data/releases file lagging its newest
+# tag. Decision logic: bin/product-freshness.py (tests:
+# scripts/test_product_freshness.py). On STALE, opens or updates ONE tracking
+# issue (deduped by title, same pattern as product-sync's failure issue) and
+# fails the job.
+
+name: product-freshness
+
+on:
+  schedule:
+    # 14:11 UTC — product-sync is 06:47, so a missed run is visible by now.
+    - cron: '11 14 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ${{ fromJSON(vars.HM_RUNNER_QUICK || '["self-hosted","quick"]') }}
+    timeout-minutes: 5
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Check product-sync freshness
+        id: fresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          python3 bin/product-freshness.py --repo "$GITHUB_REPOSITORY" > freshness.txt
+          RC=$?
+          cat freshness.txt
+          echo "rc=${RC}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Create or update the tracking issue
+        if: steps.fresh.outputs.rc == '2'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="product-sync is stale"
+          BODY="$(printf 'The freshness check found product release data out of date (run: %s/%s/actions/runs/%s).\n\n%s\n\nRe-run product-sync (workflow_dispatch) to catch up.' "${{ github.server_url }}" "$GITHUB_REPOSITORY" "${{ github.run_id }}" "$(tail -n +2 freshness.txt)")"
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$TITLE\"" --json number,title -q "[.[] | select(.title == \"$TITLE\")][0].number" 2>/dev/null)
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body "$BODY"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body "$BODY"
+          fi
+
+      - name: Fail when stale or unchecked
+        if: steps.fresh.outputs.rc != '0'
+        run: exit 1
