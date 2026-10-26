@@ -107,6 +107,8 @@ const ADDRESSES = [
   '1234 Example Rd, Hamilton, MT 59840',
   '12 Main St Apt 4',
   '59840',
+  'N1234 County Road B, Example, WI',
+  '123 Highway 64, Example, NC',
 ];
 
 // What a reader may be told about an address: it cannot be looked up yet. Never that
@@ -150,6 +152,20 @@ test('a town, "Town, ST" and a coordinate pair keep their behaviour', { skip }, 
     assert.equal(coord.options.length, 1);
     assert.match(coord.options[0], /45\.3046, -92\.3634/);
     assert.equal(coord.note, '');
+  });
+});
+
+test('Search on coordinates keeps the local answer without a false name-search failure', { skip }, async () => {
+  await withFinder(async (p) => {
+    const seen = await p.evaluate(typeAndRead('45.3046, -92.3634', true));
+    assert.equal(seen.gnisCalls, 0, 'coordinates must never go to the name service');
+    assert.equal(seen.geoCalls, 0, 'coordinates need no address lookup');
+    assert.equal(seen.nameNote, '');
+    assert.equal(seen.options.length, 1);
+    assert.match(seen.options[0], /45\.3046, -92\.3634/);
+    await p.evaluate(`document.querySelector('#qc-place-results [role="option"]').click()`);
+    const center = await p.evaluate('window.qcMap.getCenter()');
+    assert.ok(Math.abs(center.lat - 45.3046) < 0.01 && Math.abs(center.lng + 92.3634) < 0.01);
   });
 });
 

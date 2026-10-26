@@ -15,8 +15,7 @@
 //
 // Cloudflare Pages serves this file from /functions/api/geocode.js in the production branch (the build
 // publishes public/ as that branch's root). static/_routes.json limits invocation to /api/*, so every
-// other request stays a free static hit. The file is also served as a plain static file, which is fine:
-// it is public source.
+// other request stays a free static hit.
 //
 // Contract (the search box is written against these exact shapes):
 //   200 {provider, benchmark, results:[{id, label, matchClass, lat, lon, state, zip}]}, at most 5
@@ -97,7 +96,9 @@ export async function handleGeocode(request, { fetchImpl = fetch, timeoutMs = UP
     const res = await fetchImpl(upstream.toString(), {
       method: 'GET',
       headers: { accept: 'application/json' },
-      redirect: 'error',
+      // Workers rejects redirect:error before fetching. Manual preserves the
+      // no-redirect policy: the status check below rejects every 3xx response.
+      redirect: 'manual',
       signal: AbortSignal.timeout(timeoutMs),
     });
     if (res.status === 429) return fail(429, 'rate-limited');

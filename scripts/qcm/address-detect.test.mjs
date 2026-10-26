@@ -48,6 +48,12 @@ const ADDRESSES = [
   'Smith Farm, 12 Main St',
   'Suite 200, 1600 Pennsylvania Ave NW',
   'Smith Farm, 12 Main, Apt 4',
+  // Rural house numbers and numbered highways also need the address geocoder.
+  'N1234 County Road B, Example, WI',
+  'W123N456 Main St, Example, WI',
+  '123 Highway 64, Example, NC',
+  '123 US Highway 14',
+  '123 State Route 9',
 ];
 
 const NOT_ADDRESSES = [
@@ -87,6 +93,9 @@ const NOT_ADDRESSES = [
   'Lake Apt 3',
   'Pond Suite 2',
   'Township Road 12 Access',
+  'US Highway 14',
+  'State Route 9',
+  'N1234 Mountain',
   // A number, then "Mile", then a road word is a mileage name ("7 Mile Rd"), not a house.
   '7 Mile Rd',
   '10 Mile Creek Road',

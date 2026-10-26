@@ -23,6 +23,16 @@ the dispatcher's brief reports the same for an OPTIONS preflight, which I did no
 browser on headlessmode.com cannot call it. Its JSONP mode would run census.gov script inside the page,
 which the site's content policy is built to keep out. The relay keeps `connect-src 'self'`.
 
+## Cloudflare runtime compatibility
+
+The upstream fetch uses `redirect: 'manual'`. Workers supports `manual` and `follow`,
+but throws immediately for `error`, even though Node accepts that mode
+([Cloudflare Request documentation](https://developers.cloudflare.com/workers/runtime-apis/request/)).
+The relay rejects every status except 200 (with a separate 429 response), so a redirect
+is rejected without forwarding the address to its destination. The offline function tests
+model the Workers restriction and exercise 301, 302, 303, 307 and 308 responses.
+They do not substitute for a deployed-runtime check.
+
 ## Terms, read live 2026-10-08
 
 Page: https://www.census.gov/data/developers/about/terms-of-service.html ("Page Last Revised - April 14, 2026").
@@ -88,8 +98,11 @@ discarded because its ZIP check wrongly failed on ZIP+4 values, and I did not co
 - **New construction:** not measured. The ranges are TIGER's, so an address newer than them will miss.
 - **Reach:** the function drops points outside a coarse US box, which excludes Guam, American Samoa and the Northern
   Marianas (a comment in the function says Census answers for them; I did not query them).
-- **Deployment:** the Function has run only in tests. Cloudflare compiling `functions/` from the `production`
-  branch root, and the function setting its own headers because `_headers` is not documented here to cover Function
-  responses, are not verified until the first deploy. The function file is also served publicly as a static file.
+- **Deployment verification:** after deploying, submit a known public address through `/api/geocode`,
+  check for a 200 JSON response and the expected match, and select that match on the map.
+  Passing Node tests or checking the prompt while typing does not verify the hosted lookup.
+  Inspect the Function event's response status: an `ok` execution outcome can still return an HTTP error.
+  The default production smoke run includes an independent `address` check for the Census office;
+  `node scripts/qcm/live-smoke.mjs --only address` runs that check alone. See the [smoke-check contract](README.md).
 - **Alternatives:** the plan's earlier Geoapify proposal was not re-evaluated (its terms, cost and key are your
   decision, and nothing was bought), and no other provider was measured.

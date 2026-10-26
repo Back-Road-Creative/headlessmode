@@ -191,8 +191,18 @@ const BASE_STUB = `(() => {
   const names = { 3: ${JSON.stringify(PLACE_FEATURES)} };
   const real = window.fetch.bind(window);
   const json = (b, status = 200) => Promise.resolve(new Response(JSON.stringify(b), { status, headers: { 'content-type': 'application/json' } }));
+  window.__addressCalls = [];
   window.fetch = function(input, init) {
     const url = String(input && input.url ? input.url : input);
+    if (new URL(url, location.origin).pathname === '/api/geocode') {
+      window.__addressCalls.push(url);
+      const mode = (window.__scenario || {}).address || 'ok';
+      if (typeof mode === 'number') return json({ error: 'upstream' }, mode);
+      return json({ provider: 'us-census', benchmark: 'Public_AR_Current', results: mode === 'empty' ? [] : [{
+        id: 'tiger:657091557:L', label: '4600 SILVER HILL RD, WASHINGTON, DC, 20233', matchClass: 'interpolated',
+        lat: mode === 'wrong-point' ? 40 : 38.84505589808, lon: -76.92836638093, state: 'DC', zip: '20233',
+      }] });
+    }
     if (!/^https?:/.test(url) || url.startsWith(location.origin)) return real(input, init);
     const u = new URL(url);
     const t = u.pathname.match(/transportation\\/MapServer\\/(\\d+)\\/query/);
@@ -254,7 +264,7 @@ test('LIVE_ARGS lets a page reach a non-127.0.0.1 host; the default browser cann
   } finally { await site.close(); }
 });
 
-test('good build: all seven checks pass offline, and the optional cameras page is reported as not deployed', { skip }, async () => {
+test('good build: all checks pass offline, and the optional cameras page is reported as not deployed', { skip }, async () => {
   const results = await run(CHECK_NAMES);
   assert.deepEqual(results.map((r) => r.name), CHECK_NAMES);
   for (const r of results) assert.equal(r.status, 'pass', `${r.name}: ${r.reason}`);
@@ -265,6 +275,31 @@ test('good build: all seven checks pass offline, and the optional cameras page i
   assert.equal(one(results, 'search').skips, undefined);
   assert.match(one(results, 'roads').reason, /road labels/i);
   assert.equal(exitCode(results), 0);
+});
+
+test('address smoke: default checks submit the public office address and select its match', { skip }, async () => {
+  assert.ok(CHECK_NAMES.includes('address'), 'address health must run independently of name search');
+  const r = one(await run(['address']), 'address');
+  assert.equal(r.status, 'pass', r.reason);
+  assert.match(r.reason, /address.*selected/i);
+  const calls = await (await browser()).page.evaluate('window.__addressCalls');
+  assert.equal(calls.length, 1, 'the check must submit, not merely type');
+  assert.equal(new URL(calls[0], await origin()).searchParams.get('q'), '4600 Silver Hill Rd, Washington, DC');
+});
+
+test('address smoke: unavailable or missing relay and empty matches fail even when service errors are tolerated', { skip }, async () => {
+  for (const mode of [502, 404, 'empty']) {
+    const r = one(await run(['address'], { source: `window.__scenario = { address: ${JSON.stringify(mode)} }` }), 'address');
+    assert.equal(r.status, 'fail', String(mode));
+    assert.match(r.reason, /address lookup/i);
+    assert.equal(exitCode([r], { tolerateServiceErrors: true }), 1, 'a failed same-origin lookup cannot be excused as an outside-service failure');
+  }
+});
+
+test('address smoke: a match that lands at the wrong location fails', { skip }, async () => {
+  const r = one(await run(['address'], { source: `window.__scenario = { address: 'wrong-point' }` }), 'address');
+  assert.equal(r.status, 'fail');
+  assert.match(r.reason, /address.*map.*not near/i);
 });
 
 test('pages: a page that answers 404 fails with its path and status', { skip }, async () => {

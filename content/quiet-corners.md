@@ -177,10 +177,13 @@ map's tile provider for the area now on screen, the same request any pan or
 zoom already makes.
 
 **Search places** matches as you type, against the same town export the map
-scores. Typing a coordinate pair instead jumps straight to it. Neither reaches
+scores. Typing a coordinate pair offers that point; choose the result to move the
+map there. Pressing **Search** on coordinates keeps that local result without
+asking a remote name service. Neither reaches
 outside your browser — both search a list already on the page. The box, its
 suggestions, its notes and its **Search** button share one solid panel, so no
 map label shows through the text. Type a street address (a house number and street,
+including rural grid numbers such as N1234 and numbered highways such as 123 Highway 64,
 a lone apartment or unit, or a ZIP code) and nothing is sent while you type: the box
 says to press **Search**. Pressing **Search** (or Enter) then sends what you typed,
 through this site, to the U.S. Census Bureau's address geocoder, and lists up to five

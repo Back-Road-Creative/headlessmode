@@ -1,5 +1,5 @@
 // The Quiet Corners production smoke check as importable pieces: argument parsing, the exit rule and
-// seven named checks. live-smoke.mjs runs them against a deployed site; live-smoke.test.mjs runs the
+// named checks. live-smoke.mjs runs them against a deployed site; live-smoke.test.mjs runs the
 // SAME functions against the locally built site with every outside request stubbed.
 // A check returns { name, status: 'pass'|'fail'|'skipped', reason, cause?, skips? }. `cause` on a
 // failure says WHO is at fault: 'service' (an outside service errored or never answered) or 'ours'
@@ -10,7 +10,7 @@ import { readyDashboard, chooseExampleArea, waitInPage } from './helpers/waits.m
 import { trustedClick } from './helpers/trusted-click.mjs';
 
 export const DEFAULT_BASE_URL = 'https://headlessmode.com';
-export const CHECK_NAMES = Object.freeze(['marker', 'pages', 'csp', 'search', 'layers', 'roads', 'inspection']);
+export const CHECK_NAMES = Object.freeze(['marker', 'pages', 'csp', 'search', 'address', 'layers', 'roads', 'inspection']);
 const DEFAULT_TIMEOUT_MS = 45000;
 const DEFAULT_TOTAL_TIMEOUT_MS = 600000;
 
@@ -19,6 +19,7 @@ const DEFAULT_TOTAL_TIMEOUT_MS = 600000;
 const TOWN = { query: 'Bryson City', lat: 35.4266, lon: -83.4473 };
 const NAME_QUERY = 'Cold Mountain';
 const ADDRESS_QUERY = '1234 Example Rd, Hamilton, MT 59840';   // synthetic
+const PUBLIC_ADDRESS = { query: '4600 Silver Hill Rd, Washington, DC', lat: 38.84505589808, lon: -76.92836638093 }; // Census HQ
 const ROAD_VIEW = [35.375, -83.218, 13];                         // Sylva NC, zoom 13
 const SHA_RE = /^[0-9a-f]{40}$/;
 
@@ -343,6 +344,32 @@ export async function checkSearch(ctx) {
   return skipped ? { ...done, skips: [{ part: 'address', reason: 'feature not deployed' }] } : done;
 }
 
+export async function checkAddress(ctx) {
+  const name = 'address';
+  const { page } = ctx;
+  await openDashboard(ctx);
+  await typeInFinder(page, PUBLIC_ADDRESS.query);
+  await trustedClick(page, '#qc-name-search-btn');
+  const settled = await tryWait(ctx, 'the public address lookup to answer',
+    `(() => { const n = document.getElementById('qc-name-note'); return n && !n.hidden && n.textContent.trim() && !/looking up/i.test(n.textContent); })()`);
+  const status = await page.evaluate(`(document.getElementById('qc-name-note') || {}).textContent || ''`);
+  // This is our same-origin endpoint. A 502 can be our Function, so an unknown
+  // cause must not be excused by --tolerate-service-errors.
+  if (!settled) return fail(name, `address lookup never answered (status: "${status}")`);
+  const rows = await optionTexts(page);
+  if (!rows.length || !/4600.*silver hill/i.test(rows[0])) {
+    return fail(name, `address lookup returned no expected public-office match (status: "${status}")`);
+  }
+  await page.evaluate('window.__settled = qcMoves(); true');
+  await trustedClick(page, '#qc-place-results [role="option"]');
+  await page.evaluate("window.__settled('the map settled on the public address')");
+  const at = await page.evaluate('(() => { const c = window.qcMap.getCenter(); return [c.lat, c.lng]; })()');
+  if (Math.abs(at[0] - PUBLIC_ADDRESS.lat) > 0.02 || Math.abs(at[1] - PUBLIC_ADDRESS.lon) > 0.02) {
+    return fail(name, `address selection left the map at ${at[0].toFixed(3)}, ${at[1].toFixed(3)}, not near the public office`);
+  }
+  return pass(name, 'public office address submitted, matched and selected on the map');
+}
+
 const setNames = (page, on) => page.evaluate(`(() => { const c = document.getElementById('qcm-layer-names'); if (!c) throw new Error('no Named places layer checkbox');
   c.checked = ${on}; c.dispatchEvent(new Event('change', { bubbles: true })); document.getElementById('qcm-check').click(); return true; })()`);
 
@@ -414,12 +441,12 @@ export async function checkInspection(ctx) {
   return fail(name, `card never opened: ${tried.slice(0, 2).join('; ') || 'no label could be pressed'}`);
 }
 
-const CHECKS = { marker: checkMarker, pages: checkPages, csp: checkCsp, search: checkSearch, layers: checkLayers, roads: checkRoads, inspection: checkInspection };
+const CHECKS = { marker: checkMarker, pages: checkPages, csp: checkCsp, search: checkSearch, address: checkAddress, layers: checkLayers, roads: checkRoads, inspection: checkInspection };
 
 /** Runs the named checks in order. A check that throws fails with the error as its reason; a browser
  *  check with no page fails closed. `onFail(name, ctx)` runs after a failure (screenshots). Past
  *  `ctx.deadlineAt` (epoch ms, from --total-timeout-ms) a check fails unrun, and one still running is
- *  cut off, so a site that is badly down costs the deadline, not seven checks' worth of waits. */
+ *  cut off, so a site that is badly down costs the deadline, not a full set of per-check waits. */
 export async function runChecks(ctx, names = CHECK_NAMES, { onFail = null } = {}) {
   const results = [];
   for (const name of names) {

@@ -72,6 +72,35 @@ test('a real "no match" is a 200 with an empty results array, not an error', asy
   assert.deepEqual(await res.json(), { provider: 'us-census', benchmark: 'Public_AR_Current', results: [] });
 });
 
+test('a match succeeds with the Workers redirect-mode restriction', async () => {
+  // Node accepts redirect:error, but Workers throws before sending the request:
+  // https://developers.cloudflare.com/workers/runtime-apis/request/#parameters
+  // Model that runtime constraint; this is an offline double, not a Workers run.
+  const res = await call(TOKEN, { fetchImpl: (_url, init) => {
+    if (init.redirect === 'error') throw new TypeError('Unsupported redirect mode: error');
+    return json(FIX.match.body)();
+  } });
+  assert.equal(res.status, 200, 'a supported request must reach Census');
+  assert.equal((await res.json()).results[0].id, 'tiger:657091557:L');
+});
+
+test('redirects are returned for rejection without following the address to another host', async () => {
+  for (const code of [301, 302, 303, 307, 308]) {
+    const seen = [];
+    const res = await call(TOKEN, { fetchImpl: (url, init) => {
+      seen.push({ url, redirect: init.redirect });
+      return Promise.resolve(new Response('', {
+        status: code, headers: { location: `https://elsewhere.invalid/?address=${TOKEN}` },
+      }));
+    } });
+    assert.equal(res.status, 502, `upstream ${code}`);
+    assert.deepEqual(await res.json(), { error: 'upstream' });
+    assert.equal(seen.length, 1, 'no second request to a redirect destination');
+    assert.equal(seen[0].redirect, 'manual', 'the runtime must return, not follow, redirects');
+    assert.equal(new URL(seen[0].url).origin, new URL(UPSTREAM_URL).origin);
+  }
+});
+
 test('the upstream call is the documented Census URL, with an 8 second deadline and nothing from the reader', async () => {
   assert.equal(UPSTREAM_TIMEOUT_MS, 8000);
   assert.equal(BENCHMARK, 'Public_AR_Current');
