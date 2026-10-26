@@ -291,6 +291,7 @@ jobs:
           venv/bin/python3 -m pytest scripts/test_release_data.py -v
           venv/bin/python3 -m pytest scripts/test_media_manifest.py -v
           venv/bin/python3 -m pytest scripts/test_product_sync.py -v
+          venv/bin/python3 -m pytest scripts/test_product_freshness.py -v
           venv/bin/python3 -m pytest scripts/test_framegrade_page.py -v
 
       - name: Install dependencies

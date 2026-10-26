@@ -665,6 +665,7 @@ EXPECTED_LANE = {
     ("pr-ci.yml", "pr-ci"): "heavy",
     ("pr-ci.yml", "site-audit"): "quick",
     ("pr-ci.yml", "result"): "quick",
+    ("product-freshness.yml", "check"): "quick",
     ("product-sync.yml", "sync"): "quick",
     ("rigscore-facts-sync.yml", "sync"): "quick",
 }
