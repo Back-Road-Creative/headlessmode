@@ -14,6 +14,6 @@
     }
   },
   "demo": null,
-  "media_source": "v1.9.0",
-  "notes": "Screenshots in static/img/band-coach/ were captured from a checkout verified at tag v1.9.0 (scripts/capture-band-coach-shots.mjs --ref v1.9.0), matching this release; per-image capture dates and viewports are recorded in static/img/band-coach/manifest.json."
+  "media_source": "v1.10.0",
+  "notes": "Screenshots in static/img/band-coach/ were captured from a checkout verified at tag v1.10.0 (scripts/capture-band-coach-shots.mjs --ref v1.10.0), matching this release; per-image capture dates and viewports are recorded in static/img/band-coach/manifest.json."
 }

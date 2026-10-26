@@ -5,11 +5,11 @@
 // node:fs) — the same no-dependency pattern as scripts/preview-overflow.mjs
 // in this repo. It builds the app's DEV bundle (which carries the
 // `window.__coach` debug hook stripped from the release file), then clicks
-// through the real instrument picker (#picker), the "More ways to
-// practise" panel picker (#panelPicker) and real Songs rows — the same
-// elements a learner clicks — so every shot proves the real UI renders and
-// is the real, current UI rather than a hand-staged mock. There is no
-// persistent nav bar in this app. The debug hook is used only to detect
+// through the real main nav (#mainNav: Practice, Songs, Progress, Choose an
+// instrument, Settings), the instrument sheet (#picker, which also holds
+// the Tools row) and real Songs rows — the same elements a learner clicks —
+// so every shot proves the real UI renders and is the real, current UI
+// rather than a hand-staged mock. The debug hook is used only to detect
 // readiness, never to jump screens.
 //
 // Usage:
@@ -215,8 +215,8 @@ async function main() {
 
   const captured = [];
   // scrollIntoView: capturing only the viewport (no captureBeyondViewport),
-  // some real content — the song practice section, the rail menu's "More
-  // options" body — renders well below the fold at 900px tall. Without
+  // some real content — the song practice section, Settings' Backups and
+  // reset group — renders well below the fold at 900px tall. Without
   // this a shot silently repeats whatever was already on screen instead of
   // the thing the click just revealed, so every shot that reveals such
   // content must name it here rather than assume the top of the page.
@@ -235,13 +235,22 @@ async function main() {
     writeFileSync(path, Buffer.from(data, "base64"));
     const kb = Math.round(statSync(path).size / 1024);
     console.log(`${name}.png  ${width}x${clipHeight || height}  ${kb}KB`);
-    captured.push({ name, viewport: `${width}x${clipHeight || height}` });
+    captured.push({ file: `${name}.png`, viewport: `${width}x${clipHeight || height}` });
+  }
+  // The home page's product card: an 800x500 JPEG cut 1:1 from the current
+  // screen, starting at the trainer's top-left corner (#mainArea), so the
+  // crop follows the layout instead of hard-coded coordinates.
+  async function shootHomeCrop(name) {
+    const { x, y } = await evaluate("(() => { const r = document.getElementById('mainArea').getBoundingClientRect(); return { x: Math.round(r.left), y: Math.round(r.top) }; })()");
+    const { data } = await send("Page.captureScreenshot", { format: "jpeg", quality: 85, fromSurface: true, clip: { x, y, width: 800, height: 500, scale: 1 } });
+    const path = join(OUT_DIR, `${name}.jpg`);
+    writeFileSync(path, Buffer.from(data, "base64"));
+    console.log(`${name}.jpg  800x500  ${Math.round(statSync(path).size / 1024)}KB`);
+    captured.push({ file: `${name}.jpg`, viewport: "800x500" });
   }
 
-  // Drives the real instrument picker (#picker), the "More ways to
-  // practise" panel picker (#panelPicker) and the "More options" rail menu
-  // (#railMenu) — the same elements a learner clicks. There is no
-  // persistent nav bar in this app; window.__coach is used only to read
+  // Drives the real main nav (#mainNav) and instrument sheet (#picker) —
+  // the same elements a learner clicks; window.__coach is used only to read
   // state (readiness), never to jump screens.
   async function click(selector) {
     await evaluate(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); if (!el) throw new Error('not found: ${selector}'); el.click(); })()`);
@@ -251,56 +260,50 @@ async function main() {
     await evaluate(`(() => { const el = Array.from(document.querySelectorAll(${JSON.stringify(selector)})).find(e => e.textContent.trim() === ${JSON.stringify(text)}); if (!el) throw new Error('not found: ${text}'); el.click(); })()`);
     await new Promise((r) => setTimeout(r, 250));
   }
+  const nav = (route) => click(`#mainNav button[data-route="${route}"]`);
 
-  // 1. The instrument-picker sheet, open the way a first-time learner sees
-  // it (a fresh profile boots with it already open) — 26 instruments
-  // grouped by family, plus the Tools row (Ear training / How to play it /
-  // Music theory).
+  // 1. The instrument sheet, open the way a first-time learner sees it (a
+  // fresh profile boots with it already open) — 27 instruments grouped by
+  // family, plus the Tools row (Interval drill, Rhythm reading, Tuner,
+  // Capture a melody, Ear training, How to play it, Music theory).
   await waitFor("document.getElementById('picker').hidden === false");
   await shoot("instrument-picker", { width: 1440, height: 900 });
 
-  // 2. Main trainer, keyboard instrument, desktop width — picking a picker
-  // button is what a learner does to close the sheet and land here.
+  // 2. Main trainer, keyboard instrument, desktop width — picking an
+  // instrument is what closes the sheet and lands a learner here.
   await click('#picker button[data-mod="kbd"]');
   await shoot("trainer-keyboard", { width: 1440, height: 900 });
+  await shootHomeCrop("home");
 
-  // 3. Ear training, opened from the "More ways to practise" panel picker.
-  await click('#panelPickerDisclosure summary');
-  await click('#panelPicker button[data-panel="ear"]');
+  // 3. Ear training, from the Tools row: "Choose an instrument" reopens the
+  // sheet from any screen.
+  await nav("instrument");
+  await click('#picker button[data-panel="ear"]');
   await shoot("panel-ear", { width: 1440, height: 900 });
 
-  // 4. Songs list — panels.open() auto-closes the previously open panel, so
-  // this can be picked directly from the panel picker without closing ear
-  // training first.
-  await click('#panelPickerDisclosure summary');
-  await click('#panelPicker button[data-panel="songs"]');
+  // 4. Songs, from the main nav.
+  await nav("songs");
   await shoot("panel-songs", { width: 1440, height: 900 });
 
   // 5. A song practice screen — opening a starter tune from the list starts
   // its first step right away. The practice section renders below the song
-  // list/import/export sections in the DOM, so it needs scrolling into view.
+  // list in the DOM, so it needs scrolling into view.
   await clickByText(".panel-songs-row button", "Hot Cross Buns");
   await shoot("song-practice", { width: 1440, height: 900, scrollIntoView: ".panel-songs-practice" });
 
-  // 6. Progress ("My progress"), also from the panel picker.
-  await click('#panelPickerDisclosure summary');
-  await click('#panelPicker button[data-panel="history"]');
+  // 6. Progress, from the main nav.
+  await nav("progress");
   await shoot("panel-history", { width: 1440, height: 900 });
 
-  // 7. Back to the main trainer — clicking an instrument button closes any
-  // open panel and selects it, the real way learners return from a panel.
-  await click('#picker button[data-mod="kbd"]');
+  // 7. Settings, from the main nav, scrolled to Backups and reset (save /
+  // restore a backup) with Updates (check for updates) below it.
+  await nav("settings");
+  await shoot("settings", { width: 1440, height: 900, scrollIntoView: "#settingsView .settings-group:nth-of-type(2)" });
 
-  // Settings-equivalent: the "More options" rail menu (reset, backup/
-  // restore, check for updates) in the side aside — there is no dedicated
-  // Settings screen; theme/note-name options are always visible, not
-  // gated behind this disclosure.
-  await click('#railMenu summary');
-  await shoot("settings", { width: 1440, height: 900, scrollIntoView: "#railMenu" });
-  await click('#railMenu summary'); // close it again before the phone shot
-
-  // 8. Main trainer again at phone width, proving layout works down to
-  // 390px — the always-visible picker and instrument view, not a nav bar.
+  // 8. Back to Practice, then the instrument sheet reopened at phone width,
+  // proving the nav and picker fit down to 390px.
+  await nav("practice");
+  await nav("instrument");
   await shoot("trainer-phone", { width: 390, height: 844 });
 
   try { await sendBrowser("Target.closeTarget", { targetId }); } catch {}
@@ -319,8 +322,7 @@ function writeManifest(captured, ref) {
   let manifest = { product: "band-coach", images: {} };
   if (existsSync(MANIFEST_PATH)) manifest = JSON.parse(readFileSync(MANIFEST_PATH, "utf8"));
   const capturedAt = new Date().toISOString();
-  for (const { name, viewport } of captured) {
-    const key = `${name}.png`;
+  for (const { file: key, viewport } of captured) {
     const prior = manifest.images[key] || {};
     manifest.images[key] = { ...prior, source: ref, captured_at: capturedAt, viewport };
   }
