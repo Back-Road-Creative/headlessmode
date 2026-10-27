@@ -70,10 +70,23 @@ pointing it at your own. Run `python3 bin/session-board.py` without `--demo` to 
 
 ---
 
+## Check the download
+
+If you download the files from a GitHub release instead of cloning, put `session-board.py`,
+`session-board.html`, `session-board-kiosk.ps1`, `demo.png` and `SHA256SUMS` from the same release
+in one directory. From that directory, run this before starting the board; each file should report
+`OK`:
+
+```
+sha256sum -c SHA256SUMS
+```
+
+---
+
 ## Requirements
 
 Python 3.11 or newer, standard library only. Linux and WSL are what it is built and tested on. On
-macOS it works without the `/proc` checks. Windows-native Claude Code is not covered. It reads Claude
+macOS it works without the `/proc` checks. On Windows there is a kiosk launcher, `session-board-kiosk.ps1`, that starts the board in WSL and opens it full screen on a second monitor; install it from WSL, following the repo's "A wall screen on Windows" section. The project's Windows CI job only checks that the launcher installs and uninstalls; WSL startup, monitor placement and sound still need a check on your own device. Windows-native Claude Code is not covered. It reads Claude
 Code's internal files, which have no published format and can change; if a number looks wrong after
 an update, run `--doctor` and open an issue with its output. MIT licensed.
 

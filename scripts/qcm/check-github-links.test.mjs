@@ -154,6 +154,7 @@ test('planCheck maps each github.com URL shape to the API answers it needs', () 
   assert.deepEqual(paths('https://github.com/acme/tool'), [repo]);
   assert.deepEqual(paths('https://github.com/acme/tool.git'), [repo]);
   assert.deepEqual(paths('https://github.com/acme/tool/releases'), [repo]);
+  assert.deepEqual(paths('https://github.com/acme/tool/security'), [repo]);
   assert.deepEqual(paths('https://github.com/acme/tool/security/advisories/new'), [repo, `${repo}/private-vulnerability-reporting`]);
   assert.deepEqual(paths('https://github.com/acme/tool/releases/latest'), [repo, `${repo}/releases/latest`]);
   assert.deepEqual(paths('https://github.com/acme/tool/releases/latest/download/tool.html'), [repo, `${repo}/releases/latest`]);

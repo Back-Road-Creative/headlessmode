@@ -12,7 +12,7 @@ A scan runs {{< rigscore-fact field="checkCount" >}} checks ({{< rigscore-fact f
 
 ## Install {#install}
 
-Run this in a project directory (Node >= 18.17):
+Run this in a project directory (Node >= 20):
 
 ```bash
 npx github:Back-Road-Creative/rigscore

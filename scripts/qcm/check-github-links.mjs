@@ -16,7 +16,7 @@
 // and a shape with no mapping fails rather than passing:
 //   github.com                                    nothing to check
 //   github.com/O                                  GET /users/O answers
-//   github.com/O/R, O/R/releases                  the repository is public
+//   github.com/O/R, O/R/releases, O/R/security    the repository is public
 //   github.com/O/R/security/advisories/new        ... and private vulnerability reporting is on
 //   github.com/O/R/releases/latest[/download/A]   ... and a latest release exists [and lists A]
 //   github.com/O/R/releases/download/T/A          ... and a published release tagged T lists A
@@ -106,7 +106,7 @@ export function planCheck(url) {
     check: (b) => (b.private === false ? null : `${name} is not public, so a reader gets a 404`),
   }];
   const tail = parts.slice(2).join('/');
-  if (tail === '' || tail === 'releases') return { steps };
+  if (tail === '' || tail === 'releases' || tail === 'security') return { steps };
   if (tail === 'security/advisories/new') {
     steps.push({
       path: `${base}/private-vulnerability-reporting`,

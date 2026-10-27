@@ -28,6 +28,12 @@ right there below the filters.
 
 ---
 
+## Source and problems
+
+The source is public at [github.com/Back-Road-Creative/quiet-corners](https://github.com/Back-Road-Creative/quiet-corners). To report a problem, open an issue in that repository.
+
+---
+
 ## Methodology
 
 Independent scores, each 0-100:
