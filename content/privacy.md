@@ -1,6 +1,6 @@
 ---
 title: "Privacy"
-description: "What each action on this site sends and stores: browsing, map layers, search, camera images, location, saved places, sharing, the Band Coach and Waypost tools, and who receives what."
+description: "What this site, the Quiet Corners map, Band Coach and Waypost send and store: browsing, map layers, location, saved places, the microphone, and tokens."
 date: 2026-08-02
 draft: false
 tags: ["privacy", "policy"]
