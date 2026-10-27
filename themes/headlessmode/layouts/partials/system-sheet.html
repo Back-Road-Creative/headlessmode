@@ -20,7 +20,9 @@
     Provenance is stated once, inside <details>: "Published <month>" when the
     entry is dated, "Latest release <version> · <Month YYYY>" when
     data/releases/<slug>.json (slug = path.Base of the entry's "link")
-    records a version, and "Demo built from <demo.source>" when it records a
+    records a version (a published release also lists each recorded asset as
+    a download link with its SHA-256 when product-sync hashed it; a source
+    tag lists none), and "Demo built from <demo.source>" when it records a
     demo bundle whose source is a ref of the PRODUCT (source_kind product-tag
     or product-commit). A bundle whose only provenance is a site commit
     (source_kind site-commit) says nothing about which product build it
@@ -60,6 +62,13 @@
             <p>Source commit <a href="https://github.com/{{ $release.source_repo }}/tree/{{ $release.source_commit }}">{{ substr $release.source_commit 0 12 }}</a>. Source package; no GitHub Release assets.</p>
             {{- else }}
             <p>Latest release {{ $version }}{{ with $release.released_at }} &middot; {{ time.Format "January 2006" . }}{{ end }}</p>
+            {{- with $release.assets }}
+            <ul class="sheet-assets">
+                {{- range $name, $asset := . }}
+                <li><a href="{{ $asset.url }}">{{ $name }}</a>{{ with $asset.sha256 }} <span class="sheet-sha">SHA-256 <code>{{ . }}</code></span>{{ end }}</li>
+                {{- end }}
+            </ul>
+            {{- end }}
             {{- end }}
             {{- end }}
             {{- if $demoSource }}

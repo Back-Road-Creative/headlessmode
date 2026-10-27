@@ -795,6 +795,16 @@ release publication date. A moved tag's changed commit also opens an update PR.
 and writes it. The frozen Waypost demo retains its independent site-commit
 provenance and is not relabelled as the current `seo-manager` source package.
 
+A `github-release` record's `assets` render in Release details as one download
+link per asset, sorted by filename, with the SHA-256 beside each one that
+`product-sync.sh` hashed. That is how the Framegrade Windows installer and its
+`SHA256SUMS` reach the page: no template or prose names them. Framegrade stays
+`github-tag` until its first GitHub Release is published, because a draft
+release is not public; then its record's `release_source` changes to
+`github-release` in a reviewed PR (`product-sync.sh` refuses a payload whose
+source disagrees with the ledger) and the next sync fills in the assets.
+`scripts/test_framegrade_page.py` renders both shapes against a copy of `data/`.
+
 Offline regression checks use captured API-shaped fixtures, never live API calls:
 
 ```bash
