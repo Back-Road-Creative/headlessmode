@@ -19,6 +19,7 @@
 //   github.com/O/R, O/R/releases                  the repository is public
 //   github.com/O/R/security/advisories/new        ... and private vulnerability reporting is on
 //   github.com/O/R/releases/latest[/download/A]   ... and a latest release exists [and lists A]
+//   github.com/O/R/releases/download/T/A          ... and a published release tagged T lists A
 //   github.com/O/R/blob|tree/REF[/PATH]           ... and PATH is in its tree at REF
 //
 // Usage: node scripts/qcm/check-github-links.mjs [--dir public]
@@ -123,6 +124,16 @@ export function planCheck(url) {
       notFound: `${name} has no published release, so releases/latest is a 404`,
       check: (b) => (asset === undefined || (b.assets || []).some((a) => a.name === asset)
         ? null : `${name}'s latest release (${b.tag_name}) has no asset named ${asset}`),
+    });
+    return { steps };
+  }
+  if (kind === 'releases' && rest[0] === 'download' && rest.length === 3) {
+    const [, tag, asset] = rest;
+    steps.push({
+      path: `${base}/releases/tags/${enc(tag)}`,
+      notFound: `${name} has no published release tagged ${tag}`,
+      check: (b) => ((b.assets || []).some((a) => a.name === asset)
+        ? null : `${name}'s release ${tag} has no asset named ${asset}`),
     });
     return { steps };
   }

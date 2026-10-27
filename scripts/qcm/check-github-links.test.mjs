@@ -107,6 +107,7 @@ const OK_ROUTES = {
     body: { truncated: false, tree: [{ path: 'README.md' }, { path: 'docs' }, { path: 'docs/a.md' }] },
   },
   '/repos/acme/tool/releases/latest': { body: { tag_name: 'v1', assets: [{ name: 'tool.html' }] } },
+  '/repos/acme/tool/releases/tags/v1': { body: { tag_name: 'v1', assets: [{ name: 'tool.html' }] } },
   '/repos/acme/tool/private-vulnerability-reporting': { body: { enabled: true } },
 };
 
@@ -156,11 +157,13 @@ test('planCheck maps each github.com URL shape to the API answers it needs', () 
   assert.deepEqual(paths('https://github.com/acme/tool/security/advisories/new'), [repo, `${repo}/private-vulnerability-reporting`]);
   assert.deepEqual(paths('https://github.com/acme/tool/releases/latest'), [repo, `${repo}/releases/latest`]);
   assert.deepEqual(paths('https://github.com/acme/tool/releases/latest/download/tool.html'), [repo, `${repo}/releases/latest`]);
+  assert.deepEqual(paths('https://github.com/acme/tool/releases/download/v1/tool.html'), [repo, `${repo}/releases/tags/v1`]);
   assert.deepEqual(paths('https://github.com/acme/tool/blob/main/docs/a.md'), [repo, `${repo}/git/trees/main?recursive=1`]);
   assert.deepEqual(paths('https://github.com/acme/tool/tree/main'), [repo, `${repo}/git/trees/main?recursive=1`]);
   for (const unsupported of [
     'https://github.com/acme/tool/issues', 'https://github.com/acme/tool/blob/main',
     'https://github.com/acme/tool/releases/tag/v1', 'https://github.com/acme/tool/releases/latest/download',
+    'https://github.com/acme/tool/releases/download/v1', 'https://github.com/acme/tool/releases/download/v1/a/b',
   ]) {
     assert.match(planCheck(unsupported).error, /unsupported github\.com URL shape/, unsupported);
   }
@@ -173,6 +176,7 @@ test('every link resolves, and one tree answers every blob link into a repositor
       'https://github.com/acme', 'https://github.com/acme/tool', '//github.com/acme/tool/',
       'https://www.github.com/acme/tool/releases', 'https://github.com/acme/tool/releases/latest/download/tool.html',
       'https://github.com/acme/tool/security/advisories/new', 'https://github.com',
+      'https://github.com/acme/tool/releases/download/v1/tool.html',
     ),
     'docs/index.html': linkTo(
       'https://github.com/acme/tool/blob/main/README.md', 'https://github.com/acme/tool/blob/main/docs/a.md',
@@ -184,10 +188,10 @@ test('every link resolves, and one tree answers every blob link into a repositor
   cleanup(dir);
   assert.deepEqual(r.problems, []);
   assert.equal(r.pages, 2);
-  assert.equal(r.links, 10);
-  assert.equal(r.urls, 9);
+  assert.equal(r.links, 11);
+  assert.equal(r.urls, 10);
   assert.deepEqual(api.asked.map((a) => a.path).sort(), Object.keys(OK_ROUTES).sort());
-  assert.equal(r.requests, 5);
+  assert.equal(r.requests, 6);
   assert.ok(api.asked.every((a) => a.auth === undefined), 'no token was given, so none is sent');
 });
 
@@ -197,7 +201,8 @@ test('a broken github.com link fails with the reason and the pages that link it'
       'https://github.com/acme/gone', 'https://github.com/acme/secret', 'https://github.com/acme/tool/blob/main/missing.md',
       'https://github.com/acme/tool/blob/dev/README.md', 'https://github.com/acme/tool/releases/latest/download/other.zip',
       'https://github.com/acme/quiet/security/advisories/new', 'https://github.com/acme/tool/issues',
-      'https://github.com/nobody-here',
+      'https://github.com/nobody-here', 'https://github.com/acme/tool/releases/download/v1/other.zip',
+      'https://github.com/acme/tool/releases/download/v9/tool.html',
     ),
     'a/index.html': linkTo('https://github.com/acme/gone'),
   });
@@ -218,6 +223,8 @@ test('a broken github.com link fails with the reason and the pages that link it'
     'https://github.com/acme/quiet/security/advisories/new - acme/quiet has private vulnerability reporting turned off',
     'https://github.com/acme/tool/issues - unsupported github.com URL shape',
     'https://github.com/nobody-here - no GitHub user or organization named nobody-here',
+    "https://github.com/acme/tool/releases/download/v1/other.zip - acme/tool's release v1 has no asset named other.zip",
+    'https://github.com/acme/tool/releases/download/v9/tool.html - acme/tool has no published release tagged v9',
   ];
   assert.equal(problems.length, want.length, problems.join('\n'));
   for (const w of want) assert.ok(problems.some((p) => p.startsWith(w)), `${w}\n--- got:\n${problems.join('\n')}`);
