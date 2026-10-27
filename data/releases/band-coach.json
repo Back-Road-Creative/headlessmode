@@ -3,14 +3,18 @@
   "name": "Band Coach",
   "release_source": "github-release",
   "source_repo": "Back-Road-Creative/band-coach",
-  "version": "1.10.0",
-  "released_at": "2026-10-22T23:25:51Z",
-  "release_url": "https://github.com/Back-Road-Creative/band-coach/releases/tag/v1.10.0",
-  "source_ref": "v1.10.0",
+  "version": "1.11.0",
+  "released_at": "2026-10-26T17:18:49Z",
+  "release_url": "https://github.com/Back-Road-Creative/band-coach/releases/tag/v1.11.0",
+  "source_ref": "v1.11.0",
   "assets": {
     "band-coach.html": {
-      "url": "https://github.com/Back-Road-Creative/band-coach/releases/download/v1.10.0/band-coach.html",
-      "sha256": "497eed564a8e429527152b7531015ddec0d5dc9bbee048841dd19e5d12b6ae5e"
+      "url": "https://github.com/Back-Road-Creative/band-coach/releases/download/v1.11.0/band-coach.html",
+      "sha256": "228013ad45d89d9c0ab0711f79fce1da3b92020073ced6e3222496b09357750e"
+    },
+    "band-coach.html.sha256": {
+      "url": "https://github.com/Back-Road-Creative/band-coach/releases/download/v1.11.0/band-coach.html.sha256",
+      "sha256": "a65fdd9a1433d3e8887328e5f12b369d0e94f8d97b8196a99fa5462f03db9235"
     }
   },
   "demo": null,
