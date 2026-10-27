@@ -19,7 +19,11 @@ What to send:
 
 **[GitHub](https://github.com/Back-Road-Creative)** for issues and discussions on any repository in the organization. It is public, so keep anything confidential out of it.
 
-**Security reports:** do not open a public issue. Report privately through
-[GitHub Security Advisories](https://github.com/Back-Road-Creative/rigscore/security/advisories/new),
-which is also the address published in this site's machine-readable
-[security.txt](/.well-known/security.txt).
+**Security reports:** do not open a public issue. Report a security problem privately through the GitHub repository of the product it affects (open its Security tab and use "Report a vulnerability" where it is offered):
+[rigscore](https://github.com/Back-Road-Creative/rigscore/security),
+[bot-battle-station](https://github.com/Back-Road-Creative/bot-battle-station/security),
+[Band Coach](https://github.com/Back-Road-Creative/band-coach/security),
+[Waypost](https://github.com/Back-Road-Creative/waypost/security),
+[Framegrade](https://github.com/Back-Road-Creative/framegrade/security) or
+[Quiet Corners](https://github.com/Back-Road-Creative/quiet-corners/security).
+The address in this site's machine-readable [security.txt](/.well-known/security.txt) is rigscore's.
