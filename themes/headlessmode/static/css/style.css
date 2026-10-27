@@ -786,4 +786,7 @@ pre.mermaid {
 .sheet-provenance { grid-column: 1 / -1; font-size: var(--font-size-2xs); color: var(--text-secondary); }
 .sheet-provenance summary { cursor: pointer; width: max-content; }
 .sheet-provenance p { margin: 0.35rem 0 0; font-variant-numeric: tabular-nums; }
+.sheet-assets { margin: 0.35rem 0 0; padding: 0; list-style: none; }
+.sheet-assets li { margin: 0.2rem 0 0; }
+.sheet-sha code { overflow-wrap: anywhere; }
 .install-meta { font-size: var(--font-size-2xs); color: var(--text-secondary); }

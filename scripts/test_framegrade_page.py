@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Framegrade's roster row, its page, and the Waypost page that names it.
 
-Source-only (no Hugo build): data/systems.json, content/framegrade.md,
-content/waypost.md, data/releases/framegrade.json.
+Mostly source-only: data/systems.json, content/framegrade.md,
+content/waypost.md, data/releases/framegrade.json. The two Release details
+tests run a throwaway Hugo build against a copy of data/ (HUGO_DATADIR), so a
+published-release record can be rendered before the real one exists.
 
 Framegrade is the media engine used by the studio workflow. Its public
 Apache-2.0 repository publishes source tags, not GitHub Release objects. The
@@ -13,8 +15,13 @@ Run: pytest scripts/test_framegrade_page.py -v
 """
 
 import json
+import os
 import re
+import shutil
+import subprocess
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).parent.parent
 SYSTEMS = json.loads((ROOT / "data" / "systems.json").read_text(encoding="utf-8"))["systems"]
@@ -90,6 +97,59 @@ def test_framegrade_release_record_is_honest() -> None:
     assert re.fullmatch(r"[0-9a-f]{40}", rec["source_commit"])
     assert rec["released_at"] is None
     assert rec["demo"] is None and rec["assets"] == {}
+
+
+def _build_with_release(tmp_path: Path, record: dict) -> str:
+    """Build the site with data/releases/framegrade.json swapped for `record`
+    (HUGO_DATADIR points at a copy of data/) and return /framegrade/'s HTML.
+    Renders the sheet only, so no public/ or map policy is written for deploy."""
+    data = tmp_path / "data"
+    shutil.copytree(ROOT / "data", data)
+    (data / "releases" / "framegrade.json").write_text(json.dumps(record), encoding="utf-8")
+    out = tmp_path / "out"
+    subprocess.run(
+        ["hugo", "--quiet", "--source", str(ROOT), "--configDir", "site-config",
+         "--destination", str(out)],
+        env={**os.environ, "HUGO_DATADIR": str(data)},
+        check=True,
+    )
+    return (out / "framegrade" / "index.html").read_text(encoding="utf-8")
+
+
+@pytest.mark.skipif(shutil.which("hugo") is None, reason="hugo not installed")
+def test_a_published_release_lists_the_installer_and_sha256sums(tmp_path: Path) -> None:
+    """W8: once product-sync records a published GitHub Release, Release details
+    links each asset by name and shows the recorded sha256, so the Windows
+    installer and SHA256SUMS reach the page from data, never from prose."""
+    rec = json.loads(RELEASE.read_text(encoding="utf-8"))
+    base = "https://github.com/Back-Road-Creative/framegrade/releases/download/v0.3.11"
+    sha = "ab" * 32  # pragma: allowlist secret (fixture digest, not a credential)
+    rec.update(
+        release_source="github-release",
+        version="0.3.11",
+        released_at="2026-11-02T15:00:00Z",
+        release_url="https://github.com/Back-Road-Creative/framegrade/releases/tag/v0.3.11",
+        source_ref="v0.3.11",
+        assets={
+            "framegrade-setup-0.3.11.exe": {"url": f"{base}/framegrade-setup-0.3.11.exe", "sha256": sha},
+            "SHA256SUMS": {"url": f"{base}/SHA256SUMS"},
+        },
+    )
+    html = _build_with_release(tmp_path, rec)
+    details = html[html.index('class="sheet-provenance"'):html.index("</details>")]
+    assert "Latest release 0.3.11" in details
+    assert f'<a href="{base}/framegrade-setup-0.3.11.exe">framegrade-setup-0.3.11.exe</a>' in details
+    assert f'<a href="{base}/SHA256SUMS">SHA256SUMS</a>' in details
+    assert sha in details
+    assert "no GitHub Release assets" not in details
+
+
+@pytest.mark.skipif(shutil.which("hugo") is None, reason="hugo not installed")
+def test_a_source_tag_lists_no_assets(tmp_path: Path) -> None:
+    html = _build_with_release(tmp_path, json.loads(RELEASE.read_text(encoding="utf-8")))
+    details = html[html.index('class="sheet-provenance"'):html.index("</details>")]
+    assert "Latest source tag" in details and "no GitHub Release assets" in details
+    assert "sheet-assets" not in details
 
 
 def test_waypost_tools_underneath_names_framegrade_with_the_four_tools() -> None:
