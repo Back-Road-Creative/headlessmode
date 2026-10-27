@@ -165,6 +165,10 @@ for a in payload.get("assets", []):
             for chunk in iter(lambda: af.read(65536), b""):
                 h.update(chunk)
         entry["sha256"] = h.hexdigest()
+    else:
+        # Not downloaded: use the release asset's own digest ("sha256:<hex>"), else null.
+        digest = a.get("digest")
+        entry["sha256"] = digest[len("sha256:"):] if isinstance(digest, str) and digest.startswith("sha256:") else None
     assets[name] = entry
 
 data["version"] = version

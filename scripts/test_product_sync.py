@@ -95,6 +95,41 @@ def test_version_bump(tmp_path: Path, releases_dir: Path) -> None:
     assert data["assets"]["band-coach.html"]["url"].endswith("v1.9.0/band-coach.html")
 
 
+def test_sha256_comes_from_release_digest_when_not_downloaded(tmp_path: Path, releases_dir: Path) -> None:
+    digest = "a" * 64
+    payload = tmp_path / "release.json"
+    body = _release_payload("v1.9.0", [{"name": "band-coach.html"}, {"name": "other.zip"}])
+    body["assets"][0]["digest"] = f"sha256:{digest}"
+    _write_json(payload, body)
+
+    done = _run("band-coach", "v1.9.0", "--release-json", str(payload), "--releases-dir", str(releases_dir))
+    assert done.returncode == 0, done.stdout + done.stderr
+
+    assets = json.loads((releases_dir / "band-coach.json").read_text(encoding="utf-8"))["assets"]
+    assert assets["band-coach.html"]["sha256"] == digest
+    # No digest and no download: the key is still present (release data test requires it), as null.
+    assert "sha256" in assets["other.zip"]
+    assert assets["other.zip"]["sha256"] is None
+
+
+def test_local_hash_wins_over_release_digest(tmp_path: Path, releases_dir: Path) -> None:
+    asset = tmp_path / "band-coach.html"
+    asset.write_text("<html></html>", encoding="utf-8")
+    payload = tmp_path / "release.json"
+    body = _release_payload("v1.9.0", [{"name": "band-coach.html"}])
+    body["assets"][0]["digest"] = "sha256:" + "b" * 64
+    _write_json(payload, body)
+
+    done = _run(
+        "band-coach", "v1.9.0", "--release-json", str(payload),
+        "--releases-dir", str(releases_dir), "--asset", str(asset),
+    )
+    assert done.returncode == 0, done.stdout + done.stderr
+
+    assets = json.loads((releases_dir / "band-coach.json").read_text(encoding="utf-8"))["assets"]
+    assert assets["band-coach.html"]["sha256"] == _sha256(asset)
+
+
 def test_unknown_keys_preserved(tmp_path: Path, releases_dir: Path) -> None:
     payload = tmp_path / "release.json"
     _write_json(payload, _release_payload("v1.9.0", [{"name": "band-coach.html"}]))
