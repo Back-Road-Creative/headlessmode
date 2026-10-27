@@ -1,6 +1,6 @@
 ---
 title: "Privacy"
-description: "What each action on this site sends and stores: browsing, map layers, search, camera images, location, saved places, sharing, and who receives what."
+description: "What each action on this site sends and stores: browsing, map layers, search, camera images, location, saved places, sharing, the Band Coach and Waypost tools, and who receives what."
 date: 2026-08-02
 draft: false
 tags: ["privacy", "policy"]
@@ -22,6 +22,9 @@ Last reviewed 20 October 2026.
   comment system or forms, and its pages set no cookies from their own code.
   There is no measurement script, tag manager, advertising, tracking pixel or
   beacon, so nothing on a page counts your visit.
+- **Band Coach and Waypost** are separate programs you download or run
+  yourself, not part of this site's pages. Each has its own section below,
+  written from that program's public source.
 - **The host** serves those files and the relay. See [Hosting](#hosting).
 - **Your browser** keeps what the Quiet Corners map saves on your device. See
   [Saved places](#saved-places) and the other sections below for exactly what.
@@ -303,6 +306,112 @@ that service can read it.
 whose `#` fragment holds that place's coordinates and the current view
 settings. **Copy coordinates** copies the coordinates as text. None of these
 actions sends anything to a server or a provider.
+
+## Band Coach
+
+[Band Coach](/band-coach/) is a single HTML file you download and open in a
+browser. This section is written from its public source (package version 1.11.0,
+repository commit `2736d8f`).
+
+**Microphone.** Instruments that listen ask the browser for the microphone
+when you press Start or Connect (`getUserMedia`, with echo cancellation, noise
+suppression and automatic gain turned off). The sound goes into the browser's
+audio analysis in the page, which works out pitch and loudness for the level
+meter and the feedback. The source has no code that records the microphone
+(there is no `MediaRecorder`), and no code that sends audio anywhere. Switching
+to an instrument that does not listen closes the microphone.
+
+**What it keeps, and where.** Everything is in your browser, under the address
+the file was opened from:
+
+- local storage: `bandcoach.v1` (your progress and settings), `bandcoach.v1.backupAt`
+  (when you last saved a backup), `bandcoach.v1.tuneAsked` (which instruments
+  have already been asked about tuning), and `bandcoach.v1.corrupt` (a copy of
+  the saved profile, only if it could not be read);
+- session storage: `bandcoach.v1.errors`, the last 20 caught errors (message,
+  place, time), kept until the tab closes;
+- IndexedDB: `bandcoach-songs` (your saved songs) and `band-coach-model-packs`
+  (a downloaded model pack);
+- on the hosted copy only, a service worker and a browser cache named
+  `band-coach-pages-v` plus the version. The service worker is registered only
+  on `https:`, `localhost` or `127.0.0.1`, so a downloaded copy opened as a file
+  does not have one.
+
+**What leaves your device.** The source makes two network requests, and each runs
+only when you press its button under Settings. **Check for updates** fetches
+`https://back-road-creative.github.io/band-coach/version.json`. **Download model
+pack** fetches a manifest from `https://back-road-creative.github.io/band-coach/model-packs/core/manifest.json`
+and then the pack file it names, from the same folder. Neither request carries
+any of your progress, songs or audio; as with any web request, the server can see
+your IP address and browser. That address is the project's GitHub Pages site, not
+this site, so this site receives nothing from either. I found no other
+`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon` or analytics code in the
+app. **Copy diagnostics** only puts text on your clipboard (app version, browser
+string, which features exist, and recent errors with web addresses and file
+paths blanked); the app does not send it, and what you do with the text is your
+choice. **Save a backup** downloads `band-coach-progress.json` to your computer.
+
+**Deleting it.** Settings has **Erase all my data**. After you confirm, it removes
+every local-storage and session-storage key beginning `bandcoach`, deletes the
+two IndexedDB databases and the `band-coach-pages-v` caches, then reloads. A
+backup file you saved is a file on your computer and is yours to delete. Clearing
+your browser's site data for the page also removes the browser-held items above.
+
+## Waypost
+
+[Waypost](/waypost/) is software you run on your own computer. This section is
+written from the public `seo-manager` package (version 0.3.0, repository commit
+`78d65fa`). The web console in the studio deployment is not part of that package,
+so this section does not describe it. The read-only demo on this site is a fixed
+saved example.
+
+**What it handles.** Sign-in tokens for your own accounts, and the numbers the
+platforms report back:
+
+- **YouTube.** An OAuth token from Google's sign-in flow, which opens a browser
+  window on your computer. The package asks for the `youtube.readonly` and
+  `yt-analytics.readonly` scopes for analytics; the uploader asks for
+  `youtube.upload`, `youtube` and `youtube.readonly`.
+- **Facebook.** A Page access token and Page ID, read only by the earnings probe
+  (`meta_earnings_probe`).
+- **Analytics.** Per video: views, likes and comments (YouTube Data API) and
+  views, minutes watched, average view percentage, and card impressions, card
+  clicks and card click rate (YouTube Analytics API). The sync stores views,
+  likes, comments, card clicks, card impressions, the card click rate and an
+  engagement rate.
+
+**Where it is kept.** On your computer, in places you choose:
+
+- The setup guide's sign-in step saves the YouTube token as a JSON file at the
+  path you give (`youtube_credentials.json` in the guide), through an owner-only
+  temporary file (mode `0600` on POSIX).
+- The `BrandCredentials` helper keeps one folder per brand under a credentials
+  directory (default `./credentials`, relative to where you run it): the token
+  as `<brand>/youtube_oauth.json.enc` and the OAuth client as
+  `<brand>/client_secret.json.enc`, encrypted with Fernet, all with mode `0600`.
+  The encryption key is the file `.credentials_key` in that same directory.
+- The probes read a token from a SOPS-encrypted file you point them at
+  (`youtube_upload_token.json.enc`, `meta_publishing.json.enc`) or from standard
+  input. They do not write it anywhere.
+- Synced numbers go into an event log (`events.jsonl`, with `index.json`) under
+  `<storage path>/<site id>/`, by default `./data/seo/<site id>`. The Metricool
+  PDF importer, when no location is given, uses `seo_events` under the data home
+  (`$SEO_MANAGER_DATA_HOME`, else `$XDG_DATA_HOME/seo-manager`, else
+  `~/.local/share/seo-manager`).
+
+**What leaves your computer.** The package calls only these services, directly
+from the machine it runs on, with your token: Google's YouTube Data API (video
+statistics; uploads, thumbnails and playlist additions), YouTube Analytics API
+and YouTube Reporting API, and Meta's Graph API at `graph.facebook.com` (Page
+insights, with the token sent as a request parameter). An upload sends the video
+file and its title and description to YouTube. The package contains no call to
+this site and no analytics or error-reporting service, so this site receives
+none of it. Each platform receives your requests under its own terms.
+
+**Deleting it.** Delete the token file, the brand's folder under `credentials/`
+(and `.credentials_key` if you want the key gone), and the `data/seo/<site id>`
+folder or the data home folder you used. All of these are ordinary files on your
+computer.
 
 ## Diagram loading
 
