@@ -344,9 +344,9 @@ pack** fetches a manifest from `https://back-road-creative.github.io/band-coach/
 and then the pack file it names, from the same folder. Neither request carries
 any of your progress, songs or audio; as with any web request, the server can see
 your IP address and browser. That address is the project's GitHub Pages site, not
-this site, so this site receives nothing from either. I found no other
-`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon` or analytics code in the
-app. **Copy diagnostics** only puts text on your clipboard (app version, browser
+this site, so this site receives nothing from either. The app has no other
+`fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon` or analytics code.
+**Copy diagnostics** only puts text on your clipboard (app version, browser
 string, which features exist, and recent errors with web addresses and file
 paths blanked); the app does not send it, and what you do with the text is your
 choice. **Save a backup** downloads `band-coach-progress.json` to your computer.
