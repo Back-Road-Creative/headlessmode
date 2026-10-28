@@ -144,6 +144,7 @@
       "blurb": "A practice coach for 27 instruments that listens through your microphone or MIDI keyboard, checks pitch and timing, and picks what to practice next",
       "link": "/band-coach/",
       "repo": "https://github.com/Back-Road-Creative/band-coach",
+      "store": "https://apps.microsoft.com/detail/9PPJ10SXDPBN",
       "download": "https://github.com/Back-Road-Creative/band-coach/releases/latest/download/band-coach.html",
       "download_label": "Download the file",
       "platforms": [
