@@ -30,6 +30,8 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  # Dispatches pr-ci.yml on the release branch; see the open step.
+  actions: write
 
 jobs:
   sync:
@@ -123,6 +125,10 @@ jobs:
               --head "${BRANCH}" \
               --base master
           fi
+          # A push or PR made with the workflow token starts no PR CI run until a
+          # human approves it on GitHub (#61 waited at action_required, 2026-10-28).
+          # Dispatch it on the branch so the head SHA gets its check either way.
+          gh workflow run pr-ci.yml --ref "${BRANCH}"
 
       # Mirrors the old job's alerting: a broken sync must not sit unnoticed.
       - name: Create issue on failure

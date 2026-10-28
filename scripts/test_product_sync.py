@@ -23,6 +23,7 @@ SCRIPT = REPO_ROOT / "bin" / "product-sync.sh"
 WORKFLOW_DIR = REPO_ROOT / ".github" / "workflows"
 PRODUCT_SYNC_YML = WORKFLOW_DIR / "product-sync.yml"
 DRIFT_SENTINEL_YML = WORKFLOW_DIR / "drift-sentinel.yml"
+RIGSCORE_FACTS_SYNC_YML = WORKFLOW_DIR / "rigscore-facts-sync.yml"
 
 BAND_COACH_RELEASES = {
     "product": "band-coach",
@@ -336,6 +337,21 @@ def test_product_sync_dispatches_pr_ci_on_the_release_branch() -> None:
     # After the if/else that opens or updates the PR, so both paths reach it.
     assert script.index(dispatch) > script.rindex("\nfi"), script
 
+
+
+def test_rigscore_facts_sync_dispatches_pr_ci_on_the_release_branch() -> None:
+    """The same approval wait hit the rigscore facts PR: #61 (v2.3.0, 2026-10-28)
+    sat at action_required with no PR CI jobs. Its open step dispatches pr-ci.yml
+    after the open-or-update branch, and the workflow holds `actions: write`."""
+    with open(RIGSCORE_FACTS_SYNC_YML, encoding="utf-8") as f:
+        doc = yaml.safe_load(f)
+    assert doc["permissions"].get("actions") == "write", doc["permissions"]
+    script = next(
+        s["run"] for s in doc["jobs"]["sync"]["steps"] if "gh pr create" in (s.get("run") or "")
+    )
+    dispatch = 'gh workflow run pr-ci.yml --ref "${BRANCH}"'
+    assert dispatch in script, f"the open step never dispatches PR CI:\n{script}"
+    assert script.index(dispatch) > script.rindex("\nfi"), script
 
 def test_drift_sentinel_yml_still_parses() -> None:
     with open(DRIFT_SENTINEL_YML, encoding="utf-8") as f:
