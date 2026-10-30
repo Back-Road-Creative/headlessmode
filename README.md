@@ -782,8 +782,11 @@ elsewhere.
 `data/releases/<slug>.json` is the source for the product sheet's Release details.
 `product-sync.yml` checks Band Coach and Driftless's GitHub Release objects and
 Waypost and Framegrade's stable source tags daily at 06:47 UTC. It also accepts
-manual and `product-release` dispatches. Updates open review PRs; a failed sync
-opens or updates its tracking issue. Review and merge are still required before
+manual and `product-release` dispatches. Updates open review PRs, and a newer
+version's sync closes that product's older open sync PRs (`rigscore-facts-sync.yml`
+does the same for `rigscore-release/v*`), so only the latest one waits for review;
+a forced re-sync of an older tag never closes a newer PR. A failed sync opens or
+updates its tracking issue. Review and merge are still required before
 the website changes, so automation detects drift rather than promising an
 instant deployment.
 

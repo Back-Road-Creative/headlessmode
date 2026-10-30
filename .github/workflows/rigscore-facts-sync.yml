@@ -130,6 +130,31 @@ jobs:
           # Dispatch it on the branch so the head SHA gets its check either way.
           gh workflow run pr-ci.yml --ref "${BRANCH}"
 
+      # The open step only ever updates the PR for its own branch, so a newer
+      # release left the older sync PR open for good (#67, framegrade v0.3.14,
+      # still open after v0.3.15 shipped — 2026-10-30). Close the older ones
+      # here. Only an OLDER version is superseded: a forced re-sync of an older
+      # tag must never close the newer PR.
+      - name: Close superseded sync PRs
+        if: env.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          PREFIX="rigscore-release/v"
+          BRANCH="${PREFIX}${VERSION}"
+          gh pr list --state open --base master --limit 100 \
+            --json number,headRefName --jq '.[] | "\(.number) \(.headRefName)"' |
+          while read -r number head; do
+            case "${head}" in "${PREFIX}"*) ;; *) continue ;; esac
+            old="${head#"${PREFIX}"}"
+            [ "${old}" = "${VERSION}" ] && continue
+            [ "$(printf '%s\n%s\n' "${old}" "${VERSION}" | sort -V | head -n1)" = "${old}" ] || continue
+            echo "Closing #${number} (${head}): superseded by ${BRANCH}."
+            gh pr close "${number}" --delete-branch \
+              --comment "Superseded by ${BRANCH}: the rigscore facts sync now tracks a newer release, so this older one will never merge. Closed by the sync workflow."
+          done
+
       # Mirrors the old job's alerting: a broken sync must not sit unnoticed.
       - name: Create issue on failure
         if: failure()

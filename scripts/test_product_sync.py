@@ -583,3 +583,76 @@ def test_tag_sync_refuses_unsubstantiated_claims_without_mutation(tmp_path, rele
     result = _run("waypost", "v0.2.1", "--release-json", str(payload), "--releases-dir", str(releases_dir))
     assert result.returncode != 0
     assert path.read_bytes() == before
+
+
+# ---- Superseded sync PRs are closed, never left open ----------------------
+
+def _close_superseded_script(workflow: Path, rendered: dict[str, str]) -> str:
+    with open(workflow, encoding="utf-8") as f:
+        doc = yaml.safe_load(f)
+    step = next(s for s in doc["jobs"]["sync"]["steps"] if s.get("name") == "Close superseded sync PRs")
+    script = step["run"]
+    for expr, value in rendered.items():
+        script = script.replace(expr, value)
+    assert "${{" not in script, f"unrendered expression in close step: {script}"
+    # The version variable must reach the step: in product-sync it is a step
+    # output exported per step, not a job-wide env var.
+    if workflow == PRODUCT_SYNC_YML:
+        assert step.get("env", {}).get("TAG") == "${{ steps.release.outputs.tag }}", step.get("env")
+    return script
+
+
+def _run_close_step(tmp_path: Path, script: str, env: dict[str, str], open_prs: str) -> list[str]:
+    """Run the close step against a fake gh whose `pr list` prints open_prs
+    ("<number> <head>" lines); returns the `pr close` calls it made."""
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    calls = tmp_path / "gh-calls"
+    listing = tmp_path / "open-prs"
+    listing.write_text(open_prs)
+    fake_gh = fake_bin / "gh"
+    fake_gh.write_text(
+        "#!/usr/bin/env bash\n"
+        f'echo "$*" >> {calls}\n'
+        f'if [ "$1 $2" = "pr list" ]; then cat {listing}; fi\n'
+    )
+    fake_gh.chmod(0o755)
+    calls.touch()
+    proc = subprocess.run(
+        ["bash", "-c", script],
+        cwd=tmp_path, env={"PATH": f"{fake_bin}:/usr/bin:/bin", "GH_TOKEN": "x", **env},
+        capture_output=True, text=True, timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    return [line for line in calls.read_text().splitlines() if line.startswith("pr close")]
+
+
+def test_product_sync_closes_older_release_prs_of_the_same_product(tmp_path: Path) -> None:
+    """2026-10-30: framegrade v0.3.15's sync opens release/framegrade/v0.3.15
+    while #67 (release/framegrade/v0.3.14) would stay open for good — the open
+    step only ever updates the PR for its own branch. A newer tag closes the
+    older PRs of the same product; a newer tag's PR (a forced older re-sync),
+    other products and unrelated branches are left alone."""
+    script = _close_superseded_script(PRODUCT_SYNC_YML, {"${{ matrix.slug }}": "framegrade"})
+    closes = _run_close_step(
+        tmp_path, script, {"TAG": "v0.3.15"},
+        "67 release/framegrade/v0.3.14\n"
+        "70 release/framegrade/v0.3.15\n"
+        "71 release/framegrade/v0.3.16\n"
+        "72 release/waypost/v0.1.0\n"
+        "73 fix/release/framegrade/v0.3.1\n",
+    )
+    assert [c.split()[2] for c in closes] == ["67"], closes
+    assert "release/framegrade/v0.3.15" in closes[0]
+
+
+def test_rigscore_facts_sync_closes_older_release_prs(tmp_path: Path) -> None:
+    script = _close_superseded_script(RIGSCORE_FACTS_SYNC_YML, {})
+    closes = _run_close_step(
+        tmp_path, script, {"VERSION": "2.3.0"},
+        "61 rigscore-release/v2.2.0\n"
+        "62 rigscore-release/v2.3.0\n"
+        "63 rigscore-release/v2.10.0\n"
+        "64 release/framegrade/v0.3.14\n",
+    )
+    assert [c.split()[2] for c in closes] == ["61"], closes
