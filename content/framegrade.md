@@ -1,6 +1,6 @@
 ---
 title: "Framegrade — the media engine"
-description: "Grades video and photos, checks finished files and builds route films from GPS tracks. Available as tagged source for the studio media workflow."
+description: "Grades video and photos, checks finished files and builds route films from GPS tracks. Windows installer and tagged source for the studio media workflow."
 date: 2026-10-08
 draft: false
 tags: ["creator-tools", "video-pipeline", "photo-develop", "automation"]
@@ -8,8 +8,9 @@ tags: ["creator-tools", "video-pipeline", "photo-develop", "automation"]
 
 > **Access.** The source is public under Apache-2.0 at
 > [Back-Road-Creative/framegrade](https://github.com/Back-Road-Creative/framegrade).
-> A versioned source package is available; open **Release details** above for the current
-> tag and verified source commit. Follow the repository's installation instructions.
+> A Windows installer and a versioned source package are published; open **Release details**
+> above for the installer, its SHA-256 and the current version. Prerequisites are in the
+> repository's installation instructions.
 > Help with deployment is available through a studio engagement;
 > [contact me](/contact/) for setup.
 

@@ -141,6 +141,9 @@ def test_release_source_requires_its_fields(slug: str) -> None:
             f"{slug}.json release_source=github-release needs source_repo as bare "
             f"owner/repo, got {record['source_repo']!r}"
         )
+        assert "source_commit" not in record, (
+            f"{slug}.json release_source=github-release keeps a source tag's source_commit"
+        )
     elif record["release_source"] == "github-tag":
         assert re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", record["source_repo"] or "")
         assert re.fullmatch(r"[0-9a-f]{40}", record.get("source_commit", ""))

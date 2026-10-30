@@ -149,6 +149,10 @@ if source == "github-tag":
     if payload.get("html_url") != expected_url:
         sys.exit("error: source tag URL does not match the product repository")
     data["source_commit"] = sha
+else:
+    # A Release payload names no commit; one left from a github-tag record
+    # would be stale and would defeat the workflow's already-synced check.
+    data.pop("source_commit", None)
 
 version = tag[1:] if tag.startswith("v") else tag
 
