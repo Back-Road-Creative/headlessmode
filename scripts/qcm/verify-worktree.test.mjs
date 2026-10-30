@@ -15,7 +15,7 @@ const REAL_WORKFLOW = join(ROOT, '.github', 'workflows', 'pr-ci.yml');
 /** Run the script with a clean env: no inherited prefix, lock or CHROME_PATH unless the test sets it. */
 const run = (args, env = {}) => {
   const clean = { ...process.env };
-  for (const k of ['VERIFY_PYTEST_PREFIX', 'CHROME_PATH', 'NODE_TEST_CONTEXT']) delete clean[k];
+  for (const k of ['VERIFY_PYTEST_PREFIX', 'CHROME_PATH', 'NODE_TEST_CONTEXT', 'QCM_SCOPE', 'QCM_PATTERN']) delete clean[k];
   return spawnSync('bash', [SCRIPT, ...args], { cwd: ROOT, encoding: 'utf8', env: { ...clean, ...env } });
 };
 const planLines = (r) => r.stdout.split('\n').filter(Boolean);
@@ -192,4 +192,27 @@ test('a missing interpreter fails at run time with a message, not in --plan', ()
   const r = run(['--workflow', fixtureFile(), '--skip-build', '--python', '/nonexistent/python']);
   assert.notEqual(r.status, 0);
   assert.match(r.stderr, /python/i);
+});
+
+test('--python takes a bare command name and resolves it on PATH', () => {
+  const sh = spawnSync('bash', ['-c', 'command -v sh'], { encoding: 'utf8' }).stdout.trim();
+  const r = run(['--plan', '--workflow', fixtureFile(), '--python', 'sh']);
+  assert.equal(r.status, 0, r.stderr);
+  assert.equal(planLines(r)[2], `${sh} scripts/ok_one.py --flag`);
+});
+
+test('a local run with no QCM_SCOPE gives the node step the full tier and the classifier\'s glob', () => {
+  // The CI node step passes --qcm-scope "$QCM_SCOPE" from the scope job; unset locally, it was empty and the
+  // wrapper exited 2. A local run has no PR diff, and pr-scope.mjs calls an empty list `full`.
+  const dir = tmp();
+  const probe = join(dir, 'scope.test.mjs');
+  writeFileSync(probe, `import { test } from 'node:test'; import assert from 'node:assert/strict';
+import { QCM_PATTERN } from ${JSON.stringify(join(ROOT, 'scripts', 'ci', 'pr-scope.mjs'))};
+test('scope', () => { assert.equal(process.env.QCM_SCOPE, 'full'); assert.equal(process.env.QCM_PATTERN, QCM_PATTERN); });\n`);
+  const wf = fixtureFile(FIXTURE.replace('"scripts/qcm/*.test.mjs"', probe));
+  const r = run(['--workflow', wf, '--only', 'node', '--skip-build', '--log-dir', join(dir, 'logs')]);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  // A scope the caller sets is kept.
+  const site = run(['--workflow', wf, '--only', 'node', '--skip-build', '--log-dir', join(dir, 'l2')], { QCM_SCOPE: 'site' });
+  assert.notEqual(site.status, 0, 'QCM_SCOPE=site must reach the step unchanged');
 });

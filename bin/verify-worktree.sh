@@ -20,7 +20,7 @@
 # Usage: bin/verify-worktree.sh [options]
 #   --plan               print the ordered command list and exit 0, running nothing
 #   --workflow <path>    workflow to read (default .github/workflows/pr-ci.yml)
-#   --python <path>      interpreter for the venv/bin/python3 lines
+#   --python <path|name> interpreter for the venv/bin/python3 lines (a bare name is found on PATH)
 #                        (default ./venv/bin/python3, else the run fails)
 #   --node-modules <dir> symlink <dir> as ./node_modules when that is missing
 #   --lock <file>        run the node --test step under `flock -w 3600 <file>`
@@ -29,6 +29,7 @@
 #   --skip-build         skip the css and site builds
 #   --only node|python   run only that test family (builds still run unless --skip-build)
 # Env: VERIFY_PYTEST_PREFIX prefixes every python line (e.g. a test-slot wrapper);
+#      QCM_SCOPE / QCM_PATTERN default to the `full` tier and pr-scope.mjs's glob;
 #      CHROME_PATH is passed through, defaulting to the workflow's env: value.
 set -u
 
@@ -87,6 +88,8 @@ if [ "$SKIP_BUILD" -eq 0 ]; then
 fi
 
 PY_BIN="${PYTHON:-./venv/bin/python3}"
+# A bare name (`--python python3`) is looked up on PATH; an unknown one is left for the run-time check.
+case "$PY_BIN" in */*) ;; *) PY_BIN="$(command -v "$PY_BIN" || printf '%s' "$PY_BIN")" ;; esac
 PY_Q="$(printf '%q' "$PY_BIN")"
 NAMES=() CMDS=()
 add() { NAMES+=("$1"); CMDS+=("$2"); }
@@ -129,6 +132,14 @@ mkdir -p "$LOG_DIR" || die "cannot create log dir $LOG_DIR"
 export CHROME_PATH="${CHROME_PATH:-$WF_CHROME}"
 # The evidence wrapper writes its record under $RUNNER_TEMP, which only a runner sets.
 export RUNNER_TEMP="${RUNNER_TEMP:-$LOG_DIR}"
+# The node step takes --qcm-scope "$QCM_SCOPE" and the glob in $QCM_PATTERN from the scope job.
+# A local run has no PR diff, and scripts/ci/pr-scope.mjs calls an empty list `full`, so
+# default to that tier and read its glob from the classifier. A scope the caller set is kept.
+if [ "$ONLY" != python ] && [ -z "${QCM_SCOPE:-}" ]; then
+  QCM_PATTERN="$(node --input-type=module -e "import { QCM_PATTERN } from './scripts/ci/pr-scope.mjs'; process.stdout.write(QCM_PATTERN)")" \
+    || die "could not read QCM_PATTERN from scripts/ci/pr-scope.mjs"
+  export QCM_SCOPE=full QCM_PATTERN
+fi
 [ -n "$CHROME_PATH" ] || unset CHROME_PATH
 
 RESULTS=() FAILED=0 FAILED_LOGS=()
