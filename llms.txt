@@ -1,0 +1,35 @@
+# Headless Mode
+
+> Software products and free open tools from one studio; the products are on the homepage at /#software, and each system below links to its page (push-guard, which has none, links to its repository).
+
+Headless Mode publishes open single-purpose tools — rigscore among them, an open scanner that scores how safely a repository configures AI coding agents (MCP servers, skill files, permissions, secret exposure, sandbox posture, and more) — alongside the studio's products. The site carries no analytics, ads, or telemetry (see /privacy/). Crawler policy is in /robots.txt; the machine-readable check registry lives in /data/rigscore.json on the source repo. Each system's page carries its download or install command AND its documentation in a #documentation section — there is no separate docs hub.
+
+## Open source
+Source is public for all of these; each on-site page's Documentation section says where the manual lives — the repository README for most, on the page itself for rigscore.
+- [rigscore](https://headlessmode.com/rigscore/): Checks an AI development setup's configuration for security, consistency and governance problems; a default scan is local, and online and semantic checks run only with --online and --semantic. The full manual is on this page. Source: github.com/Back-Road-Creative/rigscore.
+- [keycut](https://headlessmode.com/keycut/): Cuts and joins multiple video ranges, copying video by default and moving each start forward to the next keyframe. Source: github.com/Back-Road-Creative/keycut.
+- [redactcam](https://headlessmode.com/redactcam/): Blurs faces, license plates and vehicle cabins in video, and checks cabin masks against a second detection pass before encoding. Source: github.com/Back-Road-Creative/redactcam.
+- [agent-audit](https://headlessmode.com/agent-audit/): Audits the configuration you give an AI coding agent: skill and instruction files, and workflow maturity. Source: github.com/Back-Road-Creative/agent-audit.
+- [claude-batch-runner](https://headlessmode.com/claude-batch-runner/): Runs batches of Claude Code tasks from a spec, validates outputs and reports cost. Source: github.com/Back-Road-Creative/claude-batch-runner.
+- [bot-battle-station](https://headlessmode.com/bot-battle-station/): A live wall screen for every Claude Code session on your machine: which need you, which are working, which wait on a job. Source: github.com/Back-Road-Creative/bot-battle-station.
+- [sun-track](https://headlessmode.com/sun-track/): Calculates solar elevation and golden-hour windows, and matches capture times to positions in GPX tracks. Source: github.com/Back-Road-Creative/sun-track.
+- [pycube-lut](https://headlessmode.com/pycube-lut/): Applies .cube LUTs, HALD CLUTs and 1D tone curves to NumPy images. Source: github.com/Back-Road-Creative/pycube-lut.
+- [push-guard](https://github.com/Back-Road-Creative/push-guard): A client-side hook that blocks direct pushes to protected branches so changes go through pull requests.
+
+## Products
+Driftless is public under Apache-2.0 at github.com/Back-Road-Creative/driftless. It is not listed on the homepage; its detail page carries release and source status. Waypost is public under MIT at github.com/Back-Road-Creative/waypost and Framegrade is public under Apache-2.0 at github.com/Back-Road-Creative/framegrade. Waypost has tagged source packages; its current tag and source commit appear in Release details on its product page. Framegrade publishes GitHub Releases: a Windows installer and SHA256SUMS, linked with their SHA-256 in Release details on its product page. Driftless, Grant Platform, Waypost and Framegrade are acquired through the studio; Quiet Corners is used directly in the browser, and its source is public; Grant Platform's source is private.
+- [Driftless](https://headlessmode.com/driftless/): Manages portfolios, programs and projects, computing status, forecasts and reports from data entered once.
+- [Quiet Corners](https://headlessmode.com/quiet-corners/): Scores rural U.S. counties on stability, remoteness, sprawl risk and affordability using Census and USDA data. Source: github.com/Back-Road-Creative/quiet-corners.
+- [Grant Platform](https://headlessmode.com/grant-platform/): Runs grant work end to end on one platform — funder award administration and compliance, and recipient discovery, applications, reporting and closeout.
+- [Waypost](https://headlessmode.com/waypost/): The tagged seo-manager package provides Python library and CLI tools for SEO metadata, validation, scheduling decisions and analytics. A separate studio integration runs video, photo, SEO, comment and scheduling pipelines from a locally run console; the frozen demo illustrates that integration. Drive to published slot on YouTube, Instagram and Facebook, with TikTok a manual handoff scheduled in TikTok Studio; runs on Framegrade and fronts keycut, redactcam, pycube-lut and sun-track. Driftless is a different product (project scheduling), not part of it. Source: github.com/Back-Road-Creative/waypost.
+- [Framegrade](https://headlessmode.com/framegrade/): Grades video and photos from measurements of the picture, checks each finished file, and builds route films from GPS tracks. Available as a Windows installer and tagged source; the media engine used by the studio workflow. It does not title, schedule or publish. Source: github.com/Back-Road-Creative/framegrade.
+- [Band Coach](https://headlessmode.com/band-coach/): Runs an adaptive practice plan for 26 instruments, grading what you play by microphone, MIDI or on-screen keys and tracking progress over time. Shipped 2026-09, v1.9.0, a single downloadable HTML file for Windows, Mac, Linux and Chromebook. Source: github.com/Back-Road-Creative/band-coach.
+
+## Project
+- [About](https://headlessmode.com/about/): What Headless Mode is and why it exists.
+- [Software](https://headlessmode.com/#software): The homepage products, rendered from data/systems.json with one canonical description and a contextual next step. It follows the homepage hero directly.
+- [Contact](https://headlessmode.com/contact/): How to reach Headless Mode — the channels that are actually monitored.
+- [Privacy](https://headlessmode.com/privacy/): What this site collects: nothing. No cookies, no analytics, no trackers.
+
+## Source
+- [Back Road Creative on GitHub](https://github.com/Back-Road-Creative): Every public repository listed above, with its README, per-check or per-module documentation, and issue tracker.

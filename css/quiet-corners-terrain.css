@@ -1,0 +1,151 @@
+/*
+ * Unit E1 — the lazy 3D terrain panel. Its own file, never appended to
+ * quiet-corners-maps.css or quiet-corners.css (N2/B3 territory): see the
+ * commit that added it. This sheet is small and loads eagerly with the rest of
+ * the dashboard's chrome, because the "3D" control button is visible on every
+ * load; only the vendored themes/headlessmode/static/vendor/maplibre-gl.css
+ * loads lazily, injected by Q/terrain-view.js the first time the panel opens.
+ *
+ * Contrast: #e4e4e7 on #0d0d1a (the dialog backdrop) is 15.4:1; the focus ring
+ * below is --accent-500 #4caf63, matching quiet-corners-maps.css.
+ */
+
+/* The "3D" opener: same leaflet-bar lane and 30x30 footprint as the existing
+   reset/finder controls (Q/terrain-view.js attachTerrainControl). */
+.qc-terrain-control .qc-terrain-open {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 0.875rem/1 system-ui, sans-serif;
+  background: #fff;
+  color: #18181b;
+  border: 0;
+  cursor: pointer;
+}
+
+.qc-terrain-control .qc-terrain-open:focus-visible {
+  outline: 2px solid #4caf63;
+  outline-offset: -2px;
+}
+
+@media (max-width: 1023px) {
+  .qc-terrain-control .qc-terrain-open {
+    width: 44px;
+    height: 44px;
+  }
+  /* The open place finder drops over this lane on a phone and leaves a 10px
+     sliver of "3D" showing beside it: too small to aim at, and still in the Tab
+     order behind the box. Hide it until the finder closes
+     (scripts/qcm/a11y-dynamic-browser.test.mjs, axe target-size). */
+  .leaflet-top.leaflet-left:has(.qc-finder-toggle[aria-expanded="true"]) .qc-terrain-control {
+    visibility: hidden;
+  }
+}
+
+/* The panel itself: a dialog over the map, built lazily by terrain-view.js on
+   first open and never present in the DOM before that. */
+.qc-terrain-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  background: #0d0d1a;
+  color: #e4e4e7;
+}
+
+.qc-terrain-canvas {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.qc-terrain-fallback {
+  margin: auto;
+  max-width: 32em;
+  padding: 1.5rem;
+  text-align: center;
+  font: 400 14px/1.5 system-ui, sans-serif;
+}
+
+.qc-terrain-controls {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #12121e;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qc-terrain-controls button,
+.qc-terrain-fallback .qc-terrain-close {
+  font: 500 13px/1 system-ui, sans-serif;
+  padding: 0.5rem 0.75rem;
+  min-height: 44px;
+  background: #18181b;
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qc-terrain-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: 400 13px/1.3 system-ui, sans-serif;
+}
+
+.qc-terrain-layers > summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  font: 500 13px/1 system-ui, sans-serif;
+  background: #18181b;
+  border: 1px solid #3f3f46;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qc-terrain-layers > fieldset {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  max-height: 50vh;
+  overflow: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  background: #12121e;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qc-terrain-layers legend {
+  font: 600 12px/1 system-ui, sans-serif;
+  padding: 0 0.25rem;
+}
+
+.qc-terrain-controls label:has(> input[data-layer-id]) {
+  min-height: 44px;
+}
+
+.qc-terrain-layers > summary:focus-visible,
+.qc-terrain-controls button:focus-visible,
+.qc-terrain-controls input:focus-visible,
+.qc-terrain-fallback .qc-terrain-close:focus-visible {
+  outline: 2px solid #4caf63;
+  outline-offset: 2px;
+}
+
+.qc-terrain-close {
+  margin-left: auto;
+}

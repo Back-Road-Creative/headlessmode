@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-labelledby="t">
+  <title id="t">rigscore's terminal report: a failing MCP server check, a passing check, an advisory, then the Hygiene and Practice grades</title>
+  <rect width="800" height="500" fill="#123d2b"/>
+  <rect x="60" y="60" width="680" height="380" rx="8" fill="#0f1411"/>
+  <rect x="60" y="60" width="680" height="34" rx="8" fill="#26302a"/>
+  <rect x="60" y="80" width="680" height="14" fill="#26302a"/>
+  <circle cx="84" cy="77" r="6" fill="#5b6b60"/>
+  <circle cx="104" cy="77" r="6" fill="#5b6b60"/>
+  <circle cx="124" cy="77" r="6" fill="#5b6b60"/>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17" fill="#d7e2da">
+    <text x="88" y="140"><tspan fill="#6cc77f">$</tspan> rigscore</text>
+    <text x="88" y="190"><tspan fill="#ff8a7a">[X]</tspan>   MCP server configuration</text>
+    <text x="448" y="190" fill="#ff8a7a">CRITICAL</text>
+    <text x="88" y="214" fill="#9fb0a4" font-size="15">      "filesystem" mounts /</text>
+    <text x="88" y="252"><tspan fill="#6cc77f">[OK]</tspan>  Cross-config coherence</text>
+    <text x="448" y="252" fill="#9fb0a4" font-size="15">governance matches config</text>
+    <text x="88" y="290"><tspan fill="#e8c46a">[ADV]</tspan> Semantic tool judge</text>
+    <text x="448" y="290" fill="#9fb0a4" font-size="15">advisory</text>
+    <line x1="88" y1="324" x2="712" y2="324" stroke="#2c3a31" stroke-width="1"/>
+    <text x="88" y="366" font-size="22" font-weight="700">HYGIENE <tspan fill="#6cc77f">78/100 (B)</tspan></text>
+    <text x="88" y="402" font-size="22" font-weight="700">Practice <tspan fill="#6cc77f">71/100 (B)</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Representations of Uncertainty — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-risk">Risk</a> &gt; <span aria-current="page">Representations of Uncertainty</span></nav>
+
+
+
+<h1>Representations of Uncertainty</h1>
+<p><em>Risk technique</em> ·
+   <a href="map-all#node-technique:representations_of_uncertainty">See it on the map</a></p>
+<p>Guide only — A distribution-shape picker could serve this.</p>
+<p>Describing an uncertain amount as a range instead of one falsely precise number.</p>
+<h2>When to use it</h2><p>Whenever a single-point estimate for cost, duration, or probability is being presented as if it were exact, and it isn&#39;t — which is most estimates. Useful input wherever a technique downstream (sensitivity analysis, decision tree analysis) needs a range rather than a point to work with.</p>
+<h2>When to avoid it</h2><p>When the extra precision of a full distribution (shape, spread, tails) buys nothing over a plain three-point range, because nobody downstream is going to do anything with the difference. Also avoid dressing up a genuine guess in distribution language — a triangular distribution built from three numbers someone made up in a meeting is still three numbers someone made up in a meeting.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-representations-of-uncertainty-0"> For the quantity in question, gather optimistic, most likely, and pessimistic estimates from whoever is closest to the work.</label></li>
+
+<li><label><input type="checkbox" id="step-representations-of-uncertainty-1"> Choose a shape that matches how the uncertainty actually behaves — triangular for a simple three-point estimate, a wider or skewed shape if you have reason to think bad outcomes are more likely than good ones by a large margin.</label></li>
+
+<li><label><input type="checkbox" id="step-representations-of-uncertainty-2"> Write the range and shape down next to the estimate, not just the single number that would otherwise get quoted in a status report.</label></li>
+
+<li><label><input type="checkbox" id="step-representations-of-uncertainty-3"> Use the range as the actual input wherever the estimate feeds a decision — don&#39;t collapse it back to a midpoint the moment it leaves the estimator&#39;s hands.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>An optimistic/most-likely/pessimistic range (or a described distribution shape) for the quantity, instead of one number.</li><li>A record of who supplied the estimate and on what basis, so it can be revisited.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Reporting the range once, then reverting to quoting only the most-likely figure everywhere else because it&#39;s simpler to write down.</li><li>Confusing a wide range with a careful one — width should reflect genuine uncertainty, not a padding reflex applied to look cautious.</li><li>Building a distribution nobody actually samples from. Driftless has no field for a distribution on a risk or estimate today; if you need this to feed an actual simulation, that simulation has to happen outside the tool — the only Monte Carlo Driftless runs is a schedule forecast over past sprint velocity, unrelated to any risk range you define here.</li></ul>
+
+
+<h2>Worked example</h2><p>An engineering team estimating a custom sensor housing gives one number, &#39;6 weeks,&#39; in the first plan. Pushed for a range, the lead engineer gives 4 weeks optimistic (parts arrive on time, first print works), 6 most likely, and 11 pessimistic (a redesign is needed after the first fit test). The 11-week tail, not the 6-week midpoint, is what changes the delivery commitment the PM makes to the client.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §11.4.2.4</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-11.4">Perform Quantitative Risk Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-contingent-response-strategies">Contingent Response Strategies</a></li>
+
+      <li><a href="techniques-decision-tree-analysis">Decision Tree Analysis</a></li>
+
+      <li><a href="techniques-influence-diagrams">Influence Diagrams</a></li>
+
+      <li><a href="techniques-prompt-lists">Prompt Lists</a></li>
+
+      <li><a href="techniques-risk-categorization">Risk Categorization</a></li>
+
+      <li><a href="techniques-risk-probability-and-impact-assessment">Risk Probability and Impact Assessment</a></li>
+
+      <li><a href="techniques-sensitivity-analysis">Sensitivity Analysis</a></li>
+
+      <li><a href="techniques-simulation">Simulation</a></li>
+
+      <li><a href="techniques-strategies-for-opportunities">Strategies for Opportunities</a></li>
+
+      <li><a href="techniques-strategies-for-overall-project-risk">Strategies for Overall Project Risk</a></li>
+
+      <li><a href="techniques-strategies-for-threats">Strategies for Threats</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:representations_of_uncertainty">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

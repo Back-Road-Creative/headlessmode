@@ -1,0 +1,68 @@
+{
+  "product": "band-coach",
+  "images": {
+    "instrument-picker.png": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "1440x900",
+      "scenario": "instrument picker sheet open on first visit: 27 instruments grouped by family, Tools row below",
+      "alt": "Band Coach's instrument picker: a button per instrument family, then a Tools row of drills, tuner, theory and a metronome"
+    },
+    "panel-ear.png": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "1440x900",
+      "scenario": "ear training, opened from the Tools row, scale-degree question in progress",
+      "alt": "Ear training: exercise buttons above the question Which scale degree do you hear?"
+    },
+    "panel-history.png": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "1440x900",
+      "scenario": "Progress from the main nav, before any session is logged",
+      "alt": "Progress before any practice: no sessions logged yet, a Start your first session button and results by instrument"
+    },
+    "panel-songs.png": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "1440x900",
+      "scenario": "Songs from the main nav: Add a song, the song library with built-in tunes",
+      "alt": "Songs: an Add a song button above the song library of built-in tunes"
+    },
+    "settings.png": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "1440x900",
+      "scenario": "Settings from the main nav: Backups and reset (with Erase all my data), Diagnostics, Updates, Model pack",
+      "alt": "Settings: reset an instrument, save or restore a backup, erase all data, diagnostics, updates and an optional model pack"
+    },
+    "song-practice.png": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "1440x900",
+      "scenario": "Hot Cross Buns opened from Songs, first step of practice underway",
+      "alt": "Hot Cross Buns from Songs: a listen step, Learn, Rehearse and Check modes, a My speed slider and a Play it on list"
+    },
+    "trainer-keyboard.png": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "1440x900",
+      "scenario": "keyboard trainer, desktop width",
+      "alt": "Keyboard trainer at Level 1 (C, D and E): on-screen keyboard, Start button and energy meter"
+    },
+    "trainer-phone.png": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "390x844",
+      "scenario": "main nav and instrument picker at phone width",
+      "alt": "Band Coach on a 390 px wide phone: the main nav and the instrument picker"
+    },
+    "home.jpg": {
+      "source": "v1.11.0",
+      "captured_at": "2026-10-27T15:40:15.024Z",
+      "viewport": "800x500",
+      "scenario": "home page: 800x500 crop of the keyboard trainer, cut 1:1 from its top-left corner",
+      "alt": "Band Coach's keyboard trainer: a two-hand on-screen keyboard, Start button and Level 1 card"
+    }
+  }
+}

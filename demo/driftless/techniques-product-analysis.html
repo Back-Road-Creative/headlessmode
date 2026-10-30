@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product Analysis — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-scope">Scope</a> &gt; <span aria-current="page">Product Analysis</span></nav>
+
+
+
+<h1>Product Analysis</h1>
+<p><em>Scope technique</em> ·
+   <a href="map-all#node-technique:product_analysis">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Turning a stated product idea into a defined, actionable set of requirements and deliverables.</p>
+<h2>When to use it</h2><p>Use it during Define Scope when the product itself -- not just the project&#39;s process or timeline -- is under-specified: you have a product concept or a one-line description and need to work out its functions, components, and requirements before Create <dfn><a href="glossary#wbs">WBS</a></dfn> can decompose anything.</p>
+<h2>When to avoid it</h2><p>It applies to product deliverables, not to every project. A project that is entirely process, event, or service work with no product being built or modified has nothing for product analysis to analyze -- don&#39;t force a value-engineering pass onto a deliverable that&#39;s actually an activity or a service outcome.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-product-analysis-0"> Start from the stated product description or concept, however informal, and name its major functions -- what it has to do, not how.</label></li>
+
+<li><label><input type="checkbox" id="step-product-analysis-1"> Break each function into the components or subsystems that deliver it (product breakdown) so the product&#39;s structure, not just its purpose, is visible.</label></li>
+
+<li><label><input type="checkbox" id="step-product-analysis-2"> For each component, ask whether it earns its cost relative to the function it serves (value engineering/value analysis) -- flag anything that looks like it costs more than the function is worth.</label></li>
+
+<li><label><input type="checkbox" id="step-product-analysis-3"> Turn each function and component into specific, testable requirements (requirements analysis) -- &#39;the checkout flow completes in under 5 steps&#39;, not &#39;checkout should be easy&#39;.</label></li>
+
+<li><label><input type="checkbox" id="step-product-analysis-4"> Validate the resulting requirement set with the people who stated the original product concept before it feeds Create WBS.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A structured breakdown of the product&#39;s functions and components.</li><li>A set of specific, testable requirements derived from the product description.</li><li>Flags on any component whose cost looks disproportionate to the function it serves.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Treating product analysis as an abstract exercise -- naming generic functions (&#39;user management&#39;, &#39;reporting&#39;) without ever converting them into requirements someone can build or test against.</li><li>Applying it to non-product deliverables (a training rollout, a process change) where there&#39;s no product structure to analyze, producing busywork instead of clarity.</li><li>Skipping the value-engineering pass and accepting every stated component at face value, missing the chance to drop or simplify something that costs more than it delivers.</li></ul>
+
+
+<h2>Worked example</h2><p>A community college is told to build &#39;a student advising portal&#39;. The PM runs product analysis: breaks the concept into functions (schedule an appointment, view degree progress, message an advisor), then components under each (a calendar service, a degree-audit data feed, a secure messaging channel). Value engineering flags the secure-messaging channel as expensive relative to its use -- advisors already use campus email -- so the PM proposes dropping it in favor of a mailto link, saving a build the sponsor agrees wasn&#39;t earning its cost. The remaining functions become specific requirements (&#39;a student can book an advising slot at least 48 hours out, in under 3 clicks&#39;) that feed Create WBS.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §5.3.2.5</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-5.3">Define Scope</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-benchmarking">Benchmarking</a></li>
+
+      <li><a href="techniques-context-diagram">Context Diagram</a></li>
+
+      <li><a href="techniques-decomposition">Decomposition</a></li>
+
+      <li><a href="techniques-inspection">Inspection</a></li>
+
+      <li><a href="techniques-prototypes">Prototypes</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+      <li><a href="artifacts-project-scope-statement">Project Scope Statement</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:product_analysis">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>
