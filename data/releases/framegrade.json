@@ -3,13 +3,13 @@
   "name": "Framegrade",
   "release_source": "github-tag",
   "source_repo": "Back-Road-Creative/framegrade",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "released_at": null,
-  "release_url": "https://github.com/Back-Road-Creative/framegrade/tree/v0.3.13",
-  "source_ref": "v0.3.13",
+  "release_url": "https://github.com/Back-Road-Creative/framegrade/tree/v0.3.14",
+  "source_ref": "v0.3.14",
   "assets": {},
   "demo": null,
   "media_source": null,
   "notes": "Stable source tag, not a GitHub Release object; no publication date or downloadable assets are inferred. The source package is gomoveshift-video; installation and prerequisites are documented in the tagged repository. No desktop installer is claimed.",
-  "source_commit": "ce504c05095d42df3234b903cb4adaaf10a1f83e"
+  "source_commit": "3bde2828bed1db3e6ba412d39ee4fe49a13988e8"
 }
