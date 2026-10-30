@@ -144,6 +144,22 @@ def test_unknown_keys_preserved(tmp_path: Path, releases_dir: Path) -> None:
     assert data["notes"] == "fixture"
 
 
+def test_a_release_sync_drops_a_source_tag_commit(tmp_path: Path, releases_dir: Path) -> None:
+    """A record flipped from github-tag keeps the old tag's source_commit until a
+    sync rewrites it. A Release payload carries no commit, so the stale one must
+    go: the workflow's already-synced check compares it, and Release details
+    would otherwise vouch for a commit the release never named."""
+    _write_json(releases_dir / "band-coach.json", {**BAND_COACH_RELEASES, "source_commit": "c" * 40})
+    payload = tmp_path / "release.json"
+    _write_json(payload, _release_payload("v1.9.0", [{"name": "band-coach.html"}]))
+
+    done = _run("band-coach", "v1.9.0", "--release-json", str(payload), "--releases-dir", str(releases_dir))
+    assert done.returncode == 0, done.stdout + done.stderr
+
+    data = json.loads((releases_dir / "band-coach.json").read_text(encoding="utf-8"))
+    assert "source_commit" not in data
+
+
 def test_rerun_same_tag_is_a_noop(tmp_path: Path, releases_dir: Path) -> None:
     """Running the sync twice for the already-current tag must not change the
     file the second time — idempotent, not merely skipped by the workflow's
