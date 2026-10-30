@@ -231,7 +231,7 @@ npx -y <mcp-server-package> | rigscore mcp-verify <server>                      
 | Code | Meaning |
 |---|---|
 | `0` | At or above `--fail-under` (baseline: no new findings) |
-| `1` | Below `--fail-under`, or new findings vs baseline |
+| `1` | Below `--fail-under`, a finding at or above the `--fail-on` severity, or new findings vs baseline |
 | `2` | Config error — bad `.rigscorerc.json`, unknown `--profile`, or corrupt baseline |
 | `3` | `rigscore mcp-verify <server>` with no runtime hash pinned |
 | `4` | `rigscore mcp-verify <server>` drift — the piped `tools/list` no longer matches the pinned runtime hash |
@@ -401,6 +401,7 @@ An invalid plugin warns to stderr and is skipped — it never crashes the scan.
 
 | Flag | What it does |
 |---|---|
+| `--fail-on <level>` | Exit 1 when any finding is at `critical` or `warning` severity or worse, regardless of score (`warning` includes `critical`). Respects suppressions and works with `--recursive`; an unknown level exits 2 |
 | `--badge` | Generate a markdown score badge for your README |
 | `--badge-format <f>` | Badge format: `markdown` (default, shields.io image snippet), `endpoint` (shields.io Endpoint Badge JSON, for a README badge that updates itself), or `svg` (self-contained, no network) |
 | `--check <id>` | Run a single check; an N/A check reports `n/a` and exits 0, not a red 0/100 |
