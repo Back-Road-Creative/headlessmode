@@ -1,15 +1,23 @@
 {
   "product": "framegrade",
   "name": "Framegrade",
-  "release_source": "github-tag",
+  "release_source": "github-release",
   "source_repo": "Back-Road-Creative/framegrade",
-  "version": "0.3.13",
-  "released_at": null,
-  "release_url": "https://github.com/Back-Road-Creative/framegrade/tree/v0.3.13",
-  "source_ref": "v0.3.13",
-  "assets": {},
+  "version": "0.3.15",
+  "released_at": "2026-10-30T15:10:55Z",
+  "release_url": "https://github.com/Back-Road-Creative/framegrade/releases/tag/v0.3.15",
+  "source_ref": "v0.3.15",
+  "assets": {
+    "framegrade-setup-0.3.15.exe": {
+      "url": "https://github.com/Back-Road-Creative/framegrade/releases/download/v0.3.15/framegrade-setup-0.3.15.exe",
+      "sha256": "e4d0cec1480bb2eb8a3dcfb159336ff62646ace74f789c4613773a8c1df47d60"
+    },
+    "SHA256SUMS": {
+      "url": "https://github.com/Back-Road-Creative/framegrade/releases/download/v0.3.15/SHA256SUMS",
+      "sha256": "a1bc0d77e986faa5cc94e0a9d1797acd87398c090fc15cf647d48a44aa6892b7"
+    }
+  },
   "demo": null,
   "media_source": null,
-  "notes": "Stable source tag, not a GitHub Release object; no publication date or downloadable assets are inferred. The source package is gomoveshift-video; installation and prerequisites are documented in the tagged repository. No desktop installer is claimed.",
-  "source_commit": "ce504c05095d42df3234b903cb4adaaf10a1f83e"
+  "notes": "Windows installer and SHA256SUMS published with this GitHub Release; the SHA-256 beside each asset is GitHub's recorded digest. The source package is gomoveshift-video; installation and prerequisites are documented in the tagged repository."
 }

@@ -7,9 +7,9 @@ tests run a throwaway Hugo build against a copy of data/ (HUGO_DATADIR), so a
 published-release record can be rendered before the real one exists.
 
 Framegrade is the media engine used by the studio workflow. Its public
-Apache-2.0 repository publishes source tags, not GitHub Release objects. The
-page can name that source package without inventing a publication date,
-installer, price or customer count.
+Apache-2.0 repository published source tags only until v0.3.15, its first
+GitHub Release (a Windows installer and SHA256SUMS). The page names what the
+release record holds without inventing a price or customer count.
 
 Run: pytest scripts/test_framegrade_page.py -v
 """
@@ -87,16 +87,26 @@ def test_framegrade_page_states_no_price_count_or_date() -> None:
 
 
 def test_framegrade_release_record_is_honest() -> None:
+    """v0.3.15 is Framegrade's first published GitHub Release: the record names
+    its publication time and its two assets, each with a recorded SHA-256."""
     rec = json.loads(RELEASE.read_text(encoding="utf-8"))
     assert rec["product"] == "framegrade" and rec["name"] == "Framegrade"
-    assert rec["release_source"] == "github-tag" and rec["notes"]
+    assert rec["release_source"] == "github-release" and rec["notes"]
     assert rec["source_repo"] == "Back-Road-Creative/framegrade"
     assert "no product repository" not in rec["notes"]
+    assert "No desktop installer" not in rec["notes"]
     assert re.fullmatch(r"\d+\.\d+\.\d+", rec["version"])
-    assert rec["source_ref"] == f"v{rec['version']}"
-    assert re.fullmatch(r"[0-9a-f]{40}", rec["source_commit"])
-    assert rec["released_at"] is None
-    assert rec["demo"] is None and rec["assets"] == {}
+    tag = f"v{rec['version']}"
+    assert rec["source_ref"] == tag
+    assert rec["release_url"] == f"https://github.com/Back-Road-Creative/framegrade/releases/tag/{tag}"
+    assert re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", rec["released_at"])
+    assert "source_commit" not in rec
+    assert rec["demo"] is None
+    base = f"https://github.com/Back-Road-Creative/framegrade/releases/download/{tag}"
+    assert set(rec["assets"]) == {f"framegrade-setup-{rec['version']}.exe", "SHA256SUMS"}
+    for name, asset in rec["assets"].items():
+        assert asset["url"] == f"{base}/{name}"
+        assert re.fullmatch(r"[0-9a-f]{64}", asset["sha256"] or ""), name
 
 
 def _build_with_release(tmp_path: Path, record: dict) -> str:
@@ -146,7 +156,17 @@ def test_a_published_release_lists_the_installer_and_sha256sums(tmp_path: Path) 
 
 @pytest.mark.skipif(shutil.which("hugo") is None, reason="hugo not installed")
 def test_a_source_tag_lists_no_assets(tmp_path: Path) -> None:
-    html = _build_with_release(tmp_path, json.loads(RELEASE.read_text(encoding="utf-8")))
+    rec = json.loads(RELEASE.read_text(encoding="utf-8"))
+    rec.update(
+        release_source="github-tag",
+        version="0.3.13",
+        released_at=None,
+        release_url="https://github.com/Back-Road-Creative/framegrade/tree/v0.3.13",
+        source_ref="v0.3.13",
+        source_commit="ce504c05095d42df3234b903cb4adaaf10a1f83e",
+        assets={},
+    )
+    html = _build_with_release(tmp_path, rec)
     details = html[html.index('class="sheet-provenance"'):html.index("</details>")]
     assert "Latest source tag" in details and "no GitHub Release assets" in details
     assert "sheet-assets" not in details

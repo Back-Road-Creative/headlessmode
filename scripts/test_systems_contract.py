@@ -1267,9 +1267,15 @@ def test_bot_battle_station_is_not_offered_as_a_windows_installer():
     assert "Runs on Linux, macOS" in page
 
 
-@pytest.mark.parametrize("slug", ["waypost", "framegrade"])
+def _release_record(slug: str) -> dict:
+    return json.loads((ROOT / "data" / "releases" / f"{slug}.json").read_text())
+
+
+@pytest.mark.parametrize(
+    "slug", [s for s in ("waypost", "framegrade") if _release_record(s)["release_source"] == "github-tag"]
+)
 def test_source_tag_details_render_ledger_without_invented_release_date(slug):
-    record = json.loads((ROOT / "data" / "releases" / f"{slug}.json").read_text())
+    record = _release_record(slug)
     html = built(f"/{slug}/").read_text()
     assert "Latest source tag" in html
     assert record["source_ref"] in html
@@ -1278,6 +1284,23 @@ def test_source_tag_details_render_ledger_without_invented_release_date(slug):
     assert "no GitHub Release assets" in html
     assert "Latest release" not in html
     assert "no installer or versioned release" not in html
+    assert "January 0001" not in html
+
+
+@pytest.mark.parametrize(
+    "slug", [s for s in ("waypost", "framegrade") if _release_record(s)["release_source"] == "github-release"]
+)
+def test_published_release_details_link_each_asset_with_its_sha256(slug):
+    """Once a product flips to github-release (Framegrade at v0.3.15), its
+    Release details name the release, not a source tag, and link every asset."""
+    record = _release_record(slug)
+    html = built(f"/{slug}/").read_text()
+    assert f"Latest release {record['version']}" in html
+    assert "Latest source tag" not in html and "no GitHub Release assets" not in html
+    assert record["assets"], f"{slug}.json is github-release with no assets"
+    for name, asset in record["assets"].items():
+        assert f'href="{asset["url"]}"' in html or f"href={asset['url']}" in html, name
+        assert asset["sha256"] in html, name
     assert "January 0001" not in html
 
 
