@@ -1,13 +1,15 @@
 {
   "generatedBy": "scripts/generate-facts.js",
-  "generatedAt": "2026-07-31",
-  "version": "2.2.0",
-  "date": "2026-07-31",
-  "checkCount": 28,
+  "generatedAt": "2026-10-30",
+  "version": "2.3.0",
+  "date": "2026-10-27",
+  "nodeFloor": "20.0.0",
+  "clientCount": 29,
+  "checkCount": 29,
   "scoredCount": 13,
-  "advisoryCount": 15,
+  "advisoryCount": 16,
   "enforcementGrades": {
-    "mechanical": 15,
+    "mechanical": 16,
     "keyword": 6,
     "pattern": 7
   },
@@ -163,6 +165,12 @@
       "enforcementGrade": "keyword"
     },
     {
+      "id": "staged-copy-drift",
+      "weight": 0,
+      "category": "process",
+      "enforcementGrade": "mechanical"
+    },
+    {
       "id": "unicode-steganography",
       "weight": 4,
       "category": "governance",
@@ -249,6 +257,7 @@
     "--cyclonedx",
     "--deep",
     "--depth",
+    "--fail-on",
     "--fail-under",
     "--fix",
     "--help",
