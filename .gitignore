@@ -31,7 +31,7 @@ themes/headlessmode/static/css/tailwind.css
 
 verification_reports/
 
-scripts/__pycache__/
+__pycache__/
 scripts/.pytest_cache/
 venv/
 .venv/
