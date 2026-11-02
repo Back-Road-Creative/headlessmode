@@ -419,6 +419,39 @@ def test_llms_txt_names_every_system_that_has_somewhere_to_point():
     )
 
 
+def test_llms_txt_pins_no_release_version():
+    """static/llms.txt is copied verbatim and product-sync never rewrites it, so
+    a version written here goes stale at the next release: it told agents Band
+    Coach was v1.9.0 two releases after the page moved on. Release Details on
+    each product page carries the version, from data/releases/."""
+    pinned = re.findall(r"\bv\d+\.\d+(?:\.\d+)?\b", LLMS.read_text())
+    assert not pinned, "static/llms.txt pins release versions: " + ", ".join(pinned)
+
+
+def test_llms_txt_instrument_count_matches_the_ledger():
+    """The same count is hand-written in both files. The ledger's blurb is what
+    the homepage renders, so llms.txt follows it."""
+    pattern = re.compile(r"\b(\d+) instruments\b")
+    blurb = next(s["blurb"] for s in systems() if s["name"] == "Band Coach")
+    assert pattern.findall(LLMS.read_text()) == pattern.findall(blurb)
+
+
+def test_llms_txt_names_the_store_for_a_system_with_a_store_listing():
+    """A system with a store key is installed from there first, so the file that
+    tells agents what is here cannot describe it as a download only."""
+    lines = LLMS.read_text().splitlines()
+    missing = [
+        s["name"]
+        for s in systems()
+        if "store" in s
+        and not any(
+            line.startswith(f"- [{s['name']}]") and "Microsoft Store" in line
+            for line in lines
+        )
+    ]
+    assert not missing, "llms.txt omits the store listing for: " + ", ".join(missing)
+
+
 def test_llms_txt_lists_no_system_the_ledger_has_dropped():
     """The reverse direction: only these two sections enumerate systems, so a
     name here that systems.json no longer carries means one file was edited
