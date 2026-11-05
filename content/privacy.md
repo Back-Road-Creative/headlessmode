@@ -310,8 +310,8 @@ actions sends anything to a server or a provider.
 ## Band Coach
 
 [Band Coach](/band-coach/) is a single HTML file you download and open in a
-browser. This section is written from its public source (package version 1.11.0,
-repository commit `2736d8f`).
+browser. This section is written from its public source (package version 1.12.2,
+repository commit `740fa3e`).
 
 **Microphone.** Instruments that listen ask the browser for the microphone
 when you press Start or Connect (`getUserMedia`, with echo cancellation, noise
@@ -330,21 +330,19 @@ the file was opened from:
   the saved profile, only if it could not be read);
 - session storage: `bandcoach.v1.errors`, the last 20 caught errors (message,
   place, time), kept until the tab closes;
-- IndexedDB: `bandcoach-songs` (your saved songs) and `band-coach-model-packs`
-  (a downloaded model pack);
+- IndexedDB: `bandcoach-songs` (your saved songs), and `band-coach-model-packs`
+  only if an older copy of the app created it, for a feature since removed;
 - on the hosted copy only, a service worker and a browser cache named
   `band-coach-pages-v` plus the version. The service worker is registered only
   on `https:`, `localhost` or `127.0.0.1`, so a downloaded copy opened as a file
   does not have one.
 
-**What leaves your device.** The source makes two network requests, and each runs
-only when you press its button under Settings. **Check for updates** fetches
-`https://back-road-creative.github.io/band-coach/version.json`. **Download model
-pack** fetches a manifest from `https://back-road-creative.github.io/band-coach/model-packs/core/manifest.json`
-and then the pack file it names, from the same folder. Neither request carries
-any of your progress, songs or audio; as with any web request, the server can see
-your IP address and browser. That address is the project's GitHub Pages site, not
-this site, so this site receives nothing from either. The app has no other
+**What leaves your device.** The source makes one network request, and it runs
+only when you press **Check for updates** under Settings. It fetches
+`https://back-road-creative.github.io/band-coach/version.json`. The request does
+not carry any of your progress, songs or audio; as with any web request, the
+server can see your IP address and browser. That address is the project's GitHub
+Pages site, not this site, so this site receives nothing from it. The app has no other
 `fetch`, `XMLHttpRequest`, `WebSocket`, `sendBeacon` or analytics code.
 **Copy diagnostics** only puts text on your clipboard (app version, browser
 string, which features exist, and recent errors with web addresses and file
@@ -353,7 +351,7 @@ choice. **Save a backup** downloads `band-coach-progress.json` to your computer.
 
 **Deleting it.** Settings has **Erase all my data**. After you confirm, it removes
 every local-storage and session-storage key beginning `bandcoach`, deletes the
-two IndexedDB databases and the `band-coach-pages-v` caches, then reloads. A
+IndexedDB databases above and the `band-coach-pages-v` caches, then reloads. A
 backup file you saved is a file on your computer and is yours to delete. Clearing
 your browser's site data for the page also removes the browser-held items above.
 
