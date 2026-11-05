@@ -112,6 +112,12 @@ function spawnBrowser(bin, userDataDir) {
     "--hide-scrollbars",
     "--force-color-profile=srgb",
     "--no-sandbox",
+    // A scripted click is not a user gesture, so without this the audio clock
+    // never starts and a timed exercise never moves (shot 9). The fake mic stops
+    // Start waiting on a permission prompt nobody can answer.
+    "--autoplay-policy=no-user-gesture-required",
+    "--use-fake-ui-for-media-stream",
+    "--use-fake-device-for-media-stream",
     "about:blank",
   ];
   const child = spawn(bin, args, { stdio: ["ignore", "ignore", "pipe"] });
@@ -305,6 +311,16 @@ async function main() {
   await nav("practice");
   await nav("instrument");
   await shoot("trainer-phone", { width: 390, height: 844 });
+
+  // 9. A timed exercise showing when to play: the drum kit trainer, Start
+  // pressed, caught in the count-in with a ring closing on the next drum. Last,
+  // because a take keeps running behind any shot after it. beatCue is read only
+  // to know when the ring is on screen, never to move the app.
+  await click('#picker button[data-mod="drum-kit"]');
+  await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+  await click("#playBtn");
+  await waitFor("(() => { const c = window.__coach.beatCue(); return c && c.kind === 'kit' && c.n != null && (c.rings || []).some((r) => r.progress > 0.2 && r.progress < 0.6); })()", 30000);
+  await shoot("trainer-beat-cue", { width: 1440, height: 900 });
 
   try { await sendBrowser("Target.closeTarget", { targetId }); } catch {}
   browserWs.close();
