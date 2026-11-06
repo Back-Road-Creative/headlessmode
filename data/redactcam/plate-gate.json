@@ -1,0 +1,18 @@
+{
+  "_provenance": {"what": "redactcam's license-plate false-positive gate, and the object classes it separates.",
+   "source": "redactcam 0.1.0 — redactcam/presets.py, the ROAD_FOOTAGE preset",
+   "gate_is": "Verbatim threshold values from that preset (plate_min_aspect, plate_max_aspect, plate_max_area_frac).",
+   "classes_are": "The measured ranges that preset's comments record from real forward-facing 4K road footage. They are per-class ranges, not detections from any one video, and this page draws them as illustrative rectangles rather than as a result.",
+   "recipe": "python -c \"from redactcam.presets import ROAD_FOOTAGE as p; print(p['plate_min_aspect'], p['plate_max_aspect'], p['plate_max_area_frac'])\""},
+  "gate": {"min_aspect": 2.0, "max_aspect": 6.0, "max_area_pct": 0.6},
+  "classes": [
+    {"label": "License plate", "aspect": [2.4, 4.7], "area": [null, 0.4], "kept": true,
+     "note": "About 2.4-3:1 seen at an angle, up to 4.7:1 head-on, and up to 0.4% of a 4K frame in the recorded footage. No lower area bound is recorded — a plate 40 m out is a handful of pixels."},
+    {"label": "Place-name sign", "aspect": [1.4, 1.65], "area": [0.84, 1.45], "kept": false,
+     "note": "Boxes near-square, so the aspect floor alone drops it. A plate model still scores it around 0.6 — above any confidence threshold that still kept the plates in that footage."},
+    {"label": "Stone wall, verge, bridge abutment", "aspect": [2.0, 2.7], "area": [1.4, 7.6], "kept": false,
+     "note": "The one the aspect band cannot catch: it lands squarely inside the ratio window. Area is what separates it — it covers several percent of the frame in the recorded footage, where a plate covers a fraction of one percent."},
+    {"label": "Shoreline, bridge railing", "aspect": [13.0, 13.0], "area": [null, null], "kept": false,
+     "note": "About 13:1, far past the aspect ceiling. The preset records the ratio for this class and no area range, so it is drawn spanning the whole area axis."}
+  ]
+}

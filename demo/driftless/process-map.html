@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Process map — Business</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+      <span class="as-of-chip">As of 2026-07-01</span>
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map" aria-current="page">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <span aria-current="page">Process map</span></nav>
+
+<h1>Process map — Business</h1>
+<p><em>As of 2026-07-01</em> — each grid cell washed by the share of applicable projects producing or signing off that process: the cell's background colour is tinted according to that share, a bigger share reading as a stronger tint. These washes read grid cells only: a listed project's own state is a different vocabulary, legended where it is read.
+   <a href="map">Method map</a> · <a href="pmbok">PMBOK reference</a></p>
+<dl class="legend">
+
+  <dt aria-hidden="true"><span class="badge st-muted" title="none">&nbsp;&nbsp;</span></dt><dd>none</dd><dt aria-hidden="true"><span class="badge st-warn" title="under half">&nbsp;&nbsp;</span></dt><dd>under half</dd><dt aria-hidden="true"><span class="badge st-ok" title="half+">&nbsp;&nbsp;</span></dt><dd>half+</dd><dt aria-hidden="true"><span class="badge st-signed" title="all done">&nbsp;&nbsp;</span></dt><dd>all done</dd>
+</dl>
+<p>Each ring is this area's share of applicable project-process pairs produced or signed off, pooled across every project.</p>
+<div class="rings">
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Integration completion 36%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="36 64" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">36%</text>
+    </svg>Integration
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Scope completion 38%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="38 62" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">38%</text>
+    </svg>Scope
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Schedule completion 42%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="42 58" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">42%</text>
+    </svg>Schedule
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Cost completion 38%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="38 62" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">38%</text>
+    </svg>Cost
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Quality completion 33%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="33 67" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">33%</text>
+    </svg>Quality
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Resource completion 29%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="29 71" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">29%</text>
+    </svg>Resource
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Communications completion 25%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="25 75" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">25%</text>
+    </svg>Communications
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Risk completion 54%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="54 46" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">54%</text>
+    </svg>Risk
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Procurement completion 25%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="25 75" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">25%</text>
+    </svg>Procurement
+  </span>
+
+
+  <span>
+    <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+         aria-label="Stakeholder completion 38%"
+      >
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+              stroke-width="3.5" stroke-linecap="round"
+              stroke-dasharray="38 62" stroke-dashoffset="25"/>
+
+
+      <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="10" fill="currentColor">38%</text>
+    </svg>Stakeholder
+  </span>
+
+</div>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Whole-business process grid (scrolls sideways)">
+<table class="process-grid">
+  <caption class="sr-only">Whole-business process coverage as of 2026-07-01, knowledge area by row and process group by column</caption>
+
+  <thead>
+  <tr><th scope="col" class="pg-area">Knowledge area</th><th scope="col">Initiating</th><th scope="col">Planning</th><th scope="col">Executing</th><th scope="col">Monitoring and Controlling</th><th scope="col">Closing</th></tr>
+  </thead>
+  <tbody>
+
+  <tr>
+    <th scope="row" class="pg-area">Integration</th>
+
+    <td><a href="process-map"><span class="badge st-muted" title="0%">4.1 Develop Project Charter 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-4.1">4.1 reference</a><br></td><td><a href="process-map"><span class="badge st-muted" title="0%">4.2 Develop Project Management Plan 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-4.2">4.2 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">4.3 Direct and Manage Project Work 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-4.3">4.3 reference</a><br><a href="process-map"><span class="badge st-warn" title="25%">4.4 Manage Project Knowledge 25%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-4.4">4.4 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">4.5 Monitor and Control Project Work 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-4.5">4.5 reference</a><br><a href="process-map"><span class="badge st-ok" title="50%">4.6 Perform Integrated Change Control 50%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-4.6">4.6 reference</a><br></td><td><a href="process-map"><span class="badge st-warn" title="25%">4.7 Close Project or Phase 25%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-4.7">4.7 reference</a><br></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Scope</th>
+
+    <td></td><td><a href="process-map"><span class="badge st-muted" title="0%">5.1 Plan Scope Management 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-5.1">5.1 reference</a><br><a href="process-map"><span class="badge st-warn" title="25%">5.2 Collect Requirements 25%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-5.2">5.2 reference</a><br><a href="process-map"><span class="badge st-muted" title="0%">5.3 Define Scope 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-5.3">5.3 reference</a><br><a href="process-map"><span class="badge st-ok" title="75%">5.4 Create WBS 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-5.4">5.4 reference</a><br></td><td></td><td><a href="process-map"><span class="badge st-ok" title="50%">5.5 Validate Scope 50%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-5.5">5.5 reference</a><br><a href="process-map"><span class="badge st-ok" title="75%">5.6 Control Scope 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-5.6">5.6 reference</a><br></td><td></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Schedule</th>
+
+    <td></td><td><a href="process-map"><span class="badge st-muted" title="0%">6.1 Plan Schedule Management 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-6.1">6.1 reference</a><br><a href="process-map"><span class="badge st-ok" title="75%">6.2 Define Activities 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-6.2">6.2 reference</a><br><a href="process-map"><span class="badge st-warn" title="25%">6.3 Sequence Activities 25%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-6.3">6.3 reference</a><br><a href="process-map"><span class="badge st-muted" title="0%">6.4 Estimate Activity Durations 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-6.4">6.4 reference</a><br><a href="process-map"><span class="badge st-ok" title="75%">6.5 Develop Schedule 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-6.5">6.5 reference</a><br></td><td></td><td><a href="process-map"><span class="badge st-ok" title="75%">6.6 Control Schedule 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-6.6">6.6 reference</a><br></td><td></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Cost</th>
+
+    <td></td><td><a href="process-map"><span class="badge st-muted" title="0%">7.1 Plan Cost Management 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-7.1">7.1 reference</a><br><a href="process-map"><span class="badge st-muted" title="0%">7.2 Estimate Costs 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-7.2">7.2 reference</a><br><a href="process-map"><span class="badge st-ok" title="75%">7.3 Determine Budget 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-7.3">7.3 reference</a><br></td><td></td><td><a href="process-map"><span class="badge st-ok" title="75%">7.4 Control Costs 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-7.4">7.4 reference</a><br></td><td></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Quality</th>
+
+    <td></td><td><a href="process-map"><span class="badge st-muted" title="0%">8.1 Plan Quality Management 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-8.1">8.1 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">8.2 Manage Quality 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-8.2">8.2 reference</a><br></td><td><a href="process-map"><span class="badge st-warn" title="25%">8.3 Control Quality 25%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-8.3">8.3 reference</a><br></td><td></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Resource</th>
+
+    <td></td><td><a href="process-map"><span class="badge st-muted" title="0%">9.1 Plan Resource Management 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-9.1">9.1 reference</a><br><a href="process-map"><span class="badge st-muted" title="0%">9.2 Estimate Activity Resources 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-9.2">9.2 reference</a><br></td><td><a href="process-map"><span class="badge st-muted" title="0%">9.3 Acquire Resources 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-9.3">9.3 reference</a><br><a href="process-map"><span class="badge st-warn" title="25%">9.4 Develop Team 25%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-9.4">9.4 reference</a><br><a href="process-map"><span class="badge st-ok" title="75%">9.5 Manage Team 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-9.5">9.5 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">9.6 Control Resources 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-9.6">9.6 reference</a><br></td><td></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Communications</th>
+
+    <td></td><td><a href="process-map"><span class="badge st-muted" title="0%">10.1 Plan Communications Management 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-10.1">10.1 reference</a><br></td><td><a href="process-map"><span class="badge st-muted" title="0%">10.2 Manage Communications 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-10.2">10.2 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">10.3 Monitor Communications 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-10.3">10.3 reference</a><br></td><td></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Risk</th>
+
+    <td></td><td><a href="process-map"><span class="badge st-muted" title="0%">11.1 Plan Risk Management 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-11.1">11.1 reference</a><br><a href="process-map"><span class="badge st-muted" title="0%">11.2 Identify Risks 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-11.2">11.2 reference</a><br><a href="process-map"><span class="badge st-muted" title="0%">11.3 Perform Qualitative Risk Analysis 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-11.3">11.3 reference</a><br><a href="process-map"><span class="badge st-signed" title="100%">11.4 Perform Quantitative Risk Analysis 100%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-11.4">11.4 reference</a><br><a href="process-map"><span class="badge st-signed" title="100%">11.5 Plan Risk Responses 100%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-11.5">11.5 reference</a><br></td><td><a href="process-map"><span class="badge st-signed" title="100%">11.6 Implement Risk Responses 100%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-11.6">11.6 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">11.7 Monitor Risks 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-11.7">11.7 reference</a><br></td><td></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Procurement</th>
+
+    <td></td><td><a href="process-map"><span class="badge st-muted" title="0%">12.1 Plan Procurement Management 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-12.1">12.1 reference</a><br></td><td><a href="process-map"><span class="badge st-muted" title="0%">12.2 Conduct Procurements 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-12.2">12.2 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">12.3 Control Procurements 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-12.3">12.3 reference</a><br></td><td></td>
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">Stakeholder</th>
+
+    <td><a href="process-map"><span class="badge st-muted" title="0%">13.1 Identify Stakeholders 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-13.1">13.1 reference</a><br></td><td><a href="process-map"><span class="badge st-muted" title="0%">13.2 Plan Stakeholder Engagement 0%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-13.2">13.2 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">13.3 Manage Stakeholder Engagement 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-13.3">13.3 reference</a><br></td><td><a href="process-map"><span class="badge st-ok" title="75%">13.4 Monitor Stakeholder Engagement 75%<span class="sr-only"> of applicable projects</span></span></a> <a href="pmbok-13.4">13.4 reference</a><br></td><td></td>
+  </tr>
+
+  </tbody>
+</table>
+</div>
+
+
+</main>
+</body>
+</html>

@@ -1,0 +1,36 @@
+# Headless Mode publishes software built and run by agent loops — its own
+# content should be discoverable to AI systems. We explicitly allow reputable
+# AI crawlers below. If that posture should change, update this file rather
+# than relying on silence.
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://headlessmode.com/sitemap.xml

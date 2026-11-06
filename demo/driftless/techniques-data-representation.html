@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Data Representation — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-general">General</a> &gt; <span aria-current="page">Data Representation</span></nav>
+
+
+
+<h1>Data Representation</h1>
+<p><em>General technique</em> ·
+   <a href="map-all#node-technique:data_representation">See it on the map</a></p>
+<p>Guide only — An umbrella group; its members are the runnable ones.</p>
+<p>The general term for turning analyzed data into a picture a reader can absorb quickly.</p>
+<h2>When to use it</h2><p>You have a finding or a data set and the audience needs to see the relationships in it, not just read a description of them — grouping, hierarchy, cause-and-effect, or a two-axis comparison are each easier to absorb visually than as prose.</p>
+<h2>When to avoid it</h2><p>When a plain sentence or a single number says everything the audience needs — building a matrix diagram for a decision with one clear answer is decoration, not communication. Also avoid picking a format for its polish rather than its fit: a mind map dressed up to look rigorous doesn&#39;t make a fuzzy idea rigorous.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-data-representation-0"> Identify the relationship in the data that matters most — grouping, hierarchy, cause-and-effect, sequence, or a two-axis comparison.</label></li>
+
+<li><label><input type="checkbox" id="step-data-representation-1"> Pick the format built for that relationship: affinity diagrams for grouping loose ideas, cause-and-effect diagrams for tracing a problem to its sources, flowcharts for sequence and branching, hierarchical charts for structure, matrix diagrams or a probability-and-impact matrix for two-axis comparison, SWOT for a four-quadrant internal/external view.</label></li>
+
+<li><label><input type="checkbox" id="step-data-representation-2"> Build it from the data you already analyzed — don&#39;t let the act of drawing the diagram substitute for having done the analysis.</label></li>
+
+<li><label><input type="checkbox" id="step-data-representation-3"> Label every element; an unlabeled box or arrow forces the reader to guess what you meant.</label></li>
+
+<li><label><input type="checkbox" id="step-data-representation-4"> Check the diagram against the underlying data once more before it goes into a deliverable — a mislabeled node is easy to introduce while drawing.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A diagram or chart that carries the finding, plus the data it was built from.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Picking a format for how it looks rather than what relationship it&#39;s built to show — a fishbone diagram for data with no cause-and-effect structure.</li><li>Skipping labels and leaving the reader to infer what a box or axis means.</li><li>Treating the diagram as the analysis instead of a representation of analysis already done.</li><li>Letting the diagram go stale after the underlying data changes.</li></ul>
+
+
+<h2>Worked example</h2><p>After the root cause analysis on late deliveries turns up five contributing factors, the quality lead builds a cause-and-effect diagram grouping them under supplier lead time, internal scheduling, and inspection delay, so the steering committee can see which branch to attack first instead of reading a five-item list.</p>
+
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="none">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+  No clause number is recorded for it here — a guessed citation would be worse than none. An umbrella technique group PMBOK-6 names in many processes&#39; ITTO tables across knowledge areas; its members carry the clause numbers, it does not.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-5.2">Collect Requirements</a></li>
+
+      <li><a href="pmbok-8.3">Control Quality</a></li>
+
+      <li><a href="pmbok-13.1">Identify Stakeholders</a></li>
+
+      <li><a href="pmbok-10.3">Monitor Communications</a></li>
+
+      <li><a href="pmbok-13.4">Monitor Stakeholder Engagement</a></li>
+
+      <li><a href="pmbok-11.3">Perform Qualitative Risk Analysis</a></li>
+
+      <li><a href="pmbok-10.1">Plan Communications Management</a></li>
+
+      <li><a href="pmbok-8.1">Plan Quality Management</a></li>
+
+      <li><a href="pmbok-9.1">Plan Resource Management</a></li>
+
+      <li><a href="pmbok-13.2">Plan Stakeholder Engagement</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-communication-methods">Communication Methods</a></li>
+
+      <li><a href="techniques-communication-models">Communication Models</a></li>
+
+      <li><a href="techniques-communication-requirements-analysis">Communication Requirements Analysis</a></li>
+
+      <li><a href="techniques-communication-skills">Communication Skills</a></li>
+
+      <li><a href="techniques-communication-technology">Communication Technology</a></li>
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-data-gathering">Data Gathering</a></li>
+
+      <li><a href="techniques-decision-making">Decision Making</a></li>
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+      <li><a href="techniques-project-reporting">Project Reporting</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-communications-management-plan">Communications Management Plan</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-quality-control-measurements">Quality Control Measurements</a></li>
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+      <li><a href="artifacts-requirements-documentation">Requirements Documentation</a></li>
+
+      <li><a href="artifacts-requirements-traceability-matrix">Requirements Traceability Matrix</a></li>
+
+      <li><a href="artifacts-resource-management-plan">Resource Management Plan</a></li>
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+      <li><a href="artifacts-stakeholder-engagement-plan">Stakeholder Engagement Plan</a></li>
+
+      <li><a href="artifacts-stakeholder-register">Stakeholder Register</a></li>
+
+      <li><a href="artifacts-team-charter">Team Charter</a></li>
+
+      <li><a href="artifacts-verified-deliverables">Verified Deliverables</a></li>
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Agile practices</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="methods-kanban">Kanban: Visualize the Workflow</a></li>
+
+      <li><a href="methods-kanban">Kanban: Kanban Board</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-4">Map</h3>
+    <ul aria-labelledby="related-4">
+
+      <li><a href="map-all#node-technique:data_representation">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

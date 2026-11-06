@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schedule Network Analysis — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-schedule">Schedule</a> &gt; <span aria-current="page">Schedule Network Analysis</span></nav>
+
+
+
+<h1>Schedule Network Analysis</h1>
+<p><em>Schedule technique</em> ·
+   <a href="map-all#node-technique:schedule_network_analysis">See it on the map</a></p>
+<p>Runnable here</p>
+<p>The general term for techniques that build a project schedule from its task dependencies.</p>
+<h2>When to use it</h2><p>Reach for this framing when you need to talk about analyzing the schedule network as a category — choosing which specific technique(s) below fit the situation — rather than as a standalone technique with its own distinct steps.</p>
+<h2>When to avoid it</h2><p>Don&#39;t cite &#34;schedule network analysis&#34; in place of naming the actual technique you used — it&#39;s a category label, and reporting it as the method obscures whether the real work was <dfn><a href="glossary#critical-path">critical path</a></dfn> method, resource optimization, or something else, each of which has different assumptions and different failure modes.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-schedule-network-analysis-0"> Build the dependency network (precedence diagramming method) with durations, leads and lags applied.</label></li>
+
+<li><label><input type="checkbox" id="step-schedule-network-analysis-1"> Choose the specific analysis the schedule needs: critical path method to find the driving sequence, resource optimization if resource contention is a factor, critical chain method if buffer-based tracking fits the project better, or a what-if scenario run to test the impact of a specific risk or assumption on the network.</label></li>
+
+<li><label><input type="checkbox" id="step-schedule-network-analysis-2"> Run that specific technique and read its output back into the schedule.</label></li>
+
+<li><label><input type="checkbox" id="step-schedule-network-analysis-3"> Repeat as the network changes — schedule network analysis is not a one-time pass, it&#39;s the ongoing discipline of re-deriving the schedule from the network whenever the network changes.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>Whatever the chosen specific technique produces — a critical path, a resource-leveled schedule, a buffer-tracked chain, or a what-if comparison — read through this umbrella framing as &#34;the current best schedule derived from the network&#34;.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>The umbrella term gets used as if it were itself a technique with a procedure, producing vague advice (&#34;do schedule network analysis&#34;) that doesn&#39;t tell anyone what to actually do next.</li><li>A what-if scenario run is performed once to answer a specific question and then treated as the ongoing schedule, rather than as a single scenario compared against the baseline.</li><li>Analysis stops after the first pass even though the network keeps changing, so the schedule&#39;s &#34;current&#34; critical path or resource picture is quietly stale.</li></ul>
+
+
+<h2>Worked example</h2><p>Ahead of a board presentation, a program manager runs three separate schedule network analyses on the same dependency network: a straight critical path run for the base case, a resource-optimization run reflecting a hiring freeze, and a what-if run modeling a two-week permit delay — presenting all three as distinct scenarios rather than a single number.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §6.5.2.1</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-6.5">Develop Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+      <li><a href="techniques-analogous-estimating">Analogous Estimating</a></li>
+
+      <li><a href="techniques-bottom-up-estimating">Bottom Up Estimating</a></li>
+
+      <li><a href="techniques-critical-chain-method">Critical Chain Method</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-dependency-determination">Dependency Determination</a></li>
+
+      <li><a href="techniques-leads-and-lags">Leads and Lags</a></li>
+
+      <li><a href="techniques-parametric-estimating">Parametric Estimating</a></li>
+
+      <li><a href="techniques-precedence-diagramming-method">Precedence Diagramming Method</a></li>
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-rolling-wave-planning">Rolling Wave Planning</a></li>
+
+      <li><a href="techniques-schedule-compression">Schedule Compression</a></li>
+
+      <li><a href="techniques-three-point-estimating">Three Point Estimating</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:schedule_network_analysis">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

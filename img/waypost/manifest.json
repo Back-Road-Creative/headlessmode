@@ -1,0 +1,12 @@
+{
+  "product": "waypost",
+  "images": {
+    "home.jpg": {
+      "source": "62f9408",
+      "captured_at": "2026-10-19T08:50:00-04:00",
+      "viewport": "800x500",
+      "scenario": "home page: crop of the /demo/waypost/ console Jobs page, scaled to 800x500",
+      "alt": "The Waypost demo console's Jobs page: a table of video, SEO and comment runs with their status, and the upcoming schedules"
+    }
+  }
+}

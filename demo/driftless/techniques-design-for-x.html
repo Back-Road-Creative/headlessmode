@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Design for X — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-quality">Quality</a> &gt; <span aria-current="page">Design for X</span></nav>
+
+
+
+<h1>Design for X</h1>
+<p><em>Quality technique</em> ·
+   <a href="map-all#node-technique:design_for_x">See it on the map</a></p>
+<p>Guide only — Applying a design guideline is a judgment call.</p>
+<p>A family of design rules that shapes a product around one specific later concern, like safety or cost.</p>
+<h2>When to use it</h2><p>Early in design, while changing the design is still cheap and the downstream concern (how it will be built, maintained, or paid for) is already known.</p>
+<h2>When to avoid it</h2><p>Once the design is locked and in production — applying Design for X at that point turns a pencil edit into an expensive redesign for a benefit that no longer offsets the cost. Also avoid piling on every possible X for a low-stakes deliverable; pick the X that actually matters for that product.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-design-for-x-0"> Identify which downstream concern matters most for this product — examples include Design for Manufacturability, Design for Reliability, Design for Maintainability/Serviceability, Design for Cost, and Design for Safety.</label></li>
+
+<li><label><input type="checkbox" id="step-design-for-x-1"> Bring in whoever owns that downstream concern — production, maintenance, procurement — while the design is still a draft, not after handoff.</label></li>
+
+<li><label><input type="checkbox" id="step-design-for-x-2"> Set specific, checkable guidelines for that X, for example &#39;minimize unique part count&#39; and &#39;standardize fastener sizes&#39; for Design for Manufacturability.</label></li>
+
+<li><label><input type="checkbox" id="step-design-for-x-3"> Review the design draft against the guidelines and flag violations before the design is finalized.</label></li>
+
+<li><label><input type="checkbox" id="step-design-for-x-4"> Where two X&#39;s conflict — cheapest part versus most serviceable part — make the trade-off on purpose and write down which one won and why.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A design revised against explicit, named criteria.</li><li>A documented record of trade-offs made between competing X&#39;s.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Treating &#39;Design for X&#39; as one generic review instead of naming the specific X and its guidelines — a design reviewed against no explicit criteria isn&#39;t Design for X, it&#39;s just a review.</li><li>Applying it after the design is already committed, when the fix costs a redesign instead of an edit.</li><li>Optimizing one X, such as cost, while quietly degrading another, such as serviceability, without anyone deciding that trade-off on purpose.</li></ul>
+
+
+<h2>Worked example</h2><p>Larch &amp; Rowe is designing a custom stair railing bracket for a repeat client. A Design for Manufacturability pass catches that the sketch specifies three different screw sizes; standardizing to one cuts fabrication time and inventory. A separate Design for Serviceability pass flags that the mounting screws would be hidden behind finished trim once installed — the design is changed to leave an access panel, because a future maintenance callback to remove trim would cost more than the panel does now.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §8.2</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-8.2">Manage Quality</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-audits">Audits</a></li>
+
+      <li><a href="techniques-problem-solving">Problem Solving</a></li>
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+      <li><a href="techniques-root-cause-analysis">Root Cause Analysis</a></li>
+
+      <li><a href="techniques-test-and-inspection-planning">Test and Inspection Planning</a></li>
+
+      <li><a href="techniques-testing-product-evaluations">Testing Product Evaluations</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-quality-report">Quality Report</a></li>
+
+      <li><a href="artifacts-test-and-evaluation-documents">Test and Evaluation Documents</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:design_for_x">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

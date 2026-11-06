@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multicriteria Decision Analysis — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-stakeholder">Stakeholder</a> &gt; <span aria-current="page">Multicriteria Decision Analysis</span></nav>
+
+
+
+<h1>Multicriteria Decision Analysis</h1>
+<p><em>Stakeholder technique</em> ·
+   <a href="map-all#node-technique:multicriteria_decision_analysis">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Scoring several options against stated, weighted criteria, so the choice is traceable rather than argued.</p>
+<h2>When to use it</h2><p>When choosing among several viable options — vendors, designs, sites — on more than one dimension (cost, risk, capability, schedule) and you need the reasoning to survive being questioned later.</p>
+<h2>When to avoid it</h2><p>Skip it for a decision with one obviously dominant option or one overriding constraint — the scoring exercise just launders a call that was already made. And treat with suspicion any use where the criteria and weights were set after the options were already known: weights chosen to fit a preferred answer are justification, not analysis, even though the resulting table looks identical to one honestly built.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-multicriteria-decision-analysis-0"> Define the criteria that matter to the decision before looking closely at the specific options.</label></li>
+
+<li><label><input type="checkbox" id="step-multicriteria-decision-analysis-1"> Assign each criterion a weight reflecting its relative importance, and agree the weights with stakeholders before scoring begins.</label></li>
+
+<li><label><input type="checkbox" id="step-multicriteria-decision-analysis-2"> Score each option against each criterion using a consistent scale.</label></li>
+
+<li><label><input type="checkbox" id="step-multicriteria-decision-analysis-3"> Multiply each score by its criterion&#39;s weight and sum for a total per option.</label></li>
+
+<li><label><input type="checkbox" id="step-multicriteria-decision-analysis-4"> Sanity-check the ranking against intuition — if the top result feels wrong, check whether a criterion is missing or a weight is off, rather than silently overriding the score.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A weighted score for each option, with the weights and criteria on record.</li><li>A ranked list of options traceable to stated priorities rather than to afterward-supplied reasoning.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Setting weights after seeing how the options score, to steer the total toward a preferred outcome — the table format makes this look like analysis even when it&#39;s the opposite.</li><li>Choosing criteria that all correlate with each other, so one underlying factor gets counted three or four times under different names.</li><li>Treating the weighted total as a decision rather than an input, and skipping the sanity check when the top-ranked option is surprising.</li></ul>
+
+
+<h2>Worked example</h2><p>A city is choosing a paving contractor. The procurement team sets criteria — price (40%), prior public-project experience (30%), crew availability in the required window (20%), local references (10%) — and publishes the weights before opening bids. The lowest-price bidder scores second overall once availability and experience are weighted in, and the award goes to the higher-priced bidder with the paper trail to defend it when the losing bidder asks why.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §5.2.2.4</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-5.2">Collect Requirements</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-autocratic-decision-making">Autocratic Decision Making</a></li>
+
+      <li><a href="techniques-focus-groups">Focus Groups</a></li>
+
+      <li><a href="techniques-ground-rules">Ground Rules</a></li>
+
+      <li><a href="techniques-stakeholder-analysis">Stakeholder Analysis</a></li>
+
+      <li><a href="techniques-stakeholder-engagement-assessment-matrix">Stakeholder Engagement Assessment Matrix</a></li>
+
+      <li><a href="techniques-voting">Voting</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-requirements-documentation">Requirements Documentation</a></li>
+
+      <li><a href="artifacts-requirements-traceability-matrix">Requirements Traceability Matrix</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:multicriteria_decision_analysis">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

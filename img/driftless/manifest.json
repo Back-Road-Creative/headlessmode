@@ -1,0 +1,12 @@
+{
+  "product": "driftless",
+  "images": {
+    "home.jpg": {
+      "source": "v0.8.0",
+      "captured_at": "2026-10-19T08:50:00-04:00",
+      "viewport": "800x500",
+      "scenario": "home page: crop of the /demo/driftless/ dashboard (figures, cost S-curve, portfolio treemap), scaled to 800x500",
+      "alt": "The Driftless demo dashboard: budget, actual and percent-complete figures over a cost S-curve and a portfolio treemap"
+    }
+  }
+}

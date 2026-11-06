@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Process map — Season 4 Rollout</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+      <span class="as-of-chip">As of 2026-07-01</span>
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map" aria-current="page">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="projects-1-hub">Season 4 Rollout</a> &gt; <span aria-current="page">Process map</span></nav>
+
+<h1>Process map — Season 4 Rollout</h1>
+<p><em>As of 2026-07-01</em> — completeness <strong>53%</strong> over 49 processes.
+   <a href="projects-1-wizard">Onboarding wizard</a> ·
+   <a href="projects-1-status">Weekly status</a> ·
+   <a href="map">This project on the method map</a> ·
+   <a href="#signoff">Sign off or waive a process</a></p>
+<dl class="legend">
+
+
+  <dt aria-hidden="true"><span class="badge st-ok" title="produced">&nbsp;●&nbsp;</span></dt>
+  <dd>Produced</dd>
+
+
+  <dt aria-hidden="true"><span class="badge st-signed" title="signed_off">&nbsp;✓&nbsp;</span></dt>
+  <dd>Signed Off</dd>
+
+
+  <dt aria-hidden="true"><span class="badge st-warn" title="in_progress">&nbsp;◐&nbsp;</span></dt>
+  <dd>In Progress</dd>
+
+
+  <dt aria-hidden="true"><span class="badge st-muted" title="waived">&nbsp;—&nbsp;</span></dt>
+  <dd>Waived</dd>
+
+
+  <dt aria-hidden="true"><span class="badge st-muted" title="not_started">&nbsp;○&nbsp;</span></dt>
+  <dd>Not Started</dd>
+
+</dl>
+
+<p>A cell with no mark reads <strong>Not tracked</strong> — the store holds no output of that process.</p>
+<p>Each ring is this area's share of assessable, non-waived processes produced or signed off.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Season 4 Rollout process grid (scrolls sideways)">
+<table class="process-grid">
+  <caption class="sr-only">Season 4 Rollout's processes as of 2026-07-01, knowledge area by row and process group by column</caption>
+  <thead>
+  <tr>
+    <th scope="col" class="pg-area">Knowledge area</th>
+    <th scope="col">Initiating</th><th scope="col">Planning</th><th scope="col">Executing</th><th scope="col">Monitoring and Controlling</th><th scope="col">Closing</th>
+  </tr>
+  </thead>
+  <tbody>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Integration completion 43%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="43 57" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">43%</text>
+      </svg>Integration</th>
+
+    <td>
+
+
+      <a href="pmbok-4.1"><span class="badge st-muted" title="not_started">4.1 Develop Project Charter <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-4.2"><span class="badge st-muted" title="not_started">4.2 Develop Project Management Plan <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-4.3"><span class="badge st-ok" title="produced">4.3 Direct and Manage Project Work <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+
+      <a href="pmbok-4.4"><span class="badge st-muted" title="not_started">4.4 Manage Project Knowledge <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-4.5"><span class="badge st-ok" title="produced">4.5 Monitor and Control Project Work <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+
+      <a href="pmbok-4.6"><span class="badge st-ok" title="produced">4.6 Perform Integrated Change Control <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-4.7"><span class="badge st-muted" title="not_started">4.7 Close Project or Phase <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Scope completion 67%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="67 33" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">67%</text>
+      </svg>Scope</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-5.1"><span class="badge st-muted" title="not_started">5.1 Plan Scope Management <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+
+      <a href="pmbok-5.2"><span class="badge st-ok" title="produced">5.2 Collect Requirements <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+
+      <a href="pmbok-5.3"><span class="badge st-muted" title="not_started">5.3 Define Scope <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+
+      <a href="pmbok-5.4"><span class="badge st-ok" title="produced">5.4 Create WBS <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-5.5"><span class="badge st-ok" title="produced">5.5 Validate Scope <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+
+      <a href="pmbok-5.6"><span class="badge st-ok" title="produced">5.6 Control Scope <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Schedule completion 67%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="67 33" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">67%</text>
+      </svg>Schedule</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-6.1"><span class="badge st-muted" title="not_started">6.1 Plan Schedule Management <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+
+      <a href="pmbok-6.2"><span class="badge st-ok" title="produced">6.2 Define Activities <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+
+      <a href="pmbok-6.3"><span class="badge st-ok" title="produced">6.3 Sequence Activities <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+
+      <a href="pmbok-6.4"><span class="badge st-muted" title="not_started">6.4 Estimate Activity Durations <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+
+      <a href="pmbok-6.5"><span class="badge st-ok" title="produced">6.5 Develop Schedule <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-6.6"><span class="badge st-ok" title="produced">6.6 Control Schedule <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Cost completion 50%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="50 50" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">50%</text>
+      </svg>Cost</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-7.1"><span class="badge st-muted" title="not_started">7.1 Plan Cost Management <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+
+      <a href="pmbok-7.2"><span class="badge st-muted" title="not_started">7.2 Estimate Costs <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+
+      <a href="pmbok-7.3"><span class="badge st-ok" title="produced">7.3 Determine Budget <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-7.4"><span class="badge st-ok" title="produced">7.4 Control Costs <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Quality completion 67%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="67 33" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">67%</text>
+      </svg>Quality</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-8.1"><span class="badge st-muted" title="not_started">8.1 Plan Quality Management <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-8.2"><span class="badge st-ok" title="produced">8.2 Manage Quality <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-8.3"><span class="badge st-ok" title="produced">8.3 Control Quality <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Resource completion 50%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="50 50" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">50%</text>
+      </svg>Resource</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-9.1"><span class="badge st-warn" title="in_progress">9.1 Plan Resource Management <span aria-hidden="true">◐</span><span class="sr-only"> — In Progress</span></span></a><br>
+
+
+      <a href="pmbok-9.2"><span class="badge st-warn" title="in_progress">9.2 Estimate Activity Resources <span aria-hidden="true">◐</span><span class="sr-only"> — In Progress</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-9.3"><span class="badge st-warn" title="in_progress">9.3 Acquire Resources <span aria-hidden="true">◐</span><span class="sr-only"> — In Progress</span></span></a><br>
+
+
+      <a href="pmbok-9.4"><span class="badge st-ok" title="produced">9.4 Develop Team <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+
+      <a href="pmbok-9.5"><span class="badge st-ok" title="produced">9.5 Manage Team <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-9.6"><span class="badge st-ok" title="produced">9.6 Control Resources <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Communications completion 33%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="33 67" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">33%</text>
+      </svg>Communications</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-10.1"><span class="badge st-muted" title="not_started">10.1 Plan Communications Management <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-10.2"><span class="badge st-muted" title="not_started">10.2 Manage Communications <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-10.3"><span class="badge st-ok" title="produced">10.3 Monitor Communications <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Risk completion 57%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="57 43" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">57%</text>
+      </svg>Risk</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-11.1"><span class="badge st-muted" title="not_started">11.1 Plan Risk Management <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+
+      <a href="pmbok-11.2"><span class="badge st-warn" title="in_progress">11.2 Identify Risks <span aria-hidden="true">◐</span><span class="sr-only"> — In Progress</span></span></a><br>
+
+
+      <a href="pmbok-11.3"><span class="badge st-warn" title="in_progress">11.3 Perform Qualitative Risk Analysis <span aria-hidden="true">◐</span><span class="sr-only"> — In Progress</span></span></a><br>
+
+
+      <a href="pmbok-11.4"><span class="badge st-ok" title="produced">11.4 Perform Quantitative Risk Analysis <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+
+      <a href="pmbok-11.5"><span class="badge st-ok" title="produced">11.5 Plan Risk Responses <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-11.6"><span class="badge st-ok" title="produced">11.6 Implement Risk Responses <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-11.7"><span class="badge st-ok" title="produced">11.7 Monitor Risks <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Procurement completion 33%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="33 67" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">33%</text>
+      </svg>Procurement</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-12.1"><span class="badge st-muted" title="not_started">12.1 Plan Procurement Management <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-12.2"><span class="badge st-warn" title="in_progress">12.2 Conduct Procurements <span aria-hidden="true">◐</span><span class="sr-only"> — In Progress</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-12.3"><span class="badge st-ok" title="produced">12.3 Control Procurements <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row" class="pg-area">
+
+
+      <svg class="ring" viewBox="0 0 36 36" width="34" height="34" role="img"
+           aria-label="Stakeholder completion 50%"
+      >
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-opacity="0.15" stroke-width="3.5"/>
+
+
+
+        <circle cx="18" cy="18" r="15.9155" fill="none" stroke="currentColor"
+                stroke-width="3.5" stroke-linecap="round"
+                stroke-dasharray="50 50" stroke-dashoffset="25"/>
+
+
+        <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+              font-size="10" fill="currentColor">50%</text>
+      </svg>Stakeholder</th>
+
+    <td>
+
+
+      <a href="pmbok-13.1"><span class="badge st-warn" title="in_progress">13.1 Identify Stakeholders <span aria-hidden="true">◐</span><span class="sr-only"> — In Progress</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-13.2"><span class="badge st-muted" title="not_started">13.2 Plan Stakeholder Engagement <span aria-hidden="true">○</span><span class="sr-only"> — Not Started</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-13.3"><span class="badge st-ok" title="produced">13.3 Manage Stakeholder Engagement <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+
+      <a href="pmbok-13.4"><span class="badge st-ok" title="produced">13.4 Monitor Stakeholder Engagement <span aria-hidden="true">●</span><span class="sr-only"> — Produced</span></span></a><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  </tbody>
+</table>
+</div>
+
+
+<h2>Tailoring — Predictive</h2>
+<ul>
+
+  <li><strong>4.5 Monitor and Control Project Work</strong> — Runs on: predictive baseline — Overall project performance is compared against the approved baseline no matter how the day-to-day work is tailored.</li>
+
+  <li><strong>4.6 Perform Integrated Change Control</strong> — Runs on: predictive baseline — Every plan change goes through one request-and-approval chain, so there is only ever one way to change the plan.</li>
+
+  <li><strong>5.5 Validate Scope</strong> — Runs on: predictive baseline — Finished work is accepted against the scope baseline the project approved.</li>
+
+  <li><strong>5.6 Control Scope</strong> — Runs on: predictive baseline — Scope changes are measured as variance from the approved scope baseline.</li>
+
+  <li><strong>6.6 Control Schedule</strong> — Runs on: predictive baseline — Progress is measured as variance from the approved schedule baseline.</li>
+
+  <li><strong>7.4 Control Costs</strong> — Runs on: predictive baseline — Spend is tracked against the approved cost baseline, however the work that earns it gets done.</li>
+
+  <li><strong>8.3 Control Quality</strong> — Runs on: predictive baseline — Quality is checked against the standard set out in the quality baseline.</li>
+
+  <li><strong>9.6 Control Resources</strong> — Runs on: predictive baseline — Resource use is tracked against the plan the project approved.</li>
+
+  <li><strong>10.3 Monitor Communications</strong> — Runs on: predictive baseline — Communications are checked against the plan the project approved.</li>
+
+  <li><strong>11.7 Monitor Risks</strong> — Runs on: predictive baseline — Risks are reviewed against the response plan the project approved.</li>
+
+  <li><strong>12.3 Control Procurements</strong> — Runs on: predictive baseline — Procurement performance is measured against the agreement the project approved.</li>
+
+  <li><strong>13.4 Monitor Stakeholder Engagement</strong> — Runs on: predictive baseline — Stakeholder engagement is checked against the plan the project approved.</li>
+
+</ul>
+
+<h2 id="signoff">Sign off or waive a process</h2>
+<p>Signing off records the process as approved-done; waiving tailors it out, dropping it
+   from every completeness figure above. Both are ledger entries, signed by whoever is
+   signed in — a reversal is a new decision, never an edit.</p>
+
+</main>
+</body>
+</html>

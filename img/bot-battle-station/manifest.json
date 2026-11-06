@@ -1,0 +1,19 @@
+{
+  "product": "bot-battle-station",
+  "images": {
+    "board.png": {
+      "source": "v0.2.0",
+      "captured_at": "2026-10-20T17:58:04Z",
+      "viewport": "1600x720",
+      "scenario": "demo.png from the v0.2.0 release (sha256 3b35c779ffa00dbd7328cbaebbee3c0ef3b64322c44792bec3dd6c8f0f388179): the board running its built-in demo sessions, no real session data",
+      "alt": "The bot-battle-station board with six demo sessions: DEFCON 1, Claude and Codex usage limits, a waiting-on-you banner, and tiles for needs-you, waiting-on-job, running and idle sessions"
+    },
+    "home.jpg": {
+      "source": "v0.2.0",
+      "captured_at": "2026-10-20T17:58:04Z",
+      "viewport": "800x500",
+      "scenario": "home page: the left 1152x720 of board.png, scaled to 800x500",
+      "alt": "The bot-battle-station board with demo sessions, limits and one tile per session"
+    }
+  }
+}

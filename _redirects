@@ -1,0 +1,83 @@
+# Cloudflare Pages redirects — the single redirect mechanism for this site.
+# Format: <from>  <to>  <status>
+# Supported statuses: 301, 302, 303, 307, 308 only (NO 4xx/410 — see
+# https://developers.cloudflare.com/pages/configuration/redirects/).
+# Limits: 2,000 static rules per file. Order matters: first match wins.
+
+# Retired 2026-08-03: /journal/, /work/ and /services/ lost their nav slots in
+# #251 and are no longer built. Splats cover every post and every child path.
+# /work lands on the homepage roster (see the /systems/ block below).
+/journal             /            301
+/journal/*           /            301
+/work                /#software   301
+/work/*              /#software   301
+/services            /contact/    301
+/services/*          /contact/    301
+
+# Retired 2026-08-04 (audit H4): /products/ lost its nav slot, its only inbound
+# link was llms.txt, and it duplicated the product tier. Lands on the roster.
+/products            /#software   301
+/products/*          /#software   301
+
+# rigscore product links: shipped releases hardcode learnMore + SARIF helpUri
+# URLs at /tools/rigscore/#<anchor>. Land them on /rigscore/, where those
+# anchors (#known-limits, #practice-score, ...) actually live — the manual
+# folded into the product page in the boutique redesign. No fragment on the
+# target, so the client-side anchor survives the redirect in browsers.
+# MUST stay above the /tools/* rule (first match wins).
+/tools/rigscore      /rigscore/    301
+/tools/rigscore/*    /rigscore/    301
+
+# Retired 2026-08-06 (boutique redesign): the /docs/ hub is gone. Each
+# system's documentation lives ON its page in a #documentation section, and
+# rigscore's manual, command reference, supported-clients matrix and verify
+# recipe all folded into /rigscore/. The hub itself had no single owner, so
+# it lands on the roster. A target fragment overrides an inbound one in
+# browsers, so old /docs/... deep links land at the Documentation section.
+/docs                /#software                  301
+/docs/rigscore       /rigscore/#documentation    301
+/docs/rigscore/*     /rigscore/#documentation    301
+/docs/reference      /rigscore/#documentation    301
+/docs/reference/*    /rigscore/#documentation    301
+/docs/clients        /rigscore/#documentation    301
+/docs/clients/*      /rigscore/#documentation    301
+/docs/verify         /rigscore/#documentation    301
+/docs/verify/*       /rigscore/#documentation    301
+/docs/*              /#software                  301
+
+# Retired 2026-08-06 (hybrid redesign): the /systems/ catalog is gone — the
+# full roster lives ONCE on the homepage, wrapped in id="software". A target
+# fragment overrides an inbound one in browsers.
+/systems             /#software   301
+/systems/*           /#software   301
+
+# Retired 2026-08-06 (hybrid redesign): the /releases/ section is gone —
+# release notes live on each project's GitHub releases page; the on-site
+# version truth stays data-driven on /rigscore/ (data/rigscore.json). These
+# splats also absorb the old duplicate-v2.2.0 slug rules that used to point
+# INTO /releases/ (a redirect whose target redirects is a chain, so those
+# rules are replaced rather than kept above these).
+/releases            /rigscore/   301
+/releases/*          /rigscore/   301
+
+# Retired sections (audit H5/L16). Intended 410s lived in functions/, which
+# never deployed (site uploads ./public only) — and _redirects cannot emit
+# 410 (see supported statuses above). 301 to the homepage instead: old URLs
+# drop out of search indexes and humans land on a live page instead of a 404.
+/tools/*             /    301
+/whatis/*            /    301
+/architecture/*      /    301
+
+# Field Maps was 52 pages — a federal one plus one per state — because a CSP
+# naming every state's land origins did not fit in a _headers line. It does now
+# (see themes/.../state-pages.js), so there is one map and the state pages are
+# retired. Every one of them lands on the same map, which then works out which
+# state the drawn area is in.
+#
+# The child segment is NAMED, not splatted. `/quiet-corners/maps/*` also matches
+# `/quiet-corners/maps/` itself, so from 2026-09-07 (#420) until this line the
+# one surviving map 301'd to its own URL and the page was unreachable in
+# production. A `:state` placeholder stands for exactly one non-empty segment,
+# so the parent falls through to the built page.
+/quiet-corners/maps/:state     /quiet-corners/maps/   301
+/quiet-corners/maps/:state/*   /quiet-corners/maps/   301
