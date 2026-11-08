@@ -1,0 +1,602 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio dashboard — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+      <span class="as-of-chip">As of 2026-07-01</span>
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./" aria-current="page">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main"><section class="showcase-intro" aria-label="About this demo"><h1>About this demo</h1><p>This is a fixed demo: 4 seeded projects, frozen at the as-of date above and browsed read-only. One of them, <a href="projects-1-hub"><strong>Season 4 Rollout</strong></a>, tells the full story -- its flow, RAID log, status history and every PMBOK assistant page are exported; the rest ship only the dashboard, hub, status and wizard pages every reader can already click to.</p><p>The method behind it is exported too: <a href="pmbok">PMBOK</a>, <a href="techniques">Techniques</a>, <a href="methods">Methods</a>, <a href="artifacts">Artifacts</a>, <a href="glossary">Glossary</a>, <a href="map">Map</a>.</p><p>The screen below is a live sample from the export.</p></section>
+
+
+
+
+
+<h2 class="showcase-sample-heading">Dashboard</h2>
+<p>As of <strong>2026-07-01</strong> — every figure is computed from the records, never typed.</p>
+
+<p>Method — <a href="method">what this product knows about running a project</a>, or see it drawn as <a href="map">the method map</a>.</p>
+<nav class="businesses" aria-label="Businesses on this dashboard"><a href="#business-1">Anchor Point Studios</a><a href="#business-2">Fieldstone Logistics</a></nav>
+
+
+<section class="tiles">
+<div class="tile"><b>Budget</b><span id="kpi-budget" class="value" data-countup>71,000</span></div>
+<div class="tile"><b>Actual</b><span id="kpi-actual" class="value" data-countup>51,000</span></div>
+<div class="tile"><b>Complete</b><span id="kpi-complete" class="value" data-countup>77%</span></div>
+<div class="tile"><b>On track</b><span id="kpi-on-track" class="value" data-countup>33%</span></div>
+<div class="tile"><b>Open high risks</b><span id="kpi-risks" class="value" data-countup>1</span></div>
+<div class="tile"><b>Work in progress</b><span id="kpi-wip" class="value" data-countup>2</span></div>
+<div class="tile"><b>Throughput / wk</b><span id="kpi-throughput" class="value" data-countup>1</span></div>
+<div class="tile"><b>Median cycle time (days)</b><span id="kpi-cycle" class="value" data-countup>7.0</span></div>
+<div class="tile"><b>Open threats</b><span id="kpi-threats" class="value" data-countup>12</span></div>
+<div class="tile"><b>Process completeness</b><span id="kpi-process" class="value" data-countup>37%</span></div>
+</section>
+
+
+
+<div class="charts">
+
+
+
+
+<section class="chart-curve">
+<h2>Cost S-curve — whole business</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<svg class="scurve" viewBox="0 0 320 140" role="img" aria-label="Planned 54,260 vs actual 51,000. The table below carries every sampled date as text.">
+
+
+<line class="gridline" x1="42" x2="320" y1="114.0" y2="114.0"/>
+<text class="tick-label" x="38" y="117.0" text-anchor="end">0</text>
+
+
+<line class="gridline" x1="42" x2="320" y1="67.04" y2="67.04"/>
+<text class="tick-label" x="38" y="70.04" text-anchor="end">27,130</text>
+
+
+<line class="gridline" x1="42" x2="320" y1="20.09" y2="20.09"/>
+<text class="tick-label" x="38" y="23.09" text-anchor="end">54,260</text>
+
+
+
+
+
+<text class="tick-label" x="42" y="140" text-anchor="start">2026-05-06</text>
+
+
+
+
+<text class="tick-label" x="181.0" y="140" text-anchor="middle">2026-05-31</text>
+
+
+
+
+<text class="tick-label" x="320" y="140" text-anchor="end">2026-07-01</text>
+
+
+
+
+
+
+<polyline class="s-line" points="42.0,113.71 67.27,112.27 92.55,106.21 117.82,97.81 143.09,87.61 168.36,77.41 193.64,65.18 218.91,54.41 244.18,43.49 269.45,34.52 294.73,27.3 320.0,20.09 "/><text class="curve-label" x="320" y="16.09" text-anchor="end">54,260</text>
+
+
+
+
+
+
+<g class="red"><polyline class="s-line ac" points="42.0,114.0 67.27,114.0 92.55,109.67 117.82,94.1 143.09,94.1 168.36,79.38 193.64,64.67 218.91,54.29 244.18,54.29 269.45,43.9 294.73,25.73 320.0,25.73 "/><text class="curve-label" x="320" y="27.29" text-anchor="end">51,000</text></g>
+
+
+</svg>
+
+<p class="legend"><span class="chip"></span>Planned (solid)<span class="chip red"></span>Actual (dashed)</p>
+
+
+
+
+<details class="figures"><summary>Cost S-curve as text</summary>
+
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Cost S-curve as text (scrolls sideways)">
+<table>
+<caption class="sr-only">The same S-curve as text: total planned and total actual cost at each sampled date, earliest first</caption>
+<tr><th scope="col">Date</th><th scope="col">Planned</th><th scope="col">Actual</th></tr>
+
+<tr><td>2026-05-06</td><td>167</td><td>0</td></tr>
+
+<tr><td>2026-05-11</td><td>1,000</td><td>0</td></tr>
+
+<tr><td>2026-05-16</td><td>4,500</td><td>2,500</td></tr>
+
+<tr><td>2026-05-21</td><td>9,356</td><td>11,500</td></tr>
+
+<tr><td>2026-05-26</td><td>15,247</td><td>11,500</td></tr>
+
+<tr><td>2026-05-31</td><td>21,138</td><td>20,000</td></tr>
+
+<tr><td>2026-06-06</td><td>28,207</td><td>28,500</td></tr>
+
+<tr><td>2026-06-11</td><td>34,431</td><td>34,500</td></tr>
+
+<tr><td>2026-06-16</td><td>40,739</td><td>34,500</td></tr>
+
+<tr><td>2026-06-21</td><td>45,920</td><td>40,500</td></tr>
+
+<tr><td>2026-06-26</td><td>50,090</td><td>51,000</td></tr>
+
+<tr><td>2026-07-01</td><td>54,260</td><td>51,000</td></tr>
+
+</table>
+</div>
+
+
+</details>
+
+</section>
+
+
+<section class="chart-treemap">
+<h2>Portfolio treemap — budget by portfolio</h2>
+
+
+
+
+<svg class="treemap" width="340.0" height="200.0" viewBox="0 0 340.0 200.0" role="group" aria-label="Portfolio budgets, rectangle area proportional to BAC">
+
+
+<a href="portfolios-1-rollup" tabindex="0" aria-label="Content Operations — 31,000 — red"><title>Content Operations — 31,000 — red</title>
+<rect class="tm red" x="1.0" y="1.0" width="146.45" height="198.0"/>
+
+<text class="tm-label" x="5.0" y="14.0">Content Operations</text>
+
+<text class="tm-label tm-budget" x="5.0" y="26.0">31,000</text>
+
+</a>
+
+
+<a href="portfolios-2-rollup" tabindex="0" aria-label="Fleet Programs — 40,000 — green"><title>Fleet Programs — 40,000 — green</title>
+<rect class="tm green" x="149.45" y="1.0" width="189.55" height="198.0"/>
+
+<text class="tm-label" x="153.45" y="14.0">Fleet Programs</text>
+
+<text class="tm-label tm-budget" x="153.45" y="26.0">40,000</text>
+
+</a>
+
+</svg>
+
+
+</section>
+
+</div>
+
+<div class="command"><div class="heat">
+
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Portfolio rollup (scrolls sideways)">
+<table class="rollup">
+<caption class="sr-only">Every business, portfolio, program and project as of 2026-07-01, with its RAG status and figures</caption>
+<tr><th scope="col">Business / portfolio / program / project</th><th scope="col">RAG</th><th scope="col">Budget</th><th scope="col">Actual</th><th scope="col">Complete</th><th scope="col">Open high risks</th><th scope="col">Burn</th><th scope="col">Last status</th></tr>
+
+
+<tr class="business" data-rag="red" id="business-1">
+<td><a href="business-1">Anchor Point Studios</a></td><td class="rag red">red</td><td>31,000</td><td>23,000</td><td>75%</td><td>1</td><td></td><td></td></tr>
+
+
+
+<tr class="portfolio" data-rag="red">
+<td><a href="portfolios-1-rollup">Content Operations</a></td><td class="rag red">red</td><td>31,000</td><td>23,000</td><td>75%</td><td>1</td><td></td><td></td></tr>
+
+
+
+<tr class="program" data-rag="red">
+<td><a href="programs-1-rollup">Studio Expansion</a></td><td class="rag red">red</td><td>31,000</td><td>23,000</td><td>75%</td><td>1</td><td></td><td></td></tr>
+
+
+
+<tr class="project nested" data-rag="amber">
+<td><a href="projects-2-hub">Archive Digitization</a></td><td class="rag amber">amber</td><td>16,000</td>
+<td>13,000</td><td>78%</td><td>0</td>
+
+
+
+
+<td class="burn amber">
+<svg class="burn" width="90" height="24" viewBox="0 0 90 24" role="img" aria-label="Actual 13,000 of budget 16,000">
+
+
+<line class="burn-bac" x1="0" x2="90" y1="3.13" y2="3.13"/>
+<polyline class="burn-ac" points="0.0,24.0 10.0,24.0 20.0,16.83 30.0,16.83 40.0,16.83 50.0,12.65 60.0,12.65 70.0,12.65 80.0,7.04 90.0,7.04 "/>
+</svg>
+</td>
+
+
+<td class="freshness">2026-07-01</td>
+</tr>
+
+
+
+<tr class="project nested" data-rag="red">
+<td><a href="projects-1-hub">Season 4 Rollout</a></td><td class="rag red">red</td><td>15,000</td>
+<td>10,000</td><td>73%</td><td>1</td>
+
+
+
+
+<td class="burn red">
+<svg class="burn" width="90" height="24" viewBox="0 0 90 24" role="img" aria-label="Actual 10,000 of budget 15,000">
+
+
+<line class="burn-bac" x1="0" x2="90" y1="3.13" y2="3.13"/>
+<polyline class="burn-ac" points="0.0,24.0 10.0,24.0 20.0,20.52 30.0,20.52 40.0,16.35 50.0,16.35 60.0,12.45 70.0,12.45 80.0,10.09 90.0,10.09 "/>
+</svg>
+</td>
+
+
+<td class="freshness">2026-07-01</td>
+</tr>
+
+
+
+<tr class="business" data-rag="green" id="business-2">
+<td><a href="business-2">Fieldstone Logistics</a></td><td class="rag green">green</td><td>40,000</td><td>28,000</td><td>78%</td><td>0</td><td></td><td></td></tr>
+
+
+
+<tr class="portfolio" data-rag="green">
+<td><a href="portfolios-2-rollup">Fleet Programs</a></td><td class="rag green">green</td><td>40,000</td><td>28,000</td><td>78%</td><td>0</td><td></td><td></td></tr>
+
+
+
+<tr class="project" data-rag="green">
+<td><a href="projects-4-hub">Fleet Modernization</a></td><td class="rag green">green</td><td>40,000</td>
+<td>28,000</td><td>78%</td><td>0</td>
+
+
+
+
+<td class="burn green">
+<svg class="burn" width="90" height="24" viewBox="0 0 90 24" role="img" aria-label="Actual 28,000 of budget 40,000">
+
+
+<line class="burn-bac" x1="0" x2="90" y1="3.13" y2="3.13"/>
+<polyline class="burn-ac" points="0.0,24.0 10.0,24.0 20.0,19.3 30.0,19.3 40.0,14.87 50.0,14.87 60.0,14.87 70.0,11.74 80.0,9.39 90.0,9.39 "/>
+</svg>
+</td>
+
+
+<td class="freshness">2026-07-01</td>
+</tr>
+
+
+
+<tr class="project" data-rag="unknown">
+<td><a href="projects-3-hub">Route Optimization Pilot</a></td><td class="rag unknown">no data</td><td>0</td>
+<td>0</td><td>0%</td><td>0</td>
+
+<td class="burn-empty">—</td>
+
+<td class="freshness">never</td>
+</tr>
+
+
+</table>
+</div>
+
+
+</div>
+
+<aside class="rail" aria-label="Needs attention">
+<h2>Needs attention</h2>
+<p>Process completeness <strong>37%</strong> — <a href="process-map">whole-business process map</a>.</p>
+
+<ol>
+
+<li class="card sev-red" data-kind="threat" data-item-id="threat:integration:project:1">
+<strong>Season 4 Rollout</strong> — Overall health is red: red in schedule, quality, resource, risk.
+
+<span class="badge sev-badge">red</span>
+<span class="action">Run integrated change control and escalate to the sponsor.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-red" data-kind="threat" data-item-id="threat:risk:project:1">
+<strong>Season 4 Rollout</strong> — Open-risk exposure 45,000 against contingency 1,500 (top risk: Lead editor turnover mid-season). No response planned for at least one open risk.
+
+<span class="badge sev-badge">red</span>
+<span class="action">Plan responses or top up contingency.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-red" data-kind="threat" data-item-id="threat:resource:project:1">
+<strong>Season 4 Rollout</strong> — 1 person over-allocated (peak ratio 2.67 — 80 h in all, 80 h of it on this project).
+
+<span class="badge sev-badge">red</span>
+<span class="action">Rebalance the over-allocated resources.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-red" data-kind="threat" data-item-id="threat:integration:project:3">
+<strong>Route Optimization Pilot</strong> — Overall health is red: red in resource; amber in quality, communications.
+
+<span class="badge sev-badge">red</span>
+<span class="action">Run integrated change control and escalate to the sponsor.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-red" data-kind="threat" data-item-id="threat:quality:project:1">
+<strong>Season 4 Rollout</strong> — 1 quality metric outside their configured tolerance.
+
+<span class="badge sev-badge">red</span>
+<span class="action">Re-measure the failing or stale quality metrics.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-red" data-kind="threat" data-item-id="threat:schedule:project:1">
+<strong>Season 4 Rollout</strong> — Schedule slipping (SPI 0.95, 1 milestone slipped: Sizzle reel delivery).
+
+<span class="badge sev-badge">red</span>
+<span class="action">Re-plan the slipped milestones.</span>
+
+
+
+<span class="badge delta delta-up red" title="score +0.0478 vs last week"><span aria-hidden="true">▲</span> +0.0478<span class="sr-only"> worse vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-red" data-kind="threat" data-item-id="threat:resource:project:3">
+<strong>Route Optimization Pilot</strong> — 1 person over-allocated (peak ratio 1.20 — 24 h in all, 24 h of it on this project).
+
+<span class="badge sev-badge">red</span>
+<span class="action">Rebalance the over-allocated resources.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-amber" data-kind="threat" data-item-id="threat:communications:project:3">
+<strong>Route Optimization Pilot</strong> — Communications reporting is behind cadence: no status reporting at all (no status snapshot).
+
+<span class="badge sev-badge">amber</span>
+<span class="action">Issue a fresh status report.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-amber" data-kind="threat" data-item-id="threat:integration:project:2">
+<strong>Archive Digitization</strong> — Overall health is amber: amber in scope, cost.
+
+<span class="badge sev-badge">amber</span>
+<span class="action">Run integrated change control and escalate to the sponsor.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-amber" data-kind="threat" data-item-id="threat:quality:project:3">
+<strong>Route Optimization Pilot</strong> — Quality is unmeasured: no quality measurements are recorded for this project.
+
+<span class="badge sev-badge">amber</span>
+<span class="action">Re-measure the failing or stale quality metrics.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-amber" data-kind="threat" data-item-id="threat:scope:project:2">
+<strong>Archive Digitization</strong> — 1 approved change to scope have not been re-baselined.
+
+<span class="badge sev-badge">amber</span>
+<span class="action">Baseline the approved scope changes.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-amber" data-kind="threat" data-item-id="threat:cost:project:2">
+<strong>Archive Digitization</strong> — Cost efficiency slipping (CPI 0.95, VAC -774).
+
+<span class="badge sev-badge">amber</span>
+<span class="action">Re-estimate cost at completion.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+
+
+</li>
+
+<li class="card sev-unknown" data-kind="no_status" data-item-id="no_status:project:3">
+<strong>Route Optimization Pilot</strong> — Route Optimization Pilot has never filed a status snapshot.
+
+<span class="badge sev-badge">unknown</span>
+<span class="action">File a first status snapshot. Wizard&#39;s next process: Develop Project Charter.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+<a href="projects-3-status">Fix this</a>
+
+</li>
+
+<li class="card sev-unknown" data-kind="low_completeness" data-item-id="low_completeness:project:3">
+<strong>Route Optimization Pilot</strong> — Route Optimization Pilot&#39;s process record: 6% complete.
+
+<span class="badge sev-badge">unknown</span>
+<span class="action">Produce the missing process outputs. Wizard&#39;s next process: Develop Project Charter.</span>
+
+
+
+
+<span class="badge delta delta-flat"><span aria-hidden="true">–</span><span class="sr-only">unchanged vs last week</span></span>
+
+
+<a href="projects-3-wizard">Fix this</a>
+
+</li>
+
+</ol>
+
+</aside></div>
+</main>
+</body>
+</html>

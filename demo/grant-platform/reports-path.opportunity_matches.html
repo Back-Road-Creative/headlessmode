@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opportunity Matches</title>
+  <style>
+
+:root {
+
+  --page: #ffffff; --ink: #1a1a1a; --ink-quiet: #52585e;
+  --panel: #f3f5f7; --line: #c9d1d9; --link: #0b4f8a;
+  --ok-panel: #e6f4ea; --ok-ink: #14532d; --bad-panel: #fdecea; --bad-ink: #8a1c12;
+
+
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem; --space-5: 1.5rem;
+
+
+  --text-small: 0.875rem; --text-base: 1rem; --text-section: 1.25rem; --text-title: 1.6rem;
+  --leading: 1.5; --weight-strong: 600; --weight-heavy: 700;
+
+
+  --focus-width: 3px; --focus-offset: 2px; --focus-ink: var(--link);
+
+
+  --border: 1px; --radius: 4px; --measure: 60rem; --field: 28rem;
+
+
+  --offscreen: -9999px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--page); color: var(--ink);
+  font: var(--text-base)/var(--leading) system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+        sans-serif;
+}
+a { color: var(--link); }
+:focus-visible { outline: var(--focus-width) solid var(--focus-ink); outline-offset: var(--focus-offset); }
+
+
+.skip-link { position: absolute; left: var(--offscreen); }
+
+
+.offscreen { position: absolute; left: var(--offscreen); }
+.skip-link:focus {
+  position: fixed; top: var(--space-2); left: var(--space-2); z-index: 10;
+  padding: var(--space-2) var(--space-3);
+  background: var(--page); border: var(--focus-width) solid var(--link);
+}
+
+.shell-header {
+  display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  background: var(--panel); border-bottom: var(--border) solid var(--line);
+}
+.shell-header .product { margin: 0; font-weight: var(--weight-heavy); }
+.shell-header ul { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: 0; padding: 0; }
+.shell-header li { list-style: none; }
+
+.flashes { margin: var(--space-4); padding: 0; }
+.flash {
+  list-style: none; padding: var(--space-2) var(--space-3);
+  border: var(--border) solid var(--line); border-radius: var(--radius); background: var(--panel);
+}
+.flash-success { background: var(--ok-panel); color: var(--ok-ink); }
+.flash-error { background: var(--bad-panel); color: var(--bad-ink); }
+
+main { max-width: var(--measure); padding: var(--space-4); }
+h1 { font-size: var(--text-title); }
+h2 { font-size: var(--text-section); }
+caption, .caption { color: var(--ink-quiet); font-size: var(--text-small); }
+
+
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll table { width: 100%; border-collapse: collapse; }
+.table-scroll th, .table-scroll td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border) solid var(--line);
+  text-align: left; vertical-align: top;
+}
+.table-scroll th { font-weight: var(--weight-strong); }
+
+.field { display: flex; flex-direction: column; gap: var(--space-1); max-width: var(--field); }
+.field label { font-weight: var(--weight-strong); }
+.field input {
+  padding: var(--space-1) var(--space-2); font: inherit; color: inherit; background: var(--page);
+  border: var(--border) solid var(--line); border-radius: var(--radius);
+}
+
+
+
+.field .help, .field .required { color: var(--ink-quiet); font-size: var(--text-small); }
+.field .error { color: var(--bad-ink); font-weight: var(--weight-strong); }
+.field-invalid input { border-color: var(--bad-ink); }
+.field select {
+  padding: var(--space-1) var(--space-2); font: inherit; color: inherit; background: var(--page);
+  border: var(--border) solid var(--line); border-radius: var(--radius);
+}
+
+.alert {
+  padding: var(--space-2) var(--space-3); border: var(--border) solid var(--line);
+  border-radius: var(--radius); background: var(--panel); max-width: var(--measure);
+}
+.alert-error { background: var(--bad-panel); color: var(--bad-ink); border-color: var(--bad-ink); }
+.alert-success { background: var(--ok-panel); color: var(--ok-ink); border-color: var(--ok-ink); }
+.alert-tone { font-weight: var(--weight-strong); }
+
+.error-summary {
+  padding: var(--space-3); border: var(--border) solid var(--bad-ink);
+  border-radius: var(--radius); background: var(--bad-panel); color: var(--bad-ink);
+  max-width: var(--measure);
+}
+.error-summary h2 { margin: 0 0 var(--space-2); font-size: var(--text-section); }
+.error-summary ul { margin: 0; padding-left: var(--space-5); }
+.error-summary a { color: var(--bad-ink); }
+
+button {
+  padding: var(--space-2) var(--space-3); font: inherit; color: var(--ink);
+  background: var(--panel); border: var(--border) solid var(--line); border-radius: var(--radius);
+}
+.button-danger { color: var(--bad-ink); border-color: var(--bad-ink); }
+
+.pill {
+  display: inline-block; padding: var(--space-1) var(--space-2);
+  font-size: var(--text-small); font-weight: var(--weight-strong);
+  background: var(--panel); border: var(--border) solid var(--line); border-radius: var(--radius);
+}
+.pill-ok { background: var(--ok-panel); color: var(--ok-ink); border-color: var(--ok-ink); }
+.pill-bad { background: var(--bad-panel); color: var(--bad-ink); border-color: var(--bad-ink); }
+
+.pager { margin: var(--space-3) 0; }
+.pager-count { margin: 0; color: var(--ink-quiet); font-size: var(--text-small); }
+.pager-links { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: var(--space-1) 0 0; }
+.pager-position { color: var(--ink-quiet); font-size: var(--text-small); }
+
+.page-index { margin: 0 0 var(--space-4); }
+.page-index ul {
+  display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4);
+  margin: 0; padding: var(--space-2) var(--space-3); list-style: none;
+  background: var(--panel); border: var(--border) solid var(--line); border-radius: var(--radius);
+}
+</style>
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .9rem;box-sizing:border-box;background:var(--panel);color:var(--ink);border-bottom:2px solid currentColor;padding:.4rem .8rem;margin:0 0 1rem;font-size:.85rem;line-height:1.2}.showcase-notice a{color:inherit}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about summary{cursor:pointer}.showcase-about p{position:absolute;right:0;top:100%;z-index:51;width:18rem;max-width:80vw;margin:.4rem 0 0;padding:.6rem .8rem;background:var(--panel);border:2px solid currentColor}@media(min-width:640px){.showcase-notice{height:40px;flex-wrap:nowrap;padding-block:0}[id]{scroll-margin-top:40px}}@media(max-width:639px){[id]{scroll-margin-top:7rem}}.showcase-unavailable{color:var(--ink-quiet)}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">Grant Platform &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; full profile &middot; as of 2026-09-01</span> <a class="showcase-product" href="https://headlessmode.com/grant-platform/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>source 09d592b &middot; every name, number and record is fictional; nothing here can be submitted.</p></details></aside>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="shell-header">
+    <p class="product">Grant Platform</p>
+    <nav aria-label="Main">
+      <ul>
+        <li><span class="showcase-unavailable">Users</span></li>
+        <li><span class="showcase-unavailable">Audit log</span></li>
+        <li><a href="applications.html">Applications</a></li>
+        <li><a href="awards.html">Awards</a></li>
+        <li><a href="engagements.html">Engagements</a></li>
+        <li><a href="opportunities.html">Opportunities</a></li>
+        <li><a href="organizations.html">Organizations</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main id="content"><h1>Opportunity Matches</h1>
+
+<div class="table-scroll" tabindex="0" role="region"
+     aria-labelledby="reports-rows-table">
+<table>
+  <caption id="reports-rows-table">
+    5 rows, within this report's bound of 200.
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Organization</th>
+      <th scope="col">Opportunity</th>
+      <th scope="col">Funder</th>
+      <th scope="col">Focus area</th>
+      <th scope="col">Geography</th>
+      <th scope="col">Closes</th>
+      <th scope="col">Signals</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Northfield Arts Council</td>
+      <td>Arts Engagement Fund</td>
+      <td>Northfield Community Foundation</td>
+      <td>arts</td>
+      <td>MN</td>
+      <td>2026-09-30</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Prairie Watershed Alliance</td>
+      <td>Clean Water Infrastructure Grants</td>
+      <td>State Water Resources Board</td>
+      <td>environment</td>
+      <td>MN</td>
+      <td>2026-10-15</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Riverbend Community Health</td>
+      <td>Rural Health Access Program</td>
+      <td>Upper Midwest Health Foundation</td>
+      <td>health</td>
+      <td>WI</td>
+      <td>2026-11-30</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Prairie Watershed Alliance</td>
+      <td>Watershed Stewardship Awards</td>
+      <td>Great Lakes Conservation Fund</td>
+      <td>natural_resources</td>
+      <td>US</td>
+      <td>2026-12-01</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Riverbend Community Health</td>
+      <td>Community Food Security Initiative</td>
+      <td>National Nutrition Trust</td>
+      <td>food_nutrition</td>
+      <td>US</td>
+      <td></td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+  </main>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Critical Chain Method — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-schedule">Schedule</a> &gt; <span aria-current="page">Critical Chain Method</span></nav>
+
+
+
+<h1>Critical Chain Method</h1>
+<p><em>Schedule technique</em> ·
+   <a href="map-all#node-technique:critical_chain_method">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Scheduling around resource limits, removing padding from individual tasks, and pooling that padding into shared buffers.</p>
+<h2>When to use it</h2><p>Use it when resource contention, not just task dependency, is what&#39;s actually constraining your schedule — the same specialist needed on three chains at once, a single test rig every team wants at the same time — and when individual task estimates are known to carry hidden personal safety margin that&#39;s masking the project&#39;s real risk rather than managing it.</p>
+<h2>When to avoid it</h2><p>Don&#39;t use it on a resource-unconstrained schedule where <dfn><a href="glossary#critical-path">critical path</a></dfn> method&#39;s simpler <dfn><a href="glossary#float">float</a></dfn>-based view already answers the question — pooling buffers and tracking consumption is real overhead that only pays off once resource contention is a live problem. It also asks a lot of a team culturally: it requires people to submit estimates without their usual personal padding, which needs trust that the padding won&#39;t just be cut and never restored elsewhere.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-critical-chain-method-0"> Build the dependency network as in critical path method, but this time also identify every point where the same resource is needed on more than one chain at once.</label></li>
+
+<li><label><input type="checkbox" id="step-critical-chain-method-1"> Re-sequence the network to resolve resource conflicts — the same person or resource can&#39;t be in two places, so one chain has to wait, changing which chain is actually longest.</label></li>
+
+<li><label><input type="checkbox" id="step-critical-chain-method-2"> Strip individual safety margin out of each task&#39;s estimate, aiming for a realistic (roughly 50% confidence) duration rather than a padded one, and pool the removed safety into a single project buffer at the end of the critical chain and feeding buffers where a non-critical chain feeds into it.</label></li>
+
+<li><label><input type="checkbox" id="step-critical-chain-method-3"> Track progress by buffer consumption rather than by individual task lateness: watch how much of the pooled buffer has been used relative to how much of the critical chain has been completed, and act when consumption is outpacing progress.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A resource-feasible schedule with the true critical chain identified, individual task padding removed, and pooled buffers (project buffer plus feeding buffers) whose consumption rate is the tracking signal — again outside Driftless&#39;s current single-estimate task model, since it has no concept of a shared buffer or a feeding chain today.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>The safety-stripping step happens without the buffer-pooling step actually landing anywhere the team trusts, so people quietly keep their personal padding anyway — the estimates look reduced on paper but aren&#39;t in practice.</li><li>Buffer consumption is tracked but never acted on — the whole point of watching the rate is to trigger intervention before the buffer runs out, and a buffer chart nobody responds to is just a critical path with extra math.</li><li>This gets confused with critical path method because both produce a &#34;the chain&#34; answer — but a critical chain answer that ignores resource contention is just a critical path with the wrong name on it, and float and buffer are not interchangeable concepts.</li></ul>
+
+
+<h2>Worked example</h2><p>Two workstreams on a lab-equipment installation both need the same certified electrician at the same point in the schedule: wiring the fume hood and wiring the centrifuge bay. Critical path method, ignoring the conflict, would show both chains as independently non-critical. Critical chain method resequences the electrician onto the fume hood first, which makes that chain the true critical chain, strips the padding each task lead had privately added, and places a single project buffer at the end plus a feeding buffer where the centrifuge chain rejoins — tracked afterward by how much of that buffer has burned relative to how far along the chain is.</p>
+
+
+
+
+<p class="provenance" data-source="extension"
+   data-clause="none">
+  Where it comes from: Driftless added this technique to its own vocabulary. No PMBOK-6
+  clause defines it, so none is cited.
+</p>
+
+<p class="why-extension">Why it is an extension: PMBOK-6&#39;s Develop Schedule (6.5) narrative treats it as a schedule technique but 6.5.2&#39;s tools-and-techniques bullets never list it the way they list critical path method, so no process here can honestly be said to use it per the edition. The product needs it, so Driftless adds it as an extension rather than folding it silently into the PMBOK-6 vocabulary.</p>
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Same family</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+      <li><a href="techniques-analogous-estimating">Analogous Estimating</a></li>
+
+      <li><a href="techniques-bottom-up-estimating">Bottom Up Estimating</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-dependency-determination">Dependency Determination</a></li>
+
+      <li><a href="techniques-leads-and-lags">Leads and Lags</a></li>
+
+      <li><a href="techniques-parametric-estimating">Parametric Estimating</a></li>
+
+      <li><a href="techniques-precedence-diagramming-method">Precedence Diagramming Method</a></li>
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-rolling-wave-planning">Rolling Wave Planning</a></li>
+
+      <li><a href="techniques-schedule-compression">Schedule Compression</a></li>
+
+      <li><a href="techniques-schedule-network-analysis">Schedule Network Analysis</a></li>
+
+      <li><a href="techniques-three-point-estimating">Three Point Estimating</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Map</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="map-all#node-technique:critical_chain_method">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

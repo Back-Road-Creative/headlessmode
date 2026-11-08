@@ -1,0 +1,122 @@
+/* ============================================================
+   CHROMA — Monokai, corrected for WCAG AA.
+
+   Regenerate the body of this file with:
+       hugo gen chromastyles --style=monokai
+
+   It exists because site-config/_default/hugo.toml sets `noClasses = false`
+   under [markup.highlight]: Chroma now writes its palette as class names, and
+   a class needs a stylesheet. Without this file every fenced block renders in
+   one flat color. Loaded from partials/head.html beside style.css.
+
+   Monokai is not AA-compliant on this site's code surface, which is why the
+   generated output is edited rather than shipped as-is. Token text sits on
+   --bg-elevated (#27272a) — .content-body code in style.css paints it, read
+   off the computed style rather than assumed, and not the #272822 canvas the
+   theme ships. Four colors missed 4.5:1 there and were raised in HSL with hue
+   and saturation held, so the palette still reads as Monokai:
+
+       #7f7f7f -> #8f8f8f   line numbers                     3.72 -> 4.61
+       #f92672 -> #fa4b8a   keyword/tag/operator/deleted     3.94 -> 4.57
+       #75715e -> #938f79   comments, generic subheading     3.04 -> 4.57
+       #960050 -> #ff3ca4   error token                      1.71 -> 4.56
+
+   Three backgrounds Chroma bakes in are dropped or retoned for the same
+   reason — whichever background is nearest the text decides the ratio, so the
+   site's has to be the one that wins. .bg/.chroma lose #272822, .err loses
+   #1e0010, and .hl becomes --bg-card (#18181b): darker than the code surface,
+   so marking a line can only raise contrast, never lower it.
+
+   After any regeneration, re-check every color below against #27272a. The
+   pa11y-ci gate in .pa11yci.json covers the pages that have code blocks today,
+   but it can only see a color some page actually uses.
+   ============================================================ */
+
+/* Generated using: hugo gen chromastyles --style=monokai */
+
+/* Background */ .bg { color:#f8f8f2; }
+/* PreWrapper */ .chroma { color:#f8f8f2; }
+/* Other */ .chroma .x {  }
+/* Error */ .chroma .err { color:#ff3ca4; }
+/* CodeLine */ .chroma .cl {  }
+/* LineLink */ .chroma .lnlinks { outline:none;text-decoration:none;color:inherit }
+/* LineTableTD */ .chroma .lntd { vertical-align:top;padding:0;margin:0;border:0; }
+/* LineTable */ .chroma .lntable { border-spacing:0;padding:0;margin:0;border:0; }
+/* LineHighlight */ .chroma .hl { background-color:#18181b }
+/* LineNumbersTable */ .chroma .lnt { white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#8f8f8f }
+/* LineNumbers */ .chroma .ln { white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#8f8f8f }
+/* Line */ .chroma .line { display:flex; }
+/* Keyword */ .chroma .k { color:#66d9ef }
+/* KeywordConstant */ .chroma .kc { color:#66d9ef }
+/* KeywordDeclaration */ .chroma .kd { color:#66d9ef }
+/* KeywordNamespace */ .chroma .kn { color:#fa4b8a }
+/* KeywordPseudo */ .chroma .kp { color:#66d9ef }
+/* KeywordReserved */ .chroma .kr { color:#66d9ef }
+/* KeywordType */ .chroma .kt { color:#66d9ef }
+/* Name */ .chroma .n {  }
+/* NameAttribute */ .chroma .na { color:#a6e22e }
+/* NameBuiltin */ .chroma .nb {  }
+/* NameBuiltinPseudo */ .chroma .bp {  }
+/* NameClass */ .chroma .nc { color:#a6e22e }
+/* NameConstant */ .chroma .no { color:#66d9ef }
+/* NameDecorator */ .chroma .nd { color:#a6e22e }
+/* NameEntity */ .chroma .ni {  }
+/* NameException */ .chroma .ne { color:#a6e22e }
+/* NameFunction */ .chroma .nf { color:#a6e22e }
+/* NameFunctionMagic */ .chroma .fm {  }
+/* NameLabel */ .chroma .nl {  }
+/* NameNamespace */ .chroma .nn {  }
+/* NameOther */ .chroma .nx { color:#a6e22e }
+/* NameProperty */ .chroma .py {  }
+/* NameTag */ .chroma .nt { color:#fa4b8a }
+/* NameVariable */ .chroma .nv {  }
+/* NameVariableClass */ .chroma .vc {  }
+/* NameVariableGlobal */ .chroma .vg {  }
+/* NameVariableInstance */ .chroma .vi {  }
+/* NameVariableMagic */ .chroma .vm {  }
+/* Literal */ .chroma .l { color:#ae81ff }
+/* LiteralDate */ .chroma .ld { color:#e6db74 }
+/* LiteralString */ .chroma .s { color:#e6db74 }
+/* LiteralStringAffix */ .chroma .sa { color:#e6db74 }
+/* LiteralStringBacktick */ .chroma .sb { color:#e6db74 }
+/* LiteralStringChar */ .chroma .sc { color:#e6db74 }
+/* LiteralStringDelimiter */ .chroma .dl { color:#e6db74 }
+/* LiteralStringDoc */ .chroma .sd { color:#e6db74 }
+/* LiteralStringDouble */ .chroma .s2 { color:#e6db74 }
+/* LiteralStringEscape */ .chroma .se { color:#ae81ff }
+/* LiteralStringHeredoc */ .chroma .sh { color:#e6db74 }
+/* LiteralStringInterpol */ .chroma .si { color:#e6db74 }
+/* LiteralStringOther */ .chroma .sx { color:#e6db74 }
+/* LiteralStringRegex */ .chroma .sr { color:#e6db74 }
+/* LiteralStringSingle */ .chroma .s1 { color:#e6db74 }
+/* LiteralStringSymbol */ .chroma .ss { color:#e6db74 }
+/* LiteralNumber */ .chroma .m { color:#ae81ff }
+/* LiteralNumberBin */ .chroma .mb { color:#ae81ff }
+/* LiteralNumberFloat */ .chroma .mf { color:#ae81ff }
+/* LiteralNumberHex */ .chroma .mh { color:#ae81ff }
+/* LiteralNumberInteger */ .chroma .mi { color:#ae81ff }
+/* LiteralNumberIntegerLong */ .chroma .il { color:#ae81ff }
+/* LiteralNumberOct */ .chroma .mo { color:#ae81ff }
+/* Operator */ .chroma .o { color:#fa4b8a }
+/* OperatorWord */ .chroma .ow { color:#fa4b8a }
+/* Punctuation */ .chroma .p {  }
+/* Comment */ .chroma .c { color:#938f79 }
+/* CommentHashbang */ .chroma .ch { color:#938f79 }
+/* CommentMultiline */ .chroma .cm { color:#938f79 }
+/* CommentSingle */ .chroma .c1 { color:#938f79 }
+/* CommentSpecial */ .chroma .cs { color:#938f79 }
+/* CommentPreproc */ .chroma .cp { color:#938f79 }
+/* CommentPreprocFile */ .chroma .cpf { color:#938f79 }
+/* Generic */ .chroma .g {  }
+/* GenericDeleted */ .chroma .gd { color:#fa4b8a }
+/* GenericEmph */ .chroma .ge { font-style:italic }
+/* GenericError */ .chroma .gr {  }
+/* GenericHeading */ .chroma .gh {  }
+/* GenericInserted */ .chroma .gi { color:#a6e22e }
+/* GenericOutput */ .chroma .go {  }
+/* GenericPrompt */ .chroma .gp {  }
+/* GenericStrong */ .chroma .gs { font-weight:bold }
+/* GenericSubheading */ .chroma .gu { color:#938f79 }
+/* GenericTraceback */ .chroma .gt {  }
+/* GenericUnderline */ .chroma .gl {  }
+/* TextWhitespace */ .chroma .w {  }

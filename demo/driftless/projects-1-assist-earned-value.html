@@ -1,0 +1,288 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earned value calculator — Season 4 Rollout</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+      <span class="as-of-chip">As of 2026-07-01</span>
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="projects-1-hub">Season 4 Rollout</a> &gt; <span aria-current="page">Earned value calculator</span></nav>
+
+<h1>Earned value calculator — Season 4 Rollout</h1>
+<p><em>As of 2026-07-01</em> ·
+   <a href="projects-1-hub">Project hub</a></p>
+
+
+
+<div class="tiles assist-summary">
+
+  <div class="tile"><b>Budget at completion</b><span class="value">15,000</span></div>
+
+  <div class="tile"><b>CPI</b><span class="value">1.095</span></div>
+
+  <div class="tile"><b>SPI</b><span class="value">0.952</span></div>
+
+  <div class="tile"><b>Estimate at completion</b><span class="value">13,699</span></div>
+
+</div>
+
+
+
+
+<section class="card assist-card">
+  <div class="assist-card-head">
+    <h2>Where the project stands</h2>
+
+  </div>
+
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Season 4 Rollout earned-value figures (scrolls sideways)">
+<table>
+<caption class="sr-only">Earned-value figures for Season 4 Rollout</caption>
+<tr><th scope="col">Figure</th><th scope="col">Value</th><th scope="col">How it is worked out</th></tr>
+<tr><th scope="row">Budget at completion (BAC)</th><td>15,000</td>
+  <td>The total approved cost of the plan.</td></tr>
+<tr><th scope="row">Planned value (PV)</th><td>11,500</td>
+  <td>How much of the budget the plan says should be spent by now.</td></tr>
+<tr><th scope="row">Earned value (EV)</th><td>10,950</td>
+  <td>The budget's worth of the work actually finished so far.</td></tr>
+<tr><th scope="row">Actual cost (AC)</th><td>10,000</td>
+  <td>What has really been spent so far.</td></tr>
+<tr><th scope="row">Cost performance index (CPI)</th>
+  <td>1.095</td>
+  <td>Earned value divided by actual cost — above 1.0 is efficient, below 1.0 is not.</td></tr>
+<tr><th scope="row">Schedule performance index (SPI)</th>
+  <td>0.952</td>
+  <td>Earned value divided by planned value — above 1.0 is ahead of plan.</td></tr>
+<tr><th scope="row">Estimate at completion (EAC)</th>
+  <td>13,699</td>
+  <td>Budget divided by CPI — the likely total cost at today's efficiency.</td></tr>
+<tr><th scope="row">Estimate to complete (ETC)</th>
+  <td>3,699</td>
+  <td>Estimate at completion minus what has already been spent.</td></tr>
+<tr><th scope="row">Variance at completion (VAC)</th>
+  <td>1,301</td>
+  <td>Budget minus the estimate at completion — negative means over budget.</td></tr>
+<tr><th scope="row">Cost variance (CV)</th><td id="evm-cv">950</td>
+  <td>Earned value minus actual cost — under budget.</td></tr>
+<tr><th scope="row">Schedule variance (SV)</th><td id="evm-sv">-550</td>
+  <td>Earned value minus planned value — behind plan.</td></tr>
+<tr><th scope="row">Cost variance % (CV%)</th>
+  <td id="evm-cv-pct">0.087</td>
+  <td>Cost variance divided by earned value.</td></tr>
+<tr><th scope="row">Schedule variance % (SV%)</th>
+  <td id="evm-sv-pct">-0.048</td>
+  <td>Schedule variance divided by planned value.</td></tr>
+<tr><th scope="row">Earned schedule (ES)</th>
+  <td id="evm-es">54.8</td>
+  <td>The elapsed-day point on the plan's own curve where planned value first
+    reaches today's earned value.</td></tr>
+<tr><th scope="row">Actual time (AT)</th>
+  <td id="evm-at">57</td>
+  <td>Elapsed days from the plan's start through today.</td></tr>
+<tr><th scope="row">Planned duration (PD)</th>
+  <td id="evm-pd">103</td>
+  <td>Elapsed days the whole plan spans.</td></tr>
+<tr><th scope="row">Schedule performance index — time (SPI(t))</th>
+  <td id="evm-spi-t">0.961</td>
+  <td>Earned schedule divided by actual time — above 1.0 is ahead of plan.</td></tr>
+<tr><th scope="row">Schedule variance — time (SV(t))</th>
+  <td id="evm-sv-t">-2.2</td>
+  <td>Earned schedule minus actual time, in days.</td></tr>
+<tr><th scope="row">Independent estimate at completion — time (IEAC(t))</th>
+  <td id="evm-ieac-t">107.1</td>
+  <td>Planned duration divided by SPI(t) — the likely total duration at today's
+    schedule efficiency.</td></tr>
+</table>
+</div>
+
+
+<p id="evm-interpretation">The work you finished is worth more than what you have spent.</p>
+
+</section>
+
+
+
+
+
+<section class="card assist-card">
+  <div class="assist-card-head">
+    <h2>Estimate at completion — every standard method</h2>
+
+  </div>
+
+<p>Four documented ways to forecast the total cost. Pick the one matching how you
+   expect the remaining work to run.</p>
+
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Season 4 Rollout estimate-at-completion methods (scrolls sideways)">
+<table>
+<caption class="sr-only">Estimate at completion, every method, for Season 4 Rollout</caption>
+<tr><th scope="col">Method</th><th scope="col">EAC</th><th scope="col">When to use it</th></tr>
+
+<tr class="selected">
+  <th scope="row" id="eac-method-cpi">Cost-performance-index (BAC ÷ CPI)</th>
+  <td id="eac-value-cpi">13,699</td>
+  <td>Today&#39;s efficiency holds.</td>
+</tr>
+
+<tr >
+  <th scope="row" id="eac-method-remaining_at_plan">Remaining work at the original plan (AC + (BAC − EV))</th>
+  <td id="eac-value-remaining_at_plan">14,050</td>
+  <td>Today&#39;s variance is a one-off; the rest runs at the planned rate.</td>
+</tr>
+
+<tr >
+  <th scope="row" id="eac-method-remaining_at_current">Remaining work at current efficiency (AC + (BAC − EV) ÷ (CPI × SPI))</th>
+  <td id="eac-value-remaining_at_current">13,884</td>
+  <td>Both cost AND schedule performance keep shaping what&#39;s left.</td>
+</tr>
+
+<tr >
+  <th scope="row" id="eac-method-bottom_up">Bottom-up (AC + a re-estimated remaining cost)</th>
+  <td id="eac-value-bottom_up">no data yet</td>
+  <td>The team re-estimated the remaining work directly.</td>
+</tr>
+
+</table>
+</div>
+
+
+</section>
+
+
+
+
+
+<section class="card assist-card">
+  <div class="assist-card-head">
+    <h2>To-complete performance index (TCPI)</h2>
+
+  </div>
+
+<p>How efficiently the REMAINING work must run to hit a target — computed from the same
+   figures above, never a second measurement.</p>
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="Season 4 Rollout to-complete performance index (scrolls sideways)">
+<table>
+<caption class="sr-only">To-complete performance index for Season 4 Rollout</caption>
+<tr><th scope="col">Target</th><th scope="col">TCPI</th><th scope="col">How it is worked out</th></tr>
+<tr><th scope="row">To finish at the original budget</th>
+  <td>0.81</td>
+  <td>(Budget − earned value) ÷ (budget − actual cost).</td></tr>
+<tr><th scope="row">To finish at the current forecast (EAC)</th>
+  <td>1.095</td>
+  <td>(Budget − earned value) ÷ (estimate at completion − actual cost).</td></tr>
+</table>
+</div>
+
+
+<p id="tcpi-interpretation">The remaining work can run at or below planned efficiency and still finish on budget.</p>
+
+</section>
+
+
+
+
+
+<section class="card assist-card">
+  <div class="assist-card-head">
+    <h2>What if the remaining work costs something else?</h2>
+
+  </div>
+
+<p>Try a different estimate for what is left to spend, or a different efficiency, and see the
+   estimate at completion and the to-complete performance index either implies. Nothing here
+   is saved.</p>
+
+
+
+
+<p>If a hypothetical above should become the real plan, it still only changes one
+   way: <a href="projects-1-raid#changes">Raise a change request</a> against
+   process 7.4.</p>
+
+</section>
+
+
+
+
+
+<details class="card assist-card">
+  <summary><h2>Where this comes from</h2>
+
+  </summary>
+
+<p>Technique: <strong>Earned Value Analysis</strong> · PMBOK-6 process
+   <strong>7.4</strong> (Control Costs) · as of
+   <strong>2026-07-01</strong> · source <strong>PMBOK Guide, 6th edition</strong>.</p>
+
+</details>
+
+
+
+<p><a href="projects-1-hub">&larr; Back to Season 4 Rollout hub</a></p>
+</main>
+</body>
+</html>
