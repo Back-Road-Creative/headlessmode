@@ -1556,3 +1556,33 @@ def test_result_waits_for_all_three_jobs_and_keeps_its_check_name():
         assert f"needs.{job}.result" in env
     assert "'PR CI result'" in result["name"]
     assert "'PR CI (build + validate)'" in doc["jobs"]["pr-ci"]["name"]
+
+
+BROWSER_PROBE = "Probe the self-hosted Chromium, else install Chrome for Testing"
+
+
+def _job_steps(workflow):
+    with open(os.path.join(WORKFLOWS_DIR, workflow), encoding="utf-8") as fh:
+        doc = yaml.safe_load(fh)
+    jobs = [j for j in doc["jobs"].values() if any(s.get("name") == BROWSER_PROBE for s in j.get("steps", []))]
+    return jobs[0]["steps"] if jobs else []
+
+
+def test_deploy_probes_the_self_hosted_browser_like_pr_ci():
+    """2026-11-22 22:32 ET the chromium snap refreshed to a revision that cannot start on the
+    WSL runners ("cannot track application process"); gomoveshiftsite's deploys went red at
+    Lighthouse from then on. Here Lighthouse, pa11y and the Field Maps browser tests run BEFORE
+    the publish, so a dead snap would block every production deploy. deploy-production.yml
+    probes the browser with exactly pr-ci.yml's step, before the first step that uses one."""
+    pr, deploy = _job_steps("pr-ci.yml"), _job_steps("deploy-production.yml")
+    pr_probe = [s for s in pr if s.get("name") == BROWSER_PROBE]
+    deploy_probe = [s for s in deploy if s.get("name") == BROWSER_PROBE]
+    assert len(pr_probe) == 1 and len(deploy_probe) == 1, "one probe step in each workflow"
+    assert deploy_probe[0]["run"] == pr_probe[0]["run"]
+    assert deploy_probe[0].get("if") == "runner.environment == 'self-hosted'"
+    probe_at = deploy.index(deploy_probe[0])
+    first_browser = next(
+        i for i, s in enumerate(deploy)
+        if str(s.get("name", "")).startswith(("Field Maps engine", "Validate - Accessibility", "Run Lighthouse CI"))
+    )
+    assert probe_at < first_browser, "the probe must run before the first browser step"
