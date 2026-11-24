@@ -77,9 +77,10 @@ jobs:
 
       - name: Use the hosted runner's Chrome
         # Hosted runs only (HM_RUNNER set; runner.environment is 'github-hosted'). The
-        # self-hosted box keeps the snap Chromium from the workflow env above, which
-        # bin/verify-worktree.sh reads. The hosted image has no /snap/bin/chromium, the
-        # browser tests fail closed on a CHROME_PATH naming a missing file, and
+        # self-hosted box starts from the snap Chromium in the workflow env above, which
+        # bin/verify-worktree.sh reads, and the next step launch-probes it (the snap
+        # refresh of 2026-11-22 cannot start on the WSL runners). The hosted image has
+        # no /snap/bin/chromium, the browser tests fail closed on a CHROME_PATH naming a missing file, and
         # GITHUB_ENV overrides the workflow env for every later step: the node tests,
         # pa11y (PUPPETEER_EXECUTABLE_PATH) and Lighthouse (chrome-launcher).
         # A missing browser fails here, naming itself.
@@ -88,6 +89,33 @@ jobs:
           chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           if [ -z "$chrome" ]; then
             echo "::error::no google-chrome or chromium on this hosted runner"
+            exit 1
+          fi
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --version
+
+      - name: Probe the self-hosted Chromium, else install Chrome for Testing
+        # wsl2-ci-1 runs its runner under NoNewPrivileges=yes, so the setuid
+        # snap-confine cannot start /snap/bin/chromium there ("snap-confine is
+        # packaged without necessary permissions", run 39684764854); the runners
+        # under the host's own user start it fine. Launch-probe the browser CHROME_PATH names and,
+        # when it cannot start, install Chrome for Testing (every library it needs
+        # is on the host) into the runner's tool cache, kept across runs, and
+        # repoint CHROME_PATH for pa11y and Lighthouse. The runner itself is not
+        # the fix: its hardening is deliberate and stays.
+        if: runner.environment == 'self-hosted'
+        run: |
+          err="$RUNNER_TEMP/chrome-probe.err"
+          if timeout 60 "$CHROME_PATH" --headless --no-sandbox --disable-gpu --dump-dom about:blank >/dev/null 2>"$err"; then
+            echo "$CHROME_PATH launches on $RUNNER_NAME"
+            exit 0
+          fi
+          echo "::warning::$CHROME_PATH cannot launch on $RUNNER_NAME: $(head -c 300 "$err" | tr '\n' ' ')"
+          cache="$RUNNER_TOOL_CACHE/puppeteer-chrome"
+          npx @puppeteer/browsers install chrome@stable --path "$cache"
+          chrome="$(find "$cache" -type f -name chrome -path '*chrome-linux64*' | head -1)"
+          if [ -z "$chrome" ] || ! timeout 60 "$chrome" --headless --no-sandbox --disable-gpu --dump-dom about:blank >/dev/null; then
+            echo "::error::no browser launches on $RUNNER_NAME"
             exit 1
           fi
           echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
