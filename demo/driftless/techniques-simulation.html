@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulation — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-risk">Risk</a> &gt; <span aria-current="page">Simulation</span></nav>
+
+
+
+<h1>Simulation</h1>
+<p><em>Risk technique</em> ·
+   <a href="map-all#node-technique:simulation">See it on the map</a></p>
+<p>Guide only — A Monte Carlo exists for schedule forecasting; it is not wired to any risk output.</p>
+<p>Running a risk model many times with varying inputs to see the range of likely outcomes.</p>
+<h2>When to use it</h2><p>When you need a probabilistic answer to &#39;how likely are we to finish by date X or under budget Y&#39; — one that accounts for many uncertain inputs combining, including correlations between them (two tasks sharing the same delayed vendor, for instance) that a simple sum of point estimates can&#39;t represent.</p>
+<h2>When to avoid it</h2><p>When you don&#39;t actually have distributions for the inputs — a simulation run on made-up ranges produces a precise-looking output from imprecise input, which is worse than an honest three-point estimate that admits it&#39;s rough. Also skip it when the answer doesn&#39;t need to be probabilistic at all; a straightforward reserve calculation is often enough.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-simulation-0"> Build a model of the project&#39;s cost or schedule logic — the tasks, dependencies, and cost items the simulation will vary.</label></li>
+
+<li><label><input type="checkbox" id="step-simulation-1"> Assign a probability distribution to each uncertain input (see representations of uncertainty) rather than a single point estimate.</label></li>
+
+<li><label><input type="checkbox" id="step-simulation-2"> Identify and encode correlations between inputs where they exist — inputs that move together (shared vendor, shared team) will understate risk if treated as independent.</label></li>
+
+<li><label><input type="checkbox" id="step-simulation-3"> Choose an iteration count large enough for the output distribution to stabilize, and run the simulation.</label></li>
+
+<li><label><input type="checkbox" id="step-simulation-4"> Read the output as a distribution — a P50, P80, P90 completion date or cost — not as a single answer, and decide what confidence level the commitment you make should be pinned to.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A probability distribution of possible project outcomes (cost, duration, or another modeled quantity), summarized as percentile figures such as P50/P80/P90.</li><li>A defensible basis for setting a contingency reserve or a committed date at a stated confidence level rather than a guess.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Running the simulation on fabricated distributions and reporting the output with the same confidence you&#39;d give a result built on real historical data — the output is only as honest as the inputs.</li><li>Ignoring correlation between inputs, which systematically understates the tails of the outcome distribution.</li><li>Confusing this with what Driftless actually has today: the schedule forecaster in ``driftless.calc.forecast`` runs a bootstrap simulation over past sprint velocity to forecast a completion date band. That is a real Monte Carlo method, but it samples historical velocity, not a risk model with cost/schedule distributions and correlations across the register. Driftless does not run a risk simulation of the kind described here, and there is no risk-model input (distributions, correlations, iteration count) anywhere in the product to run one from. A reader who wants this technique needs a separate quantitative risk analysis tool; this entry explains what the technique is and requires, not something you can launch from here.</li></ul>
+
+
+<h2>Worked example</h2><p>A construction estimator builds a cost model with twelve line items, each given a triangular distribution instead of a single figure, with steel and concrete costs correlated because both depend on the same regional supply conditions. Ten thousand iterations produce a cost distribution whose P80 figure — not the P50 — becomes the number the client contract is priced against, because the client wants 80% confidence of not exceeding the price.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §11.4.2.5</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-11.4">Perform Quantitative Risk Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-contingent-response-strategies">Contingent Response Strategies</a></li>
+
+      <li><a href="techniques-decision-tree-analysis">Decision Tree Analysis</a></li>
+
+      <li><a href="techniques-influence-diagrams">Influence Diagrams</a></li>
+
+      <li><a href="techniques-prompt-lists">Prompt Lists</a></li>
+
+      <li><a href="techniques-representations-of-uncertainty">Representations of Uncertainty</a></li>
+
+      <li><a href="techniques-risk-categorization">Risk Categorization</a></li>
+
+      <li><a href="techniques-risk-probability-and-impact-assessment">Risk Probability and Impact Assessment</a></li>
+
+      <li><a href="techniques-sensitivity-analysis">Sensitivity Analysis</a></li>
+
+      <li><a href="techniques-strategies-for-opportunities">Strategies for Opportunities</a></li>
+
+      <li><a href="techniques-strategies-for-overall-project-risk">Strategies for Overall Project Risk</a></li>
+
+      <li><a href="techniques-strategies-for-threats">Strategies for Threats</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:simulation">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

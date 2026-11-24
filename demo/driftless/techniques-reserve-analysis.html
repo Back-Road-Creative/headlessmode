@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reserve Analysis — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-cost">Cost</a> &gt; <span aria-current="page">Reserve Analysis</span></nav>
+
+
+
+<h1>Reserve Analysis</h1>
+<p><em>Cost technique</em> ·
+   <a href="map-all#node-technique:reserve_analysis">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Setting aside one budget cushion inside the cost <dfn><a href="glossary#baseline">baseline</a></dfn> for known risks, and another outside the baseline for the unknown.</p>
+<h2>When to use it</h2><p>During cost baselining, using the project&#39;s <dfn><a href="glossary#risk-register">risk register</a></dfn> to size contingency reserve against identified risks, and using organizational policy or judgment about overall project uncertainty to size management reserve. Revisit both any time the risk register or the project&#39;s uncertainty picture changes materially.</p>
+<h2>When to avoid it</h2><p>Don&#39;t collapse the two reserves into one undifferentiated cushion — that&#39;s the single most common way this technique gets misapplied, and it destroys the thing that makes reserve analysis useful: knowing which reserve an overrun should draw from and being able to report that draw-down honestly instead of quietly absorbing it into the <dfn><a href="glossary#baseline">baseline</a></dfn>.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-reserve-analysis-0"> Walk the risk register and estimate a cost impact and probability for each identified cost risk.</label></li>
+
+<li><label><input type="checkbox" id="step-reserve-analysis-1"> Size contingency reserve from that impact-and-probability analysis (e.g. expected monetary value, or a simulation) and add it inside the cost baseline, kept visible as its own line rather than folded into work package estimates.</label></li>
+
+<li><label><input type="checkbox" id="step-reserve-analysis-2"> Size management reserve separately, as a percentage or judgment call against overall project uncertainty, and hold it outside the baseline and outside the project manager&#39;s unilateral authority to spend.</label></li>
+
+<li><label><input type="checkbox" id="step-reserve-analysis-3"> When a risk in the register materializes and its cost impact is realized, draw against contingency reserve and report the draw-down explicitly — don&#39;t just let the actual absorb it silently.</label></li>
+
+<li><label><input type="checkbox" id="step-reserve-analysis-4"> When an unforeseen cost outside the risk register hits, escalate a management reserve request through whatever authority controls it, rather than treating it as routine.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A contingency reserve figure, inside the baseline, tied to specific identified risks.</li><li>A management reserve figure, outside the baseline, for the unknown.</li><li>A running record of what&#39;s been drawn from each reserve and why.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Merging contingency and management reserve into one number, so an overrun&#39;s source — an identified risk that materialized versus a genuine surprise — can&#39;t be told apart later.</li><li>Drawing down contingency reserve without reporting it, so the reserve looks intact right up until a status report shows it&#39;s gone.</li><li>Sizing contingency reserve as an arbitrary percentage of the estimate instead of from the actual risk register, so it bears no relationship to what the project&#39;s real risk exposure is.</li><li>Treating management reserve as routinely accessible to the project manager rather than as a genuinely separate authority to draw against.</li></ul>
+
+
+<h2>Worked example</h2><p>A data-center fit-out has a $2.1 million baseline before reserve. The risk register identifies a $60,000 cost impact if a specific HVAC vendor&#39;s lead time slips (35% probability) and a $25,000 impact if a permitting delay pushes work into a higher-cost season (20% probability); expected monetary value sizes contingency reserve at $26,000, added inside the baseline for a BAC of $2.126 million. Separately, the organization holds a 5% management reserve — $106,300 — outside the baseline for genuine unknowns. When the HVAC vendor&#39;s lead time does slip and the cost impact lands at $58,000, the project draws it from contingency and reports the reserve as $32,000 of the original $60,000 risk-linked amount still remaining, rather than letting the actual cost simply rise unremarked.</p>
+
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="none">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+  No clause number is recorded for it here — a guessed citation would be worse than none.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-7.4">Control Costs</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-cost-aggregation">Cost Aggregation</a></li>
+
+      <li><a href="techniques-cost-of-quality">Cost of Quality</a></li>
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+      <li><a href="techniques-financing">Financing</a></li>
+
+      <li><a href="techniques-funding-limit-reconciliation">Funding Limit Reconciliation</a></li>
+
+      <li><a href="techniques-historical-information-review">Historical Information Review</a></li>
+
+      <li><a href="techniques-to-complete-performance-index">To-Complete Performance Index</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-cost-forecasts">Cost Forecasts</a></li>
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:reserve_analysis">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

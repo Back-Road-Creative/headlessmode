@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PMBOK reference</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+      <span class="as-of-chip">As of 2026-07-01</span>
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok" aria-current="page">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main"><p class="showcase-note">A greyed-out label above marks a link this fixed demo does not ship: only the story project's pages go this deep, and an action a live reader could take here (signing in, applying a technique) is disabled in a read-only export.</p>
+
+
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <span aria-current="page">PMBOK</span></nav>
+
+<h1>PMBOK ITTO reference</h1>
+<p><em>Theory reference — the 49 predictive processes on the knowledge-area ×
+   process-group grid, independent of any project's state. Follow a cell for its
+   inputs, tools &amp; techniques and outputs.</em></p>
+
+
+<details class="how-to-read">
+  <summary>How to read this page</summary>
+
+<p>Four words carry this page, and none of them explains itself:</p>
+<dl>
+  <dt>ITTO</dt>
+  <dd>What each process page lists: its inputs, tools &amp; techniques and outputs —
+      what you need, how you do it, and what you get.</dd>
+  <dt>Predictive</dt>
+  <dd>Planned up front against one approved baseline, rather than re-decided each
+      sprint. These 49 are the predictive set; a project running agile or hybrid reads
+      most of its controls against the team's own cadence instead.</dd>
+  <dt><a href="glossary#knowledge-area">Knowledge area</a></dt>
+  <dd>A knowledge area is one of the ten subject groupings PMBOK sorts project work into, like cost or risk. It is one row of the grid below.</dd>
+  <dt><a href="glossary#process-group">Process group</a></dt>
+  <dd>A process group is one of the five logical groupings, like planning or closing, every PMBOK process belongs to. It is one column of the grid below.</dd>
+</dl>
+
+</details>
+
+<p><a href="pmbok-proof">Totality proof</a> — is anything left unaccounted for?</p>
+<p>Every cell says, in plain words, how much help this product gives that step today:</p>
+<dl class="legend">
+  <dt>You can fill this in here</dt><dd>— the wizard can already write one of this step&#39;s outputs for you</dd><dt>We can judge this step</dt><dd>— nothing to fill in yet, but your records can already be judged against it</dd><dt>Read-only for now</dt><dd>— reference only for now — this product works nothing out for this step</dd>
+</dl>
+
+
+<p>This grid is theory, the same for every project. To see it against one project's own
+   progress, open that project's process map:
+   <span class="showcase-unavailable">Archive Digitization</span> · <span class="showcase-unavailable">Fleet Modernization</span> · <span class="showcase-unavailable">Route Optimization Pilot</span> · <a href="projects-1-process-map">Season 4 Rollout</a>.</p>
+
+
+<div class="scroll-x" role="region" tabindex="0" aria-label="The 49-process grid (scrolls sideways)">
+<table>
+  <caption class="sr-only">The 49 predictive processes, knowledge area by row and process group by column</caption>
+  <tr>
+    <th scope="col">Knowledge area</th>
+    <th scope="col">Initiating</th><th scope="col">Planning</th><th scope="col">Executing</th><th scope="col">Monitoring and Controlling</th><th scope="col">Closing</th>
+  </tr>
+
+  <tr>
+    <th scope="row">Integration</th>
+
+    <td>
+
+      <a href="pmbok-4.1">4.1 Develop Project Charter</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-4.2">4.2 Develop Project Management Plan</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-4.3">4.3 Direct and Manage Project Work</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-4.4">4.4 Manage Project Knowledge</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-4.5">4.5 Monitor and Control Project Work</a> — <small>We can judge this step</small><br>
+
+      <a href="pmbok-4.6">4.6 Perform Integrated Change Control</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-4.7">4.7 Close Project or Phase</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Scope</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-5.1">5.1 Plan Scope Management</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-5.2">5.2 Collect Requirements</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-5.3">5.3 Define Scope</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-5.4">5.4 Create WBS</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-5.5">5.5 Validate Scope</a> — <small>We can judge this step</small><br>
+
+      <a href="pmbok-5.6">5.6 Control Scope</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Schedule</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-6.1">6.1 Plan Schedule Management</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-6.2">6.2 Define Activities</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-6.3">6.3 Sequence Activities</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-6.4">6.4 Estimate Activity Durations</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-6.5">6.5 Develop Schedule</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-6.6">6.6 Control Schedule</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Cost</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-7.1">7.1 Plan Cost Management</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-7.2">7.2 Estimate Costs</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-7.3">7.3 Determine Budget</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-7.4">7.4 Control Costs</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Quality</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-8.1">8.1 Plan Quality Management</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-8.2">8.2 Manage Quality</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-8.3">8.3 Control Quality</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Resource</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-9.1">9.1 Plan Resource Management</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-9.2">9.2 Estimate Activity Resources</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-9.3">9.3 Acquire Resources</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-9.4">9.4 Develop Team</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-9.5">9.5 Manage Team</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-9.6">9.6 Control Resources</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Communications</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-10.1">10.1 Plan Communications Management</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-10.2">10.2 Manage Communications</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-10.3">10.3 Monitor Communications</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Risk</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-11.1">11.1 Plan Risk Management</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-11.2">11.2 Identify Risks</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-11.3">11.3 Perform Qualitative Risk Analysis</a> — <small>You can fill this in here</small><br>
+
+      <a href="pmbok-11.4">11.4 Perform Quantitative Risk Analysis</a> — <small>We can judge this step</small><br>
+
+      <a href="pmbok-11.5">11.5 Plan Risk Responses</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-11.6">11.6 Implement Risk Responses</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-11.7">11.7 Monitor Risks</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Procurement</th>
+
+    <td>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-12.1">12.1 Plan Procurement Management</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-12.2">12.2 Conduct Procurements</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-12.3">12.3 Control Procurements</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+  <tr>
+    <th scope="row">Stakeholder</th>
+
+    <td>
+
+      <a href="pmbok-13.1">13.1 Identify Stakeholders</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-13.2">13.2 Plan Stakeholder Engagement</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-13.3">13.3 Manage Stakeholder Engagement</a> — <small>You can fill this in here</small><br>
+
+    </td>
+
+    <td>
+
+      <a href="pmbok-13.4">13.4 Monitor Stakeholder Engagement</a> — <small>We can judge this step</small><br>
+
+    </td>
+
+    <td>
+
+    </td>
+
+  </tr>
+
+</table>
+</div>
+
+
+
+<section class="related" aria-labelledby="pmbok-hubs-heading">
+  <h2 id="pmbok-hubs-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="pmbok-hubs-0">Elsewhere in the method</h3>
+    <ul aria-labelledby="pmbok-hubs-0">
+
+      <li><a href="techniques">Technique library</a></li>
+
+      <li><a href="artifacts">Artifacts</a></li>
+
+      <li><a href="methods">Method profiles</a></li>
+
+      <li><a href="map">Method map</a></li>
+
+      <li><a href="process-map">Process status</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

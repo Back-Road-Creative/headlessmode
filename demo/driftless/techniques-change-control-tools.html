@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Change Control Tools — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-integration">Integration</a> &gt; <span aria-current="page">Change Control Tools</span></nav>
+
+
+
+<h1>Change Control Tools</h1>
+<p><em>Integration technique</em> ·
+   <a href="map-all#node-technique:change_control_tools">See it on the map</a></p>
+<p>Guide only — Names whatever change-control tooling the org runs.</p>
+<p>Deciding whether a proposed change to an already-approved plan is accepted, and updating the plan only once it is.</p>
+<h2>When to use it</h2><p>Once a <dfn><a href="glossary#baseline">Baseline</a></dfn> exists with an approval date set, and someone wants to alter the scope, dates, or cost that baseline represents. Use it whenever the change would make current status reporting compare actuals to a plan nobody has actually agreed to anymore.</p>
+<h2>When to avoid it</h2><p>Before a <dfn><a href="glossary#baseline">baseline</a></dfn> is ever approved — a draft Baseline&#39;s lines can just be edited directly, because there is nothing frozen yet to protect. Also avoid routing every minor, in-tolerance adjustment through it: a board that rubber-stamps ten trivial requests a week stops reading the ones that matter. If the adjustment doesn&#39;t move an approved date or cost figure, it isn&#39;t a change to control.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-change-control-tools-0"> Log the change as a ChangeRequest on the project — description and a raised date — with status left at its default, &#39;proposed&#39;.</label></li>
+
+<li><label><input type="checkbox" id="step-change-control-tools-1"> Before anyone decides, assess the real impact: walk the BaselineLine rows for the affected tasks and anything downstream of them, not just the task the requester named.</label></li>
+
+<li><label><input type="checkbox" id="step-change-control-tools-2"> Bring the request and its assessed impact to whoever the project&#39;s change authority actually is, and record the decision as one of CHANGE_STATUSES.</label></li>
+
+<li><label><input type="checkbox" id="step-change-control-tools-3"> If approved, build the new Baseline: bump version, carry forward unaffected BaselineLine rows unchanged, and write new lines for whatever the change moved.</label></li>
+
+<li><label><input type="checkbox" id="step-change-control-tools-4"> Set the new Baseline&#39;s approval date, then link the ChangeRequest&#39;s resulting baseline id to it — the schema only allows that link once status is &#39;approved&#39;, so cause and consequence stay tied together.</label></li>
+
+<li><label><input type="checkbox" id="step-change-control-tools-5"> Tell whoever reads the plan downstream (schedule views, cost baseline, milestones) that a new version exists, so nothing keeps citing the superseded one.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>An approved ChangeRequest whose resulting baseline id names the version it produced.</li><li>A new Baseline version with its own BaselineLine rows, sitting alongside every prior version rather than replacing it.</li><li>A durable record of what was asked for, what it would have cost, and what was decided — including the requests that were rejected or withdrawn.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>The emergency change made in the field and never logged afterward: the work happens, no ChangeRequest is ever raised, and the baseline silently stops matching reality with no record of why.</li><li>Approving a request before its schedule and cost impact has actually been assessed — the CHECK constraint only stops the resulting baseline id from being set on anything but an approved request; it has no way to verify the approval was informed.</li><li>Re-baselining so often, and so readily, that &#39;approved&#39; stops meaning anything — if every slip gets absorbed into a fresh version instead of being questioned, the plan chases the actuals instead of the actuals being measured against the plan.</li><li>Discarding a rejected or withdrawn request instead of keeping it — it has no resulting baseline id, but it is still the record of what was asked for and refused, and why.</li></ul>
+
+
+<h2>Worked example</h2><p>A community-center renovation has an approved Baseline v1 four months in. The contractor finds the electrical panel needs replacing: +$18,000, +2 weeks on that one task. The PM logs a ChangeRequest, then walks the BaselineLine rows for the panel task and the inspection and drywall tasks that depend on it, and finds the real schedule hit is 3 weeks once the dependency chain is included, not 2. The sponsor approves it with the corrected number. The PM creates Baseline v2, carrying forward every unaffected line as-is and writing new lines only for the panel, inspection, and drywall tasks, sets its approval date, and points the ChangeRequest&#39;s resulting baseline id at v2.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §4.6.2.2</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-4.6">Perform Integrated Change Control</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-information-management">Information Management</a></li>
+
+      <li><a href="techniques-knowledge-management">Knowledge Management</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-approved-change-requests">Approved Change Requests</a></li>
+
+      <li><a href="artifacts-change-log">Change Log</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:change_control_tools">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

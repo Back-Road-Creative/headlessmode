@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>To-Complete Performance Index — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-cost">Cost</a> &gt; <span aria-current="page">To-Complete Performance Index</span></nav>
+
+
+
+<h1>To-Complete Performance Index</h1>
+<p><em>Cost technique</em> ·
+   <a href="map-all#node-technique:to_complete_performance_index">See it on the map</a></p>
+<p>Runnable here</p>
+<p>The cost efficiency remaining work must hit to land on a realistic target cost.</p>
+<h2>When to use it</h2><p>Any time CPI is off 1.0 and someone&#39;s asking whether the project can still hit its original budget. Use TCPI against <dfn><a href="glossary#bac">BAC</a></dfn> — (BAC − <dfn><a href="glossary#ev">EV</a></dfn>) / (BAC − AC) — to answer &#39;can we still make the original number&#39;, and TCPI against a revised <dfn><a href="glossary#eac">EAC</a></dfn> — (BAC − EV) / (EAC − AC) — to check whether even that revised, more forgiving forecast is achievable at the efficiency the team has actually been running at.</p>
+<h2>When to avoid it</h2><p>Don&#39;t present a TCPI-against-<dfn><a href="glossary#bac">BAC</a></dfn> figure as a plan without comparing it against the CPI the project has actually been achieving — a TCPI far above current CPI isn&#39;t a target, it&#39;s a number nobody has a believable way to hit, and presenting it as achievable is arithmetic fiction dressed up as a forecast.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-to-complete-performance-index-0"> Get current EV, AC, and BAC (or a revised EAC, if one exists and is trusted).</label></li>
+
+<li><label><input type="checkbox" id="step-to-complete-performance-index-1"> Decide which denominator answers the question being asked: BAC if the question is &#39;can the original budget still be hit&#39;, EAC if the question is &#39;is even the revised forecast realistic&#39;.</label></li>
+
+<li><label><input type="checkbox" id="step-to-complete-performance-index-2"> Compute TCPI = (BAC − EV) / (BAC − AC), or (BAC − EV) / (EAC − AC) for the EAC form.</label></li>
+
+<li><label><input type="checkbox" id="step-to-complete-performance-index-3"> Compare the result against the CPI the project has actually achieved to date.</label></li>
+
+<li><label><input type="checkbox" id="step-to-complete-performance-index-4"> If TCPI sits well above achieved CPI, treat that gap as the finding — it means the remaining work needs to run meaningfully more efficiently than the work already done, and say so explicitly rather than presenting the target alone.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A required-efficiency figure (TCPI) for the remaining work, against either BAC or a revised EAC.</li><li>An explicit comparison of that required efficiency against what the project has actually been achieving.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Reporting TCPI against BAC without ever computing or checking it against achieved CPI — the gap between the two is the entire point.</li><li>Continuing to use the BAC form after everyone has effectively accepted a revised EAC, so the TCPI reported no longer answers a question anyone is actually asking.</li><li>Treating a TCPI just modestly above current CPI as fine, without asking what specifically will change about how the remaining work is run to close even a small gap.</li></ul>
+
+
+<h2>Worked example</h2><p>On the same community-center renovation (BAC $850,000, EV $348,500, AC $410,000, CPI 0.85), TCPI against BAC is (850,000 − 348,500) / (850,000 − 410,000) = 501,500 / 440,000 ≈ 1.14 — the remaining work would need to run at 1.14 efficiency, well above the 0.85 the project has actually delivered so far, to still hit the original $850,000. Against the earlier EAC of $1,000,000 instead, TCPI = (850,000 − 348,500) / (1,000,000 − 410,000) = 501,500 / 590,000 ≈ 0.85 — exactly the efficiency already being achieved, meaning the revised forecast is the believable one and the original budget, at this point, is not.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §7.4.2.2</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-7.4">Control Costs</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-cost-aggregation">Cost Aggregation</a></li>
+
+      <li><a href="techniques-cost-of-quality">Cost of Quality</a></li>
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+      <li><a href="techniques-financing">Financing</a></li>
+
+      <li><a href="techniques-funding-limit-reconciliation">Funding Limit Reconciliation</a></li>
+
+      <li><a href="techniques-historical-information-review">Historical Information Review</a></li>
+
+      <li><a href="techniques-reserve-analysis">Reserve Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-cost-forecasts">Cost Forecasts</a></li>
+
+      <li><a href="artifacts-work-performance-information">Work Performance Information</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:to_complete_performance_index">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

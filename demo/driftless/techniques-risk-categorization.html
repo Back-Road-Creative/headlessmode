@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Risk Categorization — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-risk">Risk</a> &gt; <span aria-current="page">Risk Categorization</span></nav>
+
+
+
+<h1>Risk Categorization</h1>
+<p><em>Risk technique</em> ·
+   <a href="map-all#node-technique:risk_categorization">See it on the map</a></p>
+<p>Guide only — Sorting risks into categories is a judgment call.</p>
+<p>Grouping identified risks by source or area so patterns become visible instead of staying a flat list.</p>
+<h2>When to use it</h2><p>Once the register has enough entries that scrolling through it no longer shows you anything: a dozen or more risks, or a project with several distinct workstreams. Categorizing surfaces concentration you would otherwise miss, such as half your open risks tracing back to one vendor or one unproven technology choice.</p>
+<h2>When to avoid it</h2><p>On a short list of risks a person can hold in their head at once — the categories add bookkeeping without adding insight. Also avoid inventing a deep, formal risk breakdown structure before you have enough risks to populate more than a couple of its branches; an elaborate taxonomy with three risks in it is effort spent on the wrong thing.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-risk-categorization-0"> List every open risk currently in the register.</label></li>
+
+<li><label><input type="checkbox" id="step-risk-categorization-1"> Pick a small set of categories that matches how your team actually thinks about the project — by source (technical, external, organizational, project management) or by affected area (a specific workstream, vendor, or deliverable).</label></li>
+
+<li><label><input type="checkbox" id="step-risk-categorization-2"> Tag each risk with one primary category; note a second if it genuinely spans two.</label></li>
+
+<li><label><input type="checkbox" id="step-risk-categorization-3"> Count and total exposure by category.</label></li>
+
+<li><label><input type="checkbox" id="step-risk-categorization-4"> Look for concentration: one category carrying most of the exposure, or most of the count, is the signal you were looking for.</label></li>
+
+<li><label><input type="checkbox" id="step-risk-categorization-5"> Feed that concentration back into planning — a shared root cause across several risks is often cheaper to address once than risk by risk.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>Risks grouped into a small number of named categories.</li><li>A per-category count and exposure total.</li><li>A short written note on where the concentration is and why it matters.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Choosing categories that sound thorough (a full PMBOK-style RBS) but that the team never actually uses when a new risk shows up, so tagging drifts to &#39;other&#39; and the structure stops meaning anything.</li><li>Treating the category count as the finding instead of using it to ask why one category dominates.</li><li>Recreating this by hand every time instead of noticing Driftless has no category field on the risk record — there is nowhere to store the tag itself yet, so this stays a spreadsheet or notebook exercise layered on top of the register, not something the tool tracks for you.</li></ul>
+
+
+<h2>Worked example</h2><p>A mid-size warehouse automation project has nineteen open risks. Sorted by source, eight trace back to the conveyor vendor&#39;s late deliveries, three to unfamiliar sensor firmware, and the rest are scattered. The PM stops treating the eight vendor risks as independent items and instead escalates one conversation with the vendor&#39;s account manager about their delivery schedule — addressing the root cause instead of eight symptoms.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §11.3.2.5</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-11.3">Perform Qualitative Risk Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-contingent-response-strategies">Contingent Response Strategies</a></li>
+
+      <li><a href="techniques-decision-tree-analysis">Decision Tree Analysis</a></li>
+
+      <li><a href="techniques-influence-diagrams">Influence Diagrams</a></li>
+
+      <li><a href="techniques-prompt-lists">Prompt Lists</a></li>
+
+      <li><a href="techniques-representations-of-uncertainty">Representations of Uncertainty</a></li>
+
+      <li><a href="techniques-risk-probability-and-impact-assessment">Risk Probability and Impact Assessment</a></li>
+
+      <li><a href="techniques-sensitivity-analysis">Sensitivity Analysis</a></li>
+
+      <li><a href="techniques-simulation">Simulation</a></li>
+
+      <li><a href="techniques-strategies-for-opportunities">Strategies for Opportunities</a></li>
+
+      <li><a href="techniques-strategies-for-overall-project-risk">Strategies for Overall Project Risk</a></li>
+
+      <li><a href="techniques-strategies-for-threats">Strategies for Threats</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:risk_categorization">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

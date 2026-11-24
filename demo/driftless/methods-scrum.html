@@ -1,0 +1,1609 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scrum</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods" aria-current="page">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="methods">Methods</a> &gt; <span aria-current="page">Scrum</span></nav>
+
+<h1>Scrum</h1>
+<p>A short, repeating cycle where a small team builds a piece of the product and checks in often.</p>
+<p class="provenance">Source: The Scrum Guide, November 2020 edition (Schwaber &amp; Sutherland).</p>
+
+
+
+
+<h2>Role</h2>
+<dl class="technique-index">
+
+  <dt id="product_owner">Product Owner</dt>
+  <dd>One person decides what to build next and keeps the <dfn><a href="glossary#backlog">backlog</a></dfn> ordered.
+
+    <br><small>Crosswalk: 5.3</small>
+
+
+
+<section class="related" aria-labelledby="related-product_owner-heading">
+  <h2 id="related-product_owner-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-product_owner-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-product_owner-0">
+
+      <li><a href="pmbok-5.3">Define Scope</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_owner-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-product_owner-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-decision-making">Decision Making</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-product-analysis">Product Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_owner-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-product_owner-2">
+
+      <li><a href="artifacts-project-scope-statement">Project Scope Statement</a></li>
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+      <li><a href="artifacts-project-charter">Project Charter</a></li>
+
+      <li><a href="artifacts-scope-management-plan">Scope Management Plan</a></li>
+
+      <li><a href="artifacts-requirements-documentation">Requirements Documentation</a></li>
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_owner-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-product_owner-3">
+
+      <li><a href="methods-scrum#scrum_master">Scrum Master</a></li>
+
+      <li><a href="methods-scrum#developers">Developers</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_owner-4">Glossary terms</h3>
+    <ul aria-labelledby="related-product_owner-4">
+
+      <li><a href="glossary#backlog">Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_owner-5">Map</h3>
+    <ul aria-labelledby="related-product_owner-5">
+
+      <li><a href="map-all#node-process:5.3">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="scrum_master">Scrum Master</dt>
+  <dd>One person coaches the team and removes obstacles to its work.
+
+    <br><small>Crosswalk: 9.5</small>
+
+
+
+<section class="related" aria-labelledby="related-scrum_master-heading">
+  <h2 id="related-scrum_master-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-scrum_master-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-scrum_master-0">
+
+      <li><a href="pmbok-9.5">Manage Team</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-scrum_master-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-scrum_master-1">
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-conflict-management">Conflict Management</a></li>
+
+      <li><a href="techniques-influencing">Influencing</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-scrum_master-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-scrum_master-2">
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-issue-log">Issue Log</a></li>
+
+      <li><a href="artifacts-project-team-assignments">Project Team Assignments</a></li>
+
+      <li><a href="artifacts-resource-management-plan">Resource Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-team-charter">Team Charter</a></li>
+
+      <li><a href="artifacts-work-performance-reports">Work Performance Reports</a></li>
+
+      <li><a href="artifacts-team-performance-assessments">Team Performance Assessments</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-scrum_master-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-scrum_master-3">
+
+      <li><a href="methods-scrum#product_owner">Product Owner</a></li>
+
+      <li><a href="methods-scrum#developers">Developers</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-scrum_master-4">Map</h3>
+    <ul aria-labelledby="related-scrum_master-4">
+
+      <li><a href="map-all#node-process:9.5">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="developers">Developers</dt>
+  <dd>The people who build the product and decide together how the work gets done.
+
+    <br><small>Crosswalk: 9.4</small>
+
+
+
+<section class="related" aria-labelledby="related-developers-heading">
+  <h2 id="related-developers-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-developers-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-developers-0">
+
+      <li><a href="pmbok-9.4">Develop Team</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-developers-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-developers-1">
+
+      <li><a href="techniques-colocation">Colocation</a></li>
+
+      <li><a href="techniques-virtual-teams">Virtual Teams</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-team-building">Team Building</a></li>
+
+      <li><a href="techniques-recognition-and-rewards">Recognition and Rewards</a></li>
+
+      <li><a href="techniques-training">Training</a></li>
+
+      <li><a href="techniques-individual-and-team-assessments">Individual and Team Assessments</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-developers-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-developers-2">
+
+      <li><a href="artifacts-team-performance-assessments">Team Performance Assessments</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-resource-management-plan">Resource Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-project-team-assignments">Project Team Assignments</a></li>
+
+      <li><a href="artifacts-resource-calendars">Resource Calendars</a></li>
+
+      <li><a href="artifacts-team-charter">Team Charter</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-developers-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-developers-3">
+
+      <li><a href="methods-scrum#product_owner">Product Owner</a></li>
+
+      <li><a href="methods-scrum#scrum_master">Scrum Master</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-developers-4">Map</h3>
+    <ul aria-labelledby="related-developers-4">
+
+      <li><a href="map-all#node-process:9.4">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+</dl>
+
+
+
+
+<h2>Event</h2>
+<dl class="technique-index">
+
+  <dt id="sprint">Sprint</dt>
+  <dd>A short, fixed cycle in which the team builds a usable slice of the product.
+
+    <br><small>Crosswalk: 6.5, Rolling Wave Planning</small>
+
+
+
+<section class="related" aria-labelledby="related-sprint-heading">
+  <h2 id="related-sprint-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sprint-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-sprint-0">
+
+      <li><a href="pmbok-6.5">Develop Schedule</a></li>
+
+      <li><a href="techniques-rolling-wave-planning">Rolling Wave Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-sprint-1">
+
+      <li><a href="techniques-schedule-network-analysis">Schedule Network Analysis</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-schedule-compression">Schedule Compression</a></li>
+
+      <li><a href="techniques-leads-and-lags">Leads and Lags</a></li>
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-sprint-2">
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-schedule-management-plan">Schedule Management Plan</a></li>
+
+      <li><a href="artifacts-activity-list">Activity List</a></li>
+
+      <li><a href="artifacts-activity-attributes">Activity Attributes</a></li>
+
+      <li><a href="artifacts-project-schedule-network-diagram">Project Schedule Network Diagram</a></li>
+
+      <li><a href="artifacts-duration-estimates">Duration Estimates</a></li>
+
+      <li><a href="artifacts-resource-calendars">Resource Calendars</a></li>
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-sprint-3">
+
+      <li><a href="methods-scrum#sprint_planning">Sprint Planning</a></li>
+
+      <li><a href="methods-scrum#daily_scrum">Daily Scrum</a></li>
+
+      <li><a href="methods-scrum#sprint_review">Sprint Review</a></li>
+
+      <li><a href="methods-scrum#sprint_retrospective">Sprint Retrospective</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint-4">Glossary terms</h3>
+    <ul aria-labelledby="related-sprint-4">
+
+      <li><a href="glossary#sprint">Sprint</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint-5">Map</h3>
+    <ul aria-labelledby="related-sprint-5">
+
+      <li><a href="map-all#node-process:6.5">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="sprint_planning">Sprint Planning</dt>
+  <dd>At the start of each cycle, the team agrees what it will build and roughly how.
+
+    <br><small>Crosswalk: 6.5, Agile Release Planning</small>
+
+
+
+<section class="related" aria-labelledby="related-sprint_planning-heading">
+  <h2 id="related-sprint_planning-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sprint_planning-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-sprint_planning-0">
+
+      <li><a href="pmbok-6.5">Develop Schedule</a></li>
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_planning-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-sprint_planning-1">
+
+      <li><a href="techniques-schedule-network-analysis">Schedule Network Analysis</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-schedule-compression">Schedule Compression</a></li>
+
+      <li><a href="techniques-leads-and-lags">Leads and Lags</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_planning-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-sprint_planning-2">
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-schedule-management-plan">Schedule Management Plan</a></li>
+
+      <li><a href="artifacts-activity-list">Activity List</a></li>
+
+      <li><a href="artifacts-activity-attributes">Activity Attributes</a></li>
+
+      <li><a href="artifacts-project-schedule-network-diagram">Project Schedule Network Diagram</a></li>
+
+      <li><a href="artifacts-duration-estimates">Duration Estimates</a></li>
+
+      <li><a href="artifacts-resource-calendars">Resource Calendars</a></li>
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_planning-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-sprint_planning-3">
+
+      <li><a href="methods-scrum#sprint">Sprint</a></li>
+
+      <li><a href="methods-scrum#daily_scrum">Daily Scrum</a></li>
+
+      <li><a href="methods-scrum#sprint_review">Sprint Review</a></li>
+
+      <li><a href="methods-scrum#sprint_retrospective">Sprint Retrospective</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_planning-4">Glossary terms</h3>
+    <ul aria-labelledby="related-sprint_planning-4">
+
+      <li><a href="glossary#sprint">Sprint</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_planning-5">Map</h3>
+    <ul aria-labelledby="related-sprint_planning-5">
+
+      <li><a href="map-all#node-process:6.5">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="sprint_planning-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>The top of the Product Backlog is already refined enough to plan against before the meeting starts, not discovered during it.</li><li>The Developers, not the Product Owner or Scrum Master, decide how much work they can take on.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>The amount of work chosen is set by hope or by pressure from outside the team rather than by what the team has actually finished in past Sprints.</li><li>The meeting turns into re-arguing priorities the Product Owner already settled by ordering the backlog.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="daily_scrum">Daily Scrum</dt>
+  <dd>A short daily check-in where the team adjusts its plan for the next day&#39;s work.
+
+    <br><small>Crosswalk: Meetings</small>
+
+
+
+<section class="related" aria-labelledby="related-daily_scrum-heading">
+  <h2 id="related-daily_scrum-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-daily_scrum-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-daily_scrum-0">
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-daily_scrum-1">Other Scrum practices</h3>
+    <ul aria-labelledby="related-daily_scrum-1">
+
+      <li><a href="methods-scrum#sprint">Sprint</a></li>
+
+      <li><a href="methods-scrum#sprint_planning">Sprint Planning</a></li>
+
+      <li><a href="methods-scrum#sprint_review">Sprint Review</a></li>
+
+      <li><a href="methods-scrum#sprint_retrospective">Sprint Retrospective</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-daily_scrum-2">Map</h3>
+    <ul aria-labelledby="related-daily_scrum-2">
+
+      <li><a href="map-all#node-technique:meetings">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="daily_scrum-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>It stays inside its timebox and focuses on adjusting the plan for the next day&#39;s work, not reporting status.</li><li>Only the Developers need to run it; anyone else present listens.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>It becomes a status report delivered to the Scrum Master or a manager instead of the Developers planning among themselves.</li><li>It regularly runs long because it drifts into solving problems that belong in a smaller side conversation.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="sprint_review">Sprint Review</dt>
+  <dd>At the end of each cycle, the team shows finished work and gathers feedback.
+
+    <br><small>Crosswalk: 10.2, Meetings</small>
+
+
+
+<section class="related" aria-labelledby="related-sprint_review-heading">
+  <h2 id="related-sprint_review-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sprint_review-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-sprint_review-0">
+
+      <li><a href="pmbok-10.2">Manage Communications</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_review-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-sprint_review-1">
+
+      <li><a href="techniques-communication-technology">Communication Technology</a></li>
+
+      <li><a href="techniques-communication-methods">Communication Methods</a></li>
+
+      <li><a href="techniques-communication-skills">Communication Skills</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+      <li><a href="techniques-project-reporting">Project Reporting</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_review-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-sprint_review-2">
+
+      <li><a href="artifacts-project-communications">Project Communications</a></li>
+
+      <li><a href="artifacts-communications-management-plan">Communications Management Plan</a></li>
+
+      <li><a href="artifacts-stakeholder-engagement-plan">Stakeholder Engagement Plan</a></li>
+
+      <li><a href="artifacts-change-log">Change Log</a></li>
+
+      <li><a href="artifacts-issue-log">Issue Log</a></li>
+
+      <li><a href="artifacts-quality-report">Quality Report</a></li>
+
+      <li><a href="artifacts-work-performance-reports">Work Performance Reports</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_review-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-sprint_review-3">
+
+      <li><a href="methods-scrum#sprint">Sprint</a></li>
+
+      <li><a href="methods-scrum#sprint_planning">Sprint Planning</a></li>
+
+      <li><a href="methods-scrum#daily_scrum">Daily Scrum</a></li>
+
+      <li><a href="methods-scrum#sprint_retrospective">Sprint Retrospective</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_review-4">Glossary terms</h3>
+    <ul aria-labelledby="related-sprint_review-4">
+
+      <li><a href="glossary#sprint">Sprint</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_review-5">Map</h3>
+    <ul aria-labelledby="related-sprint_review-5">
+
+      <li><a href="map-all#node-process:10.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="sprint_review-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>What gets shown is working product, not a slide deck describing it.</li><li>Stakeholders are actually present and their feedback changes what goes on the backlog next.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>The review becomes a rubber stamp because nothing shown is genuinely usable yet.</li><li>Feedback is collected but never makes it back onto the Product Backlog.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="sprint_retrospective">Sprint Retrospective</dt>
+  <dd>After each cycle, the team looks back at how it worked and picks one thing to improve.
+
+    <br><small>Crosswalk: 8.2, Meetings</small>
+
+
+
+<section class="related" aria-labelledby="related-sprint_retrospective-heading">
+  <h2 id="related-sprint_retrospective-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sprint_retrospective-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-sprint_retrospective-0">
+
+      <li><a href="pmbok-8.2">Manage Quality</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_retrospective-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-sprint_retrospective-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-root-cause-analysis">Root Cause Analysis</a></li>
+
+      <li><a href="techniques-audits">Audits</a></li>
+
+      <li><a href="techniques-design-for-x">Design for X</a></li>
+
+      <li><a href="techniques-problem-solving">Problem Solving</a></li>
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_retrospective-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-sprint_retrospective-2">
+
+      <li><a href="artifacts-quality-report">Quality Report</a></li>
+
+      <li><a href="artifacts-test-and-evaluation-documents">Test and Evaluation Documents</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-quality-control-measurements">Quality Control Measurements</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_retrospective-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-sprint_retrospective-3">
+
+      <li><a href="methods-scrum#sprint">Sprint</a></li>
+
+      <li><a href="methods-scrum#sprint_planning">Sprint Planning</a></li>
+
+      <li><a href="methods-scrum#daily_scrum">Daily Scrum</a></li>
+
+      <li><a href="methods-scrum#sprint_review">Sprint Review</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_retrospective-4">Glossary terms</h3>
+    <ul aria-labelledby="related-sprint_retrospective-4">
+
+      <li><a href="glossary#sprint">Sprint</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_retrospective-5">Map</h3>
+    <ul aria-labelledby="related-sprint_retrospective-5">
+
+      <li><a href="map-all#node-process:8.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="sprint_retrospective-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>The team leaves with one concrete change it will actually make, not a long list of observations.</li><li>The chosen change is visibly carried into the next Sprint&#39;s plan.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>The same complaints resurface every retrospective because nothing chosen in a prior one was ever followed through.</li><li>It turns into blame directed at individuals rather than at the way the work is organized.</li></ul>
+    </div>
+
+  </dd>
+
+</dl>
+
+
+
+
+<h2>Artifact</h2>
+<dl class="technique-index">
+
+  <dt id="product_backlog">Product Backlog</dt>
+  <dd>The single ordered list of everything that might still be needed in the product.
+
+    <br><small>Crosswalk: 5.4, Decomposition</small>
+
+
+
+<section class="related" aria-labelledby="related-product_backlog-heading">
+  <h2 id="related-product_backlog-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-product_backlog-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-product_backlog-0">
+
+      <li><a href="pmbok-5.4">Create WBS</a></li>
+
+      <li><a href="techniques-decomposition">Decomposition</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_backlog-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-product_backlog-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_backlog-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-product_backlog-2">
+
+      <li><a href="artifacts-scope-baseline">Scope Baseline</a></li>
+
+      <li><a href="artifacts-scope-management-plan">Scope Management Plan</a></li>
+
+      <li><a href="artifacts-project-scope-statement">Project Scope Statement</a></li>
+
+      <li><a href="artifacts-requirements-documentation">Requirements Documentation</a></li>
+
+      <li><a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_backlog-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-product_backlog-3">
+
+      <li><a href="methods-scrum#sprint_backlog">Sprint Backlog</a></li>
+
+      <li><a href="methods-scrum#increment">Increment</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_backlog-4">Glossary terms</h3>
+    <ul aria-labelledby="related-product_backlog-4">
+
+      <li><a href="glossary#backlog">Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_backlog-5">Map</h3>
+    <ul aria-labelledby="related-product_backlog-5">
+
+      <li><a href="map-all#node-process:5.4">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="sprint_backlog">Sprint Backlog</dt>
+  <dd>The slice of work the team picked for this cycle, plus its plan to finish it.
+
+    <br><small>Crosswalk: 6.2</small>
+
+
+
+<section class="related" aria-labelledby="related-sprint_backlog-heading">
+  <h2 id="related-sprint_backlog-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sprint_backlog-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-sprint_backlog-0">
+
+      <li><a href="pmbok-6.2">Define Activities</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_backlog-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-sprint_backlog-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-decomposition">Decomposition</a></li>
+
+      <li><a href="techniques-rolling-wave-planning">Rolling Wave Planning</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_backlog-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-sprint_backlog-2">
+
+      <li><a href="artifacts-activity-list">Activity List</a></li>
+
+      <li><a href="artifacts-activity-attributes">Activity Attributes</a></li>
+
+      <li><a href="artifacts-milestone-list">Milestone List</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-schedule-management-plan">Schedule Management Plan</a></li>
+
+      <li><a href="artifacts-scope-baseline">Scope Baseline</a></li>
+
+      <li><a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_backlog-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-sprint_backlog-3">
+
+      <li><a href="methods-scrum#product_backlog">Product Backlog</a></li>
+
+      <li><a href="methods-scrum#increment">Increment</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_backlog-4">Glossary terms</h3>
+    <ul aria-labelledby="related-sprint_backlog-4">
+
+      <li><a href="glossary#sprint">Sprint</a></li>
+
+      <li><a href="glossary#backlog">Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_backlog-5">Map</h3>
+    <ul aria-labelledby="related-sprint_backlog-5">
+
+      <li><a href="map-all#node-process:6.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="increment">Increment</dt>
+  <dd>The working piece of product a cycle adds on top of everything built before it.
+
+    <br><small>Crosswalk: 4.3</small>
+
+
+
+<section class="related" aria-labelledby="related-increment-heading">
+  <h2 id="related-increment-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-increment-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-increment-0">
+
+      <li><a href="pmbok-4.3">Direct and Manage Project Work</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-increment-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-increment-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-increment-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-increment-2">
+
+      <li><a href="artifacts-deliverables">Deliverables</a></li>
+
+      <li><a href="artifacts-work-performance-data">Work Performance Data</a></li>
+
+      <li><a href="artifacts-issue-log">Issue Log</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-change-log">Change Log</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-milestone-list">Milestone List</a></li>
+
+      <li><a href="artifacts-project-communications">Project Communications</a></li>
+
+      <li><a href="artifacts-approved-change-requests">Approved Change Requests</a></li>
+
+      <li><a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-increment-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-increment-3">
+
+      <li><a href="methods-scrum#product_backlog">Product Backlog</a></li>
+
+      <li><a href="methods-scrum#sprint_backlog">Sprint Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-increment-4">Map</h3>
+    <ul aria-labelledby="related-increment-4">
+
+      <li><a href="map-all#node-process:4.3">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+</dl>
+
+
+
+
+<h2>Policy</h2>
+<dl class="technique-index">
+
+  <dt id="product_goal">Product Goal</dt>
+  <dd>The <dfn><a href="glossary#backlog">backlog</a></dfn>&#39;s long-term objective, describing the future state the product is aiming for.
+
+    <br><small>Crosswalk: 4.1</small>
+
+
+
+<section class="related" aria-labelledby="related-product_goal-heading">
+  <h2 id="related-product_goal-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-product_goal-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-product_goal-0">
+
+      <li><a href="pmbok-4.1">Develop Project Charter</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_goal-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-product_goal-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-data-gathering">Data Gathering</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-meetings">Meetings</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_goal-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-product_goal-2">
+
+      <li><a href="artifacts-project-charter">Project Charter</a></li>
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+      <li><a href="artifacts-business-case">Business Case</a></li>
+
+      <li><a href="artifacts-benefits-management-plan">Benefits Management Plan</a></li>
+
+      <li><a href="artifacts-agreements-initial">Agreements Initial</a></li>
+
+      <li><a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a></li>
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_goal-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-product_goal-3">
+
+      <li><a href="methods-scrum#sprint_goal">Sprint Goal</a></li>
+
+      <li><a href="methods-scrum#definition_of_done">Definition of Done</a></li>
+
+      <li><a href="methods-scrum#self_management">Self-Management</a></li>
+
+      <li><a href="methods-scrum#scrum_values">Scrum Values</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_goal-4">Glossary terms</h3>
+    <ul aria-labelledby="related-product_goal-4">
+
+      <li><a href="glossary#backlog">Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-product_goal-5">Map</h3>
+    <ul aria-labelledby="related-product_goal-5">
+
+      <li><a href="map-all#node-process:4.1">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="sprint_goal">Sprint Goal</dt>
+  <dd>The single purpose the cycle&#39;s chosen work is meant to achieve together.
+
+    <br><small>Crosswalk: 6.5</small>
+
+
+
+<section class="related" aria-labelledby="related-sprint_goal-heading">
+  <h2 id="related-sprint_goal-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sprint_goal-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-sprint_goal-0">
+
+      <li><a href="pmbok-6.5">Develop Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_goal-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-sprint_goal-1">
+
+      <li><a href="techniques-schedule-network-analysis">Schedule Network Analysis</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-schedule-compression">Schedule Compression</a></li>
+
+      <li><a href="techniques-leads-and-lags">Leads and Lags</a></li>
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_goal-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-sprint_goal-2">
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-schedule-management-plan">Schedule Management Plan</a></li>
+
+      <li><a href="artifacts-activity-list">Activity List</a></li>
+
+      <li><a href="artifacts-activity-attributes">Activity Attributes</a></li>
+
+      <li><a href="artifacts-project-schedule-network-diagram">Project Schedule Network Diagram</a></li>
+
+      <li><a href="artifacts-duration-estimates">Duration Estimates</a></li>
+
+      <li><a href="artifacts-resource-calendars">Resource Calendars</a></li>
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_goal-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-sprint_goal-3">
+
+      <li><a href="methods-scrum#product_goal">Product Goal</a></li>
+
+      <li><a href="methods-scrum#definition_of_done">Definition of Done</a></li>
+
+      <li><a href="methods-scrum#self_management">Self-Management</a></li>
+
+      <li><a href="methods-scrum#scrum_values">Scrum Values</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_goal-4">Glossary terms</h3>
+    <ul aria-labelledby="related-sprint_goal-4">
+
+      <li><a href="glossary#sprint">Sprint</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint_goal-5">Map</h3>
+    <ul aria-labelledby="related-sprint_goal-5">
+
+      <li><a href="map-all#node-process:6.5">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="definition_of_done">Definition of Done</dt>
+  <dd>The shared rule the team uses to agree when a piece of work is truly finished.
+
+    <br><small>Crosswalk: 8.1</small>
+
+
+
+<section class="related" aria-labelledby="related-definition_of_done-heading">
+  <h2 id="related-definition_of_done-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-definition_of_done-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-definition_of_done-0">
+
+      <li><a href="pmbok-8.1">Plan Quality Management</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-definition_of_done-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-definition_of_done-1">
+
+      <li><a href="techniques-expert-judgment">Expert Judgment</a></li>
+
+      <li><a href="techniques-data-gathering">Data Gathering</a></li>
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-cost-of-quality">Cost of Quality</a></li>
+
+      <li><a href="techniques-decision-making">Decision Making</a></li>
+
+      <li><a href="techniques-data-representation">Data Representation</a></li>
+
+      <li><a href="techniques-test-and-inspection-planning">Test and Inspection Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-definition_of_done-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-definition_of_done-2">
+
+      <li><a href="artifacts-quality-management-plan">Quality Management Plan</a></li>
+
+      <li><a href="artifacts-quality-metrics">Quality Metrics</a></li>
+
+      <li><a href="artifacts-project-management-plan">Project Management Plan</a></li>
+
+      <li><a href="artifacts-project-charter">Project Charter</a></li>
+
+      <li><a href="artifacts-requirements-management-plan">Requirements Management Plan</a></li>
+
+      <li><a href="artifacts-risk-management-plan">Risk Management Plan</a></li>
+
+      <li><a href="artifacts-stakeholder-engagement-plan">Stakeholder Engagement Plan</a></li>
+
+      <li><a href="artifacts-scope-baseline">Scope Baseline</a></li>
+
+      <li><a href="artifacts-requirements-documentation">Requirements Documentation</a></li>
+
+      <li><a href="artifacts-stakeholder-register">Stakeholder Register</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-definition_of_done-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-definition_of_done-3">
+
+      <li><a href="methods-scrum#product_goal">Product Goal</a></li>
+
+      <li><a href="methods-scrum#sprint_goal">Sprint Goal</a></li>
+
+      <li><a href="methods-scrum#self_management">Self-Management</a></li>
+
+      <li><a href="methods-scrum#scrum_values">Scrum Values</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-definition_of_done-4">Map</h3>
+    <ul aria-labelledby="related-definition_of_done-4">
+
+      <li><a href="map-all#node-process:8.1">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+    <div class="practice-content" id="definition_of_done-running-it">
+      <p><small><strong>Running it well:</strong></small></p>
+      <ul><li>It is written down somewhere the whole team can see, and it applies the same way to every item.</li><li>It only grows stricter over time as the team learns what completeness actually requires.</li></ul>
+      <p><small><strong>Going wrong looks like:</strong></small></p>
+      <ul><li>It gets quietly loosened for one item near a deadline so the burndown looks better than the work really is.</li><li>Different people on the team believe different things count as done.</li></ul>
+    </div>
+
+  </dd>
+
+  <dt id="self_management">Self-Management</dt>
+  <dd>The team decides among itself who does each piece of work and how.
+
+    <br><small>Crosswalk: 9.4</small>
+
+
+
+<section class="related" aria-labelledby="related-self_management-heading">
+  <h2 id="related-self_management-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-self_management-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-self_management-0">
+
+      <li><a href="pmbok-9.4">Develop Team</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-self_management-1">Techniques those processes use</h3>
+    <ul aria-labelledby="related-self_management-1">
+
+      <li><a href="techniques-colocation">Colocation</a></li>
+
+      <li><a href="techniques-virtual-teams">Virtual Teams</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-team-building">Team Building</a></li>
+
+      <li><a href="techniques-recognition-and-rewards">Recognition and Rewards</a></li>
+
+      <li><a href="techniques-training">Training</a></li>
+
+      <li><a href="techniques-individual-and-team-assessments">Individual and Team Assessments</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-self_management-2">Artifacts those processes touch</h3>
+    <ul aria-labelledby="related-self_management-2">
+
+      <li><a href="artifacts-team-performance-assessments">Team Performance Assessments</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+      <li><a href="artifacts-resource-management-plan">Resource Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-project-team-assignments">Project Team Assignments</a></li>
+
+      <li><a href="artifacts-resource-calendars">Resource Calendars</a></li>
+
+      <li><a href="artifacts-team-charter">Team Charter</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-self_management-3">Other Scrum practices</h3>
+    <ul aria-labelledby="related-self_management-3">
+
+      <li><a href="methods-scrum#product_goal">Product Goal</a></li>
+
+      <li><a href="methods-scrum#sprint_goal">Sprint Goal</a></li>
+
+      <li><a href="methods-scrum#definition_of_done">Definition of Done</a></li>
+
+      <li><a href="methods-scrum#scrum_values">Scrum Values</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-self_management-4">Map</h3>
+    <ul aria-labelledby="related-self_management-4">
+
+      <li><a href="map-all#node-process:9.4">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+  <dt id="scrum_values">Scrum Values</dt>
+  <dd>Five shared values — commitment, focus, openness, respect and courage — guide the team.
+
+    <br><small>Crosswalk: Ground Rules</small>
+
+
+
+<section class="related" aria-labelledby="related-scrum_values-heading">
+  <h2 id="related-scrum_values-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-scrum_values-0">Crosswalked to</h3>
+    <ul aria-labelledby="related-scrum_values-0">
+
+      <li><a href="techniques-ground-rules">Ground Rules</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-scrum_values-1">Other Scrum practices</h3>
+    <ul aria-labelledby="related-scrum_values-1">
+
+      <li><a href="methods-scrum#product_goal">Product Goal</a></li>
+
+      <li><a href="methods-scrum#sprint_goal">Sprint Goal</a></li>
+
+      <li><a href="methods-scrum#definition_of_done">Definition of Done</a></li>
+
+      <li><a href="methods-scrum#self_management">Self-Management</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-scrum_values-2">Map</h3>
+    <ul aria-labelledby="related-scrum_values-2">
+
+      <li><a href="map-all#node-technique:ground_rules">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+
+
+  </dd>
+
+</dl>
+
+
+
+
+
+
+<h2>Sprint Planning Agenda</h2>
+<ol><li>Restate the Sprint Goal candidate and check it against the Product Goal.</li><li>Walk the top of the Product Backlog and confirm each item is ready to pull.</li><li>The Developers select the work they believe they can finish this Sprint.</li><li>Break selected items into a plan of concrete tasks for the Sprint Backlog.</li><li>Confirm the Definition of Done every selected item must meet; an item that misses it goes back to the Product Backlog.</li><li>Restate the finished Sprint Goal and the Sprint Backlog back to the room.</li></ol>
+
+<h2>Definition of Done Checklist</h2>
+<ol><li>Code (or equivalent work product) is complete and reviewed by someone else.</li><li>Automated checks relevant to the change pass.</li><li>The result is integrated with the rest of the product, not sitting apart.</li><li>Any documentation the change requires has been updated.</li><li>The Product Owner has seen it and agrees it meets the Sprint Goal&#39;s intent.</li></ol>
+
+</main>
+</body>
+</html>

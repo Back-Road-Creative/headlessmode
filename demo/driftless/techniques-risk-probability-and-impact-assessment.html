@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Risk Probability and Impact Assessment — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-risk">Risk</a> &gt; <span aria-current="page">Risk Probability and Impact Assessment</span></nav>
+
+
+
+<h1>Risk Probability and Impact Assessment</h1>
+<p><em>Risk technique</em> ·
+   <a href="map-all#node-technique:risk_probability_and_impact_assessment">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Rating each risk&#39;s likelihood and effect on agreed scales so risks can be fairly compared.</p>
+<h2>When to use it</h2><p>For every risk entering the register, as a standard step right after it&#39;s identified — you need probability and impact figures before you can compute exposure or decide what deserves a response plan.</p>
+<h2>When to avoid it</h2><p>Don&#39;t build an elaborate 5x5 probability-impact matrix for a project where three people already agree, informally and correctly, on what matters most. The matrix earns its keep on a project big enough, or political enough, that &#39;high&#39; and &#39;low&#39; mean different things to different people until you write the scale down.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-risk-probability-and-impact-assessment-0"> Before scoring any risk, define what each probability band means in concrete terms — &#39;low&#39; might be &#39;has not happened on the last three similar projects,&#39; not just a number between 0 and 1.</label></li>
+
+<li><label><input type="checkbox" id="step-risk-probability-and-impact-assessment-1"> Define each impact level the same way, in terms your organization can actually judge: schedule days, cost, or a scope/quality description — not just &#39;severe&#39; or &#39;minor.&#39;</label></li>
+
+<li><label><input type="checkbox" id="step-risk-probability-and-impact-assessment-2"> Score each risk&#39;s probability against the defined bands, not against your impression of the risk overall.</label></li>
+
+<li><label><input type="checkbox" id="step-risk-probability-and-impact-assessment-3"> Score impact the same way, independently of the probability score.</label></li>
+
+<li><label><input type="checkbox" id="step-risk-probability-and-impact-assessment-4"> Record both numbers on the risk (Driftless stores probability as 0-1 and impact as a number; exposure is derived automatically as their product).</label></li>
+
+<li><label><input type="checkbox" id="step-risk-probability-and-impact-assessment-5"> Revisit scores when new information arrives — a probability assessed at project start is a snapshot, not a fact.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A probability and an impact value on every scored risk.</li><li>A derived exposure figure per risk, usable to rank and compare.</li><li>Written scale definitions the next risk gets scored against consistently.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Multiplying two ordinal ratings (a 1-5 &#39;how likely&#39; and a 1-5 &#39;how bad&#39;) and presenting the product as if it were a real number. Ordinal scales aren&#39;t arithmetic — a 4 isn&#39;t twice a 2 — so a computed &#39;16&#39; out of a 5x5 grid looks precise and isn&#39;t; it only orders risks correctly if the scale steps happen to be roughly even, which nobody checks.</li><li>Skipping the step of writing down what each band means, so two people scoring the same risk land on different numbers and neither is wrong by the (nonexistent) definition.</li><li>Letting probability scores creep toward whatever makes exposure look acceptable, especially near a status report deadline.</li><li>Treating impact as cost alone when a risk&#39;s real consequence is schedule slip, reputational damage, or scope compromise that doesn&#39;t fit a dollar figure.</li></ul>
+
+
+<h2>Worked example</h2><p>A hospital records-migration project defines probability bands up front: low = &#39;no precedent in our last four migrations,&#39; medium = &#39;happened once,&#39; high = &#39;happened on more than one.&#39; Two different leads independently score the risk &#39;legacy export tool corrupts date fields&#39; as medium probability because it happened once, on a similar system, eighteen months ago — because the band was written down, they agree without a meeting.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §11.3.2.3</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-11.3">Perform Qualitative Risk Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-contingent-response-strategies">Contingent Response Strategies</a></li>
+
+      <li><a href="techniques-decision-tree-analysis">Decision Tree Analysis</a></li>
+
+      <li><a href="techniques-influence-diagrams">Influence Diagrams</a></li>
+
+      <li><a href="techniques-prompt-lists">Prompt Lists</a></li>
+
+      <li><a href="techniques-representations-of-uncertainty">Representations of Uncertainty</a></li>
+
+      <li><a href="techniques-risk-categorization">Risk Categorization</a></li>
+
+      <li><a href="techniques-sensitivity-analysis">Sensitivity Analysis</a></li>
+
+      <li><a href="techniques-simulation">Simulation</a></li>
+
+      <li><a href="techniques-strategies-for-opportunities">Strategies for Opportunities</a></li>
+
+      <li><a href="techniques-strategies-for-overall-project-risk">Strategies for Overall Project Risk</a></li>
+
+      <li><a href="techniques-strategies-for-threats">Strategies for Threats</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-assumption-log">Assumption Log</a></li>
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:risk_probability_and_impact_assessment">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

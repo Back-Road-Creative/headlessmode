@@ -1,0 +1,2013 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Glossary</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary" aria-current="page">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <span aria-current="page">Glossary</span></nav>
+
+<h1 id="top">Glossary</h1>
+<p><em>Every term of art driftless's own pages use without stopping to explain it,
+   in plain words first. A page that mentions one of these links its first
+   occurrence here.</em></p>
+
+
+<nav aria-label="Glossary index">
+  <a href="#letter-A">A</a><a href="#letter-B">B</a><a href="#letter-C">C</a><a href="#letter-D">D</a><a href="#letter-E">E</a><a href="#letter-F">F</a><a href="#letter-K">K</a><a href="#letter-L">L</a><a href="#letter-M">M</a><a href="#letter-O">O</a><a href="#letter-P">P</a><a href="#letter-R">R</a><a href="#letter-S">S</a><a href="#letter-V">V</a><a href="#letter-W">W</a>
+</nav>
+
+<p>
+  <label for="glossary-filter">Filter terms</label>
+  <input type="search" id="glossary-filter" data-glossary-filter autocomplete="off">
+</p>
+<p data-glossary-count hidden aria-live="polite"></p>
+<div data-glossary-groups>
+
+
+
+
+
+
+    <section id="letter-A" aria-labelledby="letter-A-title">
+    <h2 id="letter-A-title">A</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="as-of">
+  <dt id="as-of">As-of</dt>
+  <dd><p>As-of is the single date every report and page is calculated for, so numbers never quietly drift while you read them.</p>
+  <p>Every calculation in Driftless takes an as-of date as an explicit input rather than reading the clock, so a report regenerated later for the same as-of comes back byte-identical.</p>
+  <p>See also:
+    <a href="glossary#baseline">Baseline</a>.</p>
+
+
+
+<section class="related" aria-labelledby="related-as-of-heading">
+  <h2 id="related-as-of-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-as-of-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-as-of-0">
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-as-of-1">See also</h3>
+    <ul aria-labelledby="related-as-of-1">
+
+      <li><a href="glossary#baseline">Baseline</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-as-of-2">Map</h3>
+    <ul aria-labelledby="related-as-of-2">
+
+      <li><a href="map-all#node-technique:earned_value_analysis">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-B" aria-labelledby="letter-B-title">
+    <h2 id="letter-B-title">B</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="bac">
+  <dt id="bac">BAC</dt>
+  <dd><p>BAC is short for budget at completion, the total amount a project was originally budgeted to cost.</p>
+  <p>It is revised when an approved change request moves the baseline, but it does not drift with a project&#39;s day-to-day outlook the way EAC does -- only an approved change updates it.</p>
+  <p>See also:
+    <a href="glossary#eac">EAC</a>.</p>
+  <p>Where you meet it:
+    <a href="techniques-earned-value-analysis">Earned Value Analysis</a>.</p>
+
+
+<section class="related" aria-labelledby="related-bac-heading">
+  <h2 id="related-bac-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-bac-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-bac-0">
+
+      <li><a href="techniques-cost-aggregation">Cost Aggregation</a></li>
+
+      <li><a href="techniques-to-complete-performance-index">To-Complete Performance Index</a></li>
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-bac-1">See also</h3>
+    <ul aria-labelledby="related-bac-1">
+
+      <li><a href="glossary#eac">EAC</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-bac-2">Map</h3>
+    <ul aria-labelledby="related-bac-2">
+
+      <li><a href="map-all#node-technique:cost_aggregation">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="backlog">
+  <dt id="backlog">Backlog</dt>
+  <dd><p>Backlog is the full list of work not yet started, ordered by what should happen next.</p>
+  <p>A backlog is re-ordered as priorities change; nothing on it is committed to a particular period until it is pulled into one.</p>
+  <p>See also:
+    <a href="glossary#sprint">Sprint</a>, <a href="glossary#velocity">Velocity</a>.</p>
+  <p>Where you meet it:
+    <a href="methods-scrum">Scrum</a>.</p>
+
+
+<section class="related" aria-labelledby="related-backlog-heading">
+  <h2 id="related-backlog-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-backlog-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-backlog-0">
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-backlog-1">Artifacts that use it</h3>
+    <ul aria-labelledby="related-backlog-1">
+
+      <li><a href="artifacts-requirements-traceability-matrix">Requirements Traceability Matrix</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-backlog-2">Practices that use it</h3>
+    <ul aria-labelledby="related-backlog-2">
+
+      <li><a href="methods-scrum#product_owner">Product Owner</a></li>
+
+      <li><a href="methods-scrum#product_backlog">Product Backlog</a></li>
+
+      <li><a href="methods-scrum#product_goal">Product Goal</a></li>
+
+      <li><a href="methods-scrum#sprint_backlog">Sprint Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-backlog-3">See also</h3>
+    <ul aria-labelledby="related-backlog-3">
+
+      <li><a href="glossary#sprint">Sprint</a></li>
+
+      <li><a href="glossary#velocity">Velocity</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-backlog-4">Map</h3>
+    <ul aria-labelledby="related-backlog-4">
+
+      <li><a href="map-all#node-technique:agile_release_planning">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="baseline">
+  <dt id="baseline">Baseline</dt>
+  <dd><p>Baseline is the approved plan a project is measured against, frozen until a change is formally approved.</p>
+  <p>Actuals are compared to the baseline, not to whatever the plan has since become, so a project&#39;s variance means something specific.</p>
+  <p>See also:
+    <a href="glossary#change-request">Change request</a>, <a href="glossary#earned-value">Earned value</a>.</p>
+
+
+
+<section class="related" aria-labelledby="related-baseline-heading">
+  <h2 id="related-baseline-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-baseline-0">Processes that use it</h3>
+    <ul aria-labelledby="related-baseline-0">
+
+      <li><a href="pmbok-5.6">Control Scope</a></li>
+
+      <li><a href="pmbok-6.5">Develop Schedule</a></li>
+
+      <li><a href="pmbok-6.6">Control Schedule</a></li>
+
+      <li><a href="pmbok-7.3">Determine Budget</a></li>
+
+      <li><a href="pmbok-7.4">Control Costs</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-baseline-1">Techniques that use it</h3>
+    <ul aria-labelledby="related-baseline-1">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-information-management">Information Management</a></li>
+
+      <li><a href="techniques-change-control-tools">Change Control Tools</a></li>
+
+      <li><a href="techniques-cost-aggregation">Cost Aggregation</a></li>
+
+      <li><a href="techniques-funding-limit-reconciliation">Funding Limit Reconciliation</a></li>
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+      <li><a href="techniques-reserve-analysis">Reserve Analysis</a></li>
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+      <li><a href="techniques-strategies-for-overall-project-risk">Strategies for Overall Project Risk</a></li>
+
+      <li><a href="techniques-sensitivity-analysis">Sensitivity Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-baseline-2">Artifacts that use it</h3>
+    <ul aria-labelledby="related-baseline-2">
+
+      <li><a href="artifacts-configuration-management-plan">Configuration Management Plan</a></li>
+
+      <li><a href="artifacts-change-management-plan">Change Management Plan</a></li>
+
+      <li><a href="artifacts-performance-measurement-baseline">Performance Measurement Baseline</a></li>
+
+      <li><a href="artifacts-scope-baseline">Scope Baseline</a></li>
+
+      <li><a href="artifacts-cost-baseline">Cost Baseline</a></li>
+
+      <li><a href="artifacts-schedule-baseline">Schedule Baseline</a></li>
+
+      <li><a href="artifacts-schedule-data">Schedule Data</a></li>
+
+      <li><a href="artifacts-project-calendars">Project Calendars</a></li>
+
+      <li><a href="artifacts-approved-change-requests">Approved Change Requests</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-baseline-3">See also</h3>
+    <ul aria-labelledby="related-baseline-3">
+
+      <li><a href="glossary#change-request">Change request</a></li>
+
+      <li><a href="glossary#earned-value">Earned value</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-baseline-4">Map</h3>
+    <ul aria-labelledby="related-baseline-4">
+
+      <li><a href="map-all#node-process:5.6">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-C" aria-labelledby="letter-C-title">
+    <h2 id="letter-C-title">C</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="change request">
+  <dt id="change-request">Change request</dt>
+  <dd><p>A change request is a formal ask to alter a project&#39;s scope, schedule, or cost after it was baselined.</p>
+  <p>It is decided on, not just noted: an approved change request updates the baseline, and a rejected one leaves it exactly where it was.</p>
+  <p>See also:
+    <a href="glossary#baseline">Baseline</a>, <a href="glossary#sign-off">Sign-off</a>.</p>
+  <p>Where you meet it:
+    <a href="artifacts-change-requests">Change Requests</a>.</p>
+
+
+<section class="related" aria-labelledby="related-change-request-heading">
+  <h2 id="related-change-request-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-change-request-0">Processes that use it</h3>
+    <ul aria-labelledby="related-change-request-0">
+
+      <li><a href="pmbok-4.6">Perform Integrated Change Control</a></li>
+
+      <li><a href="pmbok-5.2">Collect Requirements</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-change-request-1">Techniques that use it</h3>
+    <ul aria-labelledby="related-change-request-1">
+
+      <li><a href="techniques-knowledge-management">Knowledge Management</a></li>
+
+      <li><a href="techniques-information-management">Information Management</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-change-request-2">See also</h3>
+    <ul aria-labelledby="related-change-request-2">
+
+      <li><a href="glossary#baseline">Baseline</a></li>
+
+      <li><a href="glossary#sign-off">Sign-off</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-change-request-3">Map</h3>
+    <ul aria-labelledby="related-change-request-3">
+
+      <li><a href="map-all#node-process:4.6">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="critical path">
+  <dt id="critical-path">Critical path</dt>
+  <dd><p>The critical path is the longest chain of dependent tasks through the schedule, and its length sets the shortest possible finish date.</p>
+  <p>Slip any task on the critical path and the whole project&#39;s finish date slips with it; slip a task off it and the finish date can hold. Its tasks usually have zero float, but not always -- a constraint can leave a critical-path task with float above zero.</p>
+  <p>See also:
+    <a href="glossary#float">Float</a>, <a href="glossary#work-breakdown-structure">Work breakdown structure</a>.</p>
+  <p>Where you meet it:
+    <a href="techniques-critical-path-method">Critical Path Method</a>.</p>
+
+
+<section class="related" aria-labelledby="related-critical-path-heading">
+  <h2 id="related-critical-path-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-critical-path-0">Processes that use it</h3>
+    <ul aria-labelledby="related-critical-path-0">
+
+      <li><a href="pmbok-6.5">Develop Schedule</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-critical-path-1">Techniques that use it</h3>
+    <ul aria-labelledby="related-critical-path-1">
+
+      <li><a href="techniques-leads-and-lags">Leads and Lags</a></li>
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-schedule-network-analysis">Schedule Network Analysis</a></li>
+
+      <li><a href="techniques-precedence-diagramming-method">Precedence Diagramming Method</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-critical-chain-method">Critical Chain Method</a></li>
+
+      <li><a href="techniques-schedule-compression">Schedule Compression</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-critical-path-2">Artifacts that use it</h3>
+    <ul aria-labelledby="related-critical-path-2">
+
+      <li><a href="artifacts-project-schedule-network-diagram">Project Schedule Network Diagram</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-critical-path-3">See also</h3>
+    <ul aria-labelledby="related-critical-path-3">
+
+      <li><a href="glossary#float">Float</a></li>
+
+      <li><a href="glossary#work-breakdown-structure">Work breakdown structure</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-critical-path-4">Map</h3>
+    <ul aria-labelledby="related-critical-path-4">
+
+      <li><a href="map-all#node-process:6.5">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="crosswalk">
+  <dt id="crosswalk">Crosswalk</dt>
+  <dd><p>A crosswalk names the PMBOK-6 process or technique an agile practice most closely lines up with.</p>
+  <p>It never claims the two are the same thing, only that one answers the other&#39;s coverage question well enough to read from either side; a practice with no PMBOK-6 equivalent carries none, and says why instead.</p>
+
+  <p>Where you meet it:
+    <a href="methods">Methods</a>.</p>
+
+
+<section class="related" aria-labelledby="related-crosswalk-heading">
+  <h2 id="related-crosswalk-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-crosswalk-0">Map</h3>
+    <ul aria-labelledby="related-crosswalk-0">
+
+      <li><a href="map">See the whole map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-D" aria-labelledby="letter-D-title">
+    <h2 id="letter-D-title">D</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="dmaic">
+  <dt id="dmaic">DMAIC</dt>
+  <dd><p>DMAIC is short for define, measure, analyze, improve, control, a five-step cycle for driving down defects in a repeatable way.</p>
+  <p>Each step feeds the next in order, and control is what keeps an improvement from quietly slipping back once attention moves elsewhere.</p>
+
+
+
+
+<section class="related" aria-labelledby="related-dmaic-heading">
+  <h2 id="related-dmaic-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-dmaic-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-dmaic-0">
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-dmaic-1">Map</h3>
+    <ul aria-labelledby="related-dmaic-1">
+
+      <li><a href="map-all#node-technique:quality_improvement_methods">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-E" aria-labelledby="letter-E-title">
+    <h2 id="letter-E-title">E</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="eac">
+  <dt id="eac">EAC</dt>
+  <dd><p>EAC is short for estimate at completion, the current best guess of what a project will actually cost once it is finished.</p>
+  <p>Unlike the original budget, it is revised as the project runs, so it reflects performance to date rather than the plan made at the start.</p>
+  <p>See also:
+    <a href="glossary#bac">BAC</a>.</p>
+  <p>Where you meet it:
+    <a href="techniques-earned-value-analysis">Earned Value Analysis</a>.</p>
+
+
+<section class="related" aria-labelledby="related-eac-heading">
+  <h2 id="related-eac-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-eac-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-eac-0">
+
+      <li><a href="techniques-to-complete-performance-index">To-Complete Performance Index</a></li>
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-eac-1">See also</h3>
+    <ul aria-labelledby="related-eac-1">
+
+      <li><a href="glossary#bac">BAC</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-eac-2">Map</h3>
+    <ul aria-labelledby="related-eac-2">
+
+      <li><a href="map-all#node-technique:to_complete_performance_index">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="earned value">
+  <dt id="earned-value">Earned value</dt>
+  <dd><p>Earned value is the budgeted worth of the work actually completed by a given date, used to judge progress.</p>
+  <p>Compared against planned and actual cost, earned value is what turns &#34;we spent the money&#34; into &#34;we got the work that money was for.&#34;</p>
+  <p>See also:
+    <a href="glossary#evm">EVM</a>, <a href="glossary#baseline">Baseline</a>.</p>
+  <p>Where you meet it:
+    <a href="techniques-earned-value-analysis">Earned Value Analysis</a>.</p>
+
+
+<section class="related" aria-labelledby="related-earned-value-heading">
+  <h2 id="related-earned-value-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-earned-value-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-earned-value-0">
+
+      <li><a href="techniques-data-analysis">Data Analysis</a></li>
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-earned-value-1">See also</h3>
+    <ul aria-labelledby="related-earned-value-1">
+
+      <li><a href="glossary#evm">EVM</a></li>
+
+      <li><a href="glossary#baseline">Baseline</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-earned-value-2">Map</h3>
+    <ul aria-labelledby="related-earned-value-2">
+
+      <li><a href="map-all#node-technique:data_analysis">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="enterprise environmental factors">
+  <dt id="enterprise-environmental-factors">Enterprise environmental factors</dt>
+  <dd><p>Enterprise environmental factors are outside conditions, like market rules or company culture, that shape how a project can run.</p>
+  <p>They are not decided by the project and are not produced by it — a process reads them as a given, the way it reads a calendar.</p>
+  <p>See also:
+    <a href="glossary#organizational-process-assets">Organizational process assets</a>.</p>
+  <p>Where you meet it:
+    <a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a>.</p>
+
+
+<section class="related" aria-labelledby="related-enterprise-environmental-factors-heading">
+  <h2 id="related-enterprise-environmental-factors-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-enterprise-environmental-factors-0">Artifacts that use it</h3>
+    <ul aria-labelledby="related-enterprise-environmental-factors-0">
+
+      <li><a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-enterprise-environmental-factors-1">See also</h3>
+    <ul aria-labelledby="related-enterprise-environmental-factors-1">
+
+      <li><a href="glossary#organizational-process-assets">Organizational process assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-enterprise-environmental-factors-2">Map</h3>
+    <ul aria-labelledby="related-enterprise-environmental-factors-2">
+
+      <li><a href="map-all#node-artifact:enterprise_environmental_factors">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="ev">
+  <dt id="ev">EV</dt>
+  <dd><p>EV is a running figure for the budgeted worth of the work a project has actually finished by a given date.</p>
+  <p>It is the number that turns progress into the same units as cost, so the two can be compared directly at any as-of date.</p>
+  <p>See also:
+    <a href="glossary#earned-value">Earned value</a>.</p>
+  <p>Where you meet it:
+    <a href="techniques-earned-value-analysis">Earned Value Analysis</a>.</p>
+
+
+<section class="related" aria-labelledby="related-ev-heading">
+  <h2 id="related-ev-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-ev-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-ev-0">
+
+      <li><a href="techniques-to-complete-performance-index">To-Complete Performance Index</a></li>
+
+      <li><a href="techniques-earned-value-analysis">Earned Value Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-ev-1">See also</h3>
+    <ul aria-labelledby="related-ev-1">
+
+      <li><a href="glossary#earned-value">Earned value</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-ev-2">Map</h3>
+    <ul aria-labelledby="related-ev-2">
+
+      <li><a href="map-all#node-technique:to_complete_performance_index">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="evm">
+  <dt id="evm">EVM</dt>
+  <dd><p>EVM is the practice of tracking cost and schedule performance together using a project&#39;s budgeted-versus-completed-work figures.</p>
+  <p>It is what turns a single earned-value figure into a repeatable reading a project takes at every as-of date, not just once.</p>
+  <p>See also:
+    <a href="glossary#earned-value">Earned value</a>.</p>
+  <p>Where you meet it:
+    <a href="techniques-earned-value-analysis">Earned Value Analysis</a>.</p>
+
+
+<section class="related" aria-labelledby="related-evm-heading">
+  <h2 id="related-evm-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-evm-0">See also</h3>
+    <ul aria-labelledby="related-evm-0">
+
+      <li><a href="glossary#earned-value">Earned value</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-evm-1">Map</h3>
+    <ul aria-labelledby="related-evm-1">
+
+      <li><a href="map">See the whole map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-F" aria-labelledby="letter-F-title">
+    <h2 id="letter-F-title">F</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="float">
+  <dt id="float">Float</dt>
+  <dd><p>Float is how many days a task can slip without delaying the project&#39;s finish date.</p>
+  <p>A task with zero float is on the critical path; a task with days of float can run late and the project still finishes on time.</p>
+  <p>See also:
+    <a href="glossary#critical-path">Critical path</a>.</p>
+  <p>Where you meet it:
+    <a href="techniques-critical-path-method">Critical Path Method</a>.</p>
+
+
+<section class="related" aria-labelledby="related-float-heading">
+  <h2 id="related-float-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-float-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-float-0">
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-critical-chain-method">Critical Chain Method</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-float-1">Artifacts that use it</h3>
+    <ul aria-labelledby="related-float-1">
+
+      <li><a href="artifacts-project-schedule-network-diagram">Project Schedule Network Diagram</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-float-2">See also</h3>
+    <ul aria-labelledby="related-float-2">
+
+      <li><a href="glossary#critical-path">Critical path</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-float-3">Map</h3>
+    <ul aria-labelledby="related-float-3">
+
+      <li><a href="map-all#node-technique:resource_optimization">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-K" aria-labelledby="letter-K-title">
+    <h2 id="letter-K-title">K</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="knowledge area">
+  <dt id="knowledge-area">Knowledge area</dt>
+  <dd><p>A knowledge area is one of the ten subject groupings PMBOK sorts project work into, like cost or risk.</p>
+  <p>Every PMBOK process sits in exactly one knowledge area and one process group, which is what makes the ITTO grid a grid.</p>
+  <p>See also:
+    <a href="glossary#process-group">Process group</a>.</p>
+  <p>Where you meet it:
+    <a href="pmbok">PMBOK</a>.</p>
+
+
+<section class="related" aria-labelledby="related-knowledge-area-heading">
+  <h2 id="related-knowledge-area-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-knowledge-area-0">Processes that use it</h3>
+    <ul aria-labelledby="related-knowledge-area-0">
+
+      <li><a href="pmbok-4.2">Develop Project Management Plan</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-knowledge-area-1">See also</h3>
+    <ul aria-labelledby="related-knowledge-area-1">
+
+      <li><a href="glossary#process-group">Process group</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-knowledge-area-2">Map</h3>
+    <ul aria-labelledby="related-knowledge-area-2">
+
+      <li><a href="map-all#node-process:4.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-L" aria-labelledby="letter-L-title">
+    <h2 id="letter-L-title">L</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="lessons learned">
+  <dt id="lessons-learned">Lessons learned</dt>
+  <dd><p>Lessons learned are the written takeaways from a project, captured so the next project can learn from them.</p>
+  <p>They are recorded through the project, not only at closeout, and feed forward as the raw material a later project&#39;s own planning reads.</p>
+  <p>See also:
+    <a href="glossary#organizational-process-assets">Organizational process assets</a>.</p>
+  <p>Where you meet it:
+    <a href="artifacts-lessons-learned-register">Lessons Learned Register</a>.</p>
+
+
+<section class="related" aria-labelledby="related-lessons-learned-heading">
+  <h2 id="related-lessons-learned-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-lessons-learned-0">Processes that use it</h3>
+    <ul aria-labelledby="related-lessons-learned-0">
+
+      <li><a href="pmbok-4.4">Manage Project Knowledge</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-lessons-learned-1">Artifacts that use it</h3>
+    <ul aria-labelledby="related-lessons-learned-1">
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-lessons-learned-2">See also</h3>
+    <ul aria-labelledby="related-lessons-learned-2">
+
+      <li><a href="glossary#organizational-process-assets">Organizational process assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-lessons-learned-3">Map</h3>
+    <ul aria-labelledby="related-lessons-learned-3">
+
+      <li><a href="map-all#node-process:4.4">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-M" aria-labelledby="letter-M-title">
+    <h2 id="letter-M-title">M</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="milestone">
+  <dt id="milestone">Milestone</dt>
+  <dd><p>A milestone is a single dated point on a schedule that marks a significant moment, with zero duration of its own.</p>
+  <p>A milestone is hit or missed, never partly done — it is a marker on the schedule, not a task with hours logged against it.</p>
+  <p>See also:
+    <a href="glossary#critical-path">Critical path</a>.</p>
+  <p>Where you meet it:
+    <a href="artifacts-milestone-list">Milestone List</a>.</p>
+
+
+<section class="related" aria-labelledby="related-milestone-heading">
+  <h2 id="related-milestone-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-milestone-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-milestone-0">
+
+      <li><a href="techniques-rolling-wave-planning">Rolling Wave Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-milestone-1">Artifacts that use it</h3>
+    <ul aria-labelledby="related-milestone-1">
+
+      <li><a href="artifacts-milestone-list">Milestone List</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-milestone-2">See also</h3>
+    <ul aria-labelledby="related-milestone-2">
+
+      <li><a href="glossary#critical-path">Critical path</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-milestone-3">Map</h3>
+    <ul aria-labelledby="related-milestone-3">
+
+      <li><a href="map-all#node-technique:rolling_wave_planning">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-O" aria-labelledby="letter-O-title">
+    <h2 id="letter-O-title">O</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="organizational process assets">
+  <dt id="organizational-process-assets">Organizational process assets</dt>
+  <dd><p>Organizational process assets are the templates, policies, and past records an organization has built up from earlier projects.</p>
+  <p>Unlike enterprise environmental factors, these come from inside the organization itself, and a project both reads and adds to them.</p>
+  <p>See also:
+    <a href="glossary#enterprise-environmental-factors">Enterprise environmental factors</a>, <a href="glossary#lessons-learned">Lessons learned</a>.</p>
+  <p>Where you meet it:
+    <a href="artifacts-organizational-process-assets">Organizational Process Assets</a>.</p>
+
+
+<section class="related" aria-labelledby="related-organizational-process-assets-heading">
+  <h2 id="related-organizational-process-assets-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-organizational-process-assets-0">Artifacts that use it</h3>
+    <ul aria-labelledby="related-organizational-process-assets-0">
+
+      <li><a href="artifacts-organizational-process-assets">Organizational Process Assets</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-organizational-process-assets-1">See also</h3>
+    <ul aria-labelledby="related-organizational-process-assets-1">
+
+      <li><a href="glossary#enterprise-environmental-factors">Enterprise environmental factors</a></li>
+
+      <li><a href="glossary#lessons-learned">Lessons learned</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-organizational-process-assets-2">Map</h3>
+    <ul aria-labelledby="related-organizational-process-assets-2">
+
+      <li><a href="map-all#node-artifact:organizational_process_assets">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-P" aria-labelledby="letter-P-title">
+    <h2 id="letter-P-title">P</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="pdca">
+  <dt id="pdca">PDCA</dt>
+  <dd><p>PDCA is short for plan, do, check, act, a four-step cycle a team repeats to make a small improvement, test it, and keep what works.</p>
+  <p>Each pass around the cycle is deliberately small, so a bad idea is caught and reversed quickly rather than rolled out project-wide first.</p>
+
+
+
+
+<section class="related" aria-labelledby="related-pdca-heading">
+  <h2 id="related-pdca-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-pdca-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-pdca-0">
+
+      <li><a href="techniques-quality-improvement-methods">Quality Improvement Methods</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pdca-1">Map</h3>
+    <ul aria-labelledby="related-pdca-1">
+
+      <li><a href="map-all#node-technique:quality_improvement_methods">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="pert">
+  <dt id="pert">PERT</dt>
+  <dd><p>PERT estimates a task&#39;s duration from three guesses, best case, worst case, and most likely, averaged into one number.</p>
+  <p>The weighting favors the most-likely guess, so one wildly optimistic or pessimistic estimate cannot swing the result on its own.</p>
+  <p>See also:
+    <a href="glossary#critical-path">Critical path</a>.</p>
+  <p>Where you meet it:
+    <a href="techniques-three-point-estimating">Three Point Estimating</a>.</p>
+
+
+<section class="related" aria-labelledby="related-pert-heading">
+  <h2 id="related-pert-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-pert-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-pert-0">
+
+      <li><a href="techniques-three-point-estimating">Three Point Estimating</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pert-1">See also</h3>
+    <ul aria-labelledby="related-pert-1">
+
+      <li><a href="glossary#critical-path">Critical path</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pert-2">Map</h3>
+    <ul aria-labelledby="related-pert-2">
+
+      <li><a href="map-all#node-technique:three_point_estimating">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="pm">
+  <dt id="pm">PM</dt>
+  <dd><p>PM is the short way of writing project manager, the person running the project day to day.</p>
+  <p>It is a role, not a title tied to any one industry, and it is who a process usually means when it calls for a decision or a judgment call.</p>
+
+
+
+
+<section class="related" aria-labelledby="related-pm-heading">
+  <h2 id="related-pm-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-pm-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-pm-0">
+
+      <li><a href="techniques-knowledge-management">Knowledge Management</a></li>
+
+      <li><a href="techniques-organizational-theory">Organizational Theory</a></li>
+
+      <li><a href="techniques-influencing">Influencing</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pm-1">Map</h3>
+    <ul aria-labelledby="related-pm-1">
+
+      <li><a href="map-all#node-technique:knowledge_management">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="pmis">
+  <dt id="pmis">PMIS</dt>
+  <dd><p>PMIS is short for project management information system, the tools that hold a project&#39;s working data and make it usable by the team.</p>
+  <p>It covers scheduling tools, work-tracking boards, shared documents, and reporting layers together, not any one of them alone.</p>
+
+  <p>Where you meet it:
+    <a href="techniques-project-management-information-system">Project Management Information System</a>.</p>
+
+
+<section class="related" aria-labelledby="related-pmis-heading">
+  <h2 id="related-pmis-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-pmis-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-pmis-0">
+
+      <li><a href="techniques-project-management-information-system">Project Management Information System</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-pmis-1">Map</h3>
+    <ul aria-labelledby="related-pmis-1">
+
+      <li><a href="map-all#node-technique:project_management_information_system">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="process group">
+  <dt id="process-group">Process group</dt>
+  <dd><p>A process group is one of the five logical groupings, like planning or closing, every PMBOK process belongs to.</p>
+  <p>A process group is not a calendar period a project passes through once — several can be active on a project at the same time.</p>
+  <p>See also:
+    <a href="glossary#knowledge-area">Knowledge area</a>.</p>
+  <p>Where you meet it:
+    <a href="pmbok">PMBOK</a>.</p>
+
+
+<section class="related" aria-labelledby="related-process-group-heading">
+  <h2 id="related-process-group-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-process-group-0">See also</h3>
+    <ul aria-labelledby="related-process-group-0">
+
+      <li><a href="glossary#knowledge-area">Knowledge area</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-process-group-1">Map</h3>
+    <ul aria-labelledby="related-process-group-1">
+
+      <li><a href="map">See the whole map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="procurement">
+  <dt id="procurement">Procurement</dt>
+  <dd><p>Procurement is the work of buying goods or services from an outside seller for the project.</p>
+  <p>It covers the whole path from deciding what to buy through choosing a seller to closing the agreement out.</p>
+
+
+
+
+<section class="related" aria-labelledby="related-procurement-heading">
+  <h2 id="related-procurement-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-procurement-0">Processes that use it</h3>
+    <ul aria-labelledby="related-procurement-0">
+
+      <li><a href="pmbok-12.1">Plan Procurement Management</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-procurement-1">Techniques that use it</h3>
+    <ul aria-labelledby="related-procurement-1">
+
+      <li><a href="techniques-design-for-x">Design for X</a></li>
+
+      <li><a href="techniques-procurement-performance-reviews">Procurement Performance Reviews</a></li>
+
+      <li><a href="techniques-advertising">Advertising</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-procurement-2">Artifacts that use it</h3>
+    <ul aria-labelledby="related-procurement-2">
+
+      <li><a href="artifacts-procurement-management-plan">Procurement Management Plan</a></li>
+
+      <li><a href="artifacts-procurement-statement-of-work">Procurement Statement of Work</a></li>
+
+      <li><a href="artifacts-procurement-documentation">Procurement Documentation</a></li>
+
+      <li><a href="artifacts-procurement-strategy">Procurement Strategy</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-procurement-3">Map</h3>
+    <ul aria-labelledby="related-procurement-3">
+
+      <li><a href="map-all#node-process:12.1">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-R" aria-labelledby="letter-R-title">
+    <h2 id="letter-R-title">R</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="rag">
+  <dt id="rag">RAG</dt>
+  <dd><p>RAG is a three-colour status label, red, amber, or green, showing how healthy a project or task currently is.</p>
+  <p>A rollup&#39;s RAG is the worst of its children&#39;s: one red child makes the whole group read red, never averaged away.</p>
+
+  <p>Where you meet it:
+    <a href="scorecard">Scorecard</a>.</p>
+
+
+<section class="related" aria-labelledby="related-rag-heading">
+  <h2 id="related-rag-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-rag-0">Map</h3>
+    <ul aria-labelledby="related-rag-0">
+
+      <li><a href="map">See the whole map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="risk register">
+  <dt id="risk-register">Risk register</dt>
+  <dd><p>A risk register is the running list of identified risks, each with its likelihood, impact, and owner.</p>
+  <p>It is updated as risks are found, change, or close out, rather than written once at the start of a project and left alone.</p>
+
+  <p>Where you meet it:
+    <a href="artifacts-risk-register">Risk Register</a>.</p>
+
+
+<section class="related" aria-labelledby="related-risk-register-heading">
+  <h2 id="related-risk-register-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-risk-register-0">Processes that use it</h3>
+    <ul aria-labelledby="related-risk-register-0">
+
+      <li><a href="pmbok-11.2">Identify Risks</a></li>
+
+      <li><a href="pmbok-11.7">Monitor Risks</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-risk-register-1">Techniques that use it</h3>
+    <ul aria-labelledby="related-risk-register-1">
+
+      <li><a href="techniques-reserve-analysis">Reserve Analysis</a></li>
+
+      <li><a href="techniques-strategies-for-overall-project-risk">Strategies for Overall Project Risk</a></li>
+
+      <li><a href="techniques-prompt-lists">Prompt Lists</a></li>
+
+      <li><a href="techniques-sensitivity-analysis">Sensitivity Analysis</a></li>
+
+      <li><a href="techniques-strategies-for-opportunities">Strategies for Opportunities</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-risk-register-2">Artifacts that use it</h3>
+    <ul aria-labelledby="related-risk-register-2">
+
+      <li><a href="artifacts-risk-register">Risk Register</a></li>
+
+      <li><a href="artifacts-risk-report">Risk Report</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-risk-register-3">Map</h3>
+    <ul aria-labelledby="related-risk-register-3">
+
+      <li><a href="map-all#node-process:11.2">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-S" aria-labelledby="letter-S-title">
+    <h2 id="letter-S-title">S</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="sign-off">
+  <dt id="sign-off">Sign-off</dt>
+  <dd><p>Sign-off is a named person&#39;s recorded decision to approve a piece of work, so approval is never assumed.</p>
+  <p>A sign-off names who decided and when, so approval is a fact the record holds rather than something everyone simply assumed happened.</p>
+  <p>See also:
+    <a href="glossary#change-request">Change request</a>.</p>
+
+
+
+<section class="related" aria-labelledby="related-sign-off-heading">
+  <h2 id="related-sign-off-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sign-off-0">Processes that use it</h3>
+    <ul aria-labelledby="related-sign-off-0">
+
+      <li><a href="pmbok-4.1">Develop Project Charter</a></li>
+
+      <li><a href="pmbok-4.7">Close Project or Phase</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sign-off-1">Techniques that use it</h3>
+    <ul aria-labelledby="related-sign-off-1">
+
+      <li><a href="techniques-test-and-inspection-planning">Test and Inspection Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sign-off-2">Artifacts that use it</h3>
+    <ul aria-labelledby="related-sign-off-2">
+
+      <li><a href="artifacts-final-product-service-result">Final Product Service Result</a></li>
+
+      <li><a href="artifacts-verified-deliverables">Verified Deliverables</a></li>
+
+      <li><a href="artifacts-final-report">Final Report</a></li>
+
+      <li><a href="artifacts-accepted-deliverables">Accepted Deliverables</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sign-off-3">See also</h3>
+    <ul aria-labelledby="related-sign-off-3">
+
+      <li><a href="glossary#change-request">Change request</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sign-off-4">Map</h3>
+    <ul aria-labelledby="related-sign-off-4">
+
+      <li><a href="map-all#node-process:4.1">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="sla">
+  <dt id="sla">SLA</dt>
+  <dd><p>SLA, short for service level agreement, is a promised response or turnaround time a party commits to meet.</p>
+  <p>It is a measurable commitment, not a hope — a party either met the promised time or did not.</p>
+
+
+
+
+<section class="related" aria-labelledby="related-sla-heading">
+  <h2 id="related-sla-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sla-0">Map</h3>
+    <ul aria-labelledby="related-sla-0">
+
+      <li><a href="map">See the whole map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="sprint">
+  <dt id="sprint">Sprint</dt>
+  <dd><p>A sprint is a fixed short period, often two weeks, in which a team commits to finishing a set slice of work.</p>
+  <p>A sprint&#39;s length does not change from one to the next, which is what makes a team&#39;s output across several of them comparable.</p>
+  <p>See also:
+    <a href="glossary#velocity">Velocity</a>, <a href="glossary#backlog">Backlog</a>.</p>
+  <p>Where you meet it:
+    <a href="methods-scrum">Scrum</a>.</p>
+
+
+<section class="related" aria-labelledby="related-sprint-heading">
+  <h2 id="related-sprint-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-sprint-0">Practices that use it</h3>
+    <ul aria-labelledby="related-sprint-0">
+
+      <li><a href="methods-scrum#sprint">Sprint</a></li>
+
+      <li><a href="methods-scrum#sprint_planning">Sprint Planning</a></li>
+
+      <li><a href="methods-scrum#sprint_review">Sprint Review</a></li>
+
+      <li><a href="methods-scrum#sprint_retrospective">Sprint Retrospective</a></li>
+
+      <li><a href="methods-scrum#sprint_backlog">Sprint Backlog</a></li>
+
+      <li><a href="methods-scrum#sprint_goal">Sprint Goal</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint-1">See also</h3>
+    <ul aria-labelledby="related-sprint-1">
+
+      <li><a href="glossary#velocity">Velocity</a></li>
+
+      <li><a href="glossary#backlog">Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-sprint-2">Map</h3>
+    <ul aria-labelledby="related-sprint-2">
+
+      <li><a href="map">See the whole map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="stakeholder">
+  <dt id="stakeholder">Stakeholder</dt>
+  <dd><p>A stakeholder is any person or group whose interests a project&#39;s outcome affects, positively or negatively.</p>
+  <p>A stakeholder need not be on the project team or even aware of the project — the definition is about who is affected, not who is involved.</p>
+
+  <p>Where you meet it:
+    <a href="artifacts-stakeholder-register">Stakeholder Register</a>.</p>
+
+
+<section class="related" aria-labelledby="related-stakeholder-heading">
+  <h2 id="related-stakeholder-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-stakeholder-0">Processes that use it</h3>
+    <ul aria-labelledby="related-stakeholder-0">
+
+      <li><a href="pmbok-4.5">Monitor and Control Project Work</a></li>
+
+      <li><a href="pmbok-5.1">Plan Scope Management</a></li>
+
+      <li><a href="pmbok-5.2">Collect Requirements</a></li>
+
+      <li><a href="pmbok-5.3">Define Scope</a></li>
+
+      <li><a href="pmbok-8.1">Plan Quality Management</a></li>
+
+      <li><a href="pmbok-10.1">Plan Communications Management</a></li>
+
+      <li><a href="pmbok-10.3">Monitor Communications</a></li>
+
+      <li><a href="pmbok-13.1">Identify Stakeholders</a></li>
+
+      <li><a href="pmbok-13.2">Plan Stakeholder Engagement</a></li>
+
+      <li><a href="pmbok-13.3">Manage Stakeholder Engagement</a></li>
+
+      <li><a href="pmbok-13.4">Monitor Stakeholder Engagement</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-stakeholder-1">Techniques that use it</h3>
+    <ul aria-labelledby="related-stakeholder-1">
+
+      <li><a href="techniques-communication-skills">Communication Skills</a></li>
+
+      <li><a href="techniques-communication-requirements-analysis">Communication Requirements Analysis</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-context-diagram">Context Diagram</a></li>
+
+      <li><a href="techniques-influencing">Influencing</a></li>
+
+      <li><a href="techniques-influence-diagrams">Influence Diagrams</a></li>
+
+      <li><a href="techniques-stakeholder-engagement-assessment-matrix">Stakeholder Engagement Assessment Matrix</a></li>
+
+      <li><a href="techniques-stakeholder-analysis">Stakeholder Analysis</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-stakeholder-2">Artifacts that use it</h3>
+    <ul aria-labelledby="related-stakeholder-2">
+
+      <li><a href="artifacts-stakeholder-engagement-plan">Stakeholder Engagement Plan</a></li>
+
+      <li><a href="artifacts-stakeholder-register">Stakeholder Register</a></li>
+
+      <li><a href="artifacts-work-performance-reports">Work Performance Reports</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-stakeholder-3">Map</h3>
+    <ul aria-labelledby="related-stakeholder-3">
+
+      <li><a href="map-all#node-process:4.5">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="swot">
+  <dt id="swot">SWOT</dt>
+  <dd><p>SWOT is short for strengths, weaknesses, opportunities, threats, a four-part layout for comparing a situation&#39;s internal and external factors.</p>
+  <p>Strengths and weaknesses look inward at what is already true; opportunities and threats look outward at what could change.</p>
+
+
+
+
+<section class="related" aria-labelledby="related-swot-heading">
+  <h2 id="related-swot-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-swot-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-swot-0">
+
+      <li><a href="techniques-data-representation">Data Representation</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-swot-1">Map</h3>
+    <ul aria-labelledby="related-swot-1">
+
+      <li><a href="map-all#node-technique:data_representation">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-V" aria-labelledby="letter-V-title">
+    <h2 id="letter-V-title">V</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="velocity">
+  <dt id="velocity">Velocity</dt>
+  <dd><p>Velocity is the amount of work a team reliably finishes in one fixed work period, used to plan the next one.</p>
+  <p>Velocity is measured, not set: a team does not decide its velocity in advance, it is read off however much the team actually finished.</p>
+  <p>See also:
+    <a href="glossary#sprint">Sprint</a>, <a href="glossary#backlog">Backlog</a>.</p>
+
+
+
+<section class="related" aria-labelledby="related-velocity-heading">
+  <h2 id="related-velocity-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-velocity-0">Techniques that use it</h3>
+    <ul aria-labelledby="related-velocity-0">
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-velocity-1">See also</h3>
+    <ul aria-labelledby="related-velocity-1">
+
+      <li><a href="glossary#sprint">Sprint</a></li>
+
+      <li><a href="glossary#backlog">Backlog</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-velocity-2">Map</h3>
+    <ul aria-labelledby="related-velocity-2">
+
+      <li><a href="map-all#node-technique:agile_release_planning">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+    </dl><p><a href="#top">Back to top</a></p></section>
+
+    <section id="letter-W" aria-labelledby="letter-W-title">
+    <h2 id="letter-W-title">W</h2>
+    <dl class="glossary">
+
+  <div class="glossary-entry" data-glossary-term="wbs">
+  <dt id="wbs">WBS</dt>
+  <dd><p>WBS is short for a hierarchical decomposition of the total scope a project must deliver -- the structure itself, not a step of building it.</p>
+  <p>Each level of a WBS is a fuller decomposition of the level above it; the bottom level is small enough to estimate and assign with confidence.</p>
+  <p>See also:
+    <a href="glossary#work-breakdown-structure">Work breakdown structure</a>.</p>
+  <p>Where you meet it:
+    <a href="artifacts-work-breakdown-structure">Work Breakdown Structure (WBS)</a>.</p>
+
+
+<section class="related" aria-labelledby="related-wbs-heading">
+  <h2 id="related-wbs-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-wbs-0">Processes that use it</h3>
+    <ul aria-labelledby="related-wbs-0">
+
+      <li><a href="pmbok-5.4">Create WBS</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-wbs-1">Techniques that use it</h3>
+    <ul aria-labelledby="related-wbs-1">
+
+      <li><a href="techniques-decomposition">Decomposition</a></li>
+
+      <li><a href="techniques-product-analysis">Product Analysis</a></li>
+
+      <li><a href="techniques-bottom-up-estimating">Bottom Up Estimating</a></li>
+
+      <li><a href="techniques-cost-aggregation">Cost Aggregation</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-wbs-2">Artifacts that use it</h3>
+    <ul aria-labelledby="related-wbs-2">
+
+      <li><a href="artifacts-work-breakdown-structure">Work Breakdown Structure (WBS)</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-wbs-3">See also</h3>
+    <ul aria-labelledby="related-wbs-3">
+
+      <li><a href="glossary#work-breakdown-structure">Work breakdown structure</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-wbs-4">Map</h3>
+    <ul aria-labelledby="related-wbs-4">
+
+      <li><a href="map-all#node-process:5.4">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+
+
+  <div class="glossary-entry" data-glossary-term="work breakdown structure">
+  <dt id="work-breakdown-structure">Work breakdown structure</dt>
+  <dd><p>A work breakdown structure is a hierarchical breakdown of everything a project must deliver, split into progressively smaller pieces.</p>
+  <p>It is organized around deliverables, not the calendar or the org chart, so a piece of it names a thing produced rather than a date or a person.</p>
+  <p>See also:
+    <a href="glossary#wbs">WBS</a>, <a href="glossary#critical-path">Critical path</a>.</p>
+  <p>Where you meet it:
+    <a href="artifacts-work-breakdown-structure">Work Breakdown Structure (WBS)</a>.</p>
+
+
+<section class="related" aria-labelledby="related-work-breakdown-structure-heading">
+  <h2 id="related-work-breakdown-structure-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-work-breakdown-structure-0">Artifacts that use it</h3>
+    <ul aria-labelledby="related-work-breakdown-structure-0">
+
+      <li><a href="artifacts-work-breakdown-structure">Work Breakdown Structure (WBS)</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-work-breakdown-structure-1">See also</h3>
+    <ul aria-labelledby="related-work-breakdown-structure-1">
+
+      <li><a href="glossary#wbs">WBS</a></li>
+
+      <li><a href="glossary#critical-path">Critical path</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-work-breakdown-structure-2">Map</h3>
+    <ul aria-labelledby="related-work-breakdown-structure-2">
+
+      <li><a href="map-all#node-artifact:work_breakdown_structure">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+  </dd>
+  </div>
+
+</dl><p><a href="#top">Back to top</a></p></section>
+</div>
+</main>
+</body>
+</html>

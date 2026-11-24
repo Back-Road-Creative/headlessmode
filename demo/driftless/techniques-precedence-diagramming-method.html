@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Precedence Diagramming Method — driftless</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques" aria-current="page">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="techniques">Techniques</a> &gt; <a href="techniques#family-schedule">Schedule</a> &gt; <span aria-current="page">Precedence Diagramming Method</span></nav>
+
+
+
+<h1>Precedence Diagramming Method</h1>
+<p><em>Schedule technique</em> ·
+   <a href="map-all#node-technique:precedence_diagramming_method">See it on the map</a></p>
+<p>Runnable here</p>
+<p>Drawing the schedule as linked task boxes, so its order is a picture, not a memory.</p>
+<h2>When to use it</h2><p>Use it once you have more than a handful of tasks with real dependencies between them and need to see the whole sequence at once — it&#39;s the representation that <dfn><a href="glossary#critical-path">critical path</a></dfn> method and schedule network analysis are both built on top of.</p>
+<h2>When to avoid it</h2><p>For a short, mostly-linear list of tasks, drawing a formal network adds ceremony without adding insight — a simple ordered list does the job. And it&#39;s only worth building if you&#39;re also going to keep it updated as dependencies change; a diagram that&#39;s stale by week two is worse than no diagram, because people trust it anyway.</p>
+
+
+<h2>Steps</h2>
+<ol class="steps-checklist">
+
+<li><label><input type="checkbox" id="step-precedence-diagramming-method-0"> List every task as a node.</label></li>
+
+<li><label><input type="checkbox" id="step-precedence-diagramming-method-1"> For each pair of tasks with a real dependency, draw an arrow and record the relationship type — finish-to-start is the default, but start-to-start, finish-to-finish and start-to-finish all occur.</label></li>
+
+<li><label><input type="checkbox" id="step-precedence-diagramming-method-2"> Check the network for orphan nodes (a task with no predecessor and no successor is usually a missed dependency, not a genuinely isolated task) and for cycles, which mean two tasks were each recorded as depending on the other.</label></li>
+
+<li><label><input type="checkbox" id="step-precedence-diagramming-method-3"> Use the finished network as the input to critical path method or schedule network analysis.</label></li>
+
+</ol>
+
+
+
+<h2>What it produces</h2>
+<ul><li>A dependency network of task nodes and typed arrows that unambiguously encodes the sequence the work has to happen in.</li></ul>
+
+
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Every arrow gets drawn as finish-to-start by default because it&#39;s the easiest relationship to reason about, even where the real constraint is start-to-start or finish-to-finish — this artificially lengthens the schedule.</li><li>A dependency that&#39;s organizational preference (&#34;we&#39;d like to do it in this order&#34;) gets recorded as a hard technical dependency, which then blocks compression options that were actually available.</li><li>The diagram is built once at kickoff and never touched again, so it silently diverges from how the team is actually sequencing work.</li></ul>
+
+
+<h2>Worked example</h2><p>A backyard deck build records &#34;pour footings&#34; -&gt; &#34;set posts&#34; -&gt; &#34;frame joists&#34; as finish-to-start, but &#34;install railings&#34; as start-to-start with &#34;stain deck boards&#34; plus a two-day lag, since staining can begin once railing installation is under way rather than only after it completes.</p>
+
+
+<h2>Source</h2>
+<ul><li>PMBOK-6 §6.3.2.1</li></ul>
+
+
+
+<p class="provenance" data-source="pmbok_6"
+   data-clause="cited">
+  Where it comes from: this technique is named by the PMBOK Guide, 6th edition.
+</p>
+
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Used by</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-6.3">Sequence Activities</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Same family</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="techniques-agile-release-planning">Agile Release Planning</a></li>
+
+      <li><a href="techniques-analogous-estimating">Analogous Estimating</a></li>
+
+      <li><a href="techniques-bottom-up-estimating">Bottom Up Estimating</a></li>
+
+      <li><a href="techniques-critical-chain-method">Critical Chain Method</a></li>
+
+      <li><a href="techniques-critical-path-method">Critical Path Method</a></li>
+
+      <li><a href="techniques-dependency-determination">Dependency Determination</a></li>
+
+      <li><a href="techniques-leads-and-lags">Leads and Lags</a></li>
+
+      <li><a href="techniques-parametric-estimating">Parametric Estimating</a></li>
+
+      <li><a href="techniques-resource-optimization">Resource Optimization</a></li>
+
+      <li><a href="techniques-rolling-wave-planning">Rolling Wave Planning</a></li>
+
+      <li><a href="techniques-schedule-compression">Schedule Compression</a></li>
+
+      <li><a href="techniques-schedule-network-analysis">Schedule Network Analysis</a></li>
+
+      <li><a href="techniques-three-point-estimating">Three Point Estimating</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Artifacts produced</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="artifacts-activity-attributes">Activity Attributes</a></li>
+
+      <li><a href="artifacts-project-schedule-network-diagram">Project Schedule Network Diagram</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Map</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="map-all#node-technique:precedence_diagramming_method">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>9.4 Develop Team</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok" aria-current="page">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <a href="pmbok">PMBOK</a> &gt; <span aria-current="page">9.4 Develop Team</span></nav>
+
+
+
+
+
+<h1>9.4 Develop Team</h1>
+<p>Help the team build the skills and trust they need to work well together.</p>
+<p><em>Executing / Resource</em> ·
+   <a href="pmbok">&larr; PMBOK reference</a> ·
+   <a href="map-all#node-process:9.4">See it on the map</a></p>
+
+
+<h2>Why it matters</h2><p>A group of individually skilled people who do not work well together produces worse results than a less skilled team that collaborates well.</p>
+<h2>What done looks like</h2><p>Team performance is improving and skill gaps identified earlier have been addressed.</p>
+<h2>First time tip</h2><p>Invest in team-building early, before the pressure of a tight deadline makes it feel like time you cannot spare. It pays back most when the schedule gets hard.</p>
+
+<h2>What you need (Inputs)</h2>
+<ul><li><a href="artifacts-resource-management-plan">Resource Management Plan</a> <br><small>How Scrum/Kanban projects satisfy this — counted from:
+    project roles (driftless/models/agile.py:ProjectRole) — naming who holds each agile role (product owner, Scrum Master, developer, stakeholder proxy) is how an agile team plans its resources, in place of the stored prose plan a predictive project writes</small></li><li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a> <br><small>How Scrum/Kanban projects satisfy this — counted from:
+    sprint retrospective evidence (driftless/models/delivery.py:Sprint) — a sprint closed with retrospective notes is a lesson captured, the way a predictive project files one as prose</small></li><li><a href="artifacts-project-schedule">Project Schedule</a> <br><small>How Scrum/Kanban projects satisfy this — counted from:
+    releases (driftless/models/agile.py:Release) — a release with a target date is the agile reading of a project schedule when there is no sprint or milestone to read one from</small></li><li><a href="artifacts-project-team-assignments">Project Team Assignments</a></li><li><a href="artifacts-resource-calendars">Resource Calendars</a></li><li><a href="artifacts-team-charter">Team Charter</a></li></ul>
+
+<h2>How you do it (Tools &amp; Techniques)</h2>
+<ul><li id="tt-colocation"><a href="techniques-colocation">Colocation</a></li><li id="tt-virtual-teams"><a href="techniques-virtual-teams">Virtual Teams</a></li><li id="tt-interpersonal-and-team-skills"><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li><li id="tt-team-building"><a href="techniques-team-building">Team Building</a></li><li id="tt-recognition-and-rewards"><a href="techniques-recognition-and-rewards">Recognition and Rewards</a></li><li id="tt-training"><a href="techniques-training">Training</a></li><li id="tt-individual-and-team-assessments"><a href="techniques-individual-and-team-assessments">Individual and Team Assessments</a></li></ul>
+
+<h2>What you get (Outputs)</h2>
+<ul><li><a href="artifacts-team-performance-assessments">Team Performance Assessments</a></li><li><a href="artifacts-change-requests">Change Requests</a></li></ul>
+
+
+<h2>Worked example</h2>
+<p>The contractor&#39;s crew and the library volunteers have never worked together, so the first morning is spent walking the building as one group and agreeing who to ask about what — an hour that saves a week of volunteers guessing.</p>
+
+
+<h2>Common pitfalls</h2>
+<ul><li>Putting team-building off until the schedule is too tight to allow it.</li><li>Training the paid staff and leaving the volunteers to work it out.</li><li>Assuming an experienced group needs no introduction to each other.</li></ul>
+
+<h2>How driftless helps</h2>
+
+<ul><li><a href="techniques-colocation">Colocation</a> can be run here.</li><li><a href="techniques-virtual-teams">Virtual Teams</a> can be run here.</li><li><a href="techniques-team-building">Team Building</a> can be run here.</li><li><a href="techniques-recognition-and-rewards">Recognition and Rewards</a> can be run here.</li><li><a href="techniques-training">Training</a> can be run here.</li><li><a href="techniques-individual-and-team-assessments">Individual and Team Assessments</a> can be run here.</li><li><a href="artifacts-team-performance-assessments">Team Performance Assessments</a> can be created in the wizard.</li></ul>
+
+
+
+
+
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">Related</h2>
+
+  <div class="related-group">
+    <h3 id="related-0">Feeds</h3>
+    <ul aria-labelledby="related-0">
+
+      <li><a href="pmbok-4.6">Perform Integrated Change Control</a></li>
+
+      <li><a href="pmbok-9.5">Manage Team</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-1">Fed by</h3>
+    <ul aria-labelledby="related-1">
+
+      <li><a href="pmbok-4.4">Manage Project Knowledge</a></li>
+
+      <li><a href="pmbok-4.7">Close Project or Phase</a></li>
+
+      <li><a href="pmbok-6.5">Develop Schedule</a></li>
+
+      <li><a href="pmbok-9.1">Plan Resource Management</a></li>
+
+      <li><a href="pmbok-9.3">Acquire Resources</a></li>
+
+      <li><a href="pmbok-9.5">Manage Team</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-2">Same knowledge area</h3>
+    <ul aria-labelledby="related-2">
+
+      <li><a href="pmbok-9.1">Plan Resource Management</a></li>
+
+      <li><a href="pmbok-9.2">Estimate Activity Resources</a></li>
+
+      <li><a href="pmbok-9.3">Acquire Resources</a></li>
+
+      <li><a href="pmbok-9.5">Manage Team</a></li>
+
+      <li><a href="pmbok-9.6">Control Resources</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-3">Same process group</h3>
+    <ul aria-labelledby="related-3">
+
+      <li><a href="pmbok-4.3">Direct and Manage Project Work</a></li>
+
+      <li><a href="pmbok-4.4">Manage Project Knowledge</a></li>
+
+      <li><a href="pmbok-8.2">Manage Quality</a></li>
+
+      <li><a href="pmbok-9.3">Acquire Resources</a></li>
+
+      <li><a href="pmbok-9.5">Manage Team</a></li>
+
+      <li><a href="pmbok-10.2">Manage Communications</a></li>
+
+      <li><a href="pmbok-11.6">Implement Risk Responses</a></li>
+
+      <li><a href="pmbok-12.2">Conduct Procurements</a></li>
+
+      <li><a href="pmbok-13.3">Manage Stakeholder Engagement</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-4">Techniques</h3>
+    <ul aria-labelledby="related-4">
+
+      <li><a href="techniques-colocation">Colocation</a></li>
+
+      <li><a href="techniques-virtual-teams">Virtual Teams</a></li>
+
+      <li><a href="techniques-interpersonal-and-team-skills">Interpersonal and Team Skills</a></li>
+
+      <li><a href="techniques-team-building">Team Building</a></li>
+
+      <li><a href="techniques-recognition-and-rewards">Recognition and Rewards</a></li>
+
+      <li><a href="techniques-training">Training</a></li>
+
+      <li><a href="techniques-individual-and-team-assessments">Individual and Team Assessments</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-5">Artifacts produced</h3>
+    <ul aria-labelledby="related-5">
+
+      <li><a href="artifacts-team-performance-assessments">Team Performance Assessments</a></li>
+
+      <li><a href="artifacts-change-requests">Change Requests</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-6">Artifacts used</h3>
+    <ul aria-labelledby="related-6">
+
+      <li><a href="artifacts-resource-management-plan">Resource Management Plan</a></li>
+
+      <li><a href="artifacts-lessons-learned-register">Lessons Learned Register</a></li>
+
+      <li><a href="artifacts-project-schedule">Project Schedule</a></li>
+
+      <li><a href="artifacts-project-team-assignments">Project Team Assignments</a></li>
+
+      <li><a href="artifacts-resource-calendars">Resource Calendars</a></li>
+
+      <li><a href="artifacts-team-charter">Team Charter</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-7">Agile practices</h3>
+    <ul aria-labelledby="related-7">
+
+      <li><a href="methods-scrum">Scrum: Developers</a></li>
+
+      <li><a href="methods-scrum">Scrum: Self-Management</a></li>
+
+      <li><a href="methods-kanban">Kanban: Manage the Work, Not the People</a></li>
+
+    </ul>
+  </div>
+
+  <div class="related-group">
+    <h3 id="related-8">Map</h3>
+    <ul aria-labelledby="related-8">
+
+      <li><a href="map-all#node-process:9.4">See it on the map</a></li>
+
+    </ul>
+  </div>
+
+</section>
+
+
+</main>
+</body>
+</html>

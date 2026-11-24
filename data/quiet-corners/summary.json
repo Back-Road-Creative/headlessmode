@@ -1,0 +1,231 @@
+{
+  "pipeline_version": "2.0.0",
+  "generated_at": "2026-10-01T10:00:24.829212+00:00",
+  "total_counties_scored": 3144,
+  "total_rural_counties": 1681,
+  "total_states": 45,
+  "coverage": {
+    "stability": {
+      "count": 1681,
+      "pct": 100.0
+    },
+    "remoteness": {
+      "count": 1681,
+      "pct": 100.0
+    },
+    "affordability": {
+      "count": 1677,
+      "pct": 99.8
+    }
+  },
+  "sprawl_factor_coverage": {
+    "interstate": {
+      "count": 1596,
+      "pct": 94.9
+    },
+    "permits": {
+      "count": 849,
+      "pct": 50.5
+    },
+    "migration": {
+      "count": 232,
+      "pct": 13.8
+    },
+    "metro_growth": {
+      "count": 1652,
+      "pct": 98.3
+    },
+    "recreation": {
+      "count": 310,
+      "pct": 18.4
+    }
+  },
+  "evidence_schema_version": 1,
+  "sprawl_factor_availability": {
+    "interstate": {
+      "observed": 1681,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 0
+    },
+    "permits": {
+      "observed": 1565,
+      "partial": 17,
+      "unavailable": 99,
+      "unknown": 0
+    },
+    "migration": {
+      "observed": 1681,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 0
+    },
+    "metro_growth": {
+      "observed": 1681,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 0
+    },
+    "recreation": {
+      "observed": 1681,
+      "partial": 0,
+      "unavailable": 0,
+      "unknown": 0
+    }
+  },
+  "remoteness_cap_mi": 120.0,
+  "data_sources": {
+    "affordability": true,
+    "permits": true,
+    "metro_growth": true,
+    "migration": true,
+    "sprawl": true,
+    "typology": true,
+    "rucc": true
+  },
+  "sources": {
+    "2024_Gaz_counties_national.txt": {
+      "bytes": 647830,
+      "modified": "2026-10-01T10:00:12.349866+00:00",
+      "sha256": "0a121d136b434e3ae749d053db19dfbacbb56eebf30335cfa5031388803b4451",
+      "url": "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_counties_national.zip"
+    },
+    "2024_Gaz_place_national.txt": {
+      "bytes": 6499209,
+      "modified": "2026-10-01T10:00:12.771532+00:00",
+      "sha256": "ba197a3c0cef828d47981ed7435d820d040d3199bf39a719cd9b11412c59afa6",
+      "url": "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_place_national.zip"
+    },
+    "co-est2024-alldata.csv": {
+      "bytes": 1769182,
+      "modified": "2026-10-01T10:00:08.521866+00:00",
+      "sha256": "abcc8720d669e793bbfdcd440eeec37a78db3b452adbe4ccd1eadf7c72b522b9",
+      "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/totals/co-est2024-alldata.csv"
+    },
+    "co2020a.txt": {
+      "bytes": 369908,
+      "modified": "2026-10-01T10:00:10.835532+00:00",
+      "sha256": "04efba6d3ffecd19340dece9d76d01343f8b97647617c79422c04e227e2d7293",
+      "url": "https://www2.census.gov/econ/bps/County/co2020a.txt"
+    },
+    "co2021a.txt": {
+      "bytes": 372012,
+      "modified": "2026-10-01T10:00:11.088532+00:00",
+      "sha256": "ce2c9aa7b7c036ddbc99d6dc398ddf71e4a0ad0fc2782db883b559ca264f14b6",
+      "url": "https://www2.census.gov/econ/bps/County/co2021a.txt"
+    },
+    "co2022a.txt": {
+      "bytes": 374937,
+      "modified": "2026-10-01T10:00:11.326866+00:00",
+      "sha256": "0a88c16861ede81b04f8785e1c626e772510f33f1de9452f7592d86d308e2b5c",
+      "url": "https://www2.census.gov/econ/bps/County/co2022a.txt"
+    },
+    "co2023a.txt": {
+      "bytes": 374707,
+      "modified": "2026-10-01T10:00:11.546866+00:00",
+      "sha256": "fab11d759e905ff61838b8dfa41c0f2082e150cad07a20c65ddd620a007aa158",
+      "url": "https://www2.census.gov/econ/bps/County/co2023a.txt"
+    },
+    "co2024a.txt": {
+      "bytes": 375214,
+      "modified": "2026-10-01T10:00:11.788866+00:00",
+      "sha256": "a64c2dd19be96c469763c10d637575a584ef16a6878f451bba80c847bcafc8c6",
+      "url": "https://www2.census.gov/econ/bps/County/co2024a.txt"
+    },
+    "county-typology.csv": {
+      "bytes": 6188047,
+      "modified": "2026-10-01T10:00:09.376199+00:00",
+      "sha256": "922125108a089291365ff48af5507057938606844aec04d47c13bf7a8b5cf66a",
+      "url": "https://www.ers.usda.gov/media/6174/ers-county-typology-codes-2025-edition.csv"
+    },
+    "ruralurbancodes2023.csv": {
+      "bytes": 629322,
+      "modified": "2026-10-01T10:00:09.852866+00:00",
+      "sha256": "ec455ee2a8bc5fc8e070575ea5bee7dce46fc6037f8c3449cbf56e8b45331fa7",
+      "url": "https://www.ers.usda.gov/media/5768/2023-rural-urban-continuum-codes.csv"
+    },
+    "sub-est2024.csv": {
+      "bytes": 7087080,
+      "modified": "2026-10-01T10:00:10.234199+00:00",
+      "sha256": "af9cd4835c93552a2161fc88bf4d7aa31e81b4f16f7457980b95295cf91e49e9",
+      "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/cities/totals/sub-est2024.csv"
+    }
+  },
+  "api_lineage": [
+    {
+      "endpoint": "https://api.census.gov/data/2022/acs/acs1",
+      "dataset": "2022/acs/acs1",
+      "vintage": "2022",
+      "query": {
+        "for": "state:*",
+        "get": [
+          "NAME",
+          "B07001_001E",
+          "B07001_065E"
+        ]
+      },
+      "label": "ACS 2022 B07001",
+      "origin": "live",
+      "retrieved_at": "2026-10-01T10:00:14.839228+00:00",
+      "rows": 52,
+      "sha256": "37e207fb96085625aeadc3560651bffbbadd6e6581e8bd3b8574b024b93eb274"
+    },
+    {
+      "endpoint": "https://api.census.gov/data/2023/acs/acs1",
+      "dataset": "2023/acs/acs1",
+      "vintage": "2023",
+      "query": {
+        "for": "state:*",
+        "get": [
+          "NAME",
+          "B07001_001E",
+          "B07001_065E"
+        ]
+      },
+      "label": "ACS 2023 B07001",
+      "origin": "live",
+      "retrieved_at": "2026-10-01T10:00:14.281652+00:00",
+      "rows": 52,
+      "sha256": "31012432bc62f5bc537b7d22db5f8ba5958fe9ebb0a12e262506eab9b54ee9d6"
+    },
+    {
+      "endpoint": "https://api.census.gov/data/2023/acs/acs5",
+      "dataset": "2023/acs/acs5",
+      "vintage": "2023",
+      "query": {
+        "for": "county:*",
+        "get": [
+          "NAME",
+          "B25077_001E",
+          "B25064_001E",
+          "B19013_001E"
+        ],
+        "in": "state:*"
+      },
+      "label": "ACS5 2023 affordability",
+      "origin": "live",
+      "retrieved_at": "2026-10-01T10:00:15.837423+00:00",
+      "rows": 3222,
+      "sha256": "567977805d4c2eaccbb29c0c0548c74f828f73bed3b1344c68a2f2004759775a"
+    }
+  ],
+  "freshness": {
+    "source_vintage": {
+      "2022/acs/acs1": "2022",
+      "2023/acs/acs1": "2023",
+      "2023/acs/acs5": "2023"
+    },
+    "run_time": "2026-10-01T10:00:24.829212+00:00",
+    "refresh_schedule": {
+      "cadence": "monthly",
+      "cron": "0 6 1 * *",
+      "command": "bin/quiet-corners-refresh.sh --publish",
+      "documented_in": "CLAUDE.md"
+    }
+  },
+  "candidates": {
+    "total": 1574,
+    "with_coordinates": 1574,
+    "with_county_match": 1574
+  }
+}

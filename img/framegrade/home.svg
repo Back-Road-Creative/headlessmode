@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-labelledby="t">
+  <title id="t">Framegrade: one landscape frame, flat and gray on the left, graded with color on the right</title>
+  <defs>
+    <linearGradient id="skyFlat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9aa3a0"/><stop offset="1" stop-color="#c3c6c0"/>
+    </linearGradient>
+    <linearGradient id="skyGraded" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f6f9f"/><stop offset="0.7" stop-color="#e9b77a"/><stop offset="1" stop-color="#f4d6a3"/>
+    </linearGradient>
+    <clipPath id="frame"><rect x="80" y="70" width="640" height="300" rx="6"/></clipPath>
+    <clipPath id="left"><rect x="80" y="70" width="320" height="300"/></clipPath>
+    <clipPath id="right"><rect x="400" y="70" width="320" height="300"/></clipPath>
+  </defs>
+  <rect width="800" height="500" fill="#123d2b"/>
+  <g clip-path="url(#frame)">
+    <g clip-path="url(#left)">
+      <rect x="80" y="70" width="640" height="300" fill="url(#skyFlat)"/>
+      <path d="M80 270 L200 200 L300 245 L430 180 L560 240 L720 195 L720 370 L80 370 Z" fill="#7d837d"/>
+      <path d="M80 310 L260 265 L420 300 L600 262 L720 290 L720 370 L80 370 Z" fill="#666c66"/>
+      <path d="M370 370 L410 280 L424 280 L470 370 Z" fill="#8e918b"/>
+    </g>
+    <g clip-path="url(#right)">
+      <rect x="80" y="70" width="640" height="300" fill="url(#skyGraded)"/>
+      <circle cx="610" cy="205" r="26" fill="#ffe2a8"/>
+      <path d="M80 270 L200 200 L300 245 L430 180 L560 240 L720 195 L720 370 L80 370 Z" fill="#2f5d3a"/>
+      <path d="M80 310 L260 265 L420 300 L600 262 L720 290 L720 370 L80 370 Z" fill="#1f4529"/>
+      <path d="M370 370 L410 280 L424 280 L470 370 Z" fill="#c7a77a"/>
+    </g>
+  </g>
+  <rect x="80" y="70" width="640" height="300" rx="6" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2"/>
+  <line x1="400" y1="62" x2="400" y2="378" stroke="#4cbb17" stroke-width="4"/>
+  <circle cx="400" cy="220" r="14" fill="#4cbb17"/>
+  <path d="M394 214 L388 220 L394 226 M406 214 L412 220 L406 226" stroke="#123d2b" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="80" y="432" fill="#ffffff" font-family="Georgia, 'Iowan Old Style', serif" font-size="40" font-weight="700">Framegrade</text>
+  <rect x="80" y="448" width="56" height="4" rx="2" fill="#4cbb17"/>
+</svg>

@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artifact catalog</title>
+
+  <link rel="stylesheet" href="driftless.css">
+  <link rel="stylesheet" href="print.css">
+
+
+<meta name="robots" content="noindex, nofollow"><style>.showcase-notice{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .9rem;box-sizing:border-box;border-bottom:2px solid var(--focus);padding:.3rem .8rem;margin:0 0 1rem;background:var(--muted-bg);font-size:.85rem;line-height:1.4}.showcase-title{flex:1 1 auto}.showcase-about{position:relative}.showcase-about p{position:absolute;right:0;top:100%;width:min(22rem,86vw);margin:.3rem 0 0;padding:.6rem .8rem;border:2px solid var(--focus);background:var(--muted-bg)}:target,h1,h2,h3,h4{scroll-margin-top:3.5rem}.showcase-unavailable{color:var(--muted-ink)}.showcase-intro{border:1px solid var(--rule);border-radius:.4rem;padding:.65rem .8rem;margin:0 0 1rem;background:var(--muted-bg)}.showcase-intro p{margin:0 0 .4rem}.showcase-intro p:last-child{margin-bottom:0}.showcase-sample-heading{border-top:1px dashed var(--rule);padding-top:.8rem}.showcase-note{font-size:.85rem;color:var(--muted-ink);margin:0 0 1rem}.node[tabindex]:focus-visible .node-shape{stroke-width:3.5}.node[tabindex]:focus-visible text{opacity:1}</style></head>
+<body><aside class="showcase-notice" role="note"><a class="showcase-home" href="https://headlessmode.com/">&larr; Headless Mode</a> <span class="showcase-title">driftless &middot; Read-only demo &middot; <strong>Fixed fictional demo</strong> &middot; as of 2026-07-01</span> <a class="showcase-product" href="https://headlessmode.com/driftless/">Product details</a> <details class="showcase-about"><summary>About this demo</summary><p>Every name, date and figure here is fictional, and nothing on these pages can be changed. Exported from driftless source v0.9.0, as of 2026-07-01.</p></details></aside>
+
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+
+    <div class="masthead-brand">
+      <a class="wordmark" href="./">driftless</a>
+
+    </div>
+    <div class="masthead-utility">
+      <a href="search">Search</a>
+
+
+    </div>
+  </header>
+
+  <nav aria-label="Primary"><input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox"><label class="nav-toggle-label" for="nav-toggle">Menu</label><div class="primary-nav">
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-work">Work</span>
+      <ul aria-labelledby="nav-group-work">
+        <li><a href="./">Dashboard</a></li>
+        <li><a href="scorecard">Scorecard</a></li>
+        <li><a href="threats">Threats</a></li>
+        <li><a href="org-heatmap">Capacity</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+
+      <span class="nav-group-label" id="nav-group-method"><a href="method">Method</a></span>
+      <ul aria-labelledby="nav-group-method">
+        <li><a href="pmbok">PMBOK</a></li>
+        <li><a href="techniques">Techniques</a></li>
+        <li><a href="methods">Methods</a></li>
+        <li><a href="artifacts" aria-current="page">Artifacts</a></li>
+        <li><a href="glossary">Glossary</a></li>
+
+        <li><a href="process-map">Process status</a></li>
+        <li><a href="map">Method map</a></li>
+      </ul>
+    </div>
+    <div class="nav-cluster">
+      <span class="nav-group-label" id="nav-group-org">Organization</span>
+      <ul aria-labelledby="nav-group-org">
+        <li><a href="org-configuration">Configuration</a></li>
+        <li><a href="org-departments">Departments</a></li>
+      </ul>
+    </div>
+  </div></nav>
+
+  <main id="main">
+
+
+<nav class="breadcrumbs" aria-label="Breadcrumb"><a href="./">Dashboard</a> &gt; <a href="method">Method</a> &gt; <span aria-current="page">Artifacts</span></nav>
+
+<h1>Artifact catalog</h1>
+<p class="lede"><em>This catalog lists every kind of document, record or plan a process can produce
+   or use, and whether this product's records can track it.</em></p>
+<p>Reference only: nothing here reads a project or a date.</p>
+
+<h2 id="family-plans">Plans</h2>
+<p class="family-note">Charters and the management plans they authorize — the intentions a project sets before the work starts.</p>
+<dl class="artifact-index">
+
+  <dt><a href="artifacts-change-management-plan">Change Management Plan</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>Notes on how a request to change the plan gets reviewed and decided. &mdash; change control is structural: approval freezes a baseline</dd>
+
+  <dt><a href="artifacts-communications-management-plan">Communications Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on who needs to hear what, how often, and through which channel.</dd>
+
+  <dt><a href="artifacts-configuration-management-plan">Configuration Management Plan</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>Notes on how versions of the plan itself are tracked and kept from getting confused. &mdash; enforced structurally — read the baseline versions</dd>
+
+  <dt><a href="artifacts-cost-management-plan">Cost Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on how the budget will be planned, tracked and controlled.</dd>
+
+  <dt><a href="artifacts-development-approach">Development Approach</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A one-word answer to how the team will work: in steady sprints, in stages, or something in between. &mdash; carried as Project.delivery_mode — read the project row</dd>
+
+  <dt><a href="artifacts-procurement-management-plan">Procurement Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on how the team will buy things or hire outside help.</dd>
+
+  <dt><a href="artifacts-project-charter">Project Charter</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A short paper that officially starts the project and says who is in charge. &mdash; generated on read by the report engine (driftless/report/documents/charter.py); a stored copy is the duplication the design forbids — read the Charter document</dd>
+
+  <dt><a href="artifacts-project-management-plan">Project Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The single plan that ties together every smaller plan for how the work will run.</dd>
+
+  <dt><a href="artifacts-quality-management-plan">Quality Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on what good work means here and how it will be checked.</dd>
+
+  <dt><a href="artifacts-requirements-management-plan">Requirements Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on how needs will be collected, written down and kept from changing quietly.</dd>
+
+  <dt><a href="artifacts-resource-management-plan">Resource Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on how people and other resources will be found, organized and looked after.</dd>
+
+  <dt><a href="artifacts-risk-management-plan">Risk Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on how the team will look for things that could go wrong and respond.</dd>
+
+  <dt><a href="artifacts-schedule-management-plan">Schedule Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on how the timeline will be built, updated and kept honest.</dd>
+
+  <dt><a href="artifacts-scope-management-plan">Scope Management Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A short note on how the team will decide, and defend, what is and isn&#39;t included.</dd>
+
+  <dt><a href="artifacts-stakeholder-engagement-plan">Stakeholder Engagement Plan</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on how the team will keep the people affected by the project involved.</dd>
+
+</dl>
+
+<h2 id="family-baselines">Baselines</h2>
+<p class="family-note">The approved scope, schedule, cost and combined baselines that later progress is measured against.</p>
+<dl class="artifact-index">
+
+  <dt><a href="artifacts-cost-baseline">Cost Baseline</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The approved, frozen version of how much the project is planned to spend, and when.</dd>
+
+  <dt><a href="artifacts-performance-measurement-baseline">Performance Measurement Baseline</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The scope, schedule and cost baselines combined into one plan to measure real progress against. &mdash; the three approved baselines are the PMB — read those</dd>
+
+  <dt><a href="artifacts-schedule-baseline">Schedule Baseline</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The approved, frozen version of when each piece of work is planned to happen.</dd>
+
+  <dt><a href="artifacts-scope-baseline">Scope Baseline</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The approved, frozen version of exactly what the project will deliver.</dd>
+
+</dl>
+
+<h2 id="family-documents">Documents</h2>
+<p class="family-note">The working documents a process reads and revises as the project runs — logs, registers, estimates and the schedule&#39;s own detail.</p>
+<dl class="artifact-index">
+
+  <dt><a href="artifacts-activity-attributes">Activity Attributes</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The details behind each piece of work, like how big it is and who owns it.</dd>
+
+  <dt><a href="artifacts-activity-list">Activity List</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The full list of individual pieces of work the project is broken into. &mdash; the enumeration is Activity Attributes&#39; own count — read that</dd>
+
+  <dt><a href="artifacts-assumption-log">Assumption Log</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A running list of things the team is guessing are true but hasn&#39;t confirmed.</dd>
+
+  <dt><a href="artifacts-basis-of-estimates">Basis of Estimates</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A short note on how an estimate was actually worked out, not just the number itself.</dd>
+
+  <dt><a href="artifacts-change-log">Change Log</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A running list of every request to change the plan, and what happened to it.</dd>
+
+  <dt><a href="artifacts-cost-estimates">Cost Estimates</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>How much each piece of the project is expected to cost. &mdash; one planned cost per baseline line — read Cost Baseline</dd>
+
+  <dt><a href="artifacts-cost-forecasts">Cost Forecasts</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A projection of how much the project will end up costing if trends continue. &mdash; EAC/ETC/VAC are computed on read — read the earned-value snapshot</dd>
+
+  <dt><a href="artifacts-duration-estimates">Duration Estimates</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>How long each piece of work is expected to take. &mdash; a task carries exactly one estimate — read the task rows</dd>
+
+  <dt><a href="artifacts-issue-log">Issue Log</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A running list of problems that are actually happening right now, not just risks.</dd>
+
+  <dt><a href="artifacts-lessons-learned-register">Lessons Learned Register</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Notes on what worked and what didn&#39;t, written down so the next project can use them.</dd>
+
+  <dt><a href="artifacts-milestone-list">Milestone List</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The short list of major checkpoints the project is aiming to hit, and when.</dd>
+
+  <dt><a href="artifacts-physical-resource-assignments">Physical Resource Assignments</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A record of which equipment, materials or other non-person resources are assigned to the work.</dd>
+
+  <dt><a href="artifacts-project-calendars">Project Calendars</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The working days and hours the schedule assumes people are actually available.</dd>
+
+  <dt><a href="artifacts-project-communications">Project Communications</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A record of what was actually told to people, not just that a report was filed.</dd>
+
+  <dt><a href="artifacts-project-funding-requirements">Project Funding Requirements</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>How much money is needed, and when, to keep the project funded on schedule. &mdash; arithmetic over budget lines — read Cost Baseline</dd>
+
+  <dt><a href="artifacts-project-schedule">Project Schedule</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The actual plan of when work happens, built from milestones and work cycles.</dd>
+
+  <dt><a href="artifacts-project-schedule-network-diagram">Project Schedule Network Diagram</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A picture of which pieces of work have to happen before others can start.</dd>
+
+  <dt><a href="artifacts-project-scope-statement">Project Scope Statement</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A written description of exactly what is, and is not, included in the project.</dd>
+
+  <dt><a href="artifacts-project-team-assignments">Project Team Assignments</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A record of exactly which person is doing which piece of work.</dd>
+
+  <dt><a href="artifacts-quality-control-measurements">Quality Control Measurements</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The actual readings taken while checking whether work meets its target. &mdash; the dated measurement rows themselves — read Quality Report</dd>
+
+  <dt><a href="artifacts-quality-metrics">Quality Metrics</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The specific numbers and targets the team uses to judge whether work is good enough. &mdash; targets live on each dated measurement row — read Quality Report</dd>
+
+  <dt><a href="artifacts-quality-report">Quality Report</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A current summary of how well the work is meeting its quality targets.</dd>
+
+  <dt><a href="artifacts-requirements-documentation">Requirements Documentation</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A written record of what people actually need the project to deliver.</dd>
+
+  <dt><a href="artifacts-requirements-traceability-matrix">Requirements Traceability Matrix</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A table linking each need back to the piece of work that satisfies it.</dd>
+
+  <dt><a href="artifacts-resource-breakdown-structure">Resource Breakdown Structure</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A tree that organizes the project&#39;s people and resources into groups.</dd>
+
+  <dt><a href="artifacts-resource-calendars">Resource Calendars</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>When each specific person or resource is actually available to work. &mdash; one project calendar exists (ProjectCalendar); per-person calendars do not — capacity is weekly hours, read the heatmap</dd>
+
+  <dt><a href="artifacts-resource-requirements">Resource Requirements</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>What people and other resources the project needs, and how much of each. &mdash; implicit in assignment versus capacity — read the heatmap</dd>
+
+  <dt><a href="artifacts-risk-register">Risk Register</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A running list of things that could go wrong, and how likely and serious each one is.</dd>
+
+  <dt><a href="artifacts-risk-report">Risk Report</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A summary of the project&#39;s overall risk picture, not just the individual entries.</dd>
+
+  <dt><a href="artifacts-schedule-data">Schedule Data</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The supporting numbers behind the schedule, like planned start and finish windows.</dd>
+
+  <dt><a href="artifacts-schedule-forecasts">Schedule Forecasts</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A projection of when the project is likely to actually finish, based on recent pace. &mdash; computed on read from sprint velocity — read the completion forecast</dd>
+
+  <dt><a href="artifacts-stakeholder-register">Stakeholder Register</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A list of everyone with a stake in the project, and what matters to them.</dd>
+
+  <dt><a href="artifacts-team-charter">Team Charter</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A short written agreement on how the team will work together.</dd>
+
+  <dt><a href="artifacts-team-performance-assessments">Team Performance Assessments</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A written check on how well the team is actually working together.</dd>
+
+  <dt><a href="artifacts-test-and-evaluation-documents">Test and Evaluation Documents</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>Written plans and results for formally testing whether the work actually meets its targets. &mdash; no test record; measurements are the evidence</dd>
+
+  <dt><a href="artifacts-work-breakdown-structure">Work Breakdown Structure (WBS)</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A tree that breaks the whole project down into smaller and smaller pieces of work.</dd>
+
+</dl>
+
+<h2 id="family-performance">Performance</h2>
+<p class="family-note">Raw work-performance data, turned into information, turned into the reports a stakeholder actually reads.</p>
+<dl class="artifact-index">
+
+  <dt><a href="artifacts-work-performance-data">Work Performance Data</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The raw, unprocessed numbers collected as work actually happens. &mdash; computed on read; storing it is the duplication the design forbids</dd>
+
+  <dt><a href="artifacts-work-performance-information">Work Performance Information</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Raw numbers read together with the plan, so they actually mean something.</dd>
+
+  <dt><a href="artifacts-work-performance-reports">Work Performance Reports</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A periodic write-up that turns the numbers into something a person can act on.</dd>
+
+</dl>
+
+<h2 id="family-procurement">Procurement</h2>
+<p class="family-note">What it takes to buy work from a seller and see it through — from the statement of work to a closed agreement.</p>
+<dl class="artifact-index">
+
+  <dt><a href="artifacts-agreements">Agreements</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The signed contract between the project and an outside seller.</dd>
+
+  <dt><a href="artifacts-bid-documents">Bid Documents</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The paperwork sent out asking outside sellers to submit an offer. &mdash; solicitation happens outside the store — read Agreements</dd>
+
+  <dt><a href="artifacts-closed-procurements">Closed Procurements</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>Purchases that are finished and formally wrapped up with the seller. &mdash; closure is an agreement status, not a document — read Agreements</dd>
+
+  <dt><a href="artifacts-independent-cost-estimates">Independent Cost Estimates</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The team&#39;s own estimate of a fair price, made before hearing what a seller quotes. &mdash; procurement enters at signature; pre-award work is elsewhere</dd>
+
+  <dt><a href="artifacts-procurement-documentation">Procurement Documentation</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The paperwork trail behind buying something from an outside seller. &mdash; the store starts at signature — read Agreements</dd>
+
+  <dt><a href="artifacts-procurement-statement-of-work">Procurement Statement of Work</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A written description of exactly what an outside seller is being asked to deliver. &mdash; pre-signature work happens elsewhere — read Agreements</dd>
+
+  <dt><a href="artifacts-procurement-strategy">Procurement Strategy</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A plan for how the team will go about buying something, before shopping starts. &mdash; pre-signature work happens elsewhere — read Agreements</dd>
+
+  <dt><a href="artifacts-selected-sellers">Selected Sellers</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The outside sellers the team has actually chosen to work with. &mdash; selection precedes signature — read Agreements for the outcome</dd>
+
+  <dt><a href="artifacts-seller-proposals">Seller Proposals</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The offers outside sellers actually send back in response to a request. &mdash; solicitation happens outside the store — read Agreements</dd>
+
+  <dt><a href="artifacts-source-selection-criteria">Source Selection Criteria</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The rules the team will use to judge which seller to pick. &mdash; selection precedes the store — read Agreements</dd>
+
+</dl>
+
+<h2 id="family-deliverables">Deliverables</h2>
+<p class="family-note">The product or result the project exists to produce, at each stage from built to verified to accepted.</p>
+<dl class="artifact-index">
+
+  <dt><a href="artifacts-accepted-deliverables">Accepted Deliverables</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Deliverables the customer or sponsor has formally signed off as satisfactory.</dd>
+
+  <dt><a href="artifacts-deliverables">Deliverables</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The actual things the project is building or producing. &mdash; the Deliverable rows themselves — read Work Breakdown Structure (WBS)</dd>
+
+  <dt><a href="artifacts-final-product-service-result">Final Product Service Result</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>Everything the project was meant to deliver, taken together at the very end. &mdash; no closeout artifact — read the sign-off ledger</dd>
+
+  <dt><a href="artifacts-final-report">Final Report</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A written summary looking back on the whole project once it&#39;s finished. &mdash; no closeout document — read the sign-off ledger for done-ness</dd>
+
+  <dt><a href="artifacts-verified-deliverables">Verified Deliverables</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Deliverables that have actually been checked to make sure they meet requirements.</dd>
+
+</dl>
+
+<h2 id="family-changes">Changes</h2>
+<p class="family-note">Change requests and the ones a change control board has approved.</p>
+<dl class="artifact-index">
+
+  <dt><a href="artifacts-approved-change-requests">Approved Change Requests</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>Change requests that have actually been approved and are now part of the plan. &mdash; approval causes a new baseline version — read Change Log</dd>
+
+  <dt><a href="artifacts-change-requests">Change Requests</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>A formal ask to change something already agreed in the plan.</dd>
+
+</dl>
+
+<h2 id="family-environment">Environment</h2>
+<p class="family-note">What the organization brings to the project from outside it — its existing assets, its constraints, and the business case for doing the work at all.</p>
+<dl class="artifact-index">
+
+  <dt><a href="artifacts-agreements-initial">Agreements Initial</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>The contract, letter of intent or other agreement with the customer or sponsor that the project starts from. &mdash; pre-project Agreements live elsewhere — signed ones are Agreements</dd>
+
+  <dt><a href="artifacts-benefits-management-plan">Benefits Management Plan</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A plan for how the project&#39;s promised value will actually be delivered and measured. &mdash; pre-authorisation value analysis is somebody else&#39;s tool</dd>
+
+  <dt><a href="artifacts-business-case">Business Case</a>
+      <span class="badge st-muted">Not tracked</span></dt>
+  <dd>A written justification for why the project is worth doing at all. &mdash; the store begins at the project; earlier analysis is elsewhere</dd>
+
+  <dt><a href="artifacts-enterprise-environmental-factors">Enterprise Environmental Factors</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>Outside conditions the project has to work within but didn&#39;t choose, like rules or the market.</dd>
+
+  <dt><a href="artifacts-organizational-process-assets">Organizational Process Assets</a>
+      <span class="badge st-ok">Tracked</span></dt>
+  <dd>The organization&#39;s own past templates, records and know-how the project can reuse.</dd>
+
+</dl>
+
+</main>
+</body>
+</html>
